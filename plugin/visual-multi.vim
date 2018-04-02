@@ -1,4 +1,4 @@
-let g:Regions = [] | let g:VisualMatches = []
+let g:VM_Selection = {}
 
 " Set up highlighting
 highlight MultiCursor term=reverse cterm=reverse gui=reverse

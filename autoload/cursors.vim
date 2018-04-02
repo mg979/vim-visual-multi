@@ -1,16 +1,14 @@
-let s:started = 0 | let s:whole_word = 0 | let s:last_motion = 0 | let s:extending = 0
+let s:last_motion = 0 | let s:extending = 0
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! cursors#find_under(visual, wrap)
-    let s:started = 1
 
     if a:visual                     " yank has already happened here
-        call cursors#misc#init(0)
+        let s:V = cursors#funcs#init(0) | let s:v = s:V.Vars
 
     else                            " start whole word search
-        let s:whole_word = 1
-        call cursors#misc#init(1)
+        let s:V = cursors#funcs#init(1) | let s:v = s:V.Vars
         if a:wrap
             normal! yiW`]
         else
@@ -18,22 +16,21 @@ fun! cursors#find_under(visual, wrap)
         endif
     endif
 
-    call cursors#misc#set_search()
+    call cursors#funcs#set_search()
     call s:create_region(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:create_region(down)
-    let s:current_index = cursors#regions#new()
-    let s:going_down = a:down
-    let s:current_matches = getmatches()
+    call cursors#regions#new()
+    let s:v.going_down = a:down
 endfun
 
 fun! cursors#find_next(...)
 
     "skip current match
-    if a:0 | call s:remove_match(s:current_index) | endif
+    if a:0 | call s:remove_match(s:v.index) | endif
 
     normal! ngny`]
     call s:create_region(1)
@@ -42,12 +39,13 @@ endfun
 fun! cursors#find_prev(...)
 
     "move to the beginning of the current match
-    let current = g:Regions[s:current_index]
+    let i = s:v.index
+    let current = s:V.Regions[i]
     let pos = [current.l, current.a]
     call cursor(pos)
 
     "skip current match
-    if a:0 | call s:remove_match(s:current_index) | endif
+    if a:0 | call s:remove_match(s:v.index) | endif
 
     normal! NgNy`]
     call s:create_region(0)
@@ -55,23 +53,15 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! cursors#clear()
-    let s:started = 0
-    let s:whole_word = 0
-    call cursors#misc#reset()
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:remove_match(i)
-    call remove(g:Regions, a:i)
-    let m = g:VisualMatches[a:i]
-    call remove(g:VisualMatches, a:i)
+    call remove(s:V.Regions, a:i)
+    let m = s:V.Matches[a:i]
+    call remove(s:V.Matches, a:i)
     call matchdelete(m)
 endfun
 
 fun! cursors#skip()
-    if s:going_down
+    if s:v.going_down
         call cursors#find_next(1)
     else
         call cursors#find_prev(1)
@@ -94,12 +84,15 @@ fun! cursors#move()
     let s:extending = 0
 
     let i = 0
-    for c in g:Regions
-        echom string(c)
+    for c in s:V.Regions
         call cursor(c.l, c.a)
-        exe "normal! v".c['w']."l".s:last_motion
+        call s:remove_match(i)
+        exe "normal! v".c['w']."l".s:last_motion."y`]"
+        call cursors#regions#new()
         let i += 1
     endfor
+
+    let s:current_matches = getmatches()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -107,7 +100,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! cursors#toggle_whole_word()
-    let s:whole_word = !s:whole_word
+    let s:v.whole_word = !s:v.whole_word
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
