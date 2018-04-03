@@ -75,7 +75,6 @@ fun! s:init_maps(end)
         unmap <buffer> ]
         unmap <buffer> {
         unmap <buffer> }
-        unmap <buffer> w
         unmap <buffer> <c-w>
     else
         nmap <nowait> <buffer> <esc> :call cursors#funcs#reset()<cr>
@@ -85,8 +84,29 @@ fun! s:init_maps(end)
         nmap <nowait> <buffer> } :call cursors#find_under(0, 0)<cr>
         nmap <nowait> <buffer> { :call cursors#find_under(0, 1)<cr>
         nmap <nowait> <buffer> <c-w> :call cursors#toggle_whole_word()
-        nmap <nowait> <buffer> <expr> w cursors#motion('w')
     endif
+
+    "motions
+    let motions = ['w', 'W', 'b', 'B', 'e', 'E']
+    let find = ['f', 'F', 't', 'T']
+
+    if a:end
+        for m in (motions + find)
+            exe "unmap <buffer> ".m
+        endfor
+    else
+        for m in motions
+            exe "nmap <nowait> <buffer> <expr> ".m." cursors#motion('".m."')"
+        endfor
+        for m in find
+            exe "nmap <nowait> <buffer> <expr> ".m." cursors#find_motion('".m."')"
+        endfor
+    endif
+
+    "select
+    "TODO select inside/around brackets/quotes/etc.
+    nmap <nowait> <buffer> q :call cursors#select_motion(0)<cr>
+    nmap <nowait> <buffer> Q :call cursors#select_motion(1)<cr>
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

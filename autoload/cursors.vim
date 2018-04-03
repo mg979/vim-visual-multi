@@ -1,4 +1,4 @@
-let s:last_motion = 0 | let s:extending = 0
+let s:motion = 0 | let s:extending = 0
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -75,24 +75,67 @@ endfun
 
 fun! cursors#motion(motion)
     let s:extending = 1
-    let s:last_motion = a:motion
+    let s:motion = a:motion
     return a:motion
+endfun
+
+fun! cursors#find_motion(motion, ...)
+    let s:extending = 1
+    if a:0
+        let s:motion = a:motion.a:1
+    else
+        let s:motion = a:motion.nr2char(getchar())
+    endif
+    return s:motion
+endfun
+
+fun! cursors#select_motion(inclusive)
+    let s:extending = 2
+    let c = nr2char(getchar())
+
+    "wrong command
+    "if index(['a', 'i'], c[0]) == -1 | return '' | endif
+
+    let a = a:inclusive ? 'F' : 'T'
+    let b = a:inclusive ? 'f' : 't'
+
+    if index(['"', "'", '`', '_', '-'], c) != -1
+        exe "normal ".a.c
+        call cursors#move()
+        exe "normal ".b.c
+    elseif index(['[', ']'], c) != -1
+        exe "normal ".a.'['
+        call cursors#move()
+        exe "normal ".b.']'
+    elseif index(['(', ')'], c) != -1
+        exe "normal ".a.'('
+        call cursors#move()
+        exe "normal ".b.')'
+    elseif index(['{', '}'], c) != -1
+        exe "normal ".a.'{'
+        call cursors#move()
+        exe "normal ".b.'}'
+    elseif index(['<', '>'], c) != -1
+        exe "normal ".a.'<'
+        call cursors#move()
+        exe "normal ".b.'>'
+    endif
+
+    "TODO select inside/around brackets/quotes/etc.
 endfun
 
 fun! cursors#move()
     if !s:extending | return | endif
-    let s:extending = 0
+    let s:extending -= 1
 
     let i = 0
     for c in s:V.Regions
-        call cursor(c.l, c.a)
-        call s:remove_match(i)
-        exe "normal! v".c['w']."l".s:last_motion."y`]"
-        call cursors#regions#new()
+        call cursors#regions#move(i, s:motion)
         let i += 1
     endfor
 
-    let s:current_matches = getmatches()
+    normal! `]
+    call setmatches(s:v.matches)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
