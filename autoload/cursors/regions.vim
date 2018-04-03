@@ -23,19 +23,17 @@ fun! cursors#regions#new(...)
     let obj.txt = getreg(s:v.def_reg)
 
     let region = [obj.l, obj.a, obj.w]
-    "let cursor = [obj.l, obj.b, 1]
+    let cursor = [obj.l, obj.b, 1]
 
     let index = index(s:V.Regions, obj)
     if index == -1
         let match  = matchaddpos('Selection', [region], 30)
-        "let cursor = matchaddpos('MultiCursor', [cursor], 40)
+        let cursor = matchaddpos('MultiCursor', [cursor], 40)
         if a:0
-            "call insert(s:V.Matches, [match, cursor], a:1)
-            call insert(s:V.Matches, match, a:1)
+            call insert(s:V.Matches, [match, cursor], a:1)
             call insert(s:V.Regions, obj, a:1)
         else
-            "call add(s:V.Matches, [match, cursor])
-            call add(s:V.Matches, match)
+            call add(s:V.Matches, [match, cursor])
             call add(s:V.Regions, obj)
         endif
     endif
@@ -74,14 +72,10 @@ fun! s:move_forward(i, motion)
     call cursor(r.l, r.b+1)
     normal! m]`[y`]
 
-    "update the rest of the region vars, and the highlight match
-    let r.w = r.b - r.a + 1
-    let r.txt = getreg(s:v.def_reg)
-    let s:v.matches[a:i].pos1 = [r.l, r.a, r.w]
+    call s:update_region_vars(a:i)
 endfun
 
 fun! s:move_from_back(i, motion)
-    "let s:v.move_from_back = 0
     let r = s:V.Regions[a:i]
 
     "set a marks and perform the motion
@@ -100,10 +94,7 @@ fun! s:move_from_back(i, motion)
     "set begin mark and yank between marks
     normal! m[`[y`]
 
-    "update the rest of the region vars, and the highlight match
-    let r.w = r.b - r.a + 1
-    let r.txt = getreg(s:v.def_reg)
-    let s:v.matches[a:i].pos1 = [r.l, r.a, r.w]
+    call s:update_region_vars(a:i)
 endfun
 
 fun! s:move_back(i, motion)
@@ -137,8 +128,16 @@ fun! s:move_back(i, motion)
     call cursor(r.l, r.b+1)
     normal! m]`[y`]
 
+    call s:update_region_vars(a:i)
+endfun
+
+fun! s:update_region_vars(i)
     "update the rest of the region vars, and the highlight match
+    let r = s:V.Regions[a:i]
     let r.w = r.b - r.a + 1
     let r.txt = getreg(s:v.def_reg)
     let s:v.matches[a:i].pos1 = [r.l, r.a, r.w]
+    let cursor = len(s:V.Matches) + a:i
+    let s:v.matches[cursor].pos1 = [r.l, r.b, 1]
 endfun
+

@@ -103,14 +103,14 @@ fun! s:init_maps(end)
         for m in find
             exe "nmap <nowait> <buffer> <expr> ".m." cursors#find_motion('".m."')"
         endfor
+
+        "select
+        nmap <nowait> <buffer> q :call cursors#select_motion(0)<cr>
+        nmap <nowait> <buffer> Q :call cursors#select_motion(1)<cr>
+        "move from back
+        nmap <nowait> <buffer> <expr> x cursors#motion('x')
     endif
 
-    "select
-    "TODO select inside/around brackets/quotes/etc.
-    nmap <nowait> <buffer> q :call cursors#select_motion(0)<cr>
-    nmap <nowait> <buffer> Q :call cursors#select_motion(1)<cr>
-    "move from back
-    nmap <nowait> <buffer> <expr> x cursors#motion('x')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

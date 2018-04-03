@@ -55,12 +55,11 @@ endfun
 
 fun! s:remove_match(i)
     call remove(s:V.Regions, a:i)
-    "let m = s:V.Matches[a:i][0]
-    "let c = s:V.Matches[a:i][1]
-    let m = s:V.Matches[a:i]
+    let m = s:V.Matches[a:i][0]
+    let c = s:V.Matches[a:i][1]
     call remove(s:V.Matches, a:i)
     call matchdelete(m)
-    "call matchdelete(c)
+    call matchdelete(c)
 endfun
 
 fun! cursors#skip()
