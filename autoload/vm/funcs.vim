@@ -3,9 +3,6 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#funcs#init(whole)
-    if !empty(g:VM_Selection) | return s:V | endif
-
-    call vm#region#init()
     let s:V = g:VM_Selection | let s:v = s:V.Vars
 
     call s:init_maps(0)
@@ -18,7 +15,6 @@ fun! vm#funcs#init(whole)
     let s:v.move_from_back = 0
 
     call s:augroup_start()
-    return s:V
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

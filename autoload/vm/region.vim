@@ -1,5 +1,4 @@
 fun! vm#region#init()
-    let g:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': []}
     let s:V = g:VM_Selection
     let s:v = s:V.Vars
     let s:Regions = s:V.Regions
@@ -21,28 +20,8 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#region#new(...)
-
-    let R = s:Region.new()
-
-    let region = [R.l, R.a, R.w]
-    let w = R.a==R.b ? 1 : -1
-    let cursor = [R.l, R.b, w]
-
-    let index = index(s:Regions, R)
-    if index == -1
-        let match  = matchaddpos('Selection', [region], 30)
-        let cursor = matchaddpos('MultiCursor', [cursor], 40)
-        if a:0
-            call insert(s:Matches, [match, cursor], a:1)
-            call insert(s:Regions, R, a:1)
-        else
-            call add(s:Matches, [match, cursor])
-            call add(s:Regions, R)
-        endif
-    endif
-    let s:v.index = index
-    let s:v.matches = getmatches()
+fun! vm#region#new()
+    return s:Region.new()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

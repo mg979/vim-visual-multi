@@ -5,10 +5,10 @@ let s:motion = 0 | let s:extending = 0
 fun! vm#commands#find_under(visual, whole, inclusive)
 
     if a:visual                     " yank has already happened here
-        let s:V = vm#funcs#init(a:whole)
+        let s:V = vm#init(a:whole)
 
     else                            " start whole word search
-        let s:V = vm#funcs#init(a:whole)
+        let s:V = vm#init(a:whole)
         if a:inclusive
             normal! yiW`]
         else
@@ -18,14 +18,7 @@ fun! vm#commands#find_under(visual, whole, inclusive)
 
     let s:v = s:V.Vars | let s:Regions = s:V.Regions | let s:Matches = s:V.Matches
     call vm#funcs#set_search()
-    call s:create_region(1)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:create_region(down)
-    call vm#region#new()
-    let s:v.going_down = a:down
+    call vm#new_region(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -36,7 +29,7 @@ fun! vm#commands#find_next(...)
     if a:0 | call s:remove_match(s:v.index) | endif
 
     normal! ngny`]
-    call s:create_region(1)
+    call vm#new_region(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -53,7 +46,7 @@ fun! vm#commands#find_prev(...)
     if a:0 | call s:remove_match(s:v.index) | endif
 
     normal! NgNy`]
-    call s:create_region(0)
+    call vm#new_region(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
