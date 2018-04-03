@@ -133,10 +133,8 @@ fun! vm#commands#move()
     if !s:extending | return | endif
     let s:extending -= 1
 
-    let i = 0
-    for c in s:Regions
-        call vm#region#move(i, s:motion, s:v.move_from_back)
-        let i += 1
+    for r in s:Regions
+        call r.move(s:motion)
     endfor
 
     normal! `]

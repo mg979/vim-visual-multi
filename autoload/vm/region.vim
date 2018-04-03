@@ -43,17 +43,17 @@ endfun
 " Region resizing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#region#move(i, motion, from_back)
-    if a:from_back | call s:move_from_back(a:i, a:motion)
+fun! s:Region.move(motion) dict
+    if s:v.move_from_back | call self.move_from_back(a:motion)
     elseif index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], a:motion[0]) >= 0
-        call s:move_back(a:i, a:motion) | else | call s:move_forward(a:i, a:motion)
+        call self.move_back(a:motion) | else | call self.move_forward(a:motion)
     endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:move_forward(i, motion)
-    let r = s:Regions[a:i]
+fun! s:Region.move_forward(motion) dict
+    let r = self
 
     "move to the beginning of the region and set a mark
     call cursor(r.l, r.a)
@@ -74,13 +74,13 @@ fun! s:move_forward(i, motion)
     call cursor(r.l, r.b+1)
     normal! m]`[y`]
 
-    call s:update_region_vars(a:i)
+    call self.update_vars()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:move_from_back(i, motion)
-    let r = s:Regions[a:i]
+fun! s:Region.move_from_back(motion) dict
+    let r = self
 
     "set a marks and perform the motion
     call cursor(r.l, r.b+1)
@@ -98,13 +98,13 @@ fun! s:move_from_back(i, motion)
     "set begin mark and yank between marks
     normal! m[`[y`]
 
-    call s:update_region_vars(a:i)
+    call self.update_vars()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:move_back(i, motion)
-    let r = s:Regions[a:i]
+fun! s:Region.move_back(motion) dict
+    let r = self
 
     "move to the beginning of the region and set a mark
     call cursor(r.l, r.a)
@@ -134,18 +134,20 @@ fun! s:move_back(i, motion)
     call cursor(r.l, r.b+1)
     normal! m]`[y`]
 
-    call s:update_region_vars(a:i)
+    call self.update_vars()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:update_region_vars(i)
+fun! s:Region.update_vars() dict
     "update the rest of the region vars, and the highlight match
-    let r = s:Regions[a:i]
+    let r = self
+
     let r.w = r.b - r.a + 1
     let r.txt = getreg(s:v.def_reg)
-    let s:v.matches[a:i].pos1 = [r.l, r.a, r.w]
-    let cursor = len(s:Matches) + a:i
+    let i = index(s:Regions, self)
+    let s:v.matches[i].pos1 = [r.l, r.a, r.w]
+    let cursor = len(s:Matches) + i
     let w = r.a==r.b ? 1 : -1
     let s:v.matches[cursor].pos1 = [r.l, r.b, w]
 endfun
