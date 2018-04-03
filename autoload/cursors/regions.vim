@@ -2,6 +2,8 @@ fun! cursors#regions#init()
     let g:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': []}
     let s:V = g:VM_Selection
     let s:v = s:V.Vars
+    let s:Regions = s:V.Regions
+    let s:Matches = s:V.Matches
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -10,36 +12,52 @@ endfun
 
 " A new region will only been created if not already existant
 
-" g:Regions contains the regions with their contents
-" g:VisualMatches contains the matches as they are registered with matchaddpos()
+" g:VM_Selection (= s:V) contains Regions, Matches, Vars (= s:v = plugin variables)
+
+" s:Regions contains the regions with their contents
+" s:Matches contains the matches as they are registered with matchaddpos()
+" s:v.matches contains the current matches as read with getmatches()
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! cursors#regions#new(...)
 
-    let obj = {}
-    let obj.l = getpos("'[")[1]       " line
-    let obj.a = getpos("'[")[2]       " begin
-    let obj.b = getpos("']")[2]       " end
-    let obj.w = obj.b - obj.a + 1     " width
-    let obj.txt = getreg(s:v.def_reg)
+    let R = s:Region.new()
 
-    let region = [obj.l, obj.a, obj.w]
-    let w = obj.a==obj.b ? 1 : -1
-    let cursor = [obj.l, obj.b, w]
+    let region = [R.l, R.a, R.w]
+    let w = R.a==R.b ? 1 : -1
+    let cursor = [R.l, R.b, w]
 
-    let index = index(s:V.Regions, obj)
+    let index = index(s:Regions, R)
     if index == -1
         let match  = matchaddpos('Selection', [region], 30)
         let cursor = matchaddpos('MultiCursor', [cursor], 40)
         if a:0
-            call insert(s:V.Matches, [match, cursor], a:1)
-            call insert(s:V.Regions, obj, a:1)
+            call insert(s:Matches, [match, cursor], a:1)
+            call insert(s:Regions, R, a:1)
         else
-            call add(s:V.Matches, [match, cursor])
-            call add(s:V.Regions, obj)
+            call add(s:Matches, [match, cursor])
+            call add(s:Regions, R)
         endif
     endif
     let s:v.index = index
     let s:v.matches = getmatches()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+let s:Region = {}
+
+fun! s:Region.new()
+    let obj = copy(self)
+    let obj.l = getpos("'[")[1]       " line
+    let obj.a = getpos("'[")[2]       " begin
+    let obj.b = getpos("']")[2]       " end
+    let obj.w = obj.b - obj.a + 1     " width
+    let obj.txt = getreg(s:v.def_reg) " text content
+
+    return obj
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -56,7 +74,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:move_forward(i, motion)
-    let r = s:V.Regions[a:i]
+    let r = s:Regions[a:i]
 
     "move to the beginning of the region and set a mark
     call cursor(r.l, r.a)
@@ -83,7 +101,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:move_from_back(i, motion)
-    let r = s:V.Regions[a:i]
+    let r = s:Regions[a:i]
 
     "set a marks and perform the motion
     call cursor(r.l, r.b+1)
@@ -107,7 +125,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:move_back(i, motion)
-    let r = s:V.Regions[a:i]
+    let r = s:Regions[a:i]
 
     "move to the beginning of the region and set a mark
     call cursor(r.l, r.a)
@@ -144,11 +162,11 @@ endfun
 
 fun! s:update_region_vars(i)
     "update the rest of the region vars, and the highlight match
-    let r = s:V.Regions[a:i]
+    let r = s:Regions[a:i]
     let r.w = r.b - r.a + 1
     let r.txt = getreg(s:v.def_reg)
     let s:v.matches[a:i].pos1 = [r.l, r.a, r.w]
-    let cursor = len(s:V.Matches) + a:i
+    let cursor = len(s:Matches) + a:i
     let w = r.a==r.b ? 1 : -1
     let s:v.matches[cursor].pos1 = [r.l, r.b, w]
 endfun

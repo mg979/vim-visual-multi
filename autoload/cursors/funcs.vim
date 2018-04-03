@@ -144,7 +144,8 @@ endfun
 
 fun! s:pattern()
     let t = eval('@'.s:v.def_reg)
-    let t = substitute(escape(t, '\'), '\n', '\\n', 'g')
+    let t = escape(t, '\|')
+    let t = substitute(t, '\n', '\\n', 'g')
     if s:v.whole_word | let t = '\<'.t.'\>' | endif
     return t
 endfun
