@@ -78,6 +78,10 @@ fun! s:init_maps(end)
         unmap <buffer> }
         unmap <buffer> <c-w>
         unmap <buffer> x
+        unmap <buffer> h
+        unmap <buffer> l
+        unmap <buffer> k
+        unmap <buffer> j
     else
         nmap <nowait> <buffer> <esc> :call cursors#funcs#reset()<cr>
         nmap <nowait> <buffer> s :call cursors#skip()<cr>
@@ -89,7 +93,7 @@ fun! s:init_maps(end)
     endif
 
     "motions
-    let motions = ['w', 'W', 'b', 'B', 'e', 'E']
+    let motions = ['w', 'W', 'b', 'B', 'e', 'E', '$', '0', '^']
     let find = ['f', 'F', 't', 'T']
 
     if a:end
@@ -109,6 +113,10 @@ fun! s:init_maps(end)
         nmap <nowait> <buffer> Q :call cursors#select_motion(1)<cr>
         "move from back
         nmap <nowait> <buffer> <expr> x cursors#motion('x')
+        nmap <nowait> <buffer> <expr> h cursors#motion('h')
+        nmap <nowait> <buffer> <expr> l cursors#motion('l')
+        nmap <nowait> <buffer> <expr> k cursors#motion('k')
+        nmap <nowait> <buffer> <expr> j cursors#motion('j')
     endif
 
 endfun

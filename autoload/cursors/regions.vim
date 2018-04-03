@@ -23,7 +23,8 @@ fun! cursors#regions#new(...)
     let obj.txt = getreg(s:v.def_reg)
 
     let region = [obj.l, obj.a, obj.w]
-    let cursor = [obj.l, obj.b, 1]
+    let w = obj.a==obj.b ? 1 : -1
+    let cursor = [obj.l, obj.b, w]
 
     let index = index(s:V.Regions, obj)
     if index == -1
@@ -42,13 +43,17 @@ fun! cursors#regions#new(...)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Region resizing
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! cursors#regions#move(i, motion, from_back)
     if a:from_back | call s:move_from_back(a:i, a:motion)
-    elseif index(['b', 'B', 'F', 'T'], a:motion[0]) >= 0
+    elseif index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], a:motion[0]) >= 0
         call s:move_back(a:i, a:motion) | else | call s:move_forward(a:i, a:motion)
     endif
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:move_forward(i, motion)
     let r = s:V.Regions[a:i]
@@ -75,6 +80,8 @@ fun! s:move_forward(i, motion)
     call s:update_region_vars(a:i)
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:move_from_back(i, motion)
     let r = s:V.Regions[a:i]
 
@@ -96,6 +103,8 @@ fun! s:move_from_back(i, motion)
 
     call s:update_region_vars(a:i)
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:move_back(i, motion)
     let r = s:V.Regions[a:i]
@@ -119,7 +128,7 @@ fun! s:move_back(i, motion)
 
     "exchange a and b if there's been inversion
     if r.a > r.b
-        let x = r.a | let y = r.b | let r.a = y | let r.b = x
+        let r.a = r.b
         call cursor(r.l, r.a)
         normal! m[
     endif
@@ -131,6 +140,8 @@ fun! s:move_back(i, motion)
     call s:update_region_vars(a:i)
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:update_region_vars(i)
     "update the rest of the region vars, and the highlight match
     let r = s:V.Regions[a:i]
@@ -138,6 +149,9 @@ fun! s:update_region_vars(i)
     let r.txt = getreg(s:v.def_reg)
     let s:v.matches[a:i].pos1 = [r.l, r.a, r.w]
     let cursor = len(s:V.Matches) + a:i
-    let s:v.matches[cursor].pos1 = [r.l, r.b, 1]
+    let w = r.a==r.b ? 1 : -1
+    let s:v.matches[cursor].pos1 = [r.l, r.b, w]
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
