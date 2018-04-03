@@ -55,9 +55,12 @@ endfun
 
 fun! s:remove_match(i)
     call remove(s:V.Regions, a:i)
+    "let m = s:V.Matches[a:i][0]
+    "let c = s:V.Matches[a:i][1]
     let m = s:V.Matches[a:i]
     call remove(s:V.Matches, a:i)
     call matchdelete(m)
+    "call matchdelete(c)
 endfun
 
 fun! cursors#skip()
@@ -76,6 +79,11 @@ endfun
 fun! cursors#motion(motion)
     let s:extending = 1
     let s:motion = a:motion
+    if a:motion ==# 'x'
+        let s:v.move_from_back = 1
+        let s:motion = 'b'
+        return 'b'
+    endif
     return a:motion
 endfun
 
@@ -130,12 +138,13 @@ fun! cursors#move()
 
     let i = 0
     for c in s:V.Regions
-        call cursors#regions#move(i, s:motion)
+        call cursors#regions#move(i, s:motion, s:v.move_from_back)
         let i += 1
     endfor
 
     normal! `]
     call setmatches(s:v.matches)
+    let s:v.move_from_back = 0
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -144,6 +153,10 @@ endfun
 
 fun! cursors#toggle_whole_word()
     let s:v.whole_word = !s:v.whole_word
+endfun
+
+fun! cursors#toggle_move_from_back()
+    let s:v.move_from_back = !s:v.move_from_back
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

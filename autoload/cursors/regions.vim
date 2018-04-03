@@ -23,14 +23,18 @@ fun! cursors#regions#new(...)
     let obj.txt = getreg(s:v.def_reg)
 
     let region = [obj.l, obj.a, obj.w]
+    "let cursor = [obj.l, obj.b, 1]
 
     let index = index(s:V.Regions, obj)
     if index == -1
-        let match = matchaddpos('Selection', [region], 30)
+        let match  = matchaddpos('Selection', [region], 30)
+        "let cursor = matchaddpos('MultiCursor', [cursor], 40)
         if a:0
+            "call insert(s:V.Matches, [match, cursor], a:1)
             call insert(s:V.Matches, match, a:1)
             call insert(s:V.Regions, obj, a:1)
         else
+            "call add(s:V.Matches, [match, cursor])
             call add(s:V.Matches, match)
             call add(s:V.Regions, obj)
         endif
@@ -41,8 +45,9 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! cursors#regions#move(i, motion)
-    if index(['b', 'B', 'F', 'T'], a:motion[0]) >= 0
+fun! cursors#regions#move(i, motion, from_back)
+    if a:from_back | call s:move_from_back(a:i, a:motion)
+    elseif index(['b', 'B', 'F', 'T'], a:motion[0]) >= 0
         call s:move_back(a:i, a:motion) | else | call s:move_forward(a:i, a:motion)
     endif
 endfun
@@ -66,7 +71,7 @@ fun! s:move_forward(i, motion)
     endif
 
     "set end mark and yank between marks
-    call cursor(r.l, r.b)
+    call cursor(r.l, r.b+1)
     normal! m]`[y`]
 
     "update the rest of the region vars, and the highlight match
@@ -75,11 +80,12 @@ fun! s:move_forward(i, motion)
     let s:v.matches[a:i].pos1 = [r.l, r.a, r.w]
 endfun
 
-fun! s:move_back(i, motion)
+fun! s:move_from_back(i, motion)
+    "let s:v.move_from_back = 0
     let r = s:V.Regions[a:i]
 
-    "move to the beginning of the region, set a mark and perform the motion
-    call cursor(r.l, r.b)
+    "set a marks and perform the motion
+    call cursor(r.l, r.b+1)
     normal! m]
     call cursor(r.l, r.a)
     exe "normal! ".a:motion
@@ -93,6 +99,43 @@ fun! s:move_back(i, motion)
 
     "set begin mark and yank between marks
     normal! m[`[y`]
+
+    "update the rest of the region vars, and the highlight match
+    let r.w = r.b - r.a + 1
+    let r.txt = getreg(s:v.def_reg)
+    let s:v.matches[a:i].pos1 = [r.l, r.a, r.w]
+endfun
+
+fun! s:move_back(i, motion)
+    let r = s:V.Regions[a:i]
+
+    "move to the beginning of the region and set a mark
+    call cursor(r.l, r.a)
+    normal! m[
+
+    "move to the end of the region and perform the motion
+    call cursor(r.l, r.b)
+    exe "normal! ".a:motion
+
+    "ensure line boundaries aren't crossed
+    if getpos('.')[1] > r.l
+        let r.b = col([r.l, '$'])-1
+    elseif getpos('.')[1] < r.l
+        let r.b = col([r.l, 1])
+    else
+        let r.b = col('.')
+    endif
+
+    "exchange a and b if there's been inversion
+    if r.a > r.b
+        let x = r.a | let y = r.b | let r.a = y | let r.b = x
+        call cursor(r.l, r.a)
+        normal! m[
+    endif
+
+    "set end mark and yank between marks
+    call cursor(r.l, r.b+1)
+    normal! m]`[y`]
 
     "update the rest of the region vars, and the highlight match
     let r.w = r.b - r.a + 1

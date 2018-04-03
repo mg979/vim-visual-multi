@@ -77,7 +77,7 @@ fun! s:init_maps(end)
         unmap <buffer> {
         unmap <buffer> }
         unmap <buffer> <c-w>
-        unmap <buffer> <c-b>
+        unmap <buffer> x
     else
         nmap <nowait> <buffer> <esc> :call cursors#funcs#reset()<cr>
         nmap <nowait> <buffer> s :call cursors#skip()<cr>
@@ -110,7 +110,7 @@ fun! s:init_maps(end)
     nmap <nowait> <buffer> q :call cursors#select_motion(0)<cr>
     nmap <nowait> <buffer> Q :call cursors#select_motion(1)<cr>
     "move from back
-    nmap <nowait> <buffer> <expr> <c-b> cursors#motion('x')
+    nmap <nowait> <buffer> <expr> x cursors#motion('x')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
