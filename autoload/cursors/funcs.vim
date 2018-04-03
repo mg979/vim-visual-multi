@@ -71,6 +71,8 @@ fun! s:init_maps(end)
     if a:end
         unmap <buffer> <esc>
         unmap <buffer> s
+        unmap <buffer> q
+        unmap <buffer> Q
         unmap <buffer> [
         unmap <buffer> ]
         unmap <buffer> {
