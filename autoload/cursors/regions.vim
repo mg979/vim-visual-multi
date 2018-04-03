@@ -42,6 +42,12 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! cursors#regions#move(i, motion)
+    if index(['b', 'B', 'F', 'T'], a:motion[0]) >= 0
+        call s:move_back(a:i, a:motion) | else | call s:move_forward(a:i, a:motion)
+    endif
+endfun
+
+fun! s:move_forward(i, motion)
     let r = s:V.Regions[a:i]
 
     "move to the beginning of the region and set a mark
@@ -55,22 +61,38 @@ fun! cursors#regions#move(i, motion)
     "ensure line boundaries aren't crossed
     if getpos('.')[1] > r.l
         let r.b = col([r.l, '$'])-1
-    elseif getpos('.')[1] < r.l
-        let r.b = col([r.l, 1])
     else
         let r.b = col('.')
-    endif
-
-    "exchange a and b if there's been inversion
-    if r.a > r.b
-        let x = r.a | let y = r.b | let r.a = y | let r.b = x
-        call cursor(r.l, r.a)
-        normal! m[
     endif
 
     "set end mark and yank between marks
     call cursor(r.l, r.b)
     normal! m]`[y`]
+
+    "update the rest of the region vars, and the highlight match
+    let r.w = r.b - r.a + 1
+    let r.txt = getreg(s:v.def_reg)
+    let s:v.matches[a:i].pos1 = [r.l, r.a, r.w]
+endfun
+
+fun! s:move_back(i, motion)
+    let r = s:V.Regions[a:i]
+
+    "move to the beginning of the region, set a mark and perform the motion
+    call cursor(r.l, r.b)
+    normal! m]
+    call cursor(r.l, r.a)
+    exe "normal! ".a:motion
+
+    "ensure line boundaries aren't crossed
+    if getpos('.')[1] < r.l
+        let r.a = col([r.l, 1])
+    else
+        let r.a = col('.')
+    endif
+
+    "set begin mark and yank between marks
+    normal! m[`[y`]
 
     "update the rest of the region vars, and the highlight match
     let r.w = r.b - r.a + 1

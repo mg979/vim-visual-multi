@@ -15,6 +15,7 @@ fun! cursors#funcs#init(whole)
     let s:v.oldreg = s:get_reg()
     let s:v.oldsearch = [getreg("/"), getregtype("/")]
     let s:v.search = []
+    let s:v.move_from_back = 0
 
     call s:augroup_start()
     return s:V
@@ -25,13 +26,11 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! cursors#funcs#reset()
-    for m in s:V.Matches
-        call matchdelete(m)
-    endfor
     call s:restore_regs()
     call s:init_maps(1)
     let g:VM_Selection = {}
     call s:augroup_end()
+    call clearmatches()
     set nohlsearch
 endfun
 
@@ -78,6 +77,7 @@ fun! s:init_maps(end)
         unmap <buffer> {
         unmap <buffer> }
         unmap <buffer> <c-w>
+        unmap <buffer> <c-b>
     else
         nmap <nowait> <buffer> <esc> :call cursors#funcs#reset()<cr>
         nmap <nowait> <buffer> s :call cursors#skip()<cr>
@@ -85,7 +85,7 @@ fun! s:init_maps(end)
         nmap <nowait> <buffer> [ :call cursors#find_prev()<cr>
         nmap <nowait> <buffer> } :call cursors#find_under(0, 0)<cr>
         nmap <nowait> <buffer> { :call cursors#find_under(0, 1)<cr>
-        nmap <nowait> <buffer> <c-w> :call cursors#toggle_whole_word()
+        nmap <nowait> <buffer> <c-w> :call cursors#toggle_whole_word()<cr>
     endif
 
     "motions
@@ -109,6 +109,8 @@ fun! s:init_maps(end)
     "TODO select inside/around brackets/quotes/etc.
     nmap <nowait> <buffer> q :call cursors#select_motion(0)<cr>
     nmap <nowait> <buffer> Q :call cursors#select_motion(1)<cr>
+    "move from back
+    nmap <nowait> <buffer> <expr> <c-b> cursors#motion('x')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
