@@ -2,10 +2,10 @@
 " Initialize
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! cursors#funcs#init(whole)
+fun! vm#funcs#init(whole)
     if !empty(g:VM_Selection) | return s:V | endif
 
-    call cursors#regions#init()
+    call vm#region#init()
     let s:V = g:VM_Selection | let s:v = s:V.Vars
 
     call s:init_maps(0)
@@ -25,7 +25,7 @@ endfun
 " Reset
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! cursors#funcs#reset()
+fun! vm#funcs#reset()
     call s:restore_regs()
     call s:init_maps(1)
     let g:VM_Selection = {}
@@ -83,13 +83,13 @@ fun! s:init_maps(end)
         unmap <buffer> k
         unmap <buffer> j
     else
-        nmap <nowait> <buffer> <esc> :call cursors#funcs#reset()<cr>
-        nmap <nowait> <buffer> s :call cursors#skip()<cr>
-        nmap <nowait> <buffer> ] :call cursors#find_next()<cr>
-        nmap <nowait> <buffer> [ :call cursors#find_prev()<cr>
-        nmap <nowait> <buffer> } :call cursors#find_under(0, 0)<cr>
-        nmap <nowait> <buffer> { :call cursors#find_under(0, 1)<cr>
-        nmap <nowait> <buffer> <c-w> :call cursors#toggle_whole_word()<cr>
+        nmap <nowait> <buffer> <esc> :call vm#funcs#reset()<cr>
+        nmap <nowait> <buffer> s :call vm#commands#skip()<cr>
+        nmap <nowait> <buffer> ] :call vm#commands#find_next()<cr>
+        nmap <nowait> <buffer> [ :call vm#commands#find_prev()<cr>
+        nmap <nowait> <buffer> } :call vm#commands#find_under(0, 0)<cr>
+        nmap <nowait> <buffer> { :call vm#commands#find_under(0, 1)<cr>
+        nmap <nowait> <buffer> <c-w> :call vm#commands#toggle_whole_word()<cr>
     endif
 
     "motions
@@ -102,21 +102,21 @@ fun! s:init_maps(end)
         endfor
     else
         for m in motions
-            exe "nmap <nowait> <buffer> <expr> ".m." cursors#motion('".m."')"
+            exe "nmap <nowait> <buffer> <expr> ".m." vm#commands#motion('".m."')"
         endfor
         for m in find
-            exe "nmap <nowait> <buffer> <expr> ".m." cursors#find_motion('".m."')"
+            exe "nmap <nowait> <buffer> <expr> ".m." vm#commands#find_motion('".m."')"
         endfor
 
         "select
-        nmap <nowait> <buffer> q :call cursors#select_motion(0)<cr>
-        nmap <nowait> <buffer> Q :call cursors#select_motion(1)<cr>
+        nmap <nowait> <buffer> q :call vm#commands#select_motion(0)<cr>
+        nmap <nowait> <buffer> Q :call vm#commands#select_motion(1)<cr>
         "move from back
-        nmap <nowait> <buffer> <expr> x cursors#motion('x')
-        nmap <nowait> <buffer> <expr> h cursors#motion('h')
-        nmap <nowait> <buffer> <expr> l cursors#motion('l')
-        nmap <nowait> <buffer> <expr> k cursors#motion('k')
-        nmap <nowait> <buffer> <expr> j cursors#motion('j')
+        nmap <nowait> <buffer> <expr> x vm#commands#motion('x')
+        nmap <nowait> <buffer> <expr> h vm#commands#motion('h')
+        nmap <nowait> <buffer> <expr> l vm#commands#motion('l')
+        nmap <nowait> <buffer> <expr> k vm#commands#motion('k')
+        nmap <nowait> <buffer> <expr> j vm#commands#motion('j')
     endif
 
 endfun
@@ -133,7 +133,7 @@ endfunction
 " Search
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! cursors#funcs#set_search()
+fun! vm#funcs#set_search()
     let s = s:pattern()
     if index(s:v.search, s) == -1
         call add(s:v.search, s)
@@ -157,7 +157,7 @@ endfun
 fun! s:augroup_start()
     augroup plugin-visual-multi
         au!
-        au CursorMoved * call cursors#move()
+        au CursorMoved * call vm#commands#move()
     augroup END
 endfun
 

@@ -1,4 +1,4 @@
-fun! cursors#regions#init()
+fun! vm#region#init()
     let g:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': []}
     let s:V = g:VM_Selection
     let s:v = s:V.Vars
@@ -21,7 +21,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! cursors#regions#new(...)
+fun! vm#region#new(...)
 
     let R = s:Region.new()
 
@@ -64,7 +64,7 @@ endfun
 " Region resizing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! cursors#regions#move(i, motion, from_back)
+fun! vm#region#move(i, motion, from_back)
     if a:from_back | call s:move_from_back(a:i, a:motion)
     elseif index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], a:motion[0]) >= 0
         call s:move_back(a:i, a:motion) | else | call s:move_forward(a:i, a:motion)
