@@ -2,20 +2,21 @@ let s:motion = 0 | let s:extending = 0
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! cursors#find_under(visual, wrap)
+fun! cursors#find_under(visual, whole, inclusive)
 
     if a:visual                     " yank has already happened here
-        let s:V = cursors#funcs#init(0) | let s:v = s:V.Vars
+        let s:V = cursors#funcs#init(a:whole)
 
     else                            " start whole word search
-        let s:V = cursors#funcs#init(1) | let s:v = s:V.Vars
-        if a:wrap
+        let s:V = cursors#funcs#init(a:whole)
+        if a:inclusive
             normal! yiW`]
         else
             normal! yiw`]
         endif
     endif
 
+    let s:v = s:V.Vars | let s:Regions = s:V.Regions | let s:Matches = s:V.Matches
     call cursors#funcs#set_search()
     call s:create_region(1)
 endfun
@@ -27,6 +28,8 @@ fun! s:create_region(down)
     let s:v.going_down = a:down
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! cursors#find_next(...)
 
     "skip current match
@@ -36,11 +39,13 @@ fun! cursors#find_next(...)
     call s:create_region(1)
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! cursors#find_prev(...)
 
     "move to the beginning of the current match
     let i = s:v.index
-    let current = s:V.Regions[i]
+    let current = s:Regions[i]
     let pos = [current.l, current.a]
     call cursor(pos)
 
@@ -54,10 +59,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:remove_match(i)
-    call remove(s:V.Regions, a:i)
-    let m = s:V.Matches[a:i][0]
-    let c = s:V.Matches[a:i][1]
-    call remove(s:V.Matches, a:i)
+    call remove(s:Regions, a:i)
+    let m = s:Matches[a:i][0]
+    let c = s:Matches[a:i][1]
+    call remove(s:Matches, a:i)
     call matchdelete(m)
     call matchdelete(c)
 endfun
@@ -136,7 +141,7 @@ fun! cursors#move()
     let s:extending -= 1
 
     let i = 0
-    for c in s:V.Regions
+    for c in s:Regions
         call cursors#regions#move(i, s:motion, s:v.move_from_back)
         let i += 1
     endfor
