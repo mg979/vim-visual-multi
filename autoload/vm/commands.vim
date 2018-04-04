@@ -17,8 +17,10 @@ fun! vm#commands#find_under(visual, whole, inclusive)
     endif
 
     let s:v = s:V.Vars
-    let s:Regions = s:V.Regions | let s:Matches = s:V.Matches | let s:Global = s:V.Global
-    call vm#funcs#set_search()
+    let s:Regions = s:V.Regions | let s:Matches = s:V.Matches
+    let s:Global = s:V.Global | let s:Funcs = s:V.Funcs
+
+    call s:Funcs.set_search()
     call s:Global.new_region(1)
 endfun
 
@@ -27,7 +29,7 @@ endfun
 fun! vm#commands#find_next(...)
 
     "skip current match
-    if a:0 | call s:Global.remove_region() | endif
+    if a:0 | call s:Regions[s:v.index].remove() | endif
 
     normal! ngny`]
     call s:Global.new_region(1)
@@ -44,7 +46,7 @@ fun! vm#commands#find_prev(...)
     call cursor(pos)
 
     "skip current match
-    if a:0 | call s:Global.remove_region() | endif
+    if a:0 | call s:Regions[s:v.index].remove() | endif
 
     normal! NgNy`]
     call s:Global.new_region(0)
@@ -58,6 +60,7 @@ fun! vm#commands#skip()
     else
         call vm#commands#find_prev(1)
     endif
+    echom s:v.index
 endfun
 
 

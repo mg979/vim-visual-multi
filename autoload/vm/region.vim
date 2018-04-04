@@ -4,6 +4,7 @@ fun! vm#region#init()
     let s:Regions = s:V.Regions
     let s:Matches = s:V.Matches
     let s:Global = s:V.Global
+    let s:Funcs = s:V.Funcs
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -37,11 +38,25 @@ fun! s:Region.new()
     let obj.b = getpos("']")[2]       " end
     let obj.w = obj.b - obj.a + 1     " width
     let obj.txt = getreg(s:v.def_reg) " text content
+    let obj.index = len(s:Regions)
     return obj
 endfun
 
 fun! s:Region.empty() dict
     return self.a == self.b
+endfun
+
+fun! s:Region.remove() dict
+    let i = self.index
+    call remove(s:Regions, i)
+    let m = s:Matches[i][0]
+    let c = s:Matches[i][1]
+    call remove(s:Matches, i)
+    call matchdelete(m)
+    call matchdelete(c)
+
+    call s:Global.update_indices()
+
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

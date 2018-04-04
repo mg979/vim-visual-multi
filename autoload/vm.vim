@@ -15,17 +15,17 @@ fun! vm#init(whole)
         return s:V
     endif
 
-    let g:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': []}
-
+    let g:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': [], 'Funcs': {}}
     let s:V = g:VM_Selection
+    let s:V.Global = s:Global
+
     let s:v = s:V.Vars
     let s:v.whole_word = a:whole
 
     let s:Regions = s:V.Regions
     let s:Matches = s:V.Matches
-    let s:V.Global = s:Global
 
-    call vm#funcs#init()
+    let s:Funcs = vm#funcs#init()
     call vm#region#init()
 
     return s:V
@@ -47,42 +47,60 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.new_region(down, ...) dict
+fun! s:Global.new_region(down) dict
 
-    let R = vm#region#new()
+    let existing = s:Global.is_region_existant()
+    let R = existing[0]
 
     let region = [R.l, R.a, R.w]
     let w      = R.a==R.b ? 1 : -1
     let cursor = [R.l, R.b, w]
 
-    let index = index(s:Regions, R)
-    if index == -1
+    if !existing[1]
         let match  = matchaddpos('Selection',   [region], 30)
         let cursor = matchaddpos('MultiCursor', [cursor], 40)
-        if a:0
-            call insert(s:Matches, [match, cursor],  a:1)
-            call insert(s:Regions, R,                a:1)
-        else
-            call add(s:Matches, [match, cursor])
-            call add(s:Regions, R)
-        endif
+        call add(s:Matches, [match, cursor])
+        call add(s:Regions, R)
     endif
 
+    let s:v.index = R.index
     let s:v.going_down = a:down
-    let s:v.index = index
     let s:v.matches = getmatches()
+
+    call self.select_region(R.index)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.remove_region()
-    let i = s:v.index
-    call remove(s:Regions, i)
-    let m = s:Matches[i][0]
-    let c = s:Matches[i][1]
-    call remove(s:Matches, i)
-    call matchdelete(m)
-    call matchdelete(c)
+fun! s:Global.select_region(i) dict
+    "move cursor to the end of the region at index, then return the region
+    let R = s:Regions[a:i]
+    call cursor([R.l, R.b])
+    return R
+endfun
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.is_region_existant() dict
+    let pos = getpos('.')[1:2]
+    for r in s:Regions
+        if pos[0] == r.l && pos[1] >= r.a && pos[1] <= r.b
+            return [r, 1]
+        endif
+    endfor
+    return [vm#region#new(), 0]
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.update_indices() dict
+    "adjust region indices
+    let i = 0
+    for r in s:Regions
+        let r.index = i
+        let i += 1
+    endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

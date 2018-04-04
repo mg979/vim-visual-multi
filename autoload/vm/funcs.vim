@@ -2,21 +2,27 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Initialize
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"store registers, initialize script vars and temporary buffer mappings
+"Store registers, initialize script vars and temporary buffer mappings.
+"Some functions are registered in s:Funcs, that is returned to the global
+"script, and then included in the global variable, so that they can be
+"accessed from anywhere.
 
 fun! vm#funcs#init()
-    let s:V = g:VM_Selection | let s:v = s:V.Vars
+    let s:V = g:VM_Selection | let s:v = s:V.Vars | let s:Global = s:V.Global
+    let s:V.Funcs = s:Funcs
 
     call s:init_maps(0)
 
     let s:v.def_reg = s:default_reg()
-    let s:v.oldreg = s:get_reg()
+    let s:v.oldreg = s:Funcs.get_reg()
     let s:v.oldsearch = [getreg("/"), getregtype("/")]
     let s:v.search = []
     let s:v.move_from_back = 0
     let s:v.case_ignore = 0
+    let s:v.index = -1
 
     call s:augroup_start()
+    return s:Funcs
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -37,6 +43,8 @@ endfun
 " Functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+let s:Funcs = {}
+
 fun! s:default_reg()
     let clipboard_flags = split(&clipboard, ',')
     if index(clipboard_flags, 'unnamedplus') >= 0
@@ -50,7 +58,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:get_reg()
+fun! s:Funcs.get_reg() dict
     let r = s:v.def_reg
     return [r, getreg(r), getregtype(r)]
 endfun
@@ -122,7 +130,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-function! s:msg(text)
+function! s:Funcs.msg(text) dict
     echohl WarningMsg
     echo a:text
     echohl None
@@ -132,7 +140,7 @@ endfunction
 " Search
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#funcs#set_search()
+fun! s:Funcs.set_search() dict
     let s = s:pattern()
     if index(s:v.search, s) == -1
         call add(s:v.search, s)
