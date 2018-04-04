@@ -75,28 +75,35 @@ endfun
 
 fun! s:init_maps(end)
     if a:end
-        unmap <buffer> <esc>
-        unmap <buffer> s
-        unmap <buffer> q
-        unmap <buffer> Q
-        unmap <buffer> [
-        unmap <buffer> ]
-        unmap <buffer> {
-        unmap <buffer> }
-        unmap <buffer> <c-w>
-        unmap <buffer> x
-        unmap <buffer> h
-        unmap <buffer> l
-        unmap <buffer> k
-        unmap <buffer> j
+        nunmap <buffer> <esc>
+        nunmap <buffer> s
+        nunmap <buffer> q
+        nunmap <buffer> Q
+        nunmap <buffer> [
+        nunmap <buffer> ]
+        nunmap <buffer> {
+        nunmap <buffer> }
+        nunmap <buffer> <c-w>
+        nunmap <buffer> h
+        nunmap <buffer> l
+        nunmap <buffer> k
+        nunmap <buffer> j
+        xunmap <buffer> [
+        xunmap <buffer> ]
+        xunmap <buffer> {
+        xunmap <buffer> }
     else
         nmap <nowait> <buffer> <esc> :call vm#funcs#reset()<cr>
+        nmap <nowait> <buffer> <c-w> :call vm#commands#toggle_whole_word()<cr>
         nmap <nowait> <buffer> s :call vm#commands#skip()<cr>
         nmap <nowait> <buffer> ] :call vm#commands#find_next()<cr>
         nmap <nowait> <buffer> [ :call vm#commands#find_prev()<cr>
-        nmap <nowait> <buffer> } :call vm#commands#find_under(0, 0)<cr>
-        nmap <nowait> <buffer> { :call vm#commands#find_under(0, 1)<cr>
-        nmap <nowait> <buffer> <c-w> :call vm#commands#toggle_whole_word()<cr>
+        nmap <nowait> <buffer> } :call vm#commands#find_under(0, 0, 0)<cr>
+        nmap <nowait> <buffer> { :call vm#commands#find_under(0, 1, 0)<cr>
+        xmap <nowait> <buffer> ] y:call vm#commands#find_under(1, 0, 0)<cr>`]
+        xmap <nowait> <buffer> [ boey:call vm#commands#find_under(1, 1, 0)<cr>`]
+        xmap <nowait> <buffer> } boEy:call vm#commands#find_under(1, 0, 1)<cr>`]
+        xmap <nowait> <buffer> { boEy:call vm#commands#find_under(1, 1, 1)<cr>`]
     endif
 
     "motions
@@ -105,7 +112,7 @@ fun! s:init_maps(end)
 
     if a:end
         for m in (motions + find)
-            exe "unmap <buffer> ".m
+            exe "nunmap <buffer> ".m
         endfor
     else
         for m in motions
@@ -119,7 +126,6 @@ fun! s:init_maps(end)
         nmap <nowait> <buffer> q :call vm#commands#select_motion(0)<cr>
         nmap <nowait> <buffer> Q :call vm#commands#select_motion(1)<cr>
         "move from back
-        nmap <nowait> <buffer> <expr> x vm#commands#motion('x')
         nmap <nowait> <buffer> <expr> h vm#commands#motion('h')
         nmap <nowait> <buffer> <expr> l vm#commands#motion('l')
         nmap <nowait> <buffer> <expr> k vm#commands#motion('k')

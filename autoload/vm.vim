@@ -64,7 +64,7 @@ fun! s:Global.new_region(down) dict
     endif
 
     let s:v.index = R.index
-    let s:v.going_down = a:down
+    let s:v.direction = a:down
     let s:v.matches = getmatches()
 
     call self.select_region(R.index)
@@ -73,9 +73,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.select_region(i) dict
-    "move cursor to the end of the region at index, then return the region
+    "adjust cursor position of the region at index, then return the region
     let R = s:Regions[a:i]
-    call cursor([R.l, R.b])
+    let pos = s:v.direction ? R.b : R.a
+    call cursor([R.l, pos])
     return R
 endfun
 

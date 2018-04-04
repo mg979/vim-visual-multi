@@ -27,9 +27,17 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(...)
+    let i = s:v.index
+
+    "just reverse direction if going ip
+    if !s:v.direction
+        let s:v.direction = 1
+        call s:Global.select_region(i)
+        return
+    endif
 
     "skip current match
-    if a:0 | call s:Regions[s:v.index].remove() | endif
+    if a:0 | call s:Regions[i].remove() | endif
 
     normal! ngny`]
     call s:Global.new_region(1)
@@ -38,24 +46,31 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(...)
+    let i = s:v.index
+
+    "just reverse direction if going down
+    if s:v.direction
+        let s:v.direction = 0
+        call s:Global.select_region(i)
+        return
+    endif
 
     "move to the beginning of the current match
-    let i = s:v.index
     let current = s:Regions[i]
     let pos = [current.l, current.a]
     call cursor(pos)
 
     "skip current match
-    if a:0 | call s:Regions[s:v.index].remove() | endif
+    if a:0 | call s:Regions[i].remove() | endif
 
-    normal! NgNy`]
+    normal! NgNy`[
     call s:Global.new_region(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#skip()
-    if s:v.going_down
+    if s:v.direction
         call vm#commands#find_next(1)
     else
         call vm#commands#find_prev(1)
@@ -70,12 +85,8 @@ endfun
 
 fun! vm#commands#motion(motion)
     let s:extending = 1
+    let s:current_i = s:v.index
     let s:motion = a:motion
-    if a:motion ==# 'x'
-        let s:v.move_from_back = 1
-        let s:motion = 'b'
-        return 'b'
-    endif
     return a:motion
 endfun
 
@@ -128,6 +139,7 @@ endfun
 fun! vm#commands#move()
     if !s:extending | return | endif
     let s:extending -= 1
+    let s:v.move_from_back = !s:v.direction
 
     for r in s:Regions
         call r.move(s:motion)
@@ -136,6 +148,7 @@ fun! vm#commands#move()
     normal! `]
     call setmatches(s:v.matches)
     let s:v.move_from_back = 0
+    call s:Global.select_region(s:current_i)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
