@@ -16,9 +16,10 @@ fun! vm#commands#find_under(visual, whole, inclusive)
         endif
     endif
 
-    let s:v = s:V.Vars | let s:Regions = s:V.Regions | let s:Matches = s:V.Matches
+    let s:v = s:V.Vars
+    let s:Regions = s:V.Regions | let s:Matches = s:V.Matches | let s:Global = s:V.Global
     call vm#funcs#set_search()
-    call vm#new_region(1)
+    call s:Global.new_region(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -29,7 +30,7 @@ fun! vm#commands#find_next(...)
     if a:0 | call s:remove_match(s:v.index) | endif
 
     normal! ngny`]
-    call vm#new_region(1)
+    call s:Global.new_region(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -46,7 +47,7 @@ fun! vm#commands#find_prev(...)
     if a:0 | call s:remove_match(s:v.index) | endif
 
     normal! NgNy`]
-    call vm#new_region(0)
+    call s:Global.new_region(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -150,8 +151,8 @@ fun! vm#commands#toggle_whole_word()
     let s:v.whole_word = !s:v.whole_word
 endfun
 
-fun! vm#commands#toggle_move_from_back()
-    let s:v.move_from_back = !s:v.move_from_back
+fun! vm#commands#toggle_case_ignore()
+    let s:v.case_ignore = !s:v.case_ignore
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

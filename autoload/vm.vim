@@ -1,29 +1,53 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Initialize
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" g:VM_Selection (= s:V) contains Regions, Matches, Vars (= s:v = plugin variables)
+
+" s:Global holds the Global class methods
+" s:Regions contains the regions with their contents
+" s:Matches contains the matches as they are registered with matchaddpos()
+" s:v.matches contains the current matches as read with getmatches()
 
 fun! vm#init(whole)
-    "already initialized, return current instance
-    if !empty(g:VM_Selection) | return s:V | endif
+    "if already initialized, return current instance
+    if !empty(g:VM_Selection)
+        let s:v.whole_word = a:whole
+        return s:V
+    endif
 
     let g:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': []}
 
     let s:V = g:VM_Selection
     let s:v = s:V.Vars
+    let s:v.whole_word = a:whole
+
     let s:Regions = s:V.Regions
     let s:Matches = s:V.Matches
+    let s:V.Global = s:Global
 
-    call vm#funcs#init(a:whole)
+    call vm#funcs#init()
     call vm#region#init()
 
     return s:V
 endfun
 
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Global class
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:V = g:VM_Selection
+let s:Global = {}
 
-fun! vm#new_region(down, ...)
+fun! s:Global.all_empty() dict
+    for r in s:Regions
+        if !r.empty() | return 0 | endif
+    endfor
+    return 1
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.new_region(down, ...) dict
 
     let R = vm#region#new()
 
@@ -48,6 +72,4 @@ fun! vm#new_region(down, ...)
     let s:v.index = index
     let s:v.matches = getmatches()
 endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

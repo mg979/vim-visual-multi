@@ -3,6 +3,7 @@ fun! vm#region#init()
     let s:v = s:V.Vars
     let s:Regions = s:V.Regions
     let s:Matches = s:V.Matches
+    let s:Global = s:V.Global
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -13,6 +14,7 @@ endfun
 
 " g:VM_Selection (= s:V) contains Regions, Matches, Vars (= s:v = plugin variables)
 
+" s:Global holds the Global class methods
 " s:Regions contains the regions with their contents
 " s:Matches contains the matches as they are registered with matchaddpos()
 " s:v.matches contains the current matches as read with getmatches()
@@ -35,25 +37,38 @@ fun! s:Region.new()
     let obj.b = getpos("']")[2]       " end
     let obj.w = obj.b - obj.a + 1     " width
     let obj.txt = getreg(s:v.def_reg) " text content
-
     return obj
+endfun
+
+fun! s:Region.empty() dict
+    return self.a == self.b
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Region resizing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+let s:forward = ['w', 'W', 'e', 'E', 'l', 'j', 'f', 't', '$']
+let s:backwards = ['b', 'B', 'F', 'T', 'h', 'k', '0', '^']
+let s:simple = ['h', 'j', 'k', 'l']
+let s:extreme = ['$', '0', '^']
+
 fun! s:Region.move(motion) dict
-    if s:v.move_from_back | call self.move_from_back(a:motion)
-    elseif index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], a:motion[0]) >= 0
-        call self.move_back(a:motion) | else | call self.move_forward(a:motion)
+    if s:v.move_from_back
+        call self.move_from_back(a:motion)
+
+    elseif index(s:backwards, a:motion[0]) >= 0
+        call self.move_back(a:motion)
+
+    else
+        call self.move_forward(a:motion)
     endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.move_forward(motion) dict
-    let r = self
+    let r = self | let all_empty = s:Global.all_empty()
 
     "move to the beginning of the region and set a mark
     call cursor(r.l, r.a)
@@ -68,6 +83,11 @@ fun! s:Region.move_forward(motion) dict
         let r.b = col([r.l, '$'])-1
     else
         let r.b = col('.')
+    endif
+
+    "keep single width while moving if all cursors are empty
+    if a:motion ==# 'l' && all_empty
+        let r.a += 1
     endif
 
     "set end mark and yank between marks

@@ -1,18 +1,20 @@
+"This script holds miscellaneous functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Initialize
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"store registers, initialize script vars and temporary buffer mappings
 
-fun! vm#funcs#init(whole)
+fun! vm#funcs#init()
     let s:V = g:VM_Selection | let s:v = s:V.Vars
 
     call s:init_maps(0)
 
     let s:v.def_reg = s:default_reg()
-    let s:v.whole_word = a:whole
     let s:v.oldreg = s:get_reg()
     let s:v.oldsearch = [getreg("/"), getregtype("/")]
     let s:v.search = []
     let s:v.move_from_back = 0
+    let s:v.case_ignore = 0
 
     call s:augroup_start()
 endfun
