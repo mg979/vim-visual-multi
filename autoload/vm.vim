@@ -40,7 +40,7 @@ let s:Global = {}
 
 fun! s:Global.all_empty() dict
     for r in s:Regions
-        if !r.empty() | return 0 | endif
+        if r.a != r.b | return 0 | endif
     endfor
     return 1
 endfun
@@ -72,4 +72,18 @@ fun! s:Global.new_region(down, ...) dict
     let s:v.index = index
     let s:v.matches = getmatches()
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.remove_region()
+    let i = s:v.index
+    call remove(s:Regions, i)
+    let m = s:Matches[i][0]
+    let c = s:Matches[i][1]
+    call remove(s:Matches, i)
+    call matchdelete(m)
+    call matchdelete(c)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

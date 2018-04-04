@@ -27,7 +27,7 @@ endfun
 fun! vm#commands#find_next(...)
 
     "skip current match
-    if a:0 | call s:remove_match(s:v.index) | endif
+    if a:0 | call s:Global.remove_region() | endif
 
     normal! ngny`]
     call s:Global.new_region(1)
@@ -44,22 +44,13 @@ fun! vm#commands#find_prev(...)
     call cursor(pos)
 
     "skip current match
-    if a:0 | call s:remove_match(s:v.index) | endif
+    if a:0 | call s:Global.remove_region() | endif
 
     normal! NgNy`]
     call s:Global.new_region(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:remove_match(i)
-    call remove(s:Regions, a:i)
-    let m = s:Matches[a:i][0]
-    let c = s:Matches[a:i][1]
-    call remove(s:Matches, a:i)
-    call matchdelete(m)
-    call matchdelete(c)
-endfun
 
 fun! vm#commands#skip()
     if s:v.going_down
@@ -127,6 +118,7 @@ fun! vm#commands#select_motion(inclusive)
         exe "normal ".b.'>'
     endif
 
+    let s:extending = 0
     "TODO select inside/around brackets/quotes/etc.
 endfun
 

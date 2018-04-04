@@ -30,6 +30,7 @@ fun! vm#funcs#reset()
     call s:augroup_end()
     call clearmatches()
     set nohlsearch
+    "call garbagecollect()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
