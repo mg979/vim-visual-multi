@@ -1,5 +1,5 @@
 fun! vm#region#init()
-    let s:V = g:VM_Selection
+    let s:V = b:VM_Selection
     let s:v = s:V.Vars
     let s:Regions = s:V.Regions
     let s:Matches = s:V.Matches
@@ -13,7 +13,7 @@ endfun
 
 " A new region will only been created if not already existant
 
-" g:VM_Selection (= s:V) contains Regions, Matches, Vars (= s:v = plugin variables)
+" b:VM_Selection (= s:V) contains Regions, Matches, Vars (= s:v = plugin variables)
 
 " s:Global holds the Global class methods
 " s:Regions contains the regions with their contents
@@ -74,16 +74,16 @@ endfun
 " Region resizing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:forward = ['w', 'W', 'e', 'E', 'l', 'j', 'f', 't', '$']
-let s:backwards = ['b', 'B', 'F', 'T', 'h', 'k', '0', '^']
-let s:simple = ['h', 'j', 'k', 'l']
-let s:extreme = ['$', '0', '^']
+let s:forward   = {m -> index(['w', 'W', 'e', 'E', 'l', 'j', 'f', 't', '$'], m >= 0)}
+let s:backwards = {m -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], m >= 0)}
+let s:simple    = {m -> index(['h', 'j', 'k', 'l'], m >= 0)}
+let s:extreme   = {m -> index(['$', '0', '^'], m >= 0)}
 
 fun! s:Region.move(motion) dict
     if s:v.move_from_back
         call self.move_from_back(a:motion)
 
-    elseif index(s:backwards, a:motion[0]) >= 0
+    elseif s:backwards(a:motion[0])
         call self.move_back(a:motion)
 
     else
@@ -105,6 +105,7 @@ fun! s:Region.move_forward(motion) dict
     exe "normal! ".a:motion
 
     "ensure line boundaries aren't crossed
+    "if !s:simple(a:motion[0]) && getpos('.')[1] > r.l
     if getpos('.')[1] > r.l
         let r.b = col([r.l, '$'])-1
     else
@@ -135,6 +136,7 @@ fun! s:Region.move_from_back(motion) dict
     exe "normal! ".a:motion
 
     "ensure line boundaries aren't crossed
+    "if !s:simple(a:motion[0]) && getpos('.')[1] < r.l
     if getpos('.')[1] < r.l
         let r.a = col([r.l, 1])
     else
@@ -161,9 +163,8 @@ fun! s:Region.move_back(motion) dict
     exe "normal! ".a:motion
 
     "ensure line boundaries aren't crossed
-    if getpos('.')[1] > r.l
-        let r.b = col([r.l, '$'])-1
-    elseif getpos('.')[1] < r.l
+    "if !s:simple(a:motion[0]) && getpos('.')[1] < r.l
+    if getpos('.')[1] < r.l
         let r.b = col([r.l, 1])
     else
         let r.b = col('.')
@@ -189,9 +190,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update(l, a, b) dict
-    let self.l   = a:l                   " line         
-    let self.a   = a:a                   " begin        
-    let self.b   = a:b                   " end          
+    let self.l   = a:l                   " line
+    let self.a   = a:a                   " begin
+    let self.b   = a:b                   " end
 
     "yank new content
     call cursor(a:l, a:a)

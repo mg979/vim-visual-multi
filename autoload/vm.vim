@@ -1,7 +1,7 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Initialize
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" g:VM_Selection (= s:V) contains Regions, Matches, Vars (= s:v = plugin variables)
+" b:VM_Selection (= s:V) contains Regions, Matches, Vars (= s:v = plugin variables)
 
 " s:Global holds the Global class methods
 " s:Regions contains the regions with their contents
@@ -10,13 +10,13 @@
 
 fun! vm#init(whole)
     "if already initialized, return current instance
-    if !empty(g:VM_Selection)
+    if !empty(b:VM_Selection)
         let s:v.whole_word = a:whole
         return s:V
     endif
 
-    let g:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': [], 'Funcs': {}}
-    let s:V = g:VM_Selection
+    let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': [], 'Funcs': {}}
+    let s:V = b:VM_Selection
     let s:V.Global = s:Global
 
     let s:v = s:V.Vars
@@ -123,7 +123,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#merge_regions()
-    if !empty(g:VM_Selection) | call s:Global.merge_regions() | endif
+    if !empty(b:VM_Selection) | call s:Global.merge_regions() | endif
 endfun
 
 fun! s:Global.merge_regions() dict

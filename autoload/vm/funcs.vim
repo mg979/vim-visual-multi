@@ -8,7 +8,7 @@
 "accessed from anywhere.
 
 fun! vm#funcs#init()
-    let s:V = g:VM_Selection | let s:v = s:V.Vars | let s:Global = s:V.Global
+    let s:V = b:VM_Selection | let s:v = s:V.Vars | let s:Global = s:V.Global
     let s:V.Funcs = s:Funcs
 
     call s:init_maps(0)
@@ -18,6 +18,8 @@ fun! vm#funcs#init()
     let s:v.oldsearch = [getreg("/"), getregtype("/")]
     let s:v.oldvirtual = &virtualedit
     set virtualedit=onemore
+    let s:v.oldwhichwrap = &whichwrap
+    set ww=<,>,h,l
 
     let s:v.search = []
     let s:v.move_from_back = 0
@@ -34,9 +36,10 @@ endfun
 
 fun! vm#funcs#reset()
     let &virtualedit = s:v.oldvirtual
+    let &whichwrap = s:v.oldwhichwrap
     call s:restore_regs()
     call s:init_maps(1)
-    let g:VM_Selection = {}
+    let b:VM_Selection = {}
     call s:augroup_end()
     call clearmatches()
     set nohlsearch
@@ -82,6 +85,7 @@ fun! s:init_maps(end)
         nunmap <buffer> <esc>
         nunmap <buffer> <c-w>
         nunmap <buffer> <c-m>
+        nunmap <buffer> <c-]>
         nunmap <buffer> +
         nunmap <buffer> -
         nunmap <buffer> s
@@ -103,6 +107,7 @@ fun! s:init_maps(end)
         nmap <nowait> <buffer> <esc> :call vm#funcs#reset()<cr>
         nmap <nowait> <buffer> <c-w> :call vm#commands#toggle_whole_word()<cr>
         nmap <nowait> <buffer> <c-m> :call vm#merge_regions()<cr>
+        nmap <nowait> <buffer> <c-]> :call vm#funcs#update_search()<cr>
         nmap <nowait> <buffer> s :call vm#commands#skip()<cr>
         nmap <nowait> <buffer> + :call vm#commands#find_next(0, 1)<cr>
         nmap <nowait> <buffer> - :call vm#commands#find_prev(0, 1)<cr>
@@ -155,6 +160,17 @@ endfunction
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Search
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#funcs#update_search()
+    let r = s:Global.is_region_at_pos('.')
+    if empty(r) | return | endif
+    let s = escape(r.txt, '\|')
+    if index(s:v.search, s) == -1
+        let s:v.search[-1] = s
+    endif
+    let @/ = join(s:v.search, '\|')
+    set hlsearch
+endfun
 
 fun! s:Funcs.set_search() dict
     let s = s:pattern()
