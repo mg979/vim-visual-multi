@@ -13,14 +13,18 @@ endfun
 fun! vm#commands#add_cursor_at_pos(pos)
     if empty(b:VM_Selection)
         let s:V = vm#init(0) | call s:init()
-    elseif a:pos == 1
-        normal! j
-    elseif a:pos == 2
-        normal! k
     endif
 
     "try to create cursor
     call s:Global.new_cursor()
+
+    if a:pos == 1
+        normal! j
+        call s:Global.new_cursor()
+    elseif a:pos == 2
+        normal! k
+        call s:Global.new_cursor()
+    endif
 endfun
 
 
@@ -28,12 +32,12 @@ endfun
 " Find under commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_under(visual, whole, inclusive)
+fun! vm#commands#find_under(visual, whole, inclusive, next)
 
     if a:visual                     " yank has already happened here
         let s:V = vm#init(a:whole)
 
-    else                            " start whole word search
+    else                            " yank and create region
         let s:V = vm#init(a:whole)
         if a:inclusive
             normal! yiW`]
@@ -45,6 +49,7 @@ fun! vm#commands#find_under(visual, whole, inclusive)
     call s:init()
     call s:Funcs.set_search()
     call s:Global.new_region(1)
+    if a:next | call vm#commands#find_next(0, 0) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

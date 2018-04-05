@@ -11,7 +11,7 @@ fun! vm#funcs#init()
     let s:V = b:VM_Selection | let s:v = s:V.Vars | let s:Global = s:V.Global
     let s:V.Funcs = s:Funcs
 
-    call s:init_maps(0)
+    call vm#maps#start()
 
     let s:v.def_reg = s:default_reg()
     let s:v.oldreg = s:Funcs.get_reg()
@@ -39,7 +39,7 @@ fun! vm#funcs#reset()
     let &virtualedit = s:v.oldvirtual
     let &whichwrap = s:v.oldwhichwrap
     call s:restore_regs()
-    call s:init_maps(1)
+    call vm#maps#end()
     let b:VM_Selection = {}
     call s:augroup_end()
     call clearmatches()
@@ -77,83 +77,6 @@ fun! s:restore_regs()
     let r = s:v.oldreg | let s = s:v.oldsearch
     call setreg(r[0], r[1], r[2])
     call setreg("/", s[0], s[1])
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:init_maps(end)
-    if a:end
-        nunmap <buffer> <esc>
-        nunmap <buffer> <c-w>
-        nunmap <buffer> <c-m>
-        nunmap <buffer> <c-]>
-        nunmap <buffer> <c-j>
-        nunmap <buffer> <c-k>
-        nunmap <buffer> <c-space>
-        nunmap <buffer> +
-        nunmap <buffer> -
-        nunmap <buffer> s
-        nunmap <buffer> q
-        nunmap <buffer> Q
-        nunmap <buffer> [
-        nunmap <buffer> ]
-        nunmap <buffer> {
-        nunmap <buffer> }
-        nunmap <buffer> h
-        nunmap <buffer> l
-        nunmap <buffer> k
-        nunmap <buffer> j
-        xunmap <buffer> [
-        xunmap <buffer> ]
-        xunmap <buffer> {
-        xunmap <buffer> }
-    else
-        nmap <nowait> <buffer> <esc> :call vm#funcs#reset()<cr>
-        nmap <nowait> <buffer> <c-w> :call vm#commands#toggle_whole_word()<cr>
-        nmap <nowait> <buffer> <c-m> :call vm#merge_regions()<cr>
-        nmap <nowait> <buffer> <c-]> :call vm#funcs#update_search()<cr>
-        nmap <nowait> <buffer> <c-j>      :call vm#commands#add_cursor_at_pos(1)<cr>
-        nmap <nowait> <buffer> <c-k>      :call vm#commands#add_cursor_at_pos(2)<cr>
-        nmap <nowait> <buffer> <c-space>  :call vm#commands#add_cursor_at_pos(0)<cr>
-        nmap <nowait> <buffer> s :call vm#commands#skip()<cr>
-        nmap <nowait> <buffer> + :call vm#commands#find_next(0, 1)<cr>
-        nmap <nowait> <buffer> - :call vm#commands#find_prev(0, 1)<cr>
-        nmap <nowait> <buffer> ] :call vm#commands#find_next(0, 0)<cr>
-        nmap <nowait> <buffer> [ :call vm#commands#find_prev(0, 0)<cr>
-        nmap <nowait> <buffer> } :call vm#commands#find_under(0, 0, 0)<cr>
-        nmap <nowait> <buffer> { :call vm#commands#find_under(0, 1, 0)<cr>
-        xmap <nowait> <buffer> ] y:call vm#commands#find_under(1, 0, 0)<cr>`]
-        xmap <nowait> <buffer> [ boey:call vm#commands#find_under(1, 1, 0)<cr>`]
-        xmap <nowait> <buffer> } BoEy:call vm#commands#find_under(1, 0, 1)<cr>`]
-        xmap <nowait> <buffer> { BoEy:call vm#commands#find_under(1, 1, 1)<cr>`]
-    endif
-
-    "motions
-    let motions = ['w', 'W', 'b', 'B', 'e', 'E', '$', '0', '^']
-    let find = ['f', 'F', 't', 'T']
-
-    if a:end
-        for m in (motions + find)
-            exe "nunmap <buffer> ".m
-        endfor
-    else
-        for m in motions
-            exe "nmap <nowait> <buffer> <expr> ".m." vm#commands#motion('".m."')"
-        endfor
-        for m in find
-            exe "nmap <nowait> <buffer> <expr> ".m." vm#commands#find_motion('".m."')"
-        endfor
-
-        "select
-        nmap <nowait> <buffer> q :call vm#commands#select_motion(0)<cr>
-        nmap <nowait> <buffer> Q :call vm#commands#select_motion(1)<cr>
-        "move from back
-        nmap <nowait> <buffer> <expr> h vm#commands#motion('h')
-        nmap <nowait> <buffer> <expr> l vm#commands#motion('l')
-        nmap <nowait> <buffer> <expr> k vm#commands#motion('k')
-        nmap <nowait> <buffer> <expr> j vm#commands#motion('j')
-    endif
-
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

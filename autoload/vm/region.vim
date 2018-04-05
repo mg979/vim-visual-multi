@@ -83,10 +83,10 @@ endfun
 " Region resizing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:forward   = {m -> index(['w', 'W', 'e', 'E', 'l', 'j', 'f', 't', '$'], m >= 0)}
-let s:backwards = {m -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], m >= 0)}
-let s:simple    = {m -> index(['h', 'j', 'k', 'l'], m >= 0)}
-let s:extreme   = {m -> index(['$', '0', '^'], m >= 0)}
+let s:forward   = {m -> index(['w', 'W', 'e', 'E', 'l', 'j', 'f', 't', '$'], m)  >= 0}
+let s:backwards = {m -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], m)       >= 0}
+let s:simple    = {m -> index(['h', 'j', 'k', 'l'], m)                           >= 0}
+let s:extreme   = {m -> index(['$', '0', '^'], m)                                >= 0}
 
 fun! s:Region.move(motion) dict
     if s:v.move_from_back
