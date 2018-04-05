@@ -96,7 +96,7 @@ fun! vm#commands#find_next(skip, nav)
     "skip current match
     if a:skip | call s:Regions[i].remove() | endif
 
-    normal! ngny`]
+    silent normal! ngny`]
     call s:Global.get_region(1)
 endfun
 
@@ -123,8 +123,32 @@ fun! vm#commands#find_prev(skip, nav)
     "skip current match
     if a:skip | call s:Regions[i].remove() | endif
 
-    normal! NgNy`[
+    silent normal! NgNy`[
     call s:Global.get_region(0)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#find_all(visual, whole, inclusive)
+    if empty(b:VM_Selection) | let s:V = vm#init(0) | call s:init() | endif
+
+    let storepos = getpos('.')
+    let oldredraw = &lz | set lz
+    let s:v.silence = 1
+    let seen = []
+
+    call vm#commands#find_under(a:visual, a:whole, a:inclusive)
+
+    while index(seen, s:v.index) == -1
+        call add(seen, s:v.index)
+        call vm#commands#find_next(0, 0)
+    endwhile
+
+    call setpos('.', storepos)
+    let &lz = oldredraw
+    let s:v.silence = 0
+    let s = len(s:Regions)>1 ? 's.' : '.'
+    call s:Funcs.msg('Found '.len(s:Regions).' occurrance'.s)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

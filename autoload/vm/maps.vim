@@ -42,6 +42,7 @@ fun! vm#maps#start()
     nnoremap <silent> <nowait> <buffer> <c-w> :call vm#commands#toggle_whole_word()<cr>
     nnoremap <silent> <nowait> <buffer> <c-m> :call vm#merge_regions()<cr>
     nnoremap <silent> <nowait> <buffer> <c-]> :call vm#funcs#update_search()<cr>
+    nnoremap <silent> <nowait> <buffer> <c-a> :call vm#commands#find_all(0, 1, 0)<cr>
     nnoremap <silent> <nowait> <buffer> s     :call vm#commands#skip()<cr>
     nnoremap <silent> <nowait> <buffer> U     :call vm#commands#undo()<cr>
     nnoremap <silent> <nowait> <buffer> *     :call vm#commands#add_under(0, 1, 0)<cr>
@@ -50,14 +51,16 @@ fun! vm#maps#start()
     nnoremap <silent> <nowait> <buffer> [     :call vm#commands#find_prev(0, 0)<cr>
     nnoremap <silent> <nowait> <buffer> }     :call vm#commands#add_under(0, 0, 0)<cr>
     nnoremap <silent> <nowait> <buffer> {     :call vm#commands#add_under(0, 1, 0)<cr>
+
+    xnoremap <silent> <nowait> <buffer> <c-a> y:call vm#commands#find_all(0, 1, 0)<cr>`]
     xnoremap <silent> <nowait> <buffer> *     y:call vm#commands#add_under(1, 0, 0)<cr>`]
     xnoremap <silent> <nowait> <buffer> ]     y:call vm#commands#add_under(1, 0, 0)<cr>`]
     xnoremap <silent> <nowait> <buffer> [     boey:call vm#commands#add_under(1, 1, 0)<cr>`]
     xnoremap <silent> <nowait> <buffer> }     BoEy:call vm#commands#add_under(1, 0, 1)<cr>`]
     xnoremap <silent> <nowait> <buffer> {     BoEy:call vm#commands#add_under(1, 1, 1)<cr>`]
 
-    nnoremap      <nowait> <buffer> n     n
-    nnoremap      <nowait> <buffer> N     N
+    nnoremap <silent> <nowait> <buffer> n     n
+    nnoremap <silent> <nowait> <buffer> N     N
 
     if s:NVIM
         nnoremap <silent> <nowait> <buffer> <c-space>  :call vm#commands#add_cursor_at_pos(0)<cr>
@@ -114,6 +117,8 @@ fun! vm#maps#end()
     xunmap <buffer> *
     nunmap <buffer> <esc>
     nunmap <buffer> <c-w>
+    nunmap <buffer> <c-a>
+    xunmap <buffer> <c-a>
     nunmap <buffer> <c-m>
     nunmap <buffer> <c-]>
     silent! nunmap <buffer> <c-space>

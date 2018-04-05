@@ -13,18 +13,20 @@ let g:VM_use_arrow_keys   = get(g:, 'VM_use_arrow_keys', 2)
 let g:VM_sublime_mappings = get(g:, 'VM_sublime_mappings', 0)
 
 if s:NVIM
-    nmap <c-space>  :call vm#commands#add_cursor_at_pos(0)<cr>
+    nnoremap <c-space>  :call vm#commands#add_cursor_at_pos(0)<cr>
 else
-    nmap <nul>      :call vm#commands#add_cursor_at_pos(0)<cr>
+    nnoremap <nul>      :call vm#commands#add_cursor_at_pos(0)<cr>
 endif
 
-nmap <M-j>  :call vm#commands#add_cursor_at_pos(1)<cr>
-nmap <M-k>  :call vm#commands#add_cursor_at_pos(2)<cr>
-nmap s] :call vm#commands#find_under(0, 0, 0)<cr>
-nmap s[ :call vm#commands#find_under(0, 1, 0)<cr>
-nmap s} :call vm#commands#find_under(0, 0, 1)<cr>
-nmap s{ :call vm#commands#find_under(0, 1, 1)<cr>
-xmap s] y:call vm#commands#find_under(1, 0, 0)<cr>`]
-xmap s[ y:call vm#commands#find_under(1, 1, 0)<cr>`]
+nnoremap <M-j>  :call vm#commands#add_cursor_at_pos(1)<cr>
+nnoremap <M-k>  :call vm#commands#add_cursor_at_pos(2)<cr>
+xnoremap <c-a> y:call vm#commands#find_all(0, 1, 0)<cr>`]
+nnoremap <c-a> :call vm#commands#find_all(0, 1, 0)<cr>
+nnoremap s] :call vm#commands#find_under(0, 0, 0)<cr>
+nnoremap s[ :call vm#commands#find_under(0, 1, 0)<cr>
+nnoremap s} :call vm#commands#find_under(0, 0, 1)<cr>
+nnoremap s{ :call vm#commands#find_under(0, 1, 1)<cr>
+xnoremap s] y:call vm#commands#find_under(1, 0, 0)<cr>`]
+xnoremap s[ y:call vm#commands#find_under(1, 1, 0)<cr>`]
 
 au BufEnter * let b:VM_Selection = {}

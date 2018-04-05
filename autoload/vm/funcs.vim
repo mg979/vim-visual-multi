@@ -26,6 +26,7 @@ fun! vm#funcs#init()
     let s:v.case_ignore = 0
     let s:v.index = -1
     let s:v.direction = 1
+    let s:v.silence = 0
 
     call s:augroup_start()
     return s:Funcs
@@ -88,9 +89,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 function! s:Funcs.msg(text) dict
-    echohl WarningMsg
-    echo a:text
-    echohl None
+    if !s:v.silence
+        echohl WarningMsg
+        echo a:text
+        echohl None
+    endif
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
