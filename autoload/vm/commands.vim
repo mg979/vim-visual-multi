@@ -1,5 +1,31 @@
 let s:motion = 0 | let s:extending = 0
 
+fun! s:init()
+    let s:v = s:V.Vars
+    let s:Regions = s:V.Regions | let s:Matches = s:V.Matches
+    let s:Global = s:V.Global | let s:Funcs = s:V.Funcs
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Add cursor command
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#add_cursor_at_pos(pos)
+    if empty(b:VM_Selection)
+        let s:V = vm#init(0) | call s:init()
+    elseif a:pos == 1
+        normal! j
+    elseif a:pos == 2
+        normal! k
+    endif
+
+    "try to create cursor
+    call s:Global.new_cursor()
+endfun
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Find under commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_under(visual, whole, inclusive)
@@ -16,10 +42,7 @@ fun! vm#commands#find_under(visual, whole, inclusive)
         endif
     endif
 
-    let s:v = s:V.Vars
-    let s:Regions = s:V.Regions | let s:Matches = s:V.Matches
-    let s:Global = s:V.Global | let s:Funcs = s:V.Funcs
-
+    call s:init()
     call s:Funcs.set_search()
     call s:Global.new_region(1)
 endfun

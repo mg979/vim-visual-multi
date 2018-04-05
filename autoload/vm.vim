@@ -43,9 +43,23 @@ let s:Global = {}
 fun! s:Global.new_region(down) dict
 
     let R = s:Global.is_region_at_pos('.')
-    if empty(R) | let R = vm#region#new() | endif
+    if empty(R) | let R = vm#region#new(0) | endif
 
     let s:v.direction = a:down
+    let s:v.matches = getmatches()
+    call self.select_region(R.index)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.new_cursor() dict
+
+    "don't add a cursor over an existing region
+    let R = s:Global.is_region_at_pos('.')
+    if !empty(R) | return {} | endif
+
+    let R = vm#region#new(1)
+
     let s:v.matches = getmatches()
     call self.select_region(R.index)
 endfun

@@ -25,6 +25,7 @@ fun! vm#funcs#init()
     let s:v.move_from_back = 0
     let s:v.case_ignore = 0
     let s:v.index = -1
+    let s:v.direction = 1
 
     call s:augroup_start()
     return s:Funcs
@@ -86,6 +87,9 @@ fun! s:init_maps(end)
         nunmap <buffer> <c-w>
         nunmap <buffer> <c-m>
         nunmap <buffer> <c-]>
+        nunmap <buffer> <c-j>
+        nunmap <buffer> <c-k>
+        nunmap <buffer> <c-space>
         nunmap <buffer> +
         nunmap <buffer> -
         nunmap <buffer> s
@@ -108,6 +112,9 @@ fun! s:init_maps(end)
         nmap <nowait> <buffer> <c-w> :call vm#commands#toggle_whole_word()<cr>
         nmap <nowait> <buffer> <c-m> :call vm#merge_regions()<cr>
         nmap <nowait> <buffer> <c-]> :call vm#funcs#update_search()<cr>
+        nmap <nowait> <buffer> <c-j>      :call vm#commands#add_cursor_at_pos(1)<cr>
+        nmap <nowait> <buffer> <c-k>      :call vm#commands#add_cursor_at_pos(2)<cr>
+        nmap <nowait> <buffer> <c-space>  :call vm#commands#add_cursor_at_pos(0)<cr>
         nmap <nowait> <buffer> s :call vm#commands#skip()<cr>
         nmap <nowait> <buffer> + :call vm#commands#find_next(0, 1)<cr>
         nmap <nowait> <buffer> - :call vm#commands#find_prev(0, 1)<cr>

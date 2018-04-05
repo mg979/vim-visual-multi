@@ -23,22 +23,31 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#region#new()
-    return s:Region.new()
+fun! vm#region#new(empty)
+    return s:Region.new(a:empty)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:Region = {}
 
-fun! s:Region.new()
+fun! s:Region.new(empty)
     let R       = copy(self)
-    let R.l     = getpos("'[")[1]       " line
-    let R.a     = getpos("'[")[2]       " begin
-    let R.b     = getpos("']")[2]       " end
-    let R.w     = R.b - R.a + 1     " width
-    let R.txt   = getreg(s:v.def_reg)   " text content
     let R.index = len(s:Regions)
+
+    if !a:empty
+        let R.l     = getpos("'[")[1]       " line
+        let R.a     = getpos("'[")[2]       " begin
+        let R.b     = getpos("']")[2]       " end
+        let R.w     = R.b - R.a + 1         " width
+        let R.txt   = getreg(s:v.def_reg)   " text content
+    else
+        let R.l     = getpos(".")[1]        " line
+        let R.a     = getpos(".")[2]        " begin
+        let R.b     = R.a                   " end
+        let R.w     = 1                     " width
+        let R.txt   = ''                    " text content
+    endif
 
     "highlight entry
     let region  = [R.l, R.a, R.w]
