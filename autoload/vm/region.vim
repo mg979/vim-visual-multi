@@ -40,13 +40,13 @@ fun! s:Region.new()
     let R.txt   = getreg(s:v.def_reg)   " text content
     let R.index = len(s:Regions)
 
+    "highlight entry
     let region  = [R.l, R.a, R.w]
-    let w       = R.a==R.b ? 1 : -1
-    "let cursor = [R.l, R.b, w]
     let cursor  = [R.l, R.b, 1]
+    call s:cursor_hl(R.a==R.b)
 
-    let match   = matchaddpos('Selection',   [region], 30)
-    let cursor  = matchaddpos('MultiCursor', [cursor], 40)
+    let match   = matchaddpos(g:VM_Selection_hl, [region], 30)
+    let cursor  = matchaddpos('MultiCursor',     [cursor], 40)
     call add(s:Matches, [match, cursor])
     call add(s:Regions, R)
 
@@ -66,6 +66,7 @@ fun! s:Region.remove() dict
     call matchdelete(m)
     call matchdelete(c)
 
+    let s:v.matches = getmatches()
     call s:Global.update_indices()
 endfun
 
@@ -182,8 +183,10 @@ fun! s:Region.move_back(motion) dict
     call self.update_vars()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Update functions
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update(l, a, b) dict
     let self.l   = a:l                   " line         
@@ -199,18 +202,37 @@ fun! s:Region.update(l, a, b) dict
     call self.update_vars()
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Region.update_vars() dict
-    "update the rest of the region vars, and the highlight match
+    "update the rest of the region vars
     let r = self
-    let i = r.index
+    let s:v.index = r.index
 
     let r.w = r.b - r.a + 1
     let r.txt = getreg(s:v.def_reg)
+    call r.update_highlight()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:cursor_hl(mono)
+    highlight clear MultiCursor
+    if a:mono
+        exe "highlight link MultiCursor ".g:VM_Mono_Cursor_hl
+    else
+        exe "highlight MultiCursor ".g:VM_Normal_Cursor_hl
+    endif
+endfun
+
+fun! s:Region.update_highlight() dict
+    "update the highlight match
+    let r = self | let i = r.index
+
     let s:v.matches[i].pos1 = [r.l, r.a, r.w]
     let cursor = len(s:Matches) + i
-    let w = r.a==r.b ? 1 : -1
-    "let s:v.matches[cursor].pos1 = [r.l, r.b, w]
     let s:v.matches[cursor].pos1 = [r.l, r.b, 1]
+    call s:cursor_hl(r.a==r.b)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

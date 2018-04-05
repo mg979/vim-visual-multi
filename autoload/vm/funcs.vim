@@ -16,6 +16,9 @@ fun! vm#funcs#init()
     let s:v.def_reg = s:default_reg()
     let s:v.oldreg = s:Funcs.get_reg()
     let s:v.oldsearch = [getreg("/"), getregtype("/")]
+    let s:v.oldvirtual = &virtualedit
+    set virtualedit=onemore
+
     let s:v.search = []
     let s:v.move_from_back = 0
     let s:v.case_ignore = 0
@@ -30,6 +33,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#funcs#reset()
+    let &virtualedit = s:v.oldvirtual
     call s:restore_regs()
     call s:init_maps(1)
     let g:VM_Selection = {}

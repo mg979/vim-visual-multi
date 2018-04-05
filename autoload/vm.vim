@@ -47,24 +47,33 @@ fun! s:Global.new_region(down) dict
 
     let s:v.direction = a:down
     let s:v.matches = getmatches()
-
     call self.select_region(R.index)
 endfun
 
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Highlight
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.update_highlight(...) dict
+
+    for r in s:Regions
+        call r.update_highlight()
+    endfor
+
+    call setmatches(s:v.matches)
+endfun
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Regions functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.all_empty() dict
     for r in s:Regions
         if r.a != r.b | return 0 | endif | endfor
-    return 1
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Global.update_highlight() dict
-    call setmatches(s:v.matches)
-endfun
-
+        return 1
+    endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -131,11 +140,11 @@ fun! s:Global.merge_regions() dict
 
     "remove lines and indices without multiple regions
     let lines = filter(lines, 'len(v:val) > 1')
+    let to_remove = []
 
     "find overlapping regions for each line with multiple regions
     for indices in values(lines)
         let n = 0 | let max = len(indices) - 1
-        let to_remove = []
 
         for i in indices
             while (n < max)
@@ -146,12 +155,13 @@ fun! s:Global.merge_regions() dict
                 if ( r.b >= next.a )
                     call next.update(r.l, r.a, next.b)
                     call add(to_remove, r)
-                    let s:v.index = next.index
                 endif | endwhile | endfor | endfor
 
     " remove old regions and update highlight
     for r in to_remove | call r.remove() | endfor
-    call setmatches(s:v.matches)
+    call s:Global.update_highlight()
+
+    "restore cursor position
     call setpos('.', storepos)
     call self.select_region_at_pos('.')
 endfun
