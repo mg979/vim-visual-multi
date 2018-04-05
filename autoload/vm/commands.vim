@@ -166,30 +166,31 @@ endfun
 " Extend regions commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:extend_vars(n)
+fun! s:extend_vars(n, this)
     let s:extending = a:n
     let s:current_i = s:v.index
+    if a:this | let s:v.only_this = 1 | endif
     "let b:VM_backup = copy(b:VM_Selection)
 endfun
 
-fun! vm#commands#motion(motion)
-    call s:extend_vars(1)
+fun! vm#commands#motion(motion, this)
+    call s:extend_vars(1, a:this)
     let s:motion = a:motion
     return a:motion
 endfun
 
-fun! vm#commands#find_motion(motion, ...)
-    call s:extend_vars(1)
-    if a:0
-        let s:motion = a:motion.a:1
+fun! vm#commands#find_motion(motion, char, this)
+    call s:extend_vars(1, a:this)
+    if a:char != ''
+        let s:motion = a:motion.a:char
     else
         let s:motion = a:motion.nr2char(getchar())
     endif
     return s:motion
 endfun
 
-fun! vm#commands#select_motion(inclusive)
-    call s:extend_vars(2)
+fun! vm#commands#select_motion(inclusive, this)
+    call s:extend_vars(2, a:this)
     let c = nr2char(getchar())
 
     "wrong command
@@ -229,9 +230,11 @@ fun! vm#commands#move()
     let s:extending -= 1
     let s:v.move_from_back = !s:v.direction
 
-    for r in s:Regions
-        call r.move(s:motion)
-    endfor
+    if (s:v.only_this || s:v.only_this_all) | let s:v.only_this = 0
+        call s:Regions[s:v.index].move(s:motion)
+    else
+        for r in s:Regions
+            call r.move(s:motion) | endfor | endif
 
     normal! `]
     call setmatches(s:v.matches)
@@ -251,12 +254,9 @@ endfun
 " Helper functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#toggle_whole_word()
-    let s:v.whole_word = !s:v.whole_word
-endfun
-
-fun! vm#commands#toggle_case_ignore()
-    let s:v.case_ignore = !s:v.case_ignore
+fun! vm#commands#toggle_option(option)
+    let s = "s:v.".a:option
+    exe "let" s "= !".s 
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
