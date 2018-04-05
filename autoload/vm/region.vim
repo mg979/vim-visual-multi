@@ -32,14 +32,25 @@ endfun
 let s:Region = {}
 
 fun! s:Region.new()
-    let obj = copy(self)
-    let obj.l = getpos("'[")[1]       " line
-    let obj.a = getpos("'[")[2]       " begin
-    let obj.b = getpos("']")[2]       " end
-    let obj.w = obj.b - obj.a + 1     " width
-    let obj.txt = getreg(s:v.def_reg) " text content
-    let obj.index = len(s:Regions)
-    return obj
+    let R       = copy(self)
+    let R.l     = getpos("'[")[1]       " line
+    let R.a     = getpos("'[")[2]       " begin
+    let R.b     = getpos("']")[2]       " end
+    let R.w     = R.b - R.a + 1     " width
+    let R.txt   = getreg(s:v.def_reg)   " text content
+    let R.index = len(s:Regions)
+
+    let region  = [R.l, R.a, R.w]
+    let w       = R.a==R.b ? 1 : -1
+    "let cursor = [R.l, R.b, w]
+    let cursor  = [R.l, R.b, 1]
+
+    let match   = matchaddpos('Selection',   [region], 30)
+    let cursor  = matchaddpos('MultiCursor', [cursor], 40)
+    call add(s:Matches, [match, cursor])
+    call add(s:Regions, R)
+
+    return R
 endfun
 
 fun! s:Region.empty() dict
@@ -56,7 +67,6 @@ fun! s:Region.remove() dict
     call matchdelete(c)
 
     call s:Global.update_indices()
-
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -174,17 +184,33 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+
+fun! s:Region.update(l, a, b) dict
+    let self.l   = a:l                   " line         
+    let self.a   = a:a                   " begin        
+    let self.b   = a:b                   " end          
+
+    "yank new content
+    call cursor(a:l, a:a)
+    normal! m[
+    call cursor(a:l, a:b+1)
+    normal! m]`[y`]
+
+    call self.update_vars()
+endfun
+
 fun! s:Region.update_vars() dict
     "update the rest of the region vars, and the highlight match
     let r = self
+    let i = r.index
 
     let r.w = r.b - r.a + 1
     let r.txt = getreg(s:v.def_reg)
-    let i = index(s:Regions, self)
     let s:v.matches[i].pos1 = [r.l, r.a, r.w]
     let cursor = len(s:Matches) + i
     let w = r.a==r.b ? 1 : -1
-    let s:v.matches[cursor].pos1 = [r.l, r.b, w]
+    "let s:v.matches[cursor].pos1 = [r.l, r.b, w]
+    let s:v.matches[cursor].pos1 = [r.l, r.b, 1]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

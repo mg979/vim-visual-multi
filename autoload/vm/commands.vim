@@ -26,7 +26,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_next(...)
+fun! vm#commands#find_next(skip, nav)
     let i = s:v.index
 
     "just reverse direction if going ip
@@ -36,8 +36,11 @@ fun! vm#commands#find_next(...)
         return
     endif
 
+    "just navigate to next
+    if a:nav | call s:Global.select_region(s:v.index+1) | return | endif
+
     "skip current match
-    if a:0 | call s:Regions[i].remove() | endif
+    if a:skip | call s:Regions[i].remove() | endif
 
     normal! ngny`]
     call s:Global.new_region(1)
@@ -45,7 +48,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_prev(...)
+fun! vm#commands#find_prev(skip, nav)
     let i = s:v.index
 
     "just reverse direction if going down
@@ -55,13 +58,16 @@ fun! vm#commands#find_prev(...)
         return
     endif
 
+    "just navigate to previous
+    if a:nav | call s:Global.select_region(s:v.index-1) | return | endif
+
     "move to the beginning of the current match
     let current = s:Regions[i]
     let pos = [current.l, current.a]
     call cursor(pos)
 
     "skip current match
-    if a:0 | call s:Regions[i].remove() | endif
+    if a:skip | call s:Regions[i].remove() | endif
 
     normal! NgNy`[
     call s:Global.new_region(0)
@@ -71,16 +77,15 @@ endfun
 
 fun! vm#commands#skip()
     if s:v.direction
-        call vm#commands#find_next(1)
+        call vm#commands#find_next(1, 0)
     else
-        call vm#commands#find_prev(1)
+        call vm#commands#find_prev(1, 0)
     endif
-    echom s:v.index
 endfun
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Cursor moving
+" Extend regions commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#motion(motion)

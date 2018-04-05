@@ -38,32 +38,13 @@ endfun
 
 let s:Global = {}
 
-fun! s:Global.all_empty() dict
-    for r in s:Regions
-        if r.a != r.b | return 0 | endif
-    endfor
-    return 1
-endfun
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.new_region(down) dict
 
-    let existing = s:Global.is_region_existant()
-    let R = existing[0]
+    let R = s:Global.is_region_at_pos('.')
+    if empty(R) | let R = vm#region#new() | endif
 
-    let region = [R.l, R.a, R.w]
-    let w      = R.a==R.b ? 1 : -1
-    let cursor = [R.l, R.b, w]
-
-    if !existing[1]
-        let match  = matchaddpos('Selection',   [region], 30)
-        let cursor = matchaddpos('MultiCursor', [cursor], 40)
-        call add(s:Matches, [match, cursor])
-        call add(s:Regions, R)
-    endif
-
-    let s:v.index = R.index
     let s:v.direction = a:down
     let s:v.matches = getmatches()
 
@@ -72,25 +53,49 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.select_region(i) dict
-    "adjust cursor position of the region at index, then return the region
-    let R = s:Regions[a:i]
-    let pos = s:v.direction ? R.b : R.a
-    call cursor([R.l, pos])
-    return R
+fun! s:Global.all_empty() dict
+    for r in s:Regions
+        if r.a != r.b | return 0 | endif | endfor
+    return 1
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.update_highlight() dict
+    call setmatches(s:v.matches)
 endfun
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.is_region_existant() dict
-    let pos = getpos('.')[1:2]
+fun! s:Global.select_region(i) dict
+    "adjust cursor position of the region at index, then return the region
+    if a:i >= len(s:Regions) | let i = 0 | else | let i = a:i | endif
+    let R = s:Regions[i]
+    let pos = s:v.direction ? R.b : R.a
+    call cursor([R.l, pos])
+    let s:v.index = i
+    return R
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.select_region_at_pos(pos) dict
+    let r = self.is_region_at_pos(a:pos)
+    if !empty(r)
+        call self.select_region(r.index)
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.is_region_at_pos(pos) dict
+    "find if the cursor is on an highlighted region
+    let pos = getpos(a:pos)[1:2]
     for r in s:Regions
         if pos[0] == r.l && pos[1] >= r.a && pos[1] <= r.b
-            return [r, 1]
-        endif
-    endfor
-    return [vm#region#new(), 0]
+            return r | endif | endfor
+    return {}
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -102,6 +107,53 @@ fun! s:Global.update_indices() dict
         let r.index = i
         let i += 1
     endfor
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Merging regions
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#merge_regions()
+    if !empty(g:VM_Selection) | call s:Global.merge_regions() | endif
+endfun
+
+fun! s:Global.merge_regions() dict
+    "merge overlapping regions
+    let lines = {}
+    let storepos = getpos('.')
+
+    "find lines with regions
+    for r in s:Regions
+        "add region index to indices for that line
+        let lines[r.l] = get(lines, r.l, [])
+        call add(lines[r.l], r.index)
+    endfor
+
+    "remove lines and indices without multiple regions
+    let lines = filter(lines, 'len(v:val) > 1')
+
+    "find overlapping regions for each line with multiple regions
+    for indices in values(lines)
+        let n = 0 | let max = len(indices) - 1
+        let to_remove = []
+
+        for i in indices
+            while (n < max)
+                let this = indices[n] | let next = indices[n+1] | let n += 1
+                let r = s:Regions[this] | let next = s:Regions[next]
+
+                "merge regions if there is overlap with next one
+                if ( r.b >= next.a )
+                    call next.update(r.l, r.a, next.b)
+                    call add(to_remove, r)
+                    let s:v.index = next.index
+                endif | endwhile | endfor | endfor
+
+    " remove old regions and update highlight
+    for r in to_remove | call r.remove() | endfor
+    call setmatches(s:v.matches)
+    call setpos('.', storepos)
+    call self.select_region_at_pos('.')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

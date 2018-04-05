@@ -76,6 +76,10 @@ endfun
 fun! s:init_maps(end)
     if a:end
         nunmap <buffer> <esc>
+        nunmap <buffer> <c-w>
+        nunmap <buffer> <c-m>
+        nunmap <buffer> +
+        nunmap <buffer> -
         nunmap <buffer> s
         nunmap <buffer> q
         nunmap <buffer> Q
@@ -83,7 +87,6 @@ fun! s:init_maps(end)
         nunmap <buffer> ]
         nunmap <buffer> {
         nunmap <buffer> }
-        nunmap <buffer> <c-w>
         nunmap <buffer> h
         nunmap <buffer> l
         nunmap <buffer> k
@@ -95,15 +98,18 @@ fun! s:init_maps(end)
     else
         nmap <nowait> <buffer> <esc> :call vm#funcs#reset()<cr>
         nmap <nowait> <buffer> <c-w> :call vm#commands#toggle_whole_word()<cr>
+        nmap <nowait> <buffer> <c-m> :call vm#merge_regions()<cr>
         nmap <nowait> <buffer> s :call vm#commands#skip()<cr>
-        nmap <nowait> <buffer> ] :call vm#commands#find_next()<cr>
-        nmap <nowait> <buffer> [ :call vm#commands#find_prev()<cr>
+        nmap <nowait> <buffer> + :call vm#commands#find_next(0, 1)<cr>
+        nmap <nowait> <buffer> - :call vm#commands#find_prev(0, 1)<cr>
+        nmap <nowait> <buffer> ] :call vm#commands#find_next(0, 0)<cr>
+        nmap <nowait> <buffer> [ :call vm#commands#find_prev(0, 0)<cr>
         nmap <nowait> <buffer> } :call vm#commands#find_under(0, 0, 0)<cr>
         nmap <nowait> <buffer> { :call vm#commands#find_under(0, 1, 0)<cr>
         xmap <nowait> <buffer> ] y:call vm#commands#find_under(1, 0, 0)<cr>`]
         xmap <nowait> <buffer> [ boey:call vm#commands#find_under(1, 1, 0)<cr>`]
-        xmap <nowait> <buffer> } boEy:call vm#commands#find_under(1, 0, 1)<cr>`]
-        xmap <nowait> <buffer> { boEy:call vm#commands#find_under(1, 1, 1)<cr>`]
+        xmap <nowait> <buffer> } BoEy:call vm#commands#find_under(1, 0, 1)<cr>`]
+        xmap <nowait> <buffer> { BoEy:call vm#commands#find_under(1, 1, 1)<cr>`]
     endif
 
     "motions
