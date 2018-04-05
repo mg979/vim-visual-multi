@@ -1,4 +1,4 @@
-let s:motion = 0 | let s:extending = 0
+let s:motion = 0 | let s:extending = 0 | let s:current_i = 0
 
 fun! s:init()
     let s:v = s:V.Vars
@@ -32,7 +32,7 @@ endfun
 " Find under commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_under(visual, whole, inclusive, next)
+fun! vm#commands#find_under(visual, whole, inclusive)
 
     if a:visual                     " yank has already happened here
         let s:V = vm#init(a:whole)
@@ -48,9 +48,35 @@ fun! vm#commands#find_under(visual, whole, inclusive, next)
 
     call s:init()
     call s:Funcs.set_search()
-    call s:Global.new_region(1)
-    if a:next | call vm#commands#find_next(0, 0) | endif
+    call s:Global.get_region(1)
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#add_under(visual, whole, inclusive)
+
+    if !a:visual
+        let R = s:Global.is_region_at_pos('.')
+
+        "only yank if not on an existing region
+        if empty(R)
+            if a:inclusive
+                normal! yiW`]
+            else
+                normal! yiw`]
+            endif
+        else
+            call s:Funcs.set_reg(R.txt)
+        endif
+    endif
+
+    let s:v.whole = a:whole
+    call s:Funcs.set_search()
+    let R = s:Global.get_region(1)
+    call s:Global.merge_regions(R.l)
+    call vm#commands#find_next(0, 0)
+endfun
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -71,7 +97,7 @@ fun! vm#commands#find_next(skip, nav)
     if a:skip | call s:Regions[i].remove() | endif
 
     normal! ngny`]
-    call s:Global.new_region(1)
+    call s:Global.get_region(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -98,7 +124,7 @@ fun! vm#commands#find_prev(skip, nav)
     if a:skip | call s:Regions[i].remove() | endif
 
     normal! NgNy`[
-    call s:Global.new_region(0)
+    call s:Global.get_region(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -116,15 +142,20 @@ endfun
 " Extend regions commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#motion(motion)
-    let s:extending = 1
+fun! s:extend_vars(n)
+    let s:extending = a:n
     let s:current_i = s:v.index
+    "let b:VM_backup = copy(b:VM_Selection)
+endfun
+
+fun! vm#commands#motion(motion)
+    call s:extend_vars(1)
     let s:motion = a:motion
     return a:motion
 endfun
 
 fun! vm#commands#find_motion(motion, ...)
-    let s:extending = 1
+    call s:extend_vars(1)
     if a:0
         let s:motion = a:motion.a:1
     else
@@ -134,7 +165,7 @@ fun! vm#commands#find_motion(motion, ...)
 endfun
 
 fun! vm#commands#select_motion(inclusive)
-    let s:extending = 2
+    call s:extend_vars(2)
     let c = nr2char(getchar())
 
     "wrong command
@@ -181,6 +212,14 @@ fun! vm#commands#move()
     normal! `]
     call setmatches(s:v.matches)
     let s:v.move_from_back = 0
+    call s:Global.select_region(s:current_i)
+endfun
+
+fun! vm#commands#undo()
+    call clearmatches()
+    echom b:VM_backup == b:VM_Selection
+    let b:VM_Selection = copy(b:VM_backup)
+    call setmatches(s:v.matches)
     call s:Global.select_region(s:current_i)
 endfun
 

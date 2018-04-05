@@ -16,6 +16,7 @@ fun! vm#init(whole)
     endif
 
     let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': [], 'Funcs': {}}
+    let b:VM_backup = copy(b:VM_Selection)
     let s:V = b:VM_Selection
     let s:V.Global = s:Global
 
@@ -40,7 +41,7 @@ let s:Global = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.new_region(down) dict
+fun! s:Global.get_region(down) dict
 
     let R = s:Global.is_region_at_pos('.')
     if empty(R) | let R = vm#region#new(0) | endif
@@ -48,6 +49,7 @@ fun! s:Global.new_region(down) dict
     let s:v.direction = a:down
     let s:v.matches = getmatches()
     call self.select_region(R.index)
+    return R
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -62,6 +64,7 @@ fun! s:Global.new_cursor() dict
 
     let s:v.matches = getmatches()
     call self.select_region(R.index)
+    return R
 endfun
 
 
@@ -93,7 +96,10 @@ fun! s:Global.all_empty() dict
 
 fun! s:Global.select_region(i) dict
     "adjust cursor position of the region at index, then return the region
-    if a:i >= len(s:Regions) | let i = 0 | else | let i = a:i | endif
+    if a:i >= len(s:Regions) | let i = 0
+    elseif a:i<0 | let i = len(s:Regions) - 1
+    else | let i = a:i | endif
+
     let R = s:Regions[i]
     let pos = s:v.direction ? R.b : R.a
     call cursor([R.l, pos])
@@ -140,13 +146,15 @@ fun! vm#merge_regions()
     if !empty(b:VM_Selection) | call s:Global.merge_regions() | endif
 endfun
 
-fun! s:Global.merge_regions() dict
+fun! s:Global.merge_regions(...) dict
     "merge overlapping regions
     let lines = {}
     let storepos = getpos('.')
 
     "find lines with regions
     for r in s:Regions
+        "called a merge for a specific line
+        if a:0 && r.l != a:1 | continue | endif
         "add region index to indices for that line
         let lines[r.l] = get(lines, r.l, [])
         call add(lines[r.l], r.index)

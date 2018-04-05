@@ -72,6 +72,12 @@ fun! s:Funcs.get_reg() dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+fun! s:Funcs.set_reg(text) dict
+    let r = s:v.def_reg
+    call setreg(r, a:text, 'v')
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:restore_regs()
     let r = s:v.oldreg | let s = s:v.oldsearch
@@ -94,21 +100,38 @@ endfunction
 fun! vm#funcs#update_search()
     let r = s:Global.is_region_at_pos('.')
     if empty(r) | return | endif
-    let s = escape(r.txt, '\|')
-    if index(s:v.search, s) == -1
-        let s:v.search[-1] = s
-    endif
-    let @/ = join(s:v.search, '\|')
-    set hlsearch
+    call s:update_search(escape(r.txt, '\|'), 1)
 endfun
 
 fun! s:Funcs.set_search() dict
-    let s = s:pattern()
-    if index(s:v.search, s) == -1
-        call add(s:v.search, s)
+    call s:update_search(s:pattern(), 0)
+endfun
+
+fun! s:update_search(p, update)
+
+    if empty(s:v.search)
+        call insert(s:v.search, a:p)       "just started
+
+    elseif a:update                     "updating a match
+
+        "if there's a match that is a substring of
+        "the selected text, replace it with the new one
+        let i = 0
+        for p in s:v.search
+            if a:p =~ p
+                let s:v.search[i] = a:p
+                break | endif
+            let i += 1
+        endfor
+
+    elseif index(s:v.search, a:p) < 0   "not in list
+
+        call insert(s:v.search, a:p)
     endif
+
     let @/ = join(s:v.search, '\|')
     set hlsearch
+    call s:Funcs.msg('Current search: '.string(s:v.search))
 endfun
 
 fun! s:pattern()
