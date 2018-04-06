@@ -2,11 +2,13 @@ let s:NVIM = has('gui_running') || has('nvim')
 
 let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E', '$', '0', '^', 'x']
 let s:find     = ['f', 'F', 't', 'T']
-let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 's', 'U', '*', '@']
+let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 's', 'U', '*', '@', '/']
 let s:brackets = ['[', ']', '{', '}']
 
-nnoremap <Plug>(VM-Case-Setting) :call b:VM_Selection.Funcs.case_search()<cr>
-nnoremap <Plug>(VM-Update-Search) :call b:VM_Selection.Funcs.update_search()<cr>
+nnoremap        <Plug>(VM-Case-Setting)       :call b:VM_Selection.Funcs.case_search()<cr>
+nnoremap        <Plug>(VM-Update-Search)      :call b:VM_Selection.Funcs.update_search()<cr>
+nnoremap        <Plug>(VM-Read-From-Search)   :call b:VM_Selection.Funcs.read_from_search()<cr>
+nnoremap        <Plug>(VM-Start-Regex-Search) :call vm#commands#find_by_regex()<cr>/
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
@@ -49,6 +51,8 @@ endfun
 fun! vm#maps#start()
     nmap <silent> <nowait> <buffer> <c-c> <Plug>(VM-Case-Setting)
     nmap <silent> <nowait> <buffer> <c-]> <Plug>(VM-Update-Search)
+    nmap <silent> <nowait> <buffer> <M-/> <Plug>(VM-Read-From-Search)
+    nmap          <nowait> <buffer> /     <Plug>(VM-Start-Regex-Search)
 
     nnoremap <silent> <nowait> <buffer> <esc> :call vm#funcs#reset()<cr>
     nnoremap <silent> <nowait> <buffer> <c-w> :call vm#commands#toggle_option('whole_word')<cr>
@@ -135,6 +139,7 @@ fun! vm#maps#end()
     xunmap <buffer> <c-a>
     nunmap <buffer> <c-m>
     nunmap <buffer> <c-]>
+    nunmap <buffer> <M-/>
     silent! nunmap <buffer> <c-space>
     silent! nunmap <buffer> <nul>
 endfun

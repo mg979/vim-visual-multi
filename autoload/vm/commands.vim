@@ -1,9 +1,20 @@
 let s:motion = 0 | let s:extending = 0 | let s:current_i = 0
 
-fun! s:init()
+fun! s:init(whole)
+    if !empty(b:VM_Selection) | return | endif
+    let s:V = vm#init_buffer()
     let s:v = s:V.Vars
+    let s:v.whole_word = a:whole
     let s:Regions = s:V.Regions | let s:Matches = s:V.Matches
     let s:Global = s:V.Global | let s:Funcs = s:V.Funcs
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Start empty
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#start()
+    call s:init(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -11,9 +22,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#add_cursor_at_pos(pos)
-    if empty(b:VM_Selection)
-        let s:V = vm#init(0) | call s:init()
-    endif
+    call s:init(0)
 
     "try to create cursor
     call s:Global.new_cursor()
@@ -29,16 +38,35 @@ endfun
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Find by regex
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#find_regex()
+    cunmap <buffer> <cr>
+    if @/ == s:regex_reg | call setpos('.', s:regex_pos) | return | endif
+
+    normal gny`]
+    call s:Funcs.read_from_search()
+    call s:Global.get_region(1)
+endfun
+
+fun! vm#commands#find_by_regex(...)
+    call s:init(a:whole)
+    let s:regex_pos = getpos('.')
+    let s:regex_reg = @/
+    call s:Funcs.msg('Enter regex:')
+    call s:Funcs.msg('Enter regex:')
+    cnoremap <buffer> <cr> <cr>:call vm#commands#find_regex()<cr>
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find under commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_under(visual, whole, inclusive)
+    call s:init(a:whole)
 
-    if a:visual                     " yank has already happened here
-        let s:V = vm#init(a:whole)
-
-    else                            " yank and create region
-        let s:V = vm#init(a:whole)
+    if !a:visual           " yank and create region
         if a:inclusive
             normal! yiW`]
         else
@@ -46,14 +74,13 @@ fun! vm#commands#find_under(visual, whole, inclusive)
         endif
     endif
 
-    call s:init()
     call s:Funcs.set_search()
     call s:Global.get_region(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#add_under(visual, whole, inclusive)
+fun! vm#commands#add_under(visual, whole, inclusive, ...)
 
     if !a:visual
         let R = s:Global.is_region_at_pos('.')
@@ -74,7 +101,7 @@ fun! vm#commands#add_under(visual, whole, inclusive)
     call s:Funcs.set_search()
     let R = s:Global.get_region(1)
     call s:Global.merge_regions(R.l)
-    call vm#commands#find_next(0, 0)
+    if !a:0 | call vm#commands#find_next(0, 0) | endif
 endfun
 
 
@@ -130,7 +157,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_all(visual, whole, inclusive)
-    if empty(b:VM_Selection) | let s:V = vm#init(0) | call s:init() | endif
+    call s:init(a:whole)
 
     let storepos = getpos('.')
     let oldredraw = &lz | set lz

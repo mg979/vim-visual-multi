@@ -8,25 +8,33 @@
 " s:Matches contains the matches as they are registered with matchaddpos()
 " s:v.matches contains the current matches as read with getmatches()
 
-fun! vm#init(whole)
+fun! vm#init_buffer(...)
     "if already initialized, return current instance
     if !empty(b:VM_Selection)
-        let s:v.whole_word = a:whole
         return s:V
     endif
 
     let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': [], 'Funcs': {}}
-    let b:VM_backup = copy(b:VM_Selection)
+
+    if a:0  "restoring buffer
+        exe 'let b:VM_Selection = g:VM_Global.'.bufnr("%")
+
+    else    "initialize
+        exe 'let g:VM_Global.'.bufnr("%").' = b:VM_Selection'
+    endif
+
+    let g:VM_Global.is_active = 1
+
     let s:V = b:VM_Selection
     let s:V.Global = s:Global
 
     let s:v = s:V.Vars
-    let s:v.whole_word = a:whole
 
     let s:Regions = s:V.Regions
     let s:Matches = s:V.Matches
 
     let s:Funcs = vm#funcs#init()
+    call s:Funcs.msg('Visual-Multi started. Press <esc> to exit.')
     call vm#region#init()
 
     return s:V
@@ -49,6 +57,7 @@ fun! s:Global.get_region(down) dict
     let s:v.direction = a:down
     let s:v.matches = getmatches()
     call self.select_region(R.index)
+    call s:Funcs.check_pattern()
     return R
 endfun
 
@@ -120,15 +129,22 @@ endfun
 fun! s:Global.select_region_at_pos(pos) dict
     let r = self.is_region_at_pos(a:pos)
     if !empty(r)
-        call self.select_region(r.index)
+        return self.select_region(r.index)
     endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.is_region_at_pos(pos) dict
-    "find if the cursor is on an highlighted region
-    let pos = getpos(a:pos)[1:2]
+    "find if the cursor is on a highlighted region
+
+    "pos can be a string (like '.') or a list
+    if type(a:pos) == v:t_string
+        let pos = getpos(a:pos)[1:2]
+    else
+        let pos = a:pos[1:2]
+    endif
+
     for r in s:Regions
         if pos[0] == r.l && pos[1] >= r.a && pos[1] <= r.b
             return r | endif | endfor
@@ -192,8 +208,7 @@ fun! s:Global.merge_regions(...) dict
     call self.update_highlight()
 
     "restore cursor position
-    call setpos('.', storepos)
-    call self.select_region_at_pos('.')
+    call self.select_region_at_pos(storepos)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

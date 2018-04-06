@@ -36,10 +36,35 @@ fun! vm#funcs#init()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Reset
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"Backup/restore buffer state on buffer change
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#funcs#reset()
+let s:key = { -> 'g:VM_Global.'.bufnr("%") }
+
+fun! vm#funcs#buffer_leave()
+    if !empty(b:VM_Selection)
+        let s:v.pos = getpos('.')
+        exe 'let '.s:key().' = copy(b:VM_Selection)'
+        call vm#funcs#reset(1)
+    endif
+endfun
+
+fun! vm#funcs#buffer_enter()
+    let b:VM_Selection = {}
+
+    if !empty(get(g:VM_Global, bufnr("%"), {}))
+        call vm#init_buffer(1)
+        call setmatches(s:v.matches)
+        call setpos('.', s:v.pos)
+        call vm#commands#add_under(0, s:v.whole_word, 0, 1)
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Reset
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#funcs#reset(...)
     let &virtualedit = s:v.oldvirtual
     let &whichwrap = s:v.oldwhichwrap
     let &smartcase = s:v.oldcase[0]
@@ -47,10 +72,17 @@ fun! vm#funcs#reset()
     call s:restore_regs()
     call vm#maps#end()
     let b:VM_Selection = {}
+    let g:VM_Global.is_active = 0
+
+    if !a:0    "exiting manually
+        call s:Funcs.msg('Exited Visual-Multi.')
+        call remove(g:VM_Global, bufnr("%"))
+    endif
+
     call s:augroup_end()
     call clearmatches()
     set nohlsearch
-    "call garbagecollect()
+    call garbagecollect()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -95,7 +127,7 @@ endfun
 
 function! s:Funcs.msg(text) dict
     if !s:v.silence
-        echohl WarningMsg
+        exe "echohl" g:VM_Message_hl
         echo a:text
         echohl None
     endif
@@ -131,16 +163,29 @@ fun! s:Funcs.update_search()
 endfun
 
 fun! s:Funcs.set_search() dict
-    call s:update_search(s:pattern(), 0)
+    call s:update_search(s:pattern(s:v.def_reg, 0), 0)
+endfun
+
+fun! s:Funcs.read_from_search() dict
+    call s:update_search(s:pattern('/', 1), 0)
+endfun
+
+fun! s:Funcs.check_pattern() dict
+    let current = split(@/, '\\|')
+    for p in current
+        if index(s:v.search, p) == -1 | call s:Funcs.read_from_search() | endif
+        break
+    endfor
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:pattern()
-    let t = eval('@'.s:v.def_reg)
-    let t = escape(t, '.\|')
-    let t = substitute(t, '\n', '\\n', 'g')
-    if s:v.whole_word | let t = '\<'.t.'\>' | endif
+fun! s:pattern(register, regex)
+    let t = eval('@'.a:register)
+    if !a:regex
+        let t = escape(t, '.\|')
+        let t = substitute(t, '\n', '\\n', 'g')
+        if s:v.whole_word | let t = '\<'.t.'\>' | endif | endif
     return t
 endfun
 
