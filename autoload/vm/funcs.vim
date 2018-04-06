@@ -23,7 +23,8 @@ fun! vm#funcs#init()
 
     let s:v.search = []
     let s:v.move_from_back = 0
-    let s:v.ignore_case = 0
+
+    let s:v.oldcase = [&smartcase, &ignorecase]
     let s:v.index = -1
     let s:v.direction = 1
     let s:v.silence = 0
@@ -41,6 +42,8 @@ endfun
 fun! vm#funcs#reset()
     let &virtualedit = s:v.oldvirtual
     let &whichwrap = s:v.oldwhichwrap
+    let &smartcase = s:v.oldcase[0]
+    let &ignorecase = s:v.oldcase[1]
     call s:restore_regs()
     call vm#maps#end()
     let b:VM_Selection = {}
@@ -102,7 +105,26 @@ endfunction
 " Search
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#funcs#update_search()
+fun! s:Funcs.case_search()
+    if &smartcase              "smartcase        ->  case sensitive
+        set nosmartcase
+        set noignorecase
+        call self.msg('Search ->  case sensitive')
+
+    elseif !&ignorecase        "case sensitive   ->  ignorecase
+        set ignorecase
+        call self.msg('Search ->  ignore case')
+
+    else                       "ignore case      ->  smartcase
+        set smartcase
+        set ignorecase
+        call self.msg('Search ->  smartcase')
+    endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.update_search()
     let r = s:Global.is_region_at_pos('.')
     if empty(r) | return | endif
     call s:update_search(escape(r.txt, '\|'), 1)
@@ -111,6 +133,18 @@ endfun
 fun! s:Funcs.set_search() dict
     call s:update_search(s:pattern(), 0)
 endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:pattern()
+    let t = eval('@'.s:v.def_reg)
+    let t = escape(t, '.\|')
+    let t = substitute(t, '\n', '\\n', 'g')
+    if s:v.whole_word | let t = '\<'.t.'\>' | endif
+    return t
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:update_search(p, update)
 
@@ -137,14 +171,6 @@ fun! s:update_search(p, update)
     let @/ = join(s:v.search, '\|')
     set hlsearch
     call s:Funcs.msg('Current search: '.string(s:v.search))
-endfun
-
-fun! s:pattern()
-    let t = eval('@'.s:v.def_reg)
-    let t = escape(t, '\|')
-    let t = substitute(t, '\n', '\\n', 'g')
-    if s:v.whole_word | let t = '\<'.t.'\>' | endif
-    return t
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

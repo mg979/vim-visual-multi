@@ -5,6 +5,8 @@ let s:find     = ['f', 'F', 't', 'T']
 let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 's', 'U', '*', '@']
 let s:brackets = ['[', ']', '{', '}']
 
+nnoremap <Plug>(VM-Case-Setting) :call b:VM_Selection.Funcs.case_search()<cr>
+nnoremap <Plug>(VM-Update-Search) :call b:VM_Selection.Funcs.update_search()<cr>
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
@@ -45,12 +47,13 @@ fun! s:hjkl()
 endfun
 
 fun! vm#maps#start()
+    nmap <silent> <nowait> <buffer> <c-c> <Plug>(VM-Case-Setting)
+    nmap <silent> <nowait> <buffer> <c-]> <Plug>(VM-Update-Search)
+
     nnoremap <silent> <nowait> <buffer> <esc> :call vm#funcs#reset()<cr>
     nnoremap <silent> <nowait> <buffer> <c-w> :call vm#commands#toggle_option('whole_word')<cr>
     nnoremap <silent> <nowait> <buffer> <c-o> :call vm#commands#toggle_option('only_this_all')<cr>
-    nnoremap <silent> <nowait> <buffer> <c-i> :call vm#commands#toggle_option('ignore_case')<cr>
     nnoremap <silent> <nowait> <buffer> <c-m> :call vm#merge_regions()<cr>
-    nnoremap <silent> <nowait> <buffer> <c-]> :call vm#funcs#update_search()<cr>
     nnoremap <silent> <nowait> <buffer> <c-a> :call vm#commands#find_all(0, 1, 0)<cr>
     nnoremap <silent> <nowait> <buffer> s     :call vm#commands#skip()<cr>
     nnoremap <silent> <nowait> <buffer> U     :call vm#commands#undo()<cr>
@@ -127,7 +130,7 @@ fun! vm#maps#end()
     nunmap <buffer> <esc>
     nunmap <buffer> <c-w>
     nunmap <buffer> <c-o>
-    nunmap <buffer> <c-i>
+    nunmap <buffer> <c-c>
     nunmap <buffer> <c-a>
     xunmap <buffer> <c-a>
     nunmap <buffer> <c-m>
@@ -150,10 +153,10 @@ endfun
 fun! s:hjkl_end()
     nunmap <buffer> <M-j>
     nunmap <buffer> <M-k>
-    "nunmap <buffer> <C-h>
+    nunmap <buffer> <C-h>
     nunmap <buffer> <C-j>
     nunmap <buffer> <C-k>
-    "nunmap <buffer> <C-l>
+    nunmap <buffer> <C-l>
     nunmap <buffer> <M-J>
 endfun
 

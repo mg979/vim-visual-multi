@@ -7,6 +7,7 @@ let g:VM_custom_mappings  = get(g:, 'VM_custom_mappings', 0)
 let g:VM_Selection_hl     = get(g:, 'VM_Selection_hl', 'Visual')
 let g:VM_Mono_Cursor_hl   = get(g:, 'VM_Mono_Cursor_hl', 'DiffChange')
 let g:VM_Normal_Cursor_hl = get(g:, 'VM_Normal_Cursor_hl', 'term=reverse cterm=reverse gui=reverse')
+exe "highlight MultiCursor ".g:VM_Normal_Cursor_hl
 
 " mappings styles
 let g:VM_use_arrow_keys   = get(g:, 'VM_use_arrow_keys', 2)

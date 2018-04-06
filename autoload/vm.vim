@@ -43,7 +43,7 @@ let s:Global = {}
 
 fun! s:Global.get_region(down) dict
 
-    let R = s:Global.is_region_at_pos('.')
+    let R = self.is_region_at_pos('.')
     if empty(R) | let R = vm#region#new(0) | endif
 
     let s:v.direction = a:down
@@ -57,7 +57,7 @@ endfun
 fun! s:Global.new_cursor() dict
 
     "don't add a cursor over an existing region
-    let R = s:Global.is_region_at_pos('.')
+    let R = self.is_region_at_pos('.')
     if !empty(R) | return {} | endif
 
     let R = vm#region#new(1)
@@ -81,6 +81,14 @@ fun! s:Global.update_highlight(...) dict
     call setmatches(s:v.matches)
 endfun
 
+fun! s:Global.update_cursor_highlight(...) dict
+    highlight clear MultiCursor
+    if self.all_empty()
+        exe "highlight link MultiCursor ".g:VM_Mono_Cursor_hl
+    else
+        exe "highlight MultiCursor ".g:VM_Normal_Cursor_hl
+    endif
+endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Regions functions
@@ -181,7 +189,7 @@ fun! s:Global.merge_regions(...) dict
 
     " remove old regions and update highlight
     for r in to_remove | call r.remove() | endfor
-    call s:Global.update_highlight()
+    call self.update_highlight()
 
     "restore cursor position
     call setpos('.', storepos)

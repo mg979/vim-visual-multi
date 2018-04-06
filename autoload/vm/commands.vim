@@ -225,6 +225,10 @@ fun! vm#commands#select_motion(inclusive, this)
     "TODO select inside/around brackets/quotes/etc.
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Motion event
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#commands#move()
     if !s:extending | return | endif
     let s:extending -= 1
@@ -237,8 +241,10 @@ fun! vm#commands#move()
             call r.move(s:motion) | endfor | endif
 
     normal! `]
+
     call setmatches(s:v.matches)
     let s:v.move_from_back = 0
+    call s:Global.update_cursor_highlight()
     call s:Global.select_region(s:current_i)
 endfun
 
@@ -247,6 +253,7 @@ fun! vm#commands#undo()
     echom b:VM_backup == b:VM_Selection
     let b:VM_Selection = copy(b:VM_backup)
     call setmatches(s:v.matches)
+    call s:Global.update_cursor_highlight()
     call s:Global.select_region(s:current_i)
 endfun
 
@@ -256,7 +263,19 @@ endfun
 
 fun! vm#commands#toggle_option(option)
     let s = "s:v.".a:option
-    exe "let" s "= !".s 
+    exe "let" s "= !".s
+
+    if a:option == 'whole_word'
+        let s = s:v.search[0]
+
+        if s:v.whole_word
+            if s[:1] != '\<' | let s:v.search[0] = '\<'.s.'\>' | endif
+            call s:Funcs.msg('Search ->  whole word')
+        else
+            if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
+            call s:Funcs.msg('Search ->  not whole word')
+        endif
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

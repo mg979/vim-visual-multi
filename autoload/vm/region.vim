@@ -52,12 +52,12 @@ fun! s:Region.new(empty)
     "highlight entry
     let region  = [R.l, R.a, R.w]
     let cursor  = [R.l, R.b, 1]
-    call s:cursor_hl(R.a==R.b)
 
     let match   = matchaddpos(g:VM_Selection_hl, [region], 30)
     let cursor  = matchaddpos('MultiCursor',     [cursor], 40)
     call add(s:Matches, [match, cursor])
     call add(s:Regions, R)
+    call s:Global.update_cursor_highlight()
 
     return R
 endfun
@@ -226,15 +226,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:cursor_hl(mono)
-    highlight clear MultiCursor
-    if a:mono
-        exe "highlight link MultiCursor ".g:VM_Mono_Cursor_hl
-    else
-        exe "highlight MultiCursor ".g:VM_Normal_Cursor_hl
-    endif
-endfun
-
 fun! s:Region.update_highlight() dict
     "update the highlight match
     let r = self | let i = r.index
@@ -242,7 +233,6 @@ fun! s:Region.update_highlight() dict
     let s:v.matches[i].pos1 = [r.l, r.a, r.w]
     let cursor = len(s:Matches) + i
     let s:v.matches[cursor].pos1 = [r.l, r.b, 1]
-    call s:cursor_hl(r.a==r.b)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
