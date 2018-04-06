@@ -103,6 +103,8 @@ fun! vm#maps#start()
     "select
     nnoremap <silent> <nowait> <buffer> q :call vm#commands#select_motion(0, 0)<cr>
     nnoremap <silent> <nowait> <buffer> Q :call vm#commands#select_motion(1, 0)<cr>
+    nnoremap <silent> <nowait> <buffer> gi :call vm#commands#select_motion(0, 0)<cr>
+    nnoremap <silent> <nowait> <buffer> ga :call vm#commands#select_motion(1, 0)<cr>
 endfun
 
 
@@ -140,6 +142,8 @@ fun! vm#maps#end()
     nunmap <buffer> <c-m>
     nunmap <buffer> <c-]>
     nunmap <buffer> <M-/>
+    nunmap <buffer> gi
+    nunmap <buffer> ga
     silent! nunmap <buffer> <c-space>
     silent! nunmap <buffer> <nul>
 endfun

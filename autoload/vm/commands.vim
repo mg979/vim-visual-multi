@@ -1,6 +1,7 @@
 let s:motion = 0 | let s:extending = 0 | let s:current_i = 0
 
 fun! s:init(whole)
+    let was_active = g:VM_Global.is_active
     let s:V       = vm#init_buffer()
 
     let s:v       = s:V.Vars
@@ -11,6 +12,7 @@ fun! s:init(whole)
     let s:Search  = s:V.Search
 
     let s:v.whole_word = a:whole
+    return was_active
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -210,11 +212,15 @@ fun! s:extend_vars(n, this)
     "let b:VM_backup = copy(b:VM_Selection)
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#commands#motion(motion, this)
     call s:extend_vars(1, a:this)
     let s:motion = a:motion
     return a:motion
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_motion(motion, char, this)
     call s:extend_vars(1, a:this)
@@ -226,56 +232,61 @@ fun! vm#commands#find_motion(motion, char, this)
     return s:motion
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#commands#select_motion(inclusive, this)
+    let was_active = s:init(0)
+    let s:v.silence = 1
     call s:extend_vars(2, a:this)
     let c = nr2char(getchar())
-
-    "wrong command
-    "if index(['a', 'i'], c[0]) == -1 | return '' | endif
 
     let a = a:inclusive ? 'F' : 'T'
     let b = a:inclusive ? 'f' : 't'
 
     if index(['"', "'", '`', '_', '-'], c) != -1
-        exe "normal ".a.c
-        call vm#commands#move()
-        exe "normal ".b.c
+        let d = c
     elseif index(['[', ']'], c) != -1
-        exe "normal ".a.'['
-        call vm#commands#move()
-        exe "normal ".b.']'
+        let c = '[' | let d = ']'
     elseif index(['(', ')'], c) != -1
-        exe "normal ".a.'('
-        call vm#commands#move()
-        exe "normal ".b.')'
+        let c = '(' | let d = ')'
     elseif index(['{', '}'], c) != -1
-        exe "normal ".a.'{'
-        call vm#commands#move()
-        exe "normal ".b.'}'
+        let c = '[' | let d = '}'
     elseif index(['<', '>'], c) != -1
-        exe "normal ".a.'<'
-        call vm#commands#move()
-        exe "normal ".b.'>'
+        let c = '<' | let d = '>'
+    else
+        let d = nr2char(getchar())
     endif
 
-    let s:extending = 0
-    "TODO select inside/around brackets/quotes/etc.
+    exe "normal ".a.c
+    call vm#commands#move(1)
+    exe "normal ".b.d
+    call vm#commands#move()
+
+    let s:v.silence = 0
+    if !was_active | call vm#commands#add_under(0, 0, 0, 1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Motion event
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#move()
+fun! vm#commands#move(...)
     if !s:extending | return | endif
     let s:extending -= 1
     let s:v.move_from_back = !s:v.direction
+
+    "select motion: store position to move to, in between the 2 motions
+    if a:0 | let pos = getpos('.') | endif
+
+    if !len(s:Regions) | call vm#commands#add_cursor_at_pos('.') | endif
 
     if (s:v.only_this || s:v.only_this_all) | let s:v.only_this = 0
         call s:Regions[s:v.index].move(s:motion)
     else
         for r in s:Regions
-            call r.move(s:motion) | endfor | endif
+            call r.move(s:motion)
+            if a:0 | call setpos('.', pos) | endif
+        endfor | endif
 
     normal! `]
 
@@ -284,6 +295,8 @@ fun! vm#commands#move()
     call s:Global.update_cursor_highlight()
     call s:Global.select_region(s:current_i)
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#undo()
     call clearmatches()
@@ -295,7 +308,7 @@ fun! vm#commands#undo()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Helper functions
+" Toggle options
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#toggle_option(option)

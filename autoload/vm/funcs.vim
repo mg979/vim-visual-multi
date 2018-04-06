@@ -32,6 +32,7 @@ fun! vm#funcs#init()
 
     let s:v.oldcase = [&smartcase, &ignorecase]
     let s:v.index = -1
+    let s:v.matches = get(s:v, matches, [])
     let s:v.direction = 1
     let s:v.silence = 0
     let s:v.only_this = 0
