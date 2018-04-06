@@ -5,9 +5,9 @@ let s:find     = ['f', 'F', 't', 'T']
 let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 's', 'U', '*', '@', '/']
 let s:brackets = ['[', ']', '{', '}']
 
-nnoremap        <Plug>(VM-Case-Setting)       :call b:VM_Selection.Funcs.case_search()<cr>
-nnoremap        <Plug>(VM-Update-Search)      :call b:VM_Selection.Funcs.update_search()<cr>
-nnoremap        <Plug>(VM-Read-From-Search)   :call b:VM_Selection.Funcs.read_from_search()<cr>
+nnoremap        <Plug>(VM-Case-Setting)       :call b:VM_Selection.Search.case()<cr>
+nnoremap        <Plug>(VM-Update-Search)      :call b:VM_Selection.Search.update()<cr>
+nnoremap        <Plug>(VM-Read-From-Search)   :call b:VM_Selection.Search.read()<cr>
 nnoremap        <Plug>(VM-Start-Regex-Search) :call vm#commands#find_by_regex()<cr>/
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

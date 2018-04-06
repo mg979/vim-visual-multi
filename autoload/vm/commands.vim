@@ -1,12 +1,16 @@
 let s:motion = 0 | let s:extending = 0 | let s:current_i = 0
 
 fun! s:init(whole)
-    if !empty(b:VM_Selection) | return | endif
-    let s:V = vm#init_buffer()
-    let s:v = s:V.Vars
+    let s:V       = vm#init_buffer()
+
+    let s:v       = s:V.Vars
+    let s:Regions = s:V.Regions
+    let s:Matches = s:V.Matches
+    let s:Global  = s:V.Global
+    let s:Funcs   = s:V.Funcs
+    let s:Search  = s:V.Search
+
     let s:v.whole_word = a:whole
-    let s:Regions = s:V.Regions | let s:Matches = s:V.Matches
-    let s:Global = s:V.Global | let s:Funcs = s:V.Funcs
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -34,6 +38,7 @@ fun! vm#commands#add_cursor_at_pos(pos)
         normal! k
         call s:Global.new_cursor()
     endif
+    call s:Funcs.count_msg()
 endfun
 
 
@@ -46,12 +51,13 @@ fun! vm#commands#find_regex()
     if @/ == s:regex_reg | call setpos('.', s:regex_pos) | return | endif
 
     normal gny`]
-    call s:Funcs.read_from_search()
+    call s:Search.read()
     call s:Global.get_region(1)
+    call s:Funcs.count_msg()
 endfun
 
 fun! vm#commands#find_by_regex(...)
-    call s:init(a:whole)
+    call s:init(0)
     let s:regex_pos = getpos('.')
     let s:regex_reg = @/
     call s:Funcs.msg('Enter regex:')
@@ -74,8 +80,9 @@ fun! vm#commands#find_under(visual, whole, inclusive)
         endif
     endif
 
-    call s:Funcs.set_search()
+    call s:Search.set()
     call s:Global.get_region(1)
+    call s:Funcs.count_msg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -98,10 +105,11 @@ fun! vm#commands#add_under(visual, whole, inclusive, ...)
     endif
 
     let s:v.whole = a:whole
-    call s:Funcs.set_search()
+    call s:Search.set()
     let R = s:Global.get_region(1)
     call s:Global.merge_regions(R.l)
     if !a:0 | call vm#commands#find_next(0, 0) | endif
+    call s:Funcs.count_msg()
 endfun
 
 
@@ -125,6 +133,7 @@ fun! vm#commands#find_next(skip, nav)
 
     silent normal! ngny`]
     call s:Global.get_region(1)
+    call s:Funcs.count_msg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -152,6 +161,7 @@ fun! vm#commands#find_prev(skip, nav)
 
     silent normal! NgNy`[
     call s:Global.get_region(0)
+    call s:Funcs.count_msg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -174,8 +184,7 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     call setpos('.', storepos)
     let &lz = oldredraw
     let s:v.silence = 0
-    let s = len(s:Regions)>1 ? 's.' : '.'
-    call s:Funcs.msg('Found '.len(s:Regions).' occurrance'.s)
+    call s:Funcs.count_msg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -186,6 +195,7 @@ fun! vm#commands#skip()
     else
         call vm#commands#find_prev(1, 0)
     endif
+    call s:Funcs.count_msg()
 endfun
 
 

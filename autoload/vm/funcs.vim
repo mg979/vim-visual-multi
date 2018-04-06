@@ -8,8 +8,14 @@
 "accessed from anywhere.
 
 fun! vm#funcs#init()
-    let s:V = b:VM_Selection | let s:v = s:V.Vars | let s:Global = s:V.Global
+    let s:V       = b:VM_Selection
     let s:V.Funcs = s:Funcs
+
+    let s:v       = s:V.Vars
+    let s:Regions = s:V.Regions
+    let s:Matches = s:V.Matches
+    let s:Global  = s:V.Global
+    let s:Search  = vm#search#init()
 
     call vm#maps#start()
 
@@ -133,89 +139,9 @@ function! s:Funcs.msg(text) dict
     endif
 endfunction
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Search
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Funcs.case_search()
-    if &smartcase              "smartcase        ->  case sensitive
-        set nosmartcase
-        set noignorecase
-        call self.msg('Search ->  case sensitive')
-
-    elseif !&ignorecase        "case sensitive   ->  ignorecase
-        set ignorecase
-        call self.msg('Search ->  ignore case')
-
-    else                       "ignore case      ->  smartcase
-        set smartcase
-        set ignorecase
-        call self.msg('Search ->  smartcase')
-    endif
-endfun
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Funcs.update_search()
-    let r = s:Global.is_region_at_pos('.')
-    if empty(r) | return | endif
-    call s:update_search(escape(r.txt, '\|'), 1)
-endfun
-
-fun! s:Funcs.set_search() dict
-    call s:update_search(s:pattern(s:v.def_reg, 0), 0)
-endfun
-
-fun! s:Funcs.read_from_search() dict
-    call s:update_search(s:pattern('/', 1), 0)
-endfun
-
-fun! s:Funcs.check_pattern() dict
-    let current = split(@/, '\\|')
-    for p in current
-        if index(s:v.search, p) == -1 | call s:Funcs.read_from_search() | endif
-        break
-    endfor
-endfun
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:pattern(register, regex)
-    let t = eval('@'.a:register)
-    if !a:regex
-        let t = escape(t, '.\|')
-        let t = substitute(t, '\n', '\\n', 'g')
-        if s:v.whole_word | let t = '\<'.t.'\>' | endif | endif
-    return t
-endfun
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:update_search(p, update)
-
-    if empty(s:v.search)
-        call insert(s:v.search, a:p)       "just started
-
-    elseif a:update                     "updating a match
-
-        "if there's a match that is a substring of
-        "the selected text, replace it with the new one
-        let i = 0
-        for p in s:v.search
-            if a:p =~ p
-                let s:v.search[i] = a:p
-                break | endif
-            let i += 1
-        endfor
-
-    elseif index(s:v.search, a:p) < 0   "not in list
-
-        call insert(s:v.search, a:p)
-    endif
-
-    let @/ = join(s:v.search, '\|')
-    set hlsearch
-    call s:Funcs.msg('Current search: '.string(s:v.search))
+fun! s:Funcs.count_msg() dict
+    let s = len(s:Regions)>1 ? 's.' : '.'
+    call self.msg(len(s:Regions).' region'.s.'   Current patterns: '.string(s:v.search))
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

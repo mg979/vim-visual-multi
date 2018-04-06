@@ -10,9 +10,7 @@
 
 fun! vm#init_buffer(...)
     "if already initialized, return current instance
-    if !empty(b:VM_Selection)
-        return s:V
-    endif
+    if !empty(b:VM_Selection) | return s:V | endif
 
     let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': [], 'Funcs': {}}
 
@@ -25,15 +23,16 @@ fun! vm#init_buffer(...)
 
     let g:VM_Global.is_active = 1
 
-    let s:V = b:VM_Selection
+    let s:V        = b:VM_Selection
     let s:V.Global = s:Global
 
-    let s:v = s:V.Vars
+    let s:v        = s:V.Vars
+    let s:Regions  = s:V.Regions
+    let s:Matches  = s:V.Matches
 
-    let s:Regions = s:V.Regions
-    let s:Matches = s:V.Matches
+    let s:Funcs    = vm#funcs#init()
+    let s:Search   = s:V.Search
 
-    let s:Funcs = vm#funcs#init()
     call s:Funcs.msg('Visual-Multi started. Press <esc> to exit.')
     call vm#region#init()
 
@@ -57,7 +56,7 @@ fun! s:Global.get_region(down) dict
     let s:v.direction = a:down
     let s:v.matches = getmatches()
     call self.select_region(R.index)
-    call s:Funcs.check_pattern()
+    call s:Search.check_pattern()
     return R
 endfun
 

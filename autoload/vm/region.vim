@@ -1,10 +1,11 @@
 fun! vm#region#init()
-    let s:V = b:VM_Selection
-    let s:v = s:V.Vars
+    let s:V       = b:VM_Selection
+    let s:v       = s:V.Vars
     let s:Regions = s:V.Regions
     let s:Matches = s:V.Matches
-    let s:Global = s:V.Global
-    let s:Funcs = s:V.Funcs
+    let s:Global  = s:V.Global
+    let s:Funcs   = s:V.Funcs
+    let s:Search  = s:V.Search
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
