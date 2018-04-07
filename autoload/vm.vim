@@ -193,13 +193,16 @@ fun! s:Global.merge_regions(...) dict
 
         for i in indices
             while (n < max)
-                let this = indices[n] | let next = indices[n+1] | let n += 1
-                let r = s:Regions[this] | let next = s:Regions[next]
+                let i1 = indices[n] | let i2 = indices[n+1] | let n += 1
+                let this = s:Regions[i1] | let next = s:Regions[i2]
+
+                let overlap = ( this.B >= next.A ) && ( this.A <= next.A ) ||
+                            \ ( next.B >= this.A ) && ( next.A <= this.A )
 
                 "merge regions if there is overlap with next one
-                if ( r.b >= next.a )
-                    call next.update(r.l, r.a, next.b)
-                    call add(to_remove, r)
+                if overlap
+                    call next.update(this.l, min([this.a, next.a]), max([this.b, next.b]))
+                    call add(to_remove, this)
                 endif | endwhile | endfor | endfor
 
     " remove old regions and update highlight
@@ -208,6 +211,7 @@ fun! s:Global.merge_regions(...) dict
 
     "restore cursor position
     call self.select_region_at_pos(storepos)
+    call s:Funcs.count_msg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

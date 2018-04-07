@@ -36,18 +36,28 @@ fun! s:Region.new(empty)
     let R       = copy(self)
     let R.index = len(s:Regions)
 
+    let R.A_ = { -> eval(line2byte(R.l)  + R.a) }
+    let R.B_ = { -> eval(line2byte(R.l2) + R.b) }
+
     if !a:empty
-        let R.l     = getpos("'[")[1]       " line
+        let R.l     = getpos("'[")[1]       " starting line
+        let R.l2    = getpos("']")[1]       " ending line
         let R.a     = getpos("'[")[2]       " begin
         let R.b     = getpos("']")[2]       " end
         let R.w     = R.b - R.a + 1         " width
+        let R.A     = R.A_()                " byte offset a
+        let R.B     = R.B_()                " byte offset b
         let R.txt   = getreg(s:v.def_reg)   " text content
+
     else
         let R.l     = getpos(".")[1]        " line
-        let R.a     = getpos(".")[2]        " begin
-        let R.b     = R.a                   " end
-        let R.w     = 1                     " width
-        let R.txt   = ''                    " text content
+        let R.l2    = R.l
+        let R.a     = getpos(".")[2]        " position
+        let R.b     = R.a
+        let R.w     = 1
+        let R.A     = self.A_()             " byte offset
+        let R.B     = R.A
+        let R.txt   = ''
     endif
 
     "highlight entry
@@ -66,6 +76,8 @@ endfun
 fun! s:Region.empty() dict
     return self.a == self.b
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.remove() dict
     let i = self.index
@@ -219,6 +231,9 @@ fun! s:Region.update_vars() dict
     "update the rest of the region vars
     let r = self
     let s:v.index = r.index
+
+    let r.A = r.A_()
+    let r.B = r.B_()
 
     let r.w = r.b - r.a + 1
     let r.txt = getreg(s:v.def_reg)

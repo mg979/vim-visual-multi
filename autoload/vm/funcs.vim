@@ -48,7 +48,8 @@ endfun
 let s:key = { -> 'g:VM_Global.'.bufwinid("%") }
 
 fun! vm#funcs#buffer_leave()
-    if !empty(b:VM_Selection)
+    if !empty(get(b:, 'VM_Selection', {}))
+        if !buflisted(bufnr("%")) | call vm#funcs#reset(1) | return | endif
         let s:v.pos = getpos('.')
         exe 'let '.s:key().' = copy(b:VM_Selection)'
         call vm#funcs#reset(1)
@@ -131,13 +132,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-function! s:Funcs.msg(text) dict
+fun! s:Funcs.msg(text) dict
     if !s:v.silence
         exe "echohl" g:VM_Message_hl
         echo a:text
         echohl None
     endif
-endfunction
+endfun
 
 fun! s:Funcs.count_msg() dict
     let s = len(s:Regions)>1 ? 's.' : '.'

@@ -61,8 +61,8 @@ fun! vm#maps#start()
     nnoremap <silent> <nowait> <buffer> <c-a> :call vm#commands#find_all(0, 1, 0)<cr>
     nnoremap <silent> <nowait> <buffer> s     :call vm#commands#skip()<cr>
     nnoremap <silent> <nowait> <buffer> U     :call vm#commands#undo()<cr>
-    nnoremap <silent> <nowait> <buffer> *     :call vm#commands#add_under(0, 1, 0)<cr>
-    nnoremap <silent> <nowait> <buffer> @     :call vm#commands#add_under(0, 1, 1)<cr>
+    nnoremap <silent> <nowait> <buffer> *     :call vm#commands#add_under(0, 1, 0, 1)<cr>
+    nnoremap <silent> <nowait> <buffer> @     :call vm#commands#add_under(0, 1, 1, 1)<cr>
     nnoremap <silent> <nowait> <buffer> ]     :call vm#commands#find_next(0, 0)<cr>
     nnoremap <silent> <nowait> <buffer> [     :call vm#commands#find_prev(0, 0)<cr>
     nnoremap <silent> <nowait> <buffer> }     :call vm#commands#add_under(0, 0, 0)<cr>

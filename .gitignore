@@ -2,4 +2,5 @@
 tags
 doc/tags
 test
+.vim-bookmarks
 *.sw*

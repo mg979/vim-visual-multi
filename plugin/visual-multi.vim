@@ -22,19 +22,19 @@ else
     nnoremap <nul>      :call vm#commands#add_cursor_at_pos(0)<cr>
 endif
 
-nnoremap gsi     :call vm#commands#select_motion(0, 0)<cr>
-nnoremap gsa     :call vm#commands#select_motion(1, 0)<cr>
+nnoremap gsi    :call vm#commands#select_motion(0, 0)<cr>
+nnoremap gsa    :call vm#commands#select_motion(1, 0)<cr>
 nnoremap <M-j>  :call vm#commands#add_cursor_at_pos(1)<cr>
 nnoremap <M-k>  :call vm#commands#add_cursor_at_pos(2)<cr>
-xnoremap <c-a> y:call vm#commands#find_all(0, 1, 0)<cr>`]
-nnoremap <c-a> :call vm#commands#find_all(0, 1, 0)<cr>
-nnoremap <c-m> :call vm#commands#start()<cr>
-nnoremap s] :call vm#commands#find_under(0, 0, 0)<cr>
-nnoremap s[ :call vm#commands#find_under(0, 1, 0)<cr>
-nnoremap s} :call vm#commands#find_under(0, 0, 1)<cr>
-nnoremap s{ :call vm#commands#find_under(0, 1, 1)<cr>
-xnoremap s] y:call vm#commands#find_under(1, 0, 0)<cr>`]
-xnoremap s[ y:call vm#commands#find_under(1, 1, 0)<cr>`]
+xnoremap <M-A> y:call vm#commands#find_all(0, 1, 0)<cr>`]
+nnoremap <M-A>  :call vm#commands#find_all(0, 1, 0)<cr>
+nnoremap <C-m>  :call vm#commands#start()<cr>
+nnoremap s]     :call vm#commands#find_under(0, 0, 0)<cr>
+nnoremap s[     :call vm#commands#find_under(0, 1, 0)<cr>
+nnoremap s}     :call vm#commands#find_under(0, 0, 1)<cr>
+nnoremap s{     :call vm#commands#find_under(0, 1, 1)<cr>
+xnoremap s] y   :call vm#commands#find_under(1, 0, 0)<cr>`]
+xnoremap s[ y   :call vm#commands#find_under(1, 1, 0)<cr>`]
 
 au BufLeave * call vm#funcs#buffer_leave()
 au BufEnter * call vm#funcs#buffer_enter()
