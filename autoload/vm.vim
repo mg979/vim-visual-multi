@@ -86,6 +86,7 @@ fun! s:Global.update_highlight(...) dict
     endfor
 
     call setmatches(s:v.matches)
+    call self.update_cursor_highlight()
 endfun
 
 fun! s:Global.update_cursor_highlight(...) dict

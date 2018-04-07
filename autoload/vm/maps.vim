@@ -1,9 +1,12 @@
 let s:NVIM = has('gui_running') || has('nvim')
 
-let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E', '0', '^', 'x', '%']
-let s:find     = ['f', 'F', 't', 'T', '$']
+let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E', 'x']
+let s:find     = ['f', 'F', 't', 'T', '$', '0', '^', '%']
 let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 's', 'U', '*', '@', '/']
 let s:brackets = ['[', ']', '{', '}']
+
+let s:noremaps = get(g:, 'VM_Custom_Noremaps', {})
+let s:remaps   = get(g:, 'VM_Custom_Remaps', [])
 
 nnoremap        <Plug>(VM-Case-Setting)       :call b:VM_Selection.Search.case()<cr>
 nnoremap        <Plug>(VM-Update-Search)      :call b:VM_Selection.Search.update()<cr>
@@ -19,10 +22,10 @@ fun! s:arrows()
     nnoremap     <silent> <nowait> <buffer>        <M-C-Up>    :call vm#commands#add_cursor_at_pos(2)<cr>
     nnoremap     <silent> <nowait> <buffer>        <C-Down>    :call vm#commands#find_next(0, 1)<cr>
     nnoremap     <silent> <nowait> <buffer>        <C-Up>      :call vm#commands#find_prev(0, 1)<cr>
-    nnoremap     <silent> <nowait> <buffer> <expr> <S-Right>   vm#commands#motion('l', 0)
-    nnoremap     <silent> <nowait> <buffer> <expr> <S-Left>    vm#commands#motion('h', 0)
-    nnoremap     <silent> <nowait> <buffer> <expr> <C-S-Right> vm#commands#motion('e', 0)
-    nnoremap     <silent> <nowait> <buffer> <expr> <C-S-Left>  vm#commands#motion('b', 0)
+    nnoremap     <silent> <nowait> <buffer>        <S-Right>   :call vm#commands#motion('l', 0)<cr>
+    nnoremap     <silent> <nowait> <buffer>        <S-Left>    :call vm#commands#motion('h', 0)<cr>
+    nnoremap     <silent> <nowait> <buffer>        <C-S-Right> :call vm#commands#motion('e', 0)<cr>
+    nnoremap     <silent> <nowait> <buffer>        <C-S-Left>  :call vm#commands#motion('b', 0)<cr>
 endfun
 
 fun! s:hjkl()
@@ -30,22 +33,24 @@ fun! s:hjkl()
     nnoremap     <silent> <nowait> <buffer>        <M-k>       :call vm#commands#add_cursor_at_pos(2)<cr>
     nnoremap     <silent> <nowait> <buffer>        <C-j>       :call vm#commands#find_next(0, 1)<cr>
     nnoremap     <silent> <nowait> <buffer>        <C-k>       :call vm#commands#find_prev(0, 1)<cr>
-    nnoremap     <silent> <nowait> <buffer> <expr> H           vm#commands#motion('h', 0)
+    nnoremap     <silent> <nowait> <buffer>        H           :call vm#commands#motion('h', 0)<cr>
 
     "multiline disabled for now
-    "nnoremap     <silent> <nowait> <buffer> <expr> J           vm#commands#motion('j', 0)
-    "nnoremap     <silent> <nowait> <buffer> <expr> K           vm#commands#motion('k', 0)
-    nnoremap     <silent> <nowait> <buffer> <expr> J           J
-    nnoremap     <silent> <nowait> <buffer> <expr> K           K
+    "nnoremap     <silent> <nowait> <buffer>        J           :call vm#commands#motion('j', 0)<cr>
+    "nnoremap     <silent> <nowait> <buffer>        K           :call vm#commands#motion('k', 0)<cr>
+    nnoremap     <silent> <nowait> <buffer>        J           J
+    nnoremap     <silent> <nowait> <buffer>        K           K
 
-    nnoremap     <silent> <nowait> <buffer> <expr> L           vm#commands#motion('l', 0)
+    nnoremap     <silent> <nowait> <buffer>        L           :call vm#commands#motion('l', 0)<cr>
     nnoremap     <silent> <nowait> <buffer>        h           h
     nnoremap     <silent> <nowait> <buffer>        j           j
     nnoremap     <silent> <nowait> <buffer>        k           k
     nnoremap     <silent> <nowait> <buffer>        l           l
-    nnoremap     <silent> <nowait> <buffer> <expr> <C-h>       vm#commands#motion('h', 1)
-    nnoremap     <silent> <nowait> <buffer> <expr> <C-l>       vm#commands#motion('l', 1)
-    nnoremap     <silent> <nowait> <buffer> <expr> <M-J>       vm#commands#motion('J', 0)
+    nnoremap     <silent> <nowait> <buffer>        <C-h>       :call vm#commands#motion('h', 1)<cr>
+    nnoremap     <silent> <nowait> <buffer>        <C-l>       :call vm#commands#motion('l', 1)<cr>
+    nnoremap     <silent> <nowait> <buffer>        <M-J>       :call vm#commands#motion('J', 0)<cr>
+    nnoremap     <silent> <nowait> <buffer>        <End>       :call vm#commands#merge_to_beol(1, 0)<cr>
+    nnoremap     <silent> <nowait> <buffer>        <Home>      :call vm#commands#merge_to_beol(0, 0)<cr>
 endfun
 
 fun! vm#maps#start()
@@ -85,7 +90,13 @@ fun! vm#maps#start()
     endif
 
     for m in s:motions
-        exe "nnoremap <silent> <nowait> <buffer> <expr> ".m." vm#commands#motion('".m."', 0)"
+        exe "nnoremap <silent> <nowait> <buffer> ".m." :call vm#commands#motion('".m."', 0)\<cr>"
+    endfor
+    for m in keys(s:noremaps)
+        exe "nnoremap <silent> <nowait> <buffer> ".m." :call vm#commands#motion('".s:noremaps[m]."', 0)\<cr>"
+    endfor
+    for m in s:remaps
+        exe "nmap <silent> <nowait> <buffer>     ".m." :call vm#commands#motion('".m."', 0)\<cr>"
     endfor
     for m in s:find
         exe "nnoremap <silent> <nowait> <buffer> ".m." :call vm#commands#find_motion('".m."', '', 0)\<cr>"
@@ -114,7 +125,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#maps#end()
-    for m in (s:motions + s:find + s:simple)
+    for m in (s:motions + s:find + s:simple + s:remaps)
+        exe "nunmap <buffer> ".m
+    endfor
+
+    for m in keys(s:noremaps)
         exe "nunmap <buffer> ".m
     endfor
 
@@ -142,6 +157,8 @@ fun! vm#maps#end()
     nunmap <buffer> <c-m>
     nunmap <buffer> <c-]>
     nunmap <buffer> <M-/>
+    nunmap <buffer> <End>
+    nunmap <buffer> <Home>
     nunmap <buffer> gi
     nunmap <buffer> ga
     silent! nunmap <buffer> <c-space>

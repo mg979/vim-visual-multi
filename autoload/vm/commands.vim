@@ -217,29 +217,32 @@ endfun
 fun! vm#commands#motion(motion, this)
     call s:extend_vars(1, a:this)
     let s:motion = a:motion
-    return a:motion
+    call vm#commands#move(0, 0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_motion(motion, char, this)
-    let current_i = s:v.index
+fun! vm#commands#merge_to_beol(eol, this)
+    call s:extend_vars(1, a:this)
+    let s:motion = a:eol? "\<End>" : '0'
+    let s:v.merge_to_beol = 1
+    call vm#commands#move(1, 0)
+endfun
 
-    if a:motion ==# "$"
-        let motion = "$"
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#find_motion(motion, char, this, ...)
+    call s:extend_vars(1, a:this) | let merge = 0
+
+    if index(['$', '0', '^', '%'], a:motion) >= 0
+        let s:motion = a:motion | let merge = 1
     elseif a:char != ''
-        let motion = a:motion.a:char
+        let s:motion = a:motion.a:char
     else
-        let motion = a:motion.nr2char(getchar())
+        let s:motion = a:motion.nr2char(getchar())
     endif
 
-    for r in s:Regions | call r.move(motion) | endfor
-    normal! `]
-
-    call setmatches(s:v.matches)
-    let s:v.move_from_back = 0
-    call s:Global.update_cursor_highlight()
-    call s:Global.select_region(current_i)
+    call vm#commands#move(merge, 0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -267,16 +270,17 @@ fun! vm#commands#select_motion(inclusive, this)
         let d = nr2char(getchar())
     endif
 
-    exe "normal ".a.c
-    call vm#commands#move(1)
-    exe "normal ".b.d
-    call vm#commands#move()
+    let s:motion = a.c
+    call vm#commands#move(0, 1)
+    let s:motion = b.d
+    call vm#commands#move(0, 0)
 
-    let s:v.silence = 0
     if !was_active
         if !s:Global.all_empty()
             call vm#commands#add_under(0, 0, 0, 1)
+            let s:v.silence = 0
         else
+            let s:v.silence = 0
             call s:Funcs.msg('Not found. Exiting Visual-multi.')
             let s:v.silence = 1
             call vm#funcs#reset()
@@ -288,29 +292,42 @@ endfun
 " Motion event
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#move(...)
+let s:always_from_back = { -> index(['^', '0'], s:motion) >= 0 }
+let s:can_from_back    = { -> index(['$'], s:motion) == -1 && !s:v.direction }
+let s:merge_to_beol    = { -> index(["\<End>", "0"], s:motion) >= 0 }
+let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
+
+fun! vm#commands#move(merge, restore_pos, ...)
     if !s:v.extending | return | endif
-    let s:v.extending -= 1
-    let s:v.move_from_back = !s:v.direction
+    let s:v.extending -= 1 | let merge = a:merge
+
+    if s:v.merge_to_beol
+        let merge = 1
+    elseif s:v.direction && s:always_from_back()
+        call vm#commands#find_prev(0, 0)
+        let s:v.move_from_back = 1
+    else
+        let s:v.move_from_back = s:can_from_back()
+    endif
 
     "select motion: store position to move to, in between the 2 motions
-    if a:0 | let pos = getpos('.') | endif
+    if a:restore_pos | let pos = getpos('.') | endif
 
     if !len(s:Regions) | call vm#commands#add_cursor_at_pos('.') | endif
 
-    if (s:v.only_this || s:v.only_this_always) | let s:v.only_this = 0
-        call s:Regions[s:v.index].move(s:motion)
+    if s:only_this()
+        call s:Regions[s:v.index].move(s:motion) | let s:v.only_this = 0
     else
         for r in s:Regions
             call r.move(s:motion)
-            if a:0 | call setpos('.', pos) | endif
+            if a:restore_pos | call setpos('.', pos) | endif
         endfor | endif
 
     normal! `]
 
-    call setmatches(s:v.matches)
     let s:v.move_from_back = 0
-    call s:Global.update_cursor_highlight()
+    if merge | call s:Global.merge_regions() | endif
+    call s:Global.update_highlight()
     call s:Global.select_region(s:current_i)
 endfun
 
@@ -320,8 +337,7 @@ fun! vm#commands#undo()
     call clearmatches()
     echom b:VM_backup == b:VM_Selection
     let b:VM_Selection = copy(b:VM_backup)
-    call setmatches(s:v.matches)
-    call s:Global.update_cursor_highlight()
+    call s:Global.update_highlight()
     call s:Global.select_region(s:current_i)
 endfun
 

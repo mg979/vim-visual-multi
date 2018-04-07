@@ -137,10 +137,15 @@ fun! s:Region.move_forward(motion) dict
     "keep single width while moving if all cursors are empty
     if a:motion ==# 'l' && all_empty
         let r.a += 1
+    elseif a:motion == "\<End>"
+        let s:v.merge_to_beol = 0
+        normal! m[
+        let r.a = r.b
     endif
 
     "set end mark and yank between marks
-    call cursor(r.l, r.b+1)
+    let b = r.empty()? r.b : r.b+1
+    call cursor(r.l, b)
     normal! m]`[y`]
 
     call self.update_vars()
@@ -186,7 +191,12 @@ fun! s:Region.move_back(motion) dict
 
     "ensure line boundaries aren't crossed
     "if !s:simple(a:motion[0]) && getpos('.')[1] < r.l
-    if getpos('.')[1] < r.l
+    if s:v.merge_to_beol
+        let s:v.merge_to_beol = 0
+        let r.a = 1
+        let r.b = 1
+        normal! m[
+    elseif getpos('.')[1] < r.l
         let r.b = col([r.l, 1])
     else
         let r.b = col('.')
@@ -200,7 +210,8 @@ fun! s:Region.move_back(motion) dict
     endif
 
     "set end mark and yank between marks
-    call cursor(r.l, r.b+1)
+    let b = r.empty()? r.b : r.b+1
+    call cursor(r.l, b)
     normal! m]`[y`]
 
     call self.update_vars()
@@ -237,7 +248,6 @@ fun! s:Region.update_vars() dict
 
     let r.w = r.b - r.a + 1
     let r.txt = getreg(s:v.def_reg)
-    call r.update_highlight()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

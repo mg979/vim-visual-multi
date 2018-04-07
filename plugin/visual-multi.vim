@@ -1,6 +1,11 @@
-let s:NVIM = has('gui_running') || has('nvim')
-let g:VM_Global = {'is_active': 0}
-let b:VM_Selection = {}
+let s:NVIM                = has('gui_running') || has('nvim')
+
+let g:VM_Global           = {'is_active': 0}
+let b:VM_Selection        = {}
+
+"custom remaps
+let g:VM_Custom_Noremaps  = get(g:, 'VM_Custom_Noremaps', {',': ';', ';': ','})
+let g:VM_Custom_Remaps    = get(g:, 'VM_Custom_Remaps', [])
 
 "load custom mappings file
 let g:VM_custom_mappings  = get(g:, 'VM_custom_mappings', 0)

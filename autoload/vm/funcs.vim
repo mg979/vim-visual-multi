@@ -37,6 +37,7 @@ fun! vm#funcs#init()
     let s:v.extending = 0
     let s:v.only_this = 0
     let s:v.only_this_always = 0
+    let s:v.merge_to_beol = 0
 
     call s:augroup_start()
     return s:Funcs
@@ -153,7 +154,7 @@ endfun
 fun! s:augroup_start()
     augroup plugin-visual-multi
         au!
-        au CursorMoved * call vm#commands#move()
+        au CursorMoved * call vm#commands#move(0, 0)
     augroup END
 endfun
 
