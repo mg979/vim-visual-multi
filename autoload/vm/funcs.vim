@@ -34,8 +34,9 @@ fun! vm#funcs#init()
     let s:v.index = -1
     let s:v.direction = 1
     let s:v.silence = 0
+    let s:v.extending = 0
     let s:v.only_this = 0
-    let s:v.only_this_all = 0
+    let s:v.only_this_always = 0
 
     call s:augroup_start()
     return s:Funcs

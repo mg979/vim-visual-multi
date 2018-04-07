@@ -1,4 +1,4 @@
-let s:motion = 0 | let s:extending = 0 | let s:current_i = 0
+let s:motion = 0 | let s:current_i = 0
 
 fun! s:init(whole)
     let was_active = g:VM_Global.is_active
@@ -206,7 +206,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:extend_vars(n, this)
-    let s:extending = a:n
+    let s:v.extending = a:n
     let s:current_i = s:v.index
     if a:this | let s:v.only_this = 1 | endif
     "let b:VM_backup = copy(b:VM_Selection)
@@ -223,13 +223,23 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_motion(motion, char, this)
-    call s:extend_vars(1, a:this)
-    if a:char != ''
-        let s:motion = a:motion.a:char
+    let current_i = s:v.index
+
+    if a:motion ==# "$"
+        let motion = "$"
+    elseif a:char != ''
+        let motion = a:motion.a:char
     else
-        let s:motion = a:motion.nr2char(getchar())
+        let motion = a:motion.nr2char(getchar())
     endif
-    return s:motion
+
+    for r in s:Regions | call r.move(motion) | endfor
+    normal! `]
+
+    call setmatches(s:v.matches)
+    let s:v.move_from_back = 0
+    call s:Global.update_cursor_highlight()
+    call s:Global.select_region(current_i)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -279,8 +289,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#move(...)
-    if !s:extending | return | endif
-    let s:extending -= 1
+    if !s:v.extending | return | endif
+    let s:v.extending -= 1
     let s:v.move_from_back = !s:v.direction
 
     "select motion: store position to move to, in between the 2 motions
@@ -288,7 +298,7 @@ fun! vm#commands#move(...)
 
     if !len(s:Regions) | call vm#commands#add_cursor_at_pos('.') | endif
 
-    if (s:v.only_this || s:v.only_this_all) | let s:v.only_this = 0
+    if (s:v.only_this || s:v.only_this_always) | let s:v.only_this = 0
         call s:Regions[s:v.index].move(s:motion)
     else
         for r in s:Regions

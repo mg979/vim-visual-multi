@@ -71,7 +71,6 @@ fun! s:Global.new_cursor() dict
     let R = vm#region#new(1)
 
     let s:v.matches = getmatches()
-    call self.select_region(R.index)
     return R
 endfun
 

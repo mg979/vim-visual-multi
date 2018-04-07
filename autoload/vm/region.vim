@@ -55,7 +55,7 @@ fun! s:Region.new(empty)
         let R.a     = getpos(".")[2]        " position
         let R.b     = R.a
         let R.w     = 1
-        let R.A     = self.A_()             " byte offset
+        let R.A     = R.A_()                " byte offset
         let R.B     = R.A
         let R.txt   = ''
     endif

@@ -1,7 +1,7 @@
 let s:NVIM = has('gui_running') || has('nvim')
 
-let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E', '$', '0', '^', 'x']
-let s:find     = ['f', 'F', 't', 'T']
+let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E', '0', '^', 'x', '%']
+let s:find     = ['f', 'F', 't', 'T', '$']
 let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 's', 'U', '*', '@', '/']
 let s:brackets = ['[', ']', '{', '}']
 
@@ -56,7 +56,7 @@ fun! vm#maps#start()
 
     nnoremap <silent> <nowait> <buffer> <esc> :call vm#funcs#reset()<cr>
     nnoremap <silent> <nowait> <buffer> <c-w> :call vm#commands#toggle_option('whole_word')<cr>
-    nnoremap <silent> <nowait> <buffer> <c-o> :call vm#commands#toggle_option('only_this_all')<cr>
+    nnoremap <silent> <nowait> <buffer> <c-o> :call vm#commands#toggle_option('only_this_always')<cr>
     nnoremap <silent> <nowait> <buffer> <c-m> :call vm#merge_regions()<cr>
     nnoremap <silent> <nowait> <buffer> <c-a> :call vm#commands#find_all(0, 1, 0)<cr>
     nnoremap <silent> <nowait> <buffer> s     :call vm#commands#skip()<cr>
@@ -88,7 +88,7 @@ fun! vm#maps#start()
         exe "nnoremap <silent> <nowait> <buffer> <expr> ".m." vm#commands#motion('".m."', 0)"
     endfor
     for m in s:find
-        exe "nnoremap <silent> <nowait> <buffer> <expr> ".m." vm#commands#find_motion('".m."', '', 0)"
+        exe "nnoremap <silent> <nowait> <buffer> ".m." :call vm#commands#find_motion('".m."', '', 0)\<cr>"
     endfor
 
     if g:VM_use_arrow_keys == 1
