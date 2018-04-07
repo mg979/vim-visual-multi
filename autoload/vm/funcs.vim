@@ -32,7 +32,6 @@ fun! vm#funcs#init()
 
     let s:v.oldcase = [&smartcase, &ignorecase]
     let s:v.index = -1
-    let s:v.matches = get(s:v, matches, [])
     let s:v.direction = 1
     let s:v.silence = 0
     let s:v.only_this = 0
@@ -46,7 +45,7 @@ endfun
 "Backup/restore buffer state on buffer change
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:key = { -> 'g:VM_Global.'.bufnr("%") }
+let s:key = { -> 'g:VM_Global.'.bufwinid("%") }
 
 fun! vm#funcs#buffer_leave()
     if !empty(b:VM_Selection)
@@ -59,7 +58,7 @@ endfun
 fun! vm#funcs#buffer_enter()
     let b:VM_Selection = {}
 
-    if !empty(get(g:VM_Global, bufnr("%"), {}))
+    if !empty(get(g:VM_Global, bufwinid("%"), {}))
         call vm#init_buffer(1)
         call setmatches(s:v.matches)
         call setpos('.', s:v.pos)
@@ -83,7 +82,7 @@ fun! vm#funcs#reset(...)
 
     if !a:0    "exiting manually
         call s:Funcs.msg('Exited Visual-Multi.')
-        call remove(g:VM_Global, bufnr("%"))
+        call remove(g:VM_Global, bufwinid("%"))
     endif
 
     call s:augroup_end()

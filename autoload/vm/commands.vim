@@ -263,7 +263,15 @@ fun! vm#commands#select_motion(inclusive, this)
     call vm#commands#move()
 
     let s:v.silence = 0
-    if !was_active | call vm#commands#add_under(0, 0, 0, 1) | endif
+    if !was_active
+        if !s:Global.all_empty()
+            call vm#commands#add_under(0, 0, 0, 1)
+        else
+            call s:Funcs.msg('Not found. Exiting Visual-multi.')
+            let s:v.silence = 1
+            call vm#funcs#reset()
+        endif
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

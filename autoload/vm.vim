@@ -15,10 +15,10 @@ fun! vm#init_buffer(...)
     let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': [], 'Funcs': {}}
 
     if a:0  "restoring buffer
-        exe 'let b:VM_Selection = g:VM_Global.'.bufnr("%")
+        exe 'let b:VM_Selection = g:VM_Global.'.bufwinid("%")
 
     else    "initialize
-        exe 'let g:VM_Global.'.bufnr("%").' = b:VM_Selection'
+        exe 'let g:VM_Global.'.bufwinid("%").' = b:VM_Selection'
     endif
 
     let g:VM_Global.is_active = 1
