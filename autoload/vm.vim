@@ -8,7 +8,7 @@
 " s:Matches contains the matches as they are registered with matchaddpos()
 " s:v.matches contains the current matches as read with getmatches()
 
-fun! vm#init_buffer(...)
+fun! vm#init_buffer(empty, ...)
     "if already initialized, return current instance
     if !empty(b:VM_Selection) | return s:V | endif
 
@@ -30,8 +30,10 @@ fun! vm#init_buffer(...)
     let s:Regions  = s:V.Regions
     let s:Matches  = s:V.Matches
 
-    let s:Funcs    = vm#funcs#init()
+    let s:Funcs    = vm#funcs#init(a:empty)
     let s:Search   = s:V.Search
+
+    let s:byte = funcref('s:Funcs.byte')
 
     call s:Funcs.msg('Visual-Multi started. Press <esc> to exit.')
     call vm#region#init()
@@ -66,11 +68,12 @@ fun! s:Global.new_cursor() dict
 
     "don't add a cursor over an existing region
     let R = self.is_region_at_pos('.')
-    if !empty(R) | return {} | endif
+    if !empty(R) | call self.select_region(R.index) | return R | endif
 
     let R = vm#region#new(1)
 
     let s:v.matches = getmatches()
+    call self.select_region(R.index)
     return R
 endfun
 
@@ -140,12 +143,15 @@ fun! s:Global.is_region_at_pos(pos) dict
     "pos can be a string (like '.') or a list
     if type(a:pos) == v:t_string
         let pos = getpos(a:pos)[1:2]
+        let pos = s:byte([pos[0], pos[1]])
     else
-        let pos = a:pos[1:2]
+        let pos = s:byte([a:pos[0], a:pos[1]])
     endif
 
     for r in s:Regions
-        if pos[0] == r.l && pos[1] >= r.a && pos[1] <= r.b
+        let a = s:byte([r.l, r.a])
+        let b = s:byte([r.l, r.b])
+        if pos >= a && pos <= b
             return r | endif | endfor
     return {}
 endfun

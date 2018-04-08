@@ -7,7 +7,7 @@
 "script, and then included in the global variable, so that they can be
 "accessed from anywhere.
 
-fun! vm#funcs#init()
+fun! vm#funcs#init(empty)
     let s:V       = b:VM_Selection
     let s:V.Funcs = s:Funcs
 
@@ -22,6 +22,8 @@ fun! vm#funcs#init()
     let s:v.def_reg = s:default_reg()
     let s:v.oldreg = s:Funcs.get_reg()
     let s:v.oldsearch = [getreg("/"), getregtype("/")]
+    if a:empty | let @/ = '' | endif
+
     let s:v.oldvirtual = &virtualedit
     set virtualedit=onemore
     let s:v.oldwhichwrap = &whichwrap
@@ -61,8 +63,10 @@ endfun
 fun! vm#funcs#buffer_enter()
     let b:VM_Selection = {}
 
-    if !empty(get(g:VM_Global, bufwinid("%"), {}))
-        call vm#init_buffer(1)
+    if !buflisted(bufnr("%"))
+        return
+    elseif !empty(get(g:VM_Global, bufwinid("%"), {}))
+        call vm#init_buffer(0, 1)
         call setmatches(s:v.matches)
         call setpos('.', s:v.pos)
         call vm#commands#add_under(0, s:v.whole_word, 0, 1)
@@ -99,6 +103,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:Funcs = {}
+
+let s:Funcs.byte_pos = { pos -> eval(line2byte(line(pos)) + col(pos)) }
+let s:Funcs.byte     = { pos -> eval(line2byte(pos[0]) + pos[1] ) }
 
 fun! s:default_reg()
     let clipboard_flags = split(&clipboard, ',')

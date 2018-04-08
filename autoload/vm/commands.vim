@@ -1,9 +1,9 @@
 let s:motion = 0 | let s:current_i = 0
 
-fun! s:init(whole)
-    let was_active = g:VM_Global.is_active
-    let s:V       = vm#init_buffer()
+fun! s:init(whole, empty)
+    if g:VM_Global.is_active | return 1 | endif
 
+    let s:V       = vm#init_buffer(a:empty)
     let s:v       = s:V.Vars
     let s:Regions = s:V.Regions
     let s:Matches = s:V.Matches
@@ -12,7 +12,6 @@ fun! s:init(whole)
     let s:Search  = s:V.Search
 
     let s:v.whole_word = a:whole
-    return was_active
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -20,7 +19,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#start()
-    call s:init(0)
+    call s:init(0, 1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -28,7 +27,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#add_cursor_at_pos(pos)
-    call s:init(0)
+    let was_active = s:init(0, 1)
 
     "try to create cursor
     call s:Global.new_cursor()
@@ -59,7 +58,7 @@ fun! vm#commands#find_regex()
 endfun
 
 fun! vm#commands#find_by_regex(...)
-    call s:init(0)
+    call s:init(0, 0)
     let s:regex_pos = getpos('.')
     let s:regex_reg = @/
     call s:Funcs.msg('Enter regex:')
@@ -72,7 +71,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_under(visual, whole, inclusive)
-    call s:init(a:whole)
+    call s:init(a:whole, 0)
 
     if !a:visual           " yank and create region
         if a:inclusive
@@ -118,6 +117,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav)
+    if !a:nav && @/ == '' | return | endif
     let i = s:v.index
 
     "just reverse direction if going ip
@@ -141,6 +141,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(skip, nav)
+    if !a:nav && @/ == '' | return | endif
     let i = s:v.index
 
     "just reverse direction if going down
@@ -169,7 +170,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_all(visual, whole, inclusive)
-    call s:init(a:whole)
+    call s:init(a:whole, 0)
 
     let storepos = getpos('.')
     let oldredraw = &lz | set lz
@@ -191,8 +192,12 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#skip()
-    if s:v.direction
+fun! vm#commands#skip(just_remove)
+    if a:just_remove
+        let r = s:Global.is_region_at_pos('.')
+        if !empty(r) | call r.remove() | endif
+
+    elseif s:v.direction
         call vm#commands#find_next(1, 0)
     else
         call vm#commands#find_prev(1, 0)
@@ -204,11 +209,14 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Extend regions commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" NOTE: always call s:extend_vars() just the real motion, but after any other
+" function that moves the cursor, or the autocmd will be triggered for the
+" wrong function.
 
 fun! s:extend_vars(n, this)
     let s:v.extending = a:n
     let s:current_i = s:v.index
-    if a:this | let s:v.only_this = 1 | endif
+    if a:this | let s:v.only_this = a:n | endif
     "let b:VM_backup = copy(b:VM_Selection)
 endfun
 
@@ -247,33 +255,72 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#select_motion(inclusive, this)
-    let was_active = s:init(0)
-    let s:v.silence = 1
-    call s:extend_vars(2, a:this)
-    let c = nr2char(getchar())
+fun! s:inclusive(c)
+    let c = a:c
 
-    let a = a:inclusive ? 'F' : 'T'
-    let b = a:inclusive ? 'f' : 't'
-
-    if index(['"', "'", '`', '_', '-'], c) != -1
-        let d = c
-    elseif index(['[', ']'], c) != -1
+    if index(['[', ']'], c) != -1
         let c = '[' | let d = ']'
     elseif index(['(', ')'], c) != -1
         let c = '(' | let d = ')'
     elseif index(['{', '}'], c) != -1
-        let c = '[' | let d = '}'
+        let c = '{' | let d = '}'
     elseif index(['<', '>'], c) != -1
         let c = '<' | let d = '>'
     else
         let d = nr2char(getchar())
     endif
+    return [c, d]
+endfun
+
+fun! vm#commands#select_motion(inclusive, this)
+    let was_active = s:init(0, 0) | let merge = 0
+    let s:v.silence = 1
+    if a:this | call s:Global.new_cursor() | let merge = 1 | endif
+    call s:extend_vars(2, a:this)
+
+    let c = nr2char(getchar())
+    let a = a:inclusive ? 'F' : 'T'
+
+    if index(['"', "'", '`', '_', '-'], c) != -1
+        let d = c
+
+    elseif a:inclusive
+        let x = s:inclusive(c) | let c = x[0] | let d = x[1]
+
+    elseif c == '['
+        let a = 'T' | let c = '[' | let d = ']'
+
+    elseif c == ']'
+        let a = 'F' | let c = '[' | let d = ']'
+
+    elseif c == '{'
+        let a = 'T' | let c = '{' | let d = '}'
+
+    elseif c == '}'
+        let a = 'F' | let c = '{' | let d = '}'
+
+    elseif c == '('
+        let a = 'T' | let c = '(' | let d = ')'
+
+    elseif c == ')'
+        let a = 'F' | let c = '(' | let d = ')'
+
+    elseif c == '<'
+        let a = 'T' | let c = '<' | let d = '>'
+
+    elseif c == '>'
+        let a = 'F' | let c = '<' | let d = '>'
+
+    else
+        let d = nr2char(getchar())
+    endif
+
+    let b = a==#'F' ? 'f' : 't'
 
     let s:motion = a.c
-    call vm#commands#move(0, 1)
+    call vm#commands#move(merge, 1)
     let s:motion = b.d
-    call vm#commands#move(0, 0)
+    call vm#commands#move(merge, 0)
 
     if !was_active
         if !s:Global.all_empty()
@@ -285,6 +332,8 @@ fun! vm#commands#select_motion(inclusive, this)
             let s:v.silence = 1
             call vm#funcs#reset()
         endif
+    else
+        let s:v.silence = 0
     endif
 endfun
 
@@ -294,7 +343,6 @@ endfun
 
 let s:always_from_back = { -> index(['^', '0'], s:motion) >= 0 }
 let s:can_from_back    = { -> index(['$'], s:motion) == -1 && !s:v.direction }
-let s:merge_to_beol    = { -> index(["\<End>", "0"], s:motion) >= 0 }
 let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
 
 fun! vm#commands#move(merge, restore_pos, ...)
@@ -316,7 +364,7 @@ fun! vm#commands#move(merge, restore_pos, ...)
     if !len(s:Regions) | call vm#commands#add_cursor_at_pos('.') | endif
 
     if s:only_this()
-        call s:Regions[s:v.index].move(s:motion) | let s:v.only_this = 0
+        call s:Regions[s:v.index].move(s:motion) | let s:v.only_this -= 1
     else
         for r in s:Regions
             call r.move(s:motion)

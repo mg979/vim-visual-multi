@@ -193,6 +193,7 @@ fun! s:Region.move_back(motion) dict
     "if !s:simple(a:motion[0]) && getpos('.')[1] < r.l
     if s:v.merge_to_beol
         let s:v.merge_to_beol = 0
+        let s:v.direction = 1
         let r.a = 1
         let r.b = 1
         normal! m[

@@ -2,7 +2,7 @@ let s:NVIM = has('gui_running') || has('nvim')
 
 let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E', 'x']
 let s:find     = ['f', 'F', 't', 'T', '$', '0', '^', '%']
-let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 's', 'U', '*', '@', '/']
+let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 'U', '*', '@', '/']
 let s:brackets = ['[', ']', '{', '}']
 
 let s:noremaps = get(g:, 'VM_Custom_Noremaps', {})
@@ -49,8 +49,8 @@ fun! s:hjkl()
     nnoremap     <silent> <nowait> <buffer>        <C-h>       :call vm#commands#motion('h', 1)<cr>
     nnoremap     <silent> <nowait> <buffer>        <C-l>       :call vm#commands#motion('l', 1)<cr>
     nnoremap     <silent> <nowait> <buffer>        <M-J>       :call vm#commands#motion('J', 0)<cr>
-    nnoremap     <silent> <nowait> <buffer>        <End>       :call vm#commands#merge_to_beol(1, 0)<cr>
-    nnoremap     <silent> <nowait> <buffer>        <Home>      :call vm#commands#merge_to_beol(0, 0)<cr>
+    nnoremap     <silent> <nowait> <buffer>        <S-End>     :call vm#commands#merge_to_beol(1, 0)<cr>
+    nnoremap     <silent> <nowait> <buffer>        <S-Home>    :call vm#commands#merge_to_beol(0, 0)<cr>
 endfun
 
 fun! vm#maps#start()
@@ -64,7 +64,8 @@ fun! vm#maps#start()
     nnoremap <silent> <nowait> <buffer> <c-o> :call vm#commands#toggle_option('only_this_always')<cr>
     nnoremap <silent> <nowait> <buffer> <c-m> :call vm#merge_regions()<cr>
     nnoremap <silent> <nowait> <buffer> <c-a> :call vm#commands#find_all(0, 1, 0)<cr>
-    nnoremap <silent> <nowait> <buffer> s     :call vm#commands#skip()<cr>
+    nnoremap <silent> <nowait> <buffer> q     :call vm#commands#skip(0)<cr>
+    nnoremap <silent> <nowait> <buffer> Q     :call vm#commands#skip(1)<cr>
     nnoremap <silent> <nowait> <buffer> U     :call vm#commands#undo()<cr>
     nnoremap <silent> <nowait> <buffer> *     :call vm#commands#add_under(0, 1, 0, 1)<cr>
     nnoremap <silent> <nowait> <buffer> @     :call vm#commands#add_under(0, 1, 1, 1)<cr>
@@ -112,10 +113,12 @@ fun! vm#maps#start()
     endif
 
     "select
-    nnoremap <silent> <nowait> <buffer> q :call vm#commands#select_motion(0, 0)<cr>
-    nnoremap <silent> <nowait> <buffer> Q :call vm#commands#select_motion(1, 0)<cr>
-    nnoremap <silent> <nowait> <buffer> gi :call vm#commands#select_motion(0, 0)<cr>
-    nnoremap <silent> <nowait> <buffer> ga :call vm#commands#select_motion(1, 0)<cr>
+    nnoremap <silent> <nowait> <buffer> g  :call vm#commands#select_motion(0, 1)<cr>
+    nnoremap <silent> <nowait> <buffer> gi :call vm#commands#select_motion(0, 1)<cr>
+    nnoremap <silent> <nowait> <buffer> ga :call vm#commands#select_motion(1, 1)<cr>
+    nnoremap <silent> <nowait> <buffer> G  :call vm#commands#select_motion(0, 0)<cr>
+    nnoremap <silent> <nowait> <buffer> Gi :call vm#commands#select_motion(0, 0)<cr>
+    nnoremap <silent> <nowait> <buffer> Ga :call vm#commands#select_motion(1, 0)<cr>
 endfun
 
 
@@ -157,10 +160,14 @@ fun! vm#maps#end()
     nunmap <buffer> <c-m>
     nunmap <buffer> <c-]>
     nunmap <buffer> <M-/>
-    nunmap <buffer> <End>
-    nunmap <buffer> <Home>
+    nunmap <buffer> <S-End>
+    nunmap <buffer> <S-Home>
+    nunmap <buffer> g
     nunmap <buffer> gi
     nunmap <buffer> ga
+    nunmap <buffer> G
+    nunmap <buffer> Gi
+    nunmap <buffer> Ga
     silent! nunmap <buffer> <c-space>
     silent! nunmap <buffer> <nul>
 endfun
