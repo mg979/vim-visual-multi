@@ -6,6 +6,8 @@ fun! vm#region#init()
     let s:Global  = s:V.Global
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
+
+    let s:Extend = { -> g:VM_Global.extend_mode }
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -93,13 +95,16 @@ fun! s:Region.remove() dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Region resizing
+" Region motions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"NOTE: these lambdas aren't really used much for now.
 
 let s:forward   = {m -> index(['w', 'W', 'e', 'E', 'l', 'j', 'f', 't', '$'], m)  >= 0}
 let s:backwards = {m -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], m)       >= 0}
 let s:simple    = {m -> index(['h', 'j', 'k', 'l'], m)                           >= 0}
 let s:extreme   = {m -> index(['$', '0', '^'], m)                                >= 0}
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.move(motion) dict
     if s:v.move_from_back
@@ -115,60 +120,66 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.move_forward(motion) dict
-    let r = self | let all_empty = s:Global.all_empty()
+fun! s:Region.move_cursor(motion) dict
+    """If not in extend mode, just move the cursors."""
+    if s:Extend() | return | endif
 
-    "move to the beginning of the region and set a mark
-    call cursor(r.l, r.a)
-    normal! m[
+    call cursor(self.l, self.a)
+    exe "normal! ".a:motion
+
+    let self.a = self.end()
+    let self.b = self.a
+    call self.update_vars()
+    return 1
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region.end() dict
+    """Ensure line boundaries aren't crossed."""
+    let r = self | let p = getpos('.')[1]
+
+    if     ( p > r.l ) | return col([r.l, '$'])-1
+    elseif ( p < r.l ) | return col([r.l, 1])
+    else               | return col('.')
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Extend mode
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region.move_forward(motion) dict
+    let r = self | if self.move_cursor(a:motion) | return | endif
 
     "move to the end of the region and perform the motion
     call cursor(r.l, r.b)
     exe "normal! ".a:motion
 
-    "ensure line boundaries aren't crossed
-    "if !s:simple(a:motion[0]) && getpos('.')[1] > r.l
-    if getpos('.')[1] > r.l
-        let r.b = col([r.l, '$'])-1
-    else
-        let r.b = col('.')
-    endif
+    let r.b = self.end()
 
-    "keep single width while moving if all cursors are empty
-    if a:motion ==# 'l' && all_empty
-        let r.a += 1
-    elseif a:motion == "\<End>"
+    "merge to eol motion
+    if a:motion == "\<End>"
         let s:v.merge_to_beol = 0
-        normal! m[
         let r.a = r.b
     endif
 
-    "set end mark and yank between marks
-    let b = r.empty()? r.b : r.b+1
-    call cursor(r.l, b)
-    normal! m]`[y`]
-
+    call self.yank()
     call self.update_vars()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.move_from_back(motion) dict
-    let r = self
+    let r = self | if self.move_cursor(a:motion) | return | endif
 
-    "set a marks and perform the motion
+    "set a mark and perform the motion
     call cursor(r.l, r.b+1)
     normal! m]
     call cursor(r.l, r.a)
     exe "normal! ".a:motion
 
-    "ensure line boundaries aren't crossed
-    "if !s:simple(a:motion[0]) && getpos('.')[1] < r.l
-    if getpos('.')[1] < r.l
-        let r.a = col([r.l, 1])
-    else
-        let r.a = col('.')
-    endif
+    let r.a = self.end()
 
     "set begin mark and yank between marks
     normal! m[`[y`]
@@ -179,42 +190,26 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.move_back(motion) dict
-    let r = self
-
-    "move to the beginning of the region and set a mark
-    call cursor(r.l, r.a)
-    normal! m[
+    let r = self | if self.move_cursor(a:motion) | return | endif
 
     "move to the end of the region and perform the motion
     call cursor(r.l, r.b)
     exe "normal! ".a:motion
 
-    "ensure line boundaries aren't crossed
-    "if !s:simple(a:motion[0]) && getpos('.')[1] < r.l
+    "merge to bol motion
     if s:v.merge_to_beol
         let s:v.merge_to_beol = 0
         let s:v.direction = 1
         let r.a = 1
         let r.b = 1
-        normal! m[
-    elseif getpos('.')[1] < r.l
-        let r.b = col([r.l, 1])
     else
-        let r.b = col('.')
+        let r.b = self.end()
     endif
 
-    "exchange a and b if there's been inversion
-    if r.a > r.b
-        let r.a = r.b
-        call cursor(r.l, r.a)
-        normal! m[
-    endif
+    "collapse if there's been inversion
+    if r.a > r.b | let r.a = r.b | endif
 
-    "set end mark and yank between marks
-    let b = r.empty()? r.b : r.b+1
-    call cursor(r.l, b)
-    normal! m]`[y`]
-
+    call self.yank()
     call self.update_vars()
 endfun
 
@@ -223,24 +218,38 @@ endfun
 " Update functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Region.yank()
+    """Yank region content if in extend mode."""
+
+    let r = self
+
+    "if not in extend mode, the cursor will stay at r.a
+    call cursor(r.l, r.a)
+    if s:Extend()
+        normal! m[
+        call cursor(r.l, r.b+1)
+        normal! m]`[y`]`]
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Region.update(l, a, b) dict
+    """Update the region position and text."""
+
     let self.l   = a:l                   " line
     let self.a   = a:a                   " begin
     let self.b   = a:b                   " end
 
-    "yank new content
-    call cursor(a:l, a:a)
-    normal! m[
-    call cursor(a:l, a:b+1)
-    normal! m]`[y`]
-
+    call self.yank()
     call self.update_vars()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_vars() dict
-    "update the rest of the region vars
+    """Update the rest of the region vars."""
+
     let r = self
     let s:v.index = r.index
 
@@ -248,13 +257,14 @@ fun! s:Region.update_vars() dict
     let r.B = r.B_()
 
     let r.w = r.b - r.a + 1
-    let r.txt = getreg(s:v.def_reg)
+    let r.txt = s:Extend()? getreg(s:v.def_reg) : ''
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_highlight() dict
-    "update the highlight match
+    """Update the highlight match."""
+
     let r = self | let i = r.index
 
     let s:v.matches[i].pos1 = [r.l, r.a, r.w]

@@ -9,7 +9,8 @@
 " s:v.matches contains the current matches as read with getmatches()
 
 fun! vm#init_buffer(empty, ...)
-    "if already initialized, return current instance
+    """If already initialized, return current instance."""
+
     if !empty(b:VM_Selection) | return s:V | endif
 
     let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': [], 'Funcs': {}}
@@ -50,12 +51,12 @@ let s:Global = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.get_region(down) dict
+fun! s:Global.get_region() dict
+    """Get the region under cursor, or create a new one if there is none."""
 
     let R = self.is_region_at_pos('.')
     if empty(R) | let R = vm#region#new(0) | endif
 
-    let s:v.direction = a:down
     let s:v.matches = getmatches()
     call self.select_region(R.index)
     call s:Search.check_pattern()
@@ -65,8 +66,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.new_cursor() dict
+    """Create a new cursor if there is't already a region."""
 
-    "don't add a cursor over an existing region
     let R = self.is_region_at_pos('.')
     if !empty(R) | call self.select_region(R.index) | return R | endif
 
@@ -74,6 +75,7 @@ fun! s:Global.new_cursor() dict
 
     let s:v.matches = getmatches()
     call self.select_region(R.index)
+    call s:Funcs.count_msg(0)
     return R
 endfun
 
@@ -83,6 +85,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_highlight(...) dict
+    """Update highlight for all regions."""
 
     for r in s:Regions
         call r.update_highlight()
@@ -92,12 +95,16 @@ fun! s:Global.update_highlight(...) dict
     call self.update_cursor_highlight()
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Global.update_cursor_highlight(...) dict
+    """Set cursor highlight, depending on extending mode."""
+
     highlight clear MultiCursor
-    if self.all_empty()
+    if self.all_empty() && !g:VM_Global.extend_mode
         exe "highlight link MultiCursor ".g:VM_Mono_Cursor_hl
     else
-        exe "highlight MultiCursor ".g:VM_Normal_Cursor_hl
+        exe "highlight link MultiCursor ".g:VM_Normal_Cursor_hl
     endif
 endfun
 
@@ -106,15 +113,43 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.all_empty() dict
+    """If not all regions are empty, turn on extend mode."""
+
     for r in s:Regions
-        if r.a != r.b | return 0 | endif | endfor
-        return 1
-    endfun
+        if r.a != r.b
+            if !g:VM_Global.extend_mode | call vm#commands#change_mode() | endif
+            return 0 | endif
+    endfor
+    return 1
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.update_regions() dict
+    """Force regions update."""
+
+    for r in s:Regions | call r.update(r.l, r.a, r.b) | endfor
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.collapse_regions() dict
+    """Collapse regions to cursors and turn off extend mode."""
+
+    for r in s:Regions
+        if r.a != r.b | call r.update(r.l, r.a, r.a) | endif
+    endfor
+    let g:VM_Global.extend_mode = 0
+    call self.update_regions()
+    call self.update_highlight()
+endfun
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.select_region(i) dict
-    "adjust cursor position of the region at index, then return the region
+    """Adjust cursor position of the region at index, then return the region."""
+
     if a:i >= len(s:Regions) | let i = 0
     elseif a:i<0 | let i = len(s:Regions) - 1
     else | let i = a:i | endif
@@ -129,6 +164,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.select_region_at_pos(pos) dict
+    """Try to select a region at the given position."""
+
     let r = self.is_region_at_pos(a:pos)
     if !empty(r)
         return self.select_region(r.index)
@@ -138,7 +175,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.is_region_at_pos(pos) dict
-    "find if the cursor is on a highlighted region
+    """Find if the cursor is on a highlighted region.
+    "Return an empty dict otherwise."""
 
     "pos can be a string (like '.') or a list
     if type(a:pos) == v:t_string
@@ -159,13 +197,15 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_indices() dict
-    "adjust region indices
+    """Adjust region indices."""
+
     let i = 0
     for r in s:Regions
         let r.index = i
         let i += 1
     endfor
 endfun
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Merging regions
@@ -175,8 +215,10 @@ fun! vm#merge_regions()
     if !empty(b:VM_Selection) | call s:Global.merge_regions() | endif
 endfun
 
+
 fun! s:Global.merge_regions(...) dict
-    "merge overlapping regions
+    """Merge overlapping regions."""
+
     let lines = {}
     let storepos = getpos('.')
 
@@ -217,8 +259,6 @@ fun! s:Global.merge_regions(...) dict
 
     "restore cursor position
     call self.select_region_at_pos(storepos)
-    call s:Funcs.count_msg()
+    call s:Funcs.count_msg(0)
 endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

@@ -86,6 +86,7 @@ fun! vm#funcs#reset(...)
     call vm#maps#end()
     let b:VM_Selection = {}
     let g:VM_Global.is_active = 0
+    let g:VM_Global.extend_mode = 0
 
     if !a:0    "exiting manually
         call s:Funcs.msg('Exited Visual-Multi.')
@@ -149,9 +150,11 @@ fun! s:Funcs.msg(text) dict
     endif
 endfun
 
-fun! s:Funcs.count_msg() dict
+fun! s:Funcs.count_msg(force) dict
+    if a:force | let s:v.silence = 0 | endif
     let s = len(s:Regions)>1 ? 's.' : '.'
-    call self.msg(len(s:Regions).' region'.s.'   Current patterns: '.string(s:v.search))
+    let t = g:VM_Global.extend_mode? ' region' : ' cursor'
+    call self.msg(len(s:Regions).t.s.'   Current patterns: '.string(s:v.search))
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -170,4 +173,25 @@ fun! s:augroup_end()
         au!
     augroup END
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Utility functions
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.regions_contents() dict
+    echohl WarningMsg | echo "--- Regions contents ---" | echohl None
+    for r in s:Regions | call self.region_txt(r) | endfor
+endfun
+
+fun! s:Funcs.region_txt(r) dict
+    let index = printf("%-4d", a:r.index)
+    let line = substitute(a:r.txt, '\V\n', '^M', 'g')
+    if len(line) > 80 | let line = line[:80] . '…' | endif
+
+    echohl Directory | echo  index
+    echohl None      | echon line
+    echohl None
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

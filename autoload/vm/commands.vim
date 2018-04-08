@@ -1,6 +1,7 @@
 let s:motion = 0 | let s:current_i = 0
 
-fun! s:init(whole, empty)
+fun! s:init(whole, empty, extend_mode)
+    if a:extend_mode | let g:VM_Global.extend_mode = 1 | endif
     if g:VM_Global.is_active | return 1 | endif
 
     let s:V       = vm#init_buffer(a:empty)
@@ -12,34 +13,68 @@ fun! s:init(whole, empty)
     let s:Search  = s:V.Search
 
     let s:v.whole_word = a:whole
+    let s:Extend = { -> g:VM_Global.extend_mode }
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Start empty
+" Change mode
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#start()
-    call s:init(0, 1)
+fun! vm#commands#change_mode()
+    let g:VM_Global.extend_mode = !s:Extend()
+
+    if s:Extend()
+        call s:Funcs.msg('Switched to Extend Mode')
+        call s:Global.update_regions()
+        call s:Global.update_cursor_highlight()
+    else
+        call s:Funcs.msg('Switched to Cursor Mode')
+        call s:Global.collapse_regions()
+    endif
+    call s:Funcs.count_msg(0)
 endfun
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Add cursor command
+" Add cursor
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#add_cursor_at_pos(pos)
-    let was_active = s:init(0, 1)
+fun! s:check_extend_default()
+    """If just starting, enable extend mode if option is set."""
 
-    "try to create cursor
+    if g:VM_Global.extend_mode | return s:init(0, 1, 0)
+    elseif !g:VM_Global.is_active && g:VM_Extend_By_Default | return s:init(0, 1, 1)
+    else | return s:init(0, 1, 0) | endif
+endfun
+
+fun! vm#commands#add_cursor_at_word(yank, search)
+    call s:check_extend_default()
+
+    let s:v.silence = 1
+    if a:yank | call s:yank(0) | endif
+    normal! `[
     call s:Global.new_cursor()
 
-    if a:pos == 1
+    if a:search | call s:Search.set() | endif
+    call s:Funcs.count_msg(1)
+endfun
+
+fun! vm#commands#add_cursor_at_pos(where)
+    let was_active = g:VM_Global.is_active
+    call s:check_extend_default()
+
+    "silently add one cursor at pos
+    if !was_active || !a:where
+        let s:v.silence = 1 | call s:Global.new_cursor() | let s:v.silence = 0
+    endif
+
+    if a:where == 1
         normal! j
         call s:Global.new_cursor()
-    elseif a:pos == 2
+    elseif a:where == 2
         normal! k
         call s:Global.new_cursor()
     endif
-    call s:Funcs.count_msg()
 endfun
 
 
@@ -47,130 +82,92 @@ endfun
 " Find by regex
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_regex()
+fun! vm#commands#regex_done()
     cunmap <buffer> <cr>
-    if @/ == s:regex_reg | call setpos('.', s:regex_pos) | return | endif
+    cunmap <buffer> <esc>
 
-    normal gny`]
+    "@/ didn't change, so search has been aborted, return to previous position
+    if @/ == 'VM_FAKE_REGEX!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+        let @/ = s:regex_reg
+        call s:Funcs.msg('Regex search aborted.') | call s:Funcs.count_msg(1)
+        call setpos('.', s:regex_pos)
+        return | endif
+
+    normal! gny`]
     call s:Search.read()
-    call s:Global.get_region(1)
-    call s:Funcs.count_msg()
+
+    if s:Extend() | call s:Global.get_region()
+    else          | call vm#commands#add_cursor_at_word(0, 0)
+    endif
+
+    call s:Funcs.count_msg(0)
 endfun
 
 fun! vm#commands#find_by_regex(...)
-    call s:init(0, 0)
+    call s:init(0, 0, 0)
+
+    "store reg and position, to check if the search will be aborted
     let s:regex_pos = getpos('.')
     let s:regex_reg = @/
-    call s:Funcs.msg('Enter regex:')
-    call s:Funcs.msg('Enter regex:')
-    cnoremap <buffer> <cr> <cr>:call vm#commands#find_regex()<cr>
+    let @/ = 'VM_FAKE_REGEX!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+
+    let mode = s:Extend()? ' (extend mode)' : ' (cursor mode)'
+    call s:Funcs.msg('Enter regex'.mode.':')
+    call s:Funcs.msg('Enter regex'.mode.':')
+    cnoremap <buffer> <cr> <cr>:call vm#commands#regex_done()<cr>
+    cnoremap <buffer> <esc> <cr>:call vm#commands#regex_done()<cr>
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find under commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" NOTE: don't call s:Funcs.count_msg() after merging regions, or it will be
+" called twice.
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:yank(inclusive)
+    if a:inclusive | normal! yiW`]
+    else           | normal! yiw`]
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_under(visual, whole, inclusive)
-    call s:init(a:whole, 0)
+    call s:init(a:whole, 0, 1)
 
-    if !a:visual           " yank and create region
-        if a:inclusive
-            normal! yiW`]
-        else
-            normal! yiw`]
-        endif
-    endif
+    " yank and create region
+    if !a:visual | call s:yank(a:inclusive) | endif
 
     call s:Search.set()
-    call s:Global.get_region(1)
-    call s:Funcs.count_msg()
+    call s:Global.get_region()
+    call s:Funcs.count_msg(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#add_under(visual, whole, inclusive, ...)
+    call s:init(a:whole, 0, 1)
 
     if !a:visual
         let R = s:Global.is_region_at_pos('.')
 
         "only yank if not on an existing region
-        if empty(R)
-            if a:inclusive
-                normal! yiW`]
-            else
-                normal! yiw`]
-            endif
-        else
-            call s:Funcs.set_reg(R.txt)
-        endif
+        if empty(R) | call s:yank(a:inclusive)
+        else | call s:Funcs.set_reg(R.txt) | endif
     endif
 
-    let s:v.whole = a:whole
     call s:Search.set()
-    let R = s:Global.get_region(1)
+    let R = s:Global.get_region()
     call s:Global.merge_regions(R.l)
     if !a:0 | call vm#commands#find_next(0, 0) | endif
-    call s:Funcs.count_msg()
-endfun
-
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#commands#find_next(skip, nav)
-    if !a:nav && @/ == '' | return | endif
-    let i = s:v.index
-
-    "just reverse direction if going ip
-    if !s:v.direction
-        let s:v.direction = 1
-        call s:Global.select_region(i)
-        return
-    endif
-
-    "just navigate to next
-    if a:nav | call s:Global.select_region(s:v.index+1) | return | endif
-
-    "skip current match
-    if a:skip | call s:Regions[i].remove() | endif
-
-    silent normal! ngny`]
-    call s:Global.get_region(1)
-    call s:Funcs.count_msg()
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#commands#find_prev(skip, nav)
-    if !a:nav && @/ == '' | return | endif
-    let i = s:v.index
-
-    "just reverse direction if going down
-    if s:v.direction
-        let s:v.direction = 0
-        call s:Global.select_region(i)
-        return
-    endif
-
-    "just navigate to previous
-    if a:nav | call s:Global.select_region(s:v.index-1) | return | endif
-
-    "move to the beginning of the current match
-    let current = s:Regions[i]
-    let pos = [current.l, current.a]
-    call cursor(pos)
-
-    "skip current match
-    if a:skip | call s:Regions[i].remove() | endif
-
-    silent normal! NgNy`[
-    call s:Global.get_region(0)
-    call s:Funcs.count_msg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_all(visual, whole, inclusive)
-    call s:init(a:whole, 0)
+    call s:init(a:whole, 0, 1)
 
     let storepos = getpos('.')
     let oldredraw = &lz | set lz
@@ -186,8 +183,76 @@ fun! vm#commands#find_all(visual, whole, inclusive)
 
     call setpos('.', storepos)
     let &lz = oldredraw
-    let s:v.silence = 0
-    call s:Funcs.count_msg()
+    call s:Funcs.count_msg(1)
+endfun
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Find next/previous
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:get_next(n)
+    if s:Extend()
+        silent exe "normal! ".a:n."g".a:n."y`]"
+        call s:Global.get_region()
+        call s:Funcs.count_msg(0)
+    else
+        silent exe "normal! ".a:n."g".a:n."y`]"
+        call vm#commands#add_cursor_at_word(0, 0)
+    endif
+endfun
+
+" force navigate when using [] with empty cursors and no search set
+
+let s:nav = { nav -> nav || ( !s:Extend() && !nav && @/ == '' ) }
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#find_next(skip, nav)
+    let nav = s:nav(a:nav)
+    let i = s:v.index
+
+    "just navigate to next
+    if nav | call s:Global.select_region(i+1) | return | endif
+
+    "just reverse direction if going ip
+    if !s:v.direction
+        let s:v.direction = 1
+        call s:Global.select_region(i)
+        return
+    endif
+
+    "skip current match
+    if a:skip | call s:Regions[i].remove() | endif
+
+    call s:get_next('n')
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#find_prev(skip, nav)
+    let nav = s:nav(a:nav)
+    let i = s:v.index
+
+    "just navigate to previous
+    if nav | call s:Global.select_region(i-1) | return | endif
+
+    "just reverse direction if going down
+    if s:v.direction
+        let s:v.direction = 0
+        call s:Global.select_region(i)
+        return
+    endif
+
+    "move to the beginning of the current match
+    let current = s:Regions[i]
+    let pos = [current.l, current.a]
+    call cursor(pos)
+
+    "skip current match
+    if a:skip | call s:Regions[i].remove() | endif
+
+    call s:get_next('N')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -202,15 +267,15 @@ fun! vm#commands#skip(just_remove)
     else
         call vm#commands#find_prev(1, 0)
     endif
-    call s:Funcs.count_msg()
+    call s:Funcs.count_msg(0)
 endfun
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Extend regions commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" NOTE: always call s:extend_vars() just the real motion, but after any other
-" function that moves the cursor, or the autocmd will be triggered for the
+" NOTE: always call s:extend_vars() before the motion, but after any other
+" function that moves the cursor, else the autocmd will be triggered for the
 " wrong function.
 
 fun! s:extend_vars(n, this)
@@ -234,6 +299,7 @@ fun! vm#commands#merge_to_beol(eol, this)
     call s:extend_vars(1, a:this)
     let s:motion = a:eol? "\<End>" : '0'
     let s:v.merge_to_beol = 1
+    let g:VM_Global.extend_mode = 0
     call vm#commands#move(1, 0)
 endfun
 
@@ -273,9 +339,10 @@ fun! s:inclusive(c)
 endfun
 
 fun! vm#commands#select_motion(inclusive, this)
-    let was_active = s:init(0, 0) | let merge = 0
-    let s:v.silence = 1
-    if a:this | call s:Global.new_cursor() | let merge = 1 | endif
+    if !s:Extend() | call vm#commands#change_mode() | endif
+    let merge = 0 | let s:v.silence = 1
+    if a:this     | call s:Global.new_cursor() | let merge = 1 | endif
+
     call s:extend_vars(2, a:this)
 
     let c = nr2char(getchar())
@@ -287,29 +354,14 @@ fun! vm#commands#select_motion(inclusive, this)
     elseif a:inclusive
         let x = s:inclusive(c) | let c = x[0] | let d = x[1]
 
-    elseif c == '['
-        let a = 'T' | let c = '[' | let d = ']'
-
-    elseif c == ']'
-        let a = 'F' | let c = '[' | let d = ']'
-
-    elseif c == '{'
-        let a = 'T' | let c = '{' | let d = '}'
-
-    elseif c == '}'
-        let a = 'F' | let c = '{' | let d = '}'
-
-    elseif c == '('
-        let a = 'T' | let c = '(' | let d = ')'
-
-    elseif c == ')'
-        let a = 'F' | let c = '(' | let d = ')'
-
-    elseif c == '<'
-        let a = 'T' | let c = '<' | let d = '>'
-
-    elseif c == '>'
-        let a = 'F' | let c = '<' | let d = '>'
+    elseif c == '[' | let a = 'T' | let c = '[' | let d = ']'
+    elseif c == ']' | let a = 'F' | let c = '[' | let d = ']'
+    elseif c == '{' | let a = 'T' | let c = '{' | let d = '}'
+    elseif c == '}' | let a = 'F' | let c = '{' | let d = '}'
+    elseif c == '(' | let a = 'T' | let c = '(' | let d = ')'
+    elseif c == ')' | let a = 'F' | let c = '(' | let d = ')'
+    elseif c == '<' | let a = 'T' | let c = '<' | let d = '>'
+    elseif c == '>' | let a = 'F' | let c = '<' | let d = '>'
 
     else
         let d = nr2char(getchar())
@@ -322,19 +374,7 @@ fun! vm#commands#select_motion(inclusive, this)
     let s:motion = b.d
     call vm#commands#move(merge, 0)
 
-    if !was_active
-        if !s:Global.all_empty()
-            call vm#commands#add_under(0, 0, 0, 1)
-            let s:v.silence = 0
-        else
-            let s:v.silence = 0
-            call s:Funcs.msg('Not found. Exiting Visual-multi.')
-            let s:v.silence = 1
-            call vm#funcs#reset()
-        endif
-    else
-        let s:v.silence = 0
-    endif
+    let s:v.silence = 0
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
