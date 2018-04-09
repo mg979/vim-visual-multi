@@ -47,10 +47,11 @@ fun! s:check_extend_default()
     else | return s:init(0, 1, 0) | endif
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#commands#add_cursor_at_word(yank, search)
     call s:check_extend_default()
 
-    let s:v.silence = 1
     if a:yank | call s:yank(0) | endif
     normal! `[
     call s:Global.new_cursor()
@@ -59,14 +60,13 @@ fun! vm#commands#add_cursor_at_word(yank, search)
     call s:Funcs.count_msg(1)
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#commands#add_cursor_at_pos(where)
-    let was_active = g:VM_Global.is_active
     call s:check_extend_default()
 
     "silently add one cursor at pos
-    if !was_active || !a:where
-        let s:v.silence = 1 | call s:Global.new_cursor() | let s:v.silence = 0
-    endif
+    call s:Global.new_cursor()
 
     if a:where == 1
         normal! j
@@ -75,6 +75,7 @@ fun! vm#commands#add_cursor_at_pos(where)
         normal! k
         call s:Global.new_cursor()
     endif
+    call s:Funcs.count_msg(0)
 endfun
 
 
@@ -102,6 +103,8 @@ fun! vm#commands#regex_done()
 
     call s:Funcs.count_msg(0)
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_by_regex(...)
     call s:init(0, 0, 0)
@@ -204,26 +207,26 @@ endfun
 
 " force navigate when using [] with empty cursors and no search set
 
-let s:nav = { nav -> nav || ( !s:Extend() && !nav && @/ == '' ) }
+let s:nav = { nav -> nav || ( !s:Extend() && @/ == '' ) }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav)
-    let nav = s:nav(a:nav)
     let i = s:v.index
 
-    "just navigate to next
-    if nav | call s:Global.select_region(i+1) | return | endif
+    if s:nav(a:nav) | call s:Global.select_region(i+1) | return
+        "just navigate to next
 
-    "just reverse direction if going ip
-    if !s:v.direction
+    elseif !s:v.direction
+        "just reverse direction if going ip
         let s:v.direction = 1
         call s:Global.select_region(i)
         return
-    endif
 
+    elseif @/ == '' | call s:Global.select_region(i+1) | return
+
+    elseif a:skip | call s:Regions[i].remove() | endif
     "skip current match
-    if a:skip | call s:Regions[i].remove() | endif
 
     call s:get_next('n')
 endfun
@@ -231,26 +234,24 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(skip, nav)
-    let nav = s:nav(a:nav)
-    let i = s:v.index
+    let i = s:v.index | let r = s:Regions[i]
 
-    "just navigate to previous
-    if nav | call s:Global.select_region(i-1) | return | endif
+    if s:nav(a:nav) | call s:Global.select_region(i-1) | return
+        "just navigate to previous
 
-    "just reverse direction if going down
-    if s:v.direction
+    elseif s:v.direction
+        "just reverse direction if going ip
         let s:v.direction = 0
         call s:Global.select_region(i)
         return
-    endif
+
+    elseif @/ == '' | call s:Global.select_region(i-1) | return
+
+    elseif a:skip | call s:Regions[i].remove() | endif
+    "skip current match
 
     "move to the beginning of the current match
-    let current = s:Regions[i]
-    let pos = [current.l, current.a]
-    call cursor(pos)
-
-    "skip current match
-    if a:skip | call s:Regions[i].remove() | endif
+    call cursor(r.l, r.a)
 
     call s:get_next('N')
 endfun
@@ -384,6 +385,7 @@ endfun
 let s:always_from_back = { -> index(['^', '0'], s:motion) >= 0 }
 let s:can_from_back    = { -> index(['$'], s:motion) == -1 && !s:v.direction }
 let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
+let s:forward          = { -> index(['w', 'W', 'e', 'E', 'l', 'f', 't'], s:motion)  >= 0 }
 
 fun! vm#commands#move(merge, restore_pos, ...)
     if !s:v.extending | return | endif
@@ -411,12 +413,16 @@ fun! vm#commands#move(merge, restore_pos, ...)
             if a:restore_pos | call setpos('.', pos) | endif
         endfor | endif
 
-    normal! `]
-
+    "update variables, facing direction, highlighting
     let s:v.move_from_back = 0
+
+    if s:motion == '$' | let s:v.direction = 0
+    elseif s:always_from_back() | let s:v.direction = 1 | endif
+
     if merge | call s:Global.merge_regions() | endif
+    "call s:Global.update_regions()
     call s:Global.update_highlight()
-    call s:Global.select_region(s:current_i)
+    let r = s:Global.select_region(s:current_i)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

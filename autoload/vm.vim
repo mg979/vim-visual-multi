@@ -69,13 +69,13 @@ fun! s:Global.new_cursor() dict
     """Create a new cursor if there is't already a region."""
 
     let R = self.is_region_at_pos('.')
-    if !empty(R) | call self.select_region(R.index) | return R | endif
+    if !empty(R) | return R | endif
+    "if !empty(R) | call self.select_region(R.index) | return R | endif
 
     let R = vm#region#new(1)
 
     let s:v.matches = getmatches()
-    call self.select_region(R.index)
-    call s:Funcs.count_msg(0)
+    "call self.select_region(R.index)
     return R
 endfun
 
@@ -128,7 +128,7 @@ endfun
 fun! s:Global.update_regions() dict
     """Force regions update."""
 
-    for r in s:Regions | call r.update(r.l, r.a, r.b) | endfor
+    for r in s:Regions | call r.update() | endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -140,7 +140,7 @@ fun! s:Global.collapse_regions() dict
         if r.a != r.b | call r.update(r.l, r.a, r.a) | endif
     endfor
     let g:VM_Global.extend_mode = 0
-    call self.update_regions()
+    "call self.update_regions()
     call self.update_highlight()
 endfun
 
@@ -215,7 +215,7 @@ fun! s:Global.merge_cursors()
     """Merge overlapping cursors."""
 
     let cursors_pos = map(s:Regions, 'v:val.A')
-    echom string(cursors_pos)
+    "echom string(cursors_pos)
     while 1
         let i = 0
         for c in cursors_pos

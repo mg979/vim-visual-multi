@@ -179,7 +179,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.regions_contents() dict
-    echohl WarningMsg | echo "--- Regions contents ---" | echohl None
+    echohl WarningMsg | echo "Index, A, B, width    --- Regions contents ---" | echohl None
     for r in s:Regions | call self.region_txt(r) | endfor
 endfun
 
@@ -188,8 +188,8 @@ fun! s:Funcs.region_txt(r) dict
     let line = substitute(a:r.txt, '\V\n', '^M', 'g')
     if len(line) > 80 | let line = line[:80] . '…' | endif
 
-    echohl Directory | echo  index
-    echohl None      | echon line
+    echohl Directory | echo  index a:r.A a:r.B a:r.w
+    echohl None      | echon "      " line
     echohl None
 endfun
 

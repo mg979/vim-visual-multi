@@ -11,11 +11,14 @@ let b:VM_Selection        = {}
 "NOT YET: sublime_mappings
 
 call vm#plugs#init()
+let g:VM = {}
 let g:VM_sublime_mappings  = get(g:, 'VM_sublime_mappings', 0)
 let g:VM_custom_mappings   = get(g:, 'VM_custom_mappings', 0)
 let g:VM_Custom_Noremaps   = get(g:, 'VM_Custom_Noremaps', {',': ';', ';': ','})
 let g:VM_Custom_Remaps     = get(g:, 'VM_Custom_Remaps', [])
 let g:VM_Extend_By_Default = get(g:, 'VM_Extend_By_Default', 0)
+
+let g:VM.keep_collapsed_while_moving_back = get(g:VM, 'keep_collapsed_while_moving_back', 0)
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Set up highlighting

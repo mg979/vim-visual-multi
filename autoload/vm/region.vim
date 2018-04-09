@@ -164,8 +164,7 @@ fun! s:Region.move_forward(motion) dict
         let r.a = r.b
     endif
 
-    call self.yank()
-    call self.update_vars()
+    call self.update()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -184,7 +183,7 @@ fun! s:Region.move_from_back(motion) dict
     "set begin mark and yank between marks
     normal! m[`[y`]
 
-    call self.update_vars()
+    call self.update()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -207,10 +206,10 @@ fun! s:Region.move_back(motion) dict
     endif
 
     "collapse if there's been inversion
-    if r.a > r.b | let r.a = r.b | endif
+    if g:VM.keep_collapsed_while_moving_back
+        if r.a > r.b | let r.a = r.b | endif | endif
 
-    call self.yank()
-    call self.update_vars()
+    call self.update()
 endfun
 
 
@@ -228,18 +227,21 @@ fun! s:Region.yank()
     if s:Extend()
         normal! m[
         call cursor(r.l, r.b+1)
-        normal! m]`[y`]`]
+        normal! m]`[y`]
     endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.update(l, a, b) dict
+fun! s:Region.update(...) dict
     """Update the region position and text."""
+    let r = self
+    if a:0 | let l = a:1 | let a = a:2 | let b = a:3
+    else   | let l = r.l | let a = r.a | let b = r.b | endif
 
-    let self.l   = a:l                   " line
-    let self.a   = a:a                   " begin
-    let self.b   = a:b                   " end
+    let r.l   = l                 " line
+    let r.a   = min([a, b])       " begin
+    let r.b   = max([a, b])       " end
 
     call self.yank()
     call self.update_vars()
