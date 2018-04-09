@@ -26,40 +26,44 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#region#new(empty)
-    return s:Region.new(a:empty)
+fun! vm#region#new(cursor)
+    return s:Region.new(a:cursor)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:Region = {}
 
-fun! s:Region.new(empty)
+fun! s:Region.new(cursor)
     let R       = copy(self)
     let R.index = len(s:Regions)
 
-    let R.A_ = { -> eval(line2byte(R.l)  + R.a) }
-    let R.B_ = { -> eval(line2byte(R.l2) + R.b) }
+    let R.A_ = { -> eval(line2byte(R.l) + R.a) }
+    let R.B_ = { -> eval(line2byte(R.L) + R.b) }
 
-    if !a:empty
-        let R.l     = getpos("'[")[1]       " starting line
-        let R.l2    = getpos("']")[1]       " ending line
-        let R.a     = getpos("'[")[2]       " begin
-        let R.b     = getpos("']")[2]       " end
-        let R.w     = R.b - R.a + 1         " width
-        let R.A     = R.A_()                " byte offset a
-        let R.B     = R.B_()                " byte offset b
-        let R.txt   = getreg(s:v.def_reg)   " text content
+    if a:cursor    "/////////// CURSOR ///////////
 
-    else
         let R.l     = getpos(".")[1]        " line
-        let R.l2    = R.l
+        let R.L     = R.l
         let R.a     = getpos(".")[2]        " position
         let R.b     = R.a
         let R.w     = 1
         let R.A     = R.A_()                " byte offset
         let R.B     = R.A
         let R.txt   = ''
+        let R.pat   = ''
+
+    else            "/////////// REGION ///////////
+
+        let R.l     = getpos("'[")[1]       " starting line
+        let R.L     = getpos("']")[1]       " ending line
+        let R.a     = getpos("'[")[2]       " begin
+        let R.b     = getpos("']")[2]       " end
+        let R.w     = R.b - R.a + 1         " width
+        let R.A     = R.A_()                " byte offset a
+        let R.B     = R.B_()                " byte offset b
+        let R.txt   = getreg(s:v.def_reg)   " text content
+        let R.pat   = R.pattern()           " associated search pattern
     endif
 
     "highlight entry
@@ -75,8 +79,21 @@ fun! s:Region.new(empty)
     return R
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Region.empty() dict
-    return self.a == self.b
+    return self.A == self.B
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region.pattern() dict
+    """Find the search pattern associated with the region."""
+
+    if empty(s:v.search) | return '' | endif
+
+    for p in s:v.search | if self.txt =~ p | return p | endif | endfor
+    return ''
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -180,9 +197,6 @@ fun! s:Region.move_from_back(motion) dict
 
     let r.a = self.end()
 
-    "set begin mark and yank between marks
-    normal! m[`[y`]
-
     call self.update()
 endfun
 
@@ -236,10 +250,11 @@ endfun
 fun! s:Region.update(...) dict
     """Update the region position and text."""
     let r = self
-    if a:0 | let l = a:1 | let a = a:2 | let b = a:3
-    else   | let l = r.l | let a = r.a | let b = r.b | endif
+    if a:0 | let l = a:1 | let L = a:2 | let a = a:3 | let b = a:4
+    else   | let l = r.l | let L = r.L | let a = r.a | let b = r.b | endif
 
-    let r.l   = l                 " line
+    let r.l   = l                 " starting line
+    let r.L   = L                 " end line
     let r.a   = min([a, b])       " begin
     let r.b   = max([a, b])       " end
 
@@ -252,14 +267,15 @@ endfun
 fun! s:Region.update_vars() dict
     """Update the rest of the region vars."""
 
-    let r = self
+    let r         = self
     let s:v.index = r.index
 
-    let r.A = r.A_()
-    let r.B = r.B_()
+    let r.A       = r.A_()
+    let r.B       = r.B_()
 
-    let r.w = r.b - r.a + 1
-    let r.txt = s:Extend()? getreg(s:v.def_reg) : ''
+    let r.w       = r.b - r.a + 1
+    let r.txt     = s:Extend()? getreg(s:v.def_reg) : ''
+    let r.pat     = r.pattern()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

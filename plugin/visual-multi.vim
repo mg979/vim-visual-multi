@@ -12,13 +12,12 @@ let b:VM_Selection        = {}
 
 call vm#plugs#init()
 let g:VM = {}
-let g:VM_sublime_mappings  = get(g:, 'VM_sublime_mappings', 0)
-let g:VM_custom_mappings   = get(g:, 'VM_custom_mappings', 0)
-let g:VM_Custom_Noremaps   = get(g:, 'VM_Custom_Noremaps', {',': ';', ';': ','})
-let g:VM_Custom_Remaps     = get(g:, 'VM_Custom_Remaps', [])
-let g:VM_Extend_By_Default = get(g:, 'VM_Extend_By_Default', 0)
-
-let g:VM.keep_collapsed_while_moving_back = get(g:VM, 'keep_collapsed_while_moving_back', 0)
+let g:VM.custom_noremaps                  = get(g:VM, 'custom_noremaps', {',': ';', ';': ','})
+let g:VM.custom_remaps                    = get(g:VM, 'custom_remaps', [])
+let g:VM.extend_by_default                = get(g:VM, 'extend_by_default', 1)
+let g:VM.sublime_mappings                 = get(g:VM, 'sublime_mappings', 0)
+let g:VM.custom_mappings                  = get(g:VM, 'custom_mappings', 0)
+let g:VM.keep_collapsed_while_moving_back = get(g:VM, 'keep_collapsed_while_moving_back', 1)
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Set up highlighting

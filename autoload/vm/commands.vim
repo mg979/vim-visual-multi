@@ -26,7 +26,6 @@ fun! vm#commands#change_mode()
     if s:Extend()
         call s:Funcs.msg('Switched to Extend Mode')
         call s:Global.update_regions()
-        call s:Global.update_cursor_highlight()
     else
         call s:Funcs.msg('Switched to Cursor Mode')
         call s:Global.collapse_regions()
@@ -43,7 +42,7 @@ fun! s:check_extend_default()
     """If just starting, enable extend mode if option is set."""
 
     if g:VM_Global.extend_mode | return s:init(0, 1, 0)
-    elseif !g:VM_Global.is_active && g:VM_Extend_By_Default | return s:init(0, 1, 1)
+    elseif !g:VM_Global.is_active && g:VM.extend_by_default | return s:init(0, 1, 1)
     else | return s:init(0, 1, 0) | endif
 endfun
 
@@ -95,13 +94,11 @@ fun! vm#commands#regex_done()
         return | endif
 
     normal! gny`]
-    call s:Search.read()
+    call s:Search.from_slash_reg()
 
-    if s:Extend() | call s:Global.get_region()
+    if s:Extend() | call s:Global.get_region() | call s:Funcs.count_msg(0)
     else          | call vm#commands#add_cursor_at_word(0, 0)
     endif
-
-    call s:Funcs.count_msg(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -205,25 +202,23 @@ fun! s:get_next(n)
     endif
 endfun
 
-" force navigate when using [] with empty cursors and no search set
 
-let s:nav = { nav -> nav || ( !s:Extend() && @/ == '' ) }
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#invert_direction()
+    """Invert direction and reselect region."""
+
+    let s:v.direction = !s:v.direction
+    call s:Global.select_region(s:v.index)
+endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav)
     let i = s:v.index
 
-    if s:nav(a:nav) | call s:Global.select_region(i+1) | return
-        "just navigate to next
-
-    elseif !s:v.direction
-        "just reverse direction if going ip
-        let s:v.direction = 1
-        call s:Global.select_region(i)
-        return
-
-    elseif @/ == '' | call s:Global.select_region(i+1) | return
+    " force navigate when using [] with no search set
+    if a:nav || @/=='' | call s:Global.select_region(i+1) | return
 
     elseif a:skip | call s:Regions[i].remove() | endif
     "skip current match
@@ -236,16 +231,8 @@ endfun
 fun! vm#commands#find_prev(skip, nav)
     let i = s:v.index | let r = s:Regions[i]
 
-    if s:nav(a:nav) | call s:Global.select_region(i-1) | return
+    if a:nav || @/=='' | call s:Global.select_region(i-1) | return
         "just navigate to previous
-
-    elseif s:v.direction
-        "just reverse direction if going ip
-        let s:v.direction = 0
-        call s:Global.select_region(i)
-        return
-
-    elseif @/ == '' | call s:Global.select_region(i-1) | return
 
     elseif a:skip | call s:Regions[i].remove() | endif
     "skip current match
@@ -262,13 +249,13 @@ fun! vm#commands#skip(just_remove)
     if a:just_remove
         let r = s:Global.is_region_at_pos('.')
         if !empty(r) | call r.remove() | endif
+        call s:Funcs.count_msg(0)
 
     elseif s:v.direction
         call vm#commands#find_next(1, 0)
     else
         call vm#commands#find_prev(1, 0)
     endif
-    call s:Funcs.count_msg(0)
 endfun
 
 

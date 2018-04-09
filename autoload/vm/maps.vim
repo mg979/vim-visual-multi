@@ -2,11 +2,11 @@ let s:NVIM = has('gui_running') || has('nvim')
 
 let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E', 'x']
 let s:find     = ['f', 'F', 't', 'T', '$', '0', '^', '%']
-let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 'U', '*', '@', '/']
+let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o']
 let s:brackets = ['[', ']', '{', '}']
 
-let s:noremaps = get(g:, 'VM_Custom_Noremaps', {})
-let s:remaps   = get(g:, 'VM_Custom_Remaps', [])
+let s:noremaps = get(g:VM, 'custom_noremaps', {})
+let s:remaps   = get(g:VM, 'custom_remaps', [])
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
@@ -50,22 +50,29 @@ fun! s:hjkl()
 endfun
 
 fun! vm#maps#start()
-    nmap     <silent> <nowait> <buffer> <Tab>      <Plug>(VM-Switch-Mode)
-    nmap     <silent> <nowait> <buffer> <c-c>      <Plug>(VM-Case-Setting)
-    nmap     <silent> <nowait> <buffer> <c-]>      <Plug>(VM-Update-Search)
-    nmap     <silent> <nowait> <buffer> <M-/>      <Plug>(VM-Read-From-Search)
-    nmap              <nowait> <buffer> /          <Plug>(VM-Start-Regex-Search)
-
     nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
+    nmap     <silent> <nowait> <buffer> <Tab>      <Plug>(VM-Switch-Mode)
+    nmap     <silent> <nowait> <buffer> <c-a>      <Plug>(VM-Select-All)
+    nmap     <silent> <nowait> <buffer> o          <Plug>(VM-Invert-Direction)
+    nmap              <nowait> <buffer> <leader>/  <Plug>(VM-Start-Regex-Search)
+
+    "utility
+    nmap              <nowait> <buffer> <C-x>t     <Plug>(VM-Show-Regions-Text)
+    nmap     <silent> <nowait> <buffer> <C-x>m     <Plug>(VM-Merge-Regions)
+    nmap     <silent> <nowait> <buffer> <C-x>/     <Plug>(VM-Read-From-Search)
+    nmap     <silent> <nowait> <buffer> <c-x>]     <Plug>(VM-Rewrite-Search-Index)
+    nmap     <silent> <nowait> <buffer> <C-x>s     <Plug>(VM-Remove-Search)
+    nmap     <silent> <nowait> <buffer> <C-x>S     <Plug>(VM-Remove-Search-Regions)
+
+    nmap     <silent> <nowait> <buffer> <c-c>      <Plug>(VM-Case-Setting)
     nmap     <silent> <nowait> <buffer> <c-w>      <Plug>(VM-Toggle-Whole-Word)
     nmap     <silent> <nowait> <buffer> <c-o>      <Plug>(VM-Toggle-Only-This-Region)
-    nmap     <silent> <nowait> <buffer> <M-m>      <Plug>(VM-Merge-Regions)
-    nmap     <silent> <nowait> <buffer> <c-a>      <Plug>(VM-Select-All)
+
     nmap     <silent> <nowait> <buffer> q          <Plug>(VM-Skip-Region)
     nmap     <silent> <nowait> <buffer> Q          <Plug>(VM-Remove-Region)
     nnoremap <silent> <nowait> <buffer> U          :call vm#commands#undo()<cr>
     nnoremap <silent> <nowait> <buffer> *          :call vm#commands#add_under(0, 1, 0, 1)<cr>
-    nnoremap <silent> <nowait> <buffer> @          :call vm#commands#add_under(0, 1, 1, 1)<cr>
+    nnoremap <silent> <nowait> <buffer> #          :call vm#commands#add_under(0, 1, 1, 1)<cr>
     nmap     <silent> <nowait> <buffer> ]          <Plug>(VM-Find-Next)
     nmap     <silent> <nowait> <buffer> [          <Plug>(VM-Find-Prev)
     nnoremap <silent> <nowait> <buffer> }          :call vm#commands#add_under(0, 0, 0)<cr>
@@ -111,8 +118,6 @@ fun! vm#maps#start()
     nmap <silent> <nowait> <buffer> Gi <Plug>(VM-Select-All-Inside)
     nmap <silent> <nowait> <buffer> Ga <Plug>(VM-Select-All-Around)
 
-    "utility
-    nmap              <nowait> <buffer> <M-v>t <Plug>(VM-Show-Regions-Text)
 endfun
 
 
@@ -146,9 +151,15 @@ fun! vm#maps#end()
     nunmap <buffer> <c-c>
     nunmap <buffer> <c-a>
     xunmap <buffer> <c-a>
-    nunmap <buffer> <M-m>
-    nunmap <buffer> <c-]>
-    nunmap <buffer> <M-/>
+    nunmap <buffer> <leader>/
+
+    nunmap <buffer> <C-x>/
+    nunmap <buffer> <C-x>t
+    nunmap <buffer> <C-x>m
+    nunmap <buffer> <C-x>s
+    nunmap <buffer> <C-x>S
+    nunmap <buffer> <C-x>]
+
     nunmap <buffer> <S-End>
     nunmap <buffer> <S-Home>
     nunmap <buffer> g
@@ -157,7 +168,6 @@ fun! vm#maps#end()
     nunmap <buffer> G
     nunmap <buffer> Gi
     nunmap <buffer> Ga
-    nunmap <buffer> <M-v>t
     silent! nunmap <buffer> <c-space>
     silent! nunmap <buffer> <nul>
 endfun

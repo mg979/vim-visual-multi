@@ -2,7 +2,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-At-Word)      :call vm#commands#add_cursor_at_word(1, 1)<cr>
     nnoremap        <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
-    xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(0, 1, 0)<cr>`]
+    xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(1, 1, 0)<cr>`]
     nnoremap        <Plug>(VM-Add-Cursor-Down)         :call vm#commands#add_cursor_at_pos(1)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-Up)           :call vm#commands#add_cursor_at_pos(2)<cr>
     nnoremap        <Plug>(VM-Find-I-Word)             :call vm#commands#find_under(0, 0, 0)<cr>
@@ -16,13 +16,16 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Toggle-Only-This-Region) :call vm#commands#toggle_option('only_this_always')<cr>
     nnoremap        <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
     nnoremap        <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
-    nnoremap        <Plug>(VM-Update-Search)           :call b:VM_Selection.Search.update()<cr>
-    nnoremap        <Plug>(VM-Read-From-Search)        :call b:VM_Selection.Search.read()<cr>
+    nnoremap        <Plug>(VM-Rewrite-Search-Index)    :call b:VM_Selection.Search.rewrite()<cr>
+    nnoremap        <Plug>(VM-Read-From-Search)        :call b:VM_Selection.Search.from_slash_reg()<cr>
+    nnoremap        <Plug>(VM-Remove-Search)           :call b:VM_Selection.Search.remove(0)<cr>
+    nnoremap        <Plug>(VM-Remove-Search-Regions)   :call b:VM_Selection.Search.remove(1)<cr>
     nnoremap        <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex()<cr>/
     nnoremap        <Plug>(VM-Show-Regions-Text)       :call b:VM_Selection.Funcs.regions_contents()<cr>
     nnoremap        <Plug>(VM-Switch-Mode)             :call vm#commands#change_mode()<cr>
     nnoremap        <Plug>(VM-Reset)                   :call vm#funcs#reset()<cr>
 
+    nnoremap        <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction()<cr>
     nnoremap        <Plug>(VM-Goto-Next)               :call vm#commands#find_next(0, 1)<cr>
     nnoremap        <Plug>(VM-Goto-Prev)               :call vm#commands#find_prev(0, 1)<cr>
     nnoremap        <Plug>(VM-Find-Next)               :call vm#commands#find_next(0, 0)<cr>

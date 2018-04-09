@@ -35,6 +35,7 @@ fun! vm#init_buffer(empty, ...)
     let s:Search   = s:V.Search
 
     let s:byte = funcref('s:Funcs.byte')
+    let s:Extend = { -> g:VM_Global.extend_mode }
 
     call s:Funcs.msg('Visual-Multi started. Press <esc> to exit.')
     call vm#region#init()
@@ -101,7 +102,7 @@ fun! s:Global.update_cursor_highlight(...) dict
     """Set cursor highlight, depending on extending mode."""
 
     highlight clear MultiCursor
-    if self.all_empty() && !g:VM_Global.extend_mode
+    if self.all_empty() && !s:Extend()
         exe "highlight link MultiCursor ".g:VM_Mono_Cursor_hl
     else
         exe "highlight link MultiCursor ".g:VM_Normal_Cursor_hl
@@ -117,7 +118,7 @@ fun! s:Global.all_empty() dict
 
     for r in s:Regions
         if r.a != r.b
-            if !g:VM_Global.extend_mode | call vm#commands#change_mode() | endif
+            if !s:Extend() | call vm#commands#change_mode() | endif
             return 0 | endif
     endfor
     return 1
@@ -129,6 +130,8 @@ fun! s:Global.update_regions() dict
     """Force regions update."""
 
     for r in s:Regions | call r.update() | endfor
+    if s:Extend() | call self.update_highlight()
+    else | call s:Global.update_cursor_highlight() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -137,7 +140,7 @@ fun! s:Global.collapse_regions() dict
     """Collapse regions to cursors and turn off extend mode."""
 
     for r in s:Regions
-        if r.a != r.b | call r.update(r.l, r.a, r.a) | endif
+        if r.a != r.b | call r.update(r.l, r.L, r.a, r.a) | endif
     endfor
     let g:VM_Global.extend_mode = 0
     "call self.update_regions()
@@ -212,7 +215,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.merge_cursors()
-    """Merge overlapping cursors."""
+    """BROKEN: Merge overlapping cursors."""
 
     let cursors_pos = map(s:Regions, 'v:val.A')
     "echom string(cursors_pos)
@@ -230,7 +233,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.merge_regions(...) dict
-    """Merge overlapping regions."""
+    """MUST BE IMPROVED: Merge overlapping regions."""
 
     let lines = {}
     let storepos = getpos('.')
@@ -262,7 +265,7 @@ fun! s:Global.merge_regions(...) dict
 
                 "merge regions if there is overlap with next one
                 if overlap
-                    call next.update(this.l, min([this.a, next.a]), max([this.b, next.b]))
+                    call next.update(this.l, this.L, min([this.a, next.a]), max([this.b, next.b]))
                     call add(to_remove, this)
                 endif | endwhile | endfor | endfor
 
