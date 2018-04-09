@@ -29,7 +29,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Find-Prev)               :call vm#commands#find_prev(0, 0)<cr>
     nnoremap        <Plug>(VM-Merge-To-Eol)            :call vm#commands#merge_to_beol(1, 0)<cr>
     nnoremap        <Plug>(VM-Merge-To-Bol)            :call vm#commands#merge_to_beol(0, 0)<cr>
-    nnoremap        <Plug>(VM-Merge-Regions)           :call vm#merge_regions()<cr>
+    nnoremap        <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
     nnoremap        <Plug>(VM-Skip-Region)             :call vm#commands#skip(0)<cr>
     nnoremap        <Plug>(VM-Remove-Region)           :call vm#commands#skip(1)<cr>
 

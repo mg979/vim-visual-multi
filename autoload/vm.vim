@@ -211,10 +211,23 @@ endfun
 " Merging regions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#merge_regions()
-    if !empty(b:VM_Selection) | call s:Global.merge_regions() | endif
+fun! s:Global.merge_cursors()
+    """Merge overlapping cursors."""
+
+    let cursors_pos = map(s:Regions, 'v:val.A')
+    echom string(cursors_pos)
+    while 1
+        let i = 0
+        for c in cursors_pos
+            if count(cursors_pos, c) > 1
+                call s:Regions[i].remove() | break | endif
+            let i += 1
+        endfor
+        break
+    endwhile
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.merge_regions(...) dict
     """Merge overlapping regions."""
