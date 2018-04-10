@@ -53,8 +53,9 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.from_slash_reg() dict
+fun! s:Search.get_slash_reg() dict
     call s:update_search(s:pattern('/', 1), 0)
+    call s:Funcs.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -101,11 +102,30 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Search.validate() dict
+    """Check whether the current search is valid, if not, clear the search."""
+    let @/ = join(s:v.search, '\|')
+    if empty(@/) | return | endif
+
+    "pattern found, ok
+    if search(@/, 'cnw') | return | endif
+
+    while 1
+        let i = 0
+        for p in s:v.search
+            if !search(@/, 'cnw') | call remove(s:v.search, i) | break | endif
+        endfor | break
+    endwhile
+    let @/ = join(s:v.search, '\|')
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Search.check_pattern() dict
+    """Update the search patterns if the active search isn't listed."""
     let current = split(@/, '\\|')
     for p in current
-        if index(s:v.search, p) == -1 | call self.read() | endif
-        break
+        if index(s:v.search, p) == -1 | call self.get_slash_reg() | break | endif
     endfor
 endfun
 

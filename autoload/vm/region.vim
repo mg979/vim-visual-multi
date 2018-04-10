@@ -35,8 +35,9 @@ endfun
 let s:Region = {}
 
 fun! s:Region.new(cursor)
-    let R       = copy(self)
-    let R.index = len(s:Regions)
+    let R         = copy(self)
+    let R.index   = len(s:Regions)
+    let s:v.index = R.index
 
     let R.A_ = { -> eval(line2byte(R.l) + R.a) }
     let R.B_ = { -> eval(line2byte(R.L) + R.b) }

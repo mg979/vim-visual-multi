@@ -82,19 +82,28 @@ endfun
 " Find by regex
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#regex_done()
-    cunmap <buffer> <cr>
-    cunmap <buffer> <esc>
+fun! vm#commands#regex_reset(...)
+    silent! cunmap <buffer> <cr>
+    silent! cunmap <buffer> <esc>
+    if a:0 | return a:1 | endif
+endfun
 
-    "@/ didn't change, so search has been aborted, return to previous position
-    if @/ == 'VM_FAKE_REGEX!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-        let @/ = s:regex_reg
-        call s:Funcs.msg('Regex search aborted.') | call s:Funcs.count_msg(1)
-        call setpos('.', s:regex_pos)
-        return | endif
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#regex_abort()
+    let @/ = s:regex_reg
+    call s:Funcs.msg('Regex search aborted.') | call s:Funcs.count_msg(1)
+    call setpos('.', s:regex_pos)
+    call vm#commands#regex_reset()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#regex_done()
+    call vm#commands#regex_reset()
 
     normal! gny`]
-    call s:Search.from_slash_reg()
+    call s:Search.get_slash_reg()
 
     if s:Extend() | call s:Global.get_region() | call s:Funcs.count_msg(0)
     else          | call vm#commands#add_cursor_at_word(0, 0)
@@ -104,18 +113,14 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_by_regex(...)
-    call s:init(0, 0, 0)
+    if !g:VM_Global.is_active | call vm#commands#regex_reset() | return | endif
 
     "store reg and position, to check if the search will be aborted
     let s:regex_pos = getpos('.')
     let s:regex_reg = @/
-    let @/ = 'VM_FAKE_REGEX!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 
-    let mode = s:Extend()? ' (extend mode)' : ' (cursor mode)'
-    call s:Funcs.msg('Enter regex'.mode.':')
-    call s:Funcs.msg('Enter regex'.mode.':')
     cnoremap <buffer> <cr> <cr>:call vm#commands#regex_done()<cr>
-    cnoremap <buffer> <esc> <cr>:call vm#commands#regex_done()<cr>
+    cnoremap <buffer> <esc> <cr>:call vm#commands#regex_abort()<cr>
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -215,10 +220,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav)
-    let i = s:v.index
+    call s:Search.validate() | let i = s:v.index
 
-    " force navigate when using [] with no search set
-    if a:nav || @/=='' | call s:Global.select_region(i+1) | return
+    "just navigate to next
+    if a:nav || @/=='' | call s:Global.select_region(i+1)
+        redraw! | call s:Funcs.count_msg(0) | return
 
     elseif a:skip | call s:Regions[i].remove() | endif
     "skip current match
@@ -229,12 +235,13 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(skip, nav)
-    let i = s:v.index | let r = s:Regions[i]
+    call s:Search.validate() | let i = s:v.index | let r = s:Regions[i]
 
-    if a:nav || @/=='' | call s:Global.select_region(i-1) | return
-        "just navigate to previous
+    "just navigate to previous
+    if a:nav || @/=='' | call s:Global.select_region(i-1)
+        redraw! | call s:Funcs.count_msg(0) | return
 
-    elseif a:skip | call s:Regions[i].remove() | endif
+    elseif a:skip | call r.remove() | endif
     "skip current match
 
     "move to the beginning of the current match
@@ -312,14 +319,10 @@ endfun
 fun! s:inclusive(c)
     let c = a:c
 
-    if index(['[', ']'], c) != -1
-        let c = '[' | let d = ']'
-    elseif index(['(', ')'], c) != -1
-        let c = '(' | let d = ')'
-    elseif index(['{', '}'], c) != -1
-        let c = '{' | let d = '}'
-    elseif index(['<', '>'], c) != -1
-        let c = '<' | let d = '>'
+    if     index(['[', ']'], c) != -1 | let c = '[' | let d = ']'
+    elseif index(['(', ')'], c) != -1 | let c = '(' | let d = ')'
+    elseif index(['{', '}'], c) != -1 | let c = '{' | let d = '}'
+    elseif index(['<', '>'], c) != -1 | let c = '<' | let d = '>'
     else
         let d = nr2char(getchar())
     endif

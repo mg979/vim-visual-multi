@@ -151,10 +151,11 @@ fun! s:Funcs.msg(text) dict
 endfun
 
 fun! s:Funcs.count_msg(force) dict
+    let i = '['.s:v['index'].']  '
     if a:force | let s:v.silence = 0 | endif
     let s = len(s:Regions)>1 ? 's.' : '.'
     let t = g:VM_Global.extend_mode? ' region' : ' cursor'
-    call self.msg(len(s:Regions).t.s.'   Current patterns: '.string(s:v.search))
+    call self.msg(i.len(s:Regions).t.s.'   Current patterns: '.string(s:v.search))
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

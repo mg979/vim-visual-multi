@@ -6,21 +6,39 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Add-Cursor-Down)         :call vm#commands#add_cursor_at_pos(1)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-Up)           :call vm#commands#add_cursor_at_pos(2)<cr>
     nnoremap        <Plug>(VM-Find-I-Word)             :call vm#commands#find_under(0, 0, 0)<cr>
-    nnoremap        <Plug>(VM-Find-A-Word)             :call vm#commands#find_under(0, 1, 0)<cr>
-    nnoremap        <Plug>(VM-Find-I-Whole-Word)       :call vm#commands#find_under(0, 0, 1)<cr>
+    nnoremap        <Plug>(VM-Find-A-Word)             :call vm#commands#find_under(0, 0, 1)<cr>
+    nnoremap        <Plug>(VM-Find-I-Whole-Word)       :call vm#commands#find_under(0, 1, 0)<cr>
     nnoremap        <Plug>(VM-Find-A-Whole-Word)       :call vm#commands#find_under(0, 1, 1)<cr>
     xnoremap        <Plug>(VM-Find-A-Subword)          y:call vm#commands#find_under(1, 0, 0)<cr>`]
     xnoremap        <Plug>(VM-Find-A-Whole-Subword)    y:call vm#commands#find_under(1, 1, 0)<cr>`]
+
+    nnoremap        <Plug>(VM-Star)                    :call vm#commands#add_under(0, 1, 0, 1)<cr>
+    nnoremap        <Plug>(VM-Hash)                    :call vm#commands#add_under(0, 1, 1, 1)<cr>
+    nnoremap        <Plug>(VM-Add-I-Word)              :call vm#commands#add_under(0, 0, 0)<cr>
+    nnoremap        <Plug>(VM-Add-A-Word)              :call vm#commands#add_under(0, 0, 1)<cr>
+    nnoremap        <Plug>(VM-Add-I-Whole-Word)        :call vm#commands#add_under(0, 1, 0)<cr>
+    nnoremap        <Plug>(VM-Add-A-Whole-Word)        :call vm#commands#add_under(0, 1, 1)<cr>
+    xnoremap        <Plug>(VM-Star)                    y:call vm#commands#add_under(1, 0, 0, 1)<cr>`]
+    nnoremap        <Plug>(VM-Hash)                    y:call vm#commands#add_under(1, 1, 0, 1)<cr>`]
 
     nnoremap        <Plug>(VM-Toggle-Whole-Word)       :call vm#commands#toggle_option('whole_word')<cr>
     nnoremap        <Plug>(VM-Toggle-Only-This-Region) :call vm#commands#toggle_option('only_this_always')<cr>
     nnoremap        <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
     nnoremap        <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
     nnoremap        <Plug>(VM-Rewrite-Search-Index)    :call b:VM_Selection.Search.rewrite()<cr>
-    nnoremap        <Plug>(VM-Read-From-Search)        :call b:VM_Selection.Search.from_slash_reg()<cr>
+    nnoremap        <Plug>(VM-Read-From-Search)        :call b:VM_Selection.Search.get_slash_reg()<cr>
     nnoremap        <Plug>(VM-Remove-Search)           :call b:VM_Selection.Search.remove(0)<cr>
     nnoremap        <Plug>(VM-Remove-Search-Regions)   :call b:VM_Selection.Search.remove(1)<cr>
-    nnoremap        <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex()<cr>/
+
+    fun! <SID>Mode()
+        let mode = g:VM_Global.extend_mode? ' (extend mode)' : ' (cursor mode)'
+        call b:VM_Selection.Funcs.msg('Enter regex'.mode.':')
+    endfun
+
+    nnoremap <expr> <Plug>(VM-:)                       vm#commands#regex_reset(':')
+    nnoremap <expr> <Plug>(VM-/)                       vm#commands#regex_reset('/')
+    nnoremap <expr> <Plug>(VM-?)                       vm#commands#regex_reset('?')
+    nnoremap        <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex()<cr>:call <SID>Mode()<cr>/
     nnoremap        <Plug>(VM-Show-Regions-Text)       :call b:VM_Selection.Funcs.regions_contents()<cr>
     nnoremap        <Plug>(VM-Switch-Mode)             :call vm#commands#change_mode()<cr>
     nnoremap        <Plug>(VM-Reset)                   :call vm#funcs#reset()<cr>
@@ -35,11 +53,15 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
     nnoremap        <Plug>(VM-Skip-Region)             :call vm#commands#skip(0)<cr>
     nnoremap        <Plug>(VM-Remove-Region)           :call vm#commands#skip(1)<cr>
+    nnoremap        <Plug>(VM-Undo-Last)               :call vm#commands#undo()<cr>
 
     nnoremap        <Plug>(VM-Select-One-Inside)       :call vm#commands#select_motion(0, 1)<cr>
     nnoremap        <Plug>(VM-Select-One-Around)       :call vm#commands#select_motion(1, 1)<cr>
     nnoremap        <Plug>(VM-Select-All-Inside)       :call vm#commands#select_motion(0, 0)<cr>
     nnoremap        <Plug>(VM-Select-All-Around)       :call vm#commands#select_motion(1, 0)<cr>
+
+    nnoremap        <Plug>(VM-This-Motion-h)           :call vm#commands#motion('h', 1)<cr>
+    nnoremap        <Plug>(VM-This-Motion-l)           :call vm#commands#motion('l', 1)<cr>
 
     nnoremap        <Plug>(VM-Motion-h)                :call vm#commands#motion('h', 0)<cr>
     nnoremap        <Plug>(VM-Motion-j)                :call vm#commands#motion('j', 0)<cr>

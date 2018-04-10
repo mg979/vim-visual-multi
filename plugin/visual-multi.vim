@@ -31,20 +31,22 @@ exe "highlight link MultiCursor ".g:VM_Normal_Cursor_hl
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Global mappings
 
-nmap <silent> g<space> <Plug>(VM-Add-Cursor-At-Pos)
-nmap <silent> g<cr>    <Plug>(VM-Add-Cursor-At-Word)
+nmap <silent> g<space>   <Plug>(VM-Add-Cursor-At-Pos)
+nmap <silent> g<cr>      <Plug>(VM-Add-Cursor-At-Word)
 
-nmap <silent> <M-A>    <Plug>(VM-Select-All)
-xmap <silent> <M-A>    <Plug>(VM-Select-All)
-nmap <silent> <M-j>    <Plug>(VM-Add-Cursor-Down)
-nmap <silent> <M-k>    <Plug>(VM-Add-Cursor-Up)
+nmap <silent> <M-A>      <Plug>(VM-Select-All)
+xmap <silent> <M-A>      <Plug>(VM-Select-All)
+nmap <silent> <M-j>      <Plug>(VM-Add-Cursor-Down)
+nmap <silent> <M-k>      <Plug>(VM-Add-Cursor-Up)
+nmap <silent> <M-C-Down> <Plug>(VM-Add-Cursor-Down)
+nmap <silent> <M-C-Up>   <Plug>(VM-Add-Cursor-Up)
 
-nmap <silent> s]       <Plug>(VM-Find-I-Word)
-nmap <silent> s[       <Plug>(VM-Find-A-Word)
-nmap <silent> s}       <Plug>(VM-Find-I-Whole-Word)
-nmap <silent> s{       <Plug>(VM-Find-A-Whole-Word)
-xmap <silent> s]       <Plug>(VM-Find-A-Subword)
-xmap <silent> s[       <Plug>(VM-Find-A-Whole-Subword)
+nmap <silent> s]         <Plug>(VM-Find-I-Word)
+nmap <silent> s[         <Plug>(VM-Find-A-Word)
+nmap <silent> s}         <Plug>(VM-Find-I-Whole-Word)
+nmap <silent> s{         <Plug>(VM-Find-A-Whole-Word)
+xmap <silent> s]         <Plug>(VM-Find-A-Subword)
+xmap <silent> s[         <Plug>(VM-Find-A-Whole-Subword)
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Autocommands
