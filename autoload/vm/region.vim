@@ -51,6 +51,8 @@ fun! s:Region.new(cursor)
         let R.w     = 1
         let R.A     = R.A_()                " byte offset
         let R.B     = R.A
+        let R.h     = R.a                   " anchor (unused for cursors)
+        let R.H     = R.A
         let R.txt   = ''
         let R.pat   = ''
 
@@ -63,6 +65,8 @@ fun! s:Region.new(cursor)
         let R.w     = R.b - R.a + 1         " width
         let R.A     = R.A_()                " byte offset a
         let R.B     = R.B_()                " byte offset b
+        let R.h     = R.a                   " anchor
+        let R.H     = R.A                   " anchor offset
         let R.txt   = getreg(s:v.def_reg)   " text content
         let R.pat   = R.pattern()           " associated search pattern
     endif
@@ -273,6 +277,9 @@ fun! s:Region.update_vars() dict
 
     let r.A       = r.A_()
     let r.B       = r.B_()
+
+    "update anchor if in cursor mode
+    if !s:Extend() | let r.h = r.a | let r.H = r.A | endif
 
     let r.w       = r.b - r.a + 1
     let r.txt     = s:Extend()? getreg(s:v.def_reg) : ''

@@ -268,6 +268,5 @@ fun! s:Global.merge_regions(...) dict
 
     "restore cursor position
     call self.select_region_at_pos(storepos)
-    call s:Funcs.count_msg(0)
 endfun
 

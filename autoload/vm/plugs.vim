@@ -5,6 +5,8 @@ fun! vm#plugs#init()
     xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(1, 1, 0)<cr>`]
     nnoremap        <Plug>(VM-Add-Cursor-Down)         :call vm#commands#add_cursor_at_pos(1)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-Up)           :call vm#commands#add_cursor_at_pos(2)<cr>
+    nnoremap        <Plug>(VM-Select-Down)             :call vm#commands#add_cursor_at_pos(1, 1)<cr>
+    nnoremap        <Plug>(VM-Select-Up)               :call vm#commands#add_cursor_at_pos(2, 1)<cr>
     nnoremap        <Plug>(VM-Find-I-Word)             :call vm#commands#find_under(0, 0, 0)<cr>
     nnoremap        <Plug>(VM-Find-A-Word)             :call vm#commands#find_under(0, 0, 1)<cr>
     nnoremap        <Plug>(VM-Find-I-Whole-Word)       :call vm#commands#find_under(0, 1, 0)<cr>
@@ -30,17 +32,10 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Remove-Search)           :call b:VM_Selection.Search.remove(0)<cr>
     nnoremap        <Plug>(VM-Remove-Search-Regions)   :call b:VM_Selection.Search.remove(1)<cr>
 
-    fun! <SID>Mode()
-        let mode = g:VM_Global.extend_mode? ' (extend mode)' : ' (cursor mode)'
-        call b:VM_Selection.Funcs.msg('Enter regex'.mode.':')
-    endfun
-
-    nnoremap <expr> <Plug>(VM-:)                       vm#commands#regex_reset(':')
-    nnoremap <expr> <Plug>(VM-/)                       vm#commands#regex_reset('/')
-    nnoremap <expr> <Plug>(VM-?)                       vm#commands#regex_reset('?')
     nnoremap        <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex()<cr>:call <SID>Mode()<cr>/
     nnoremap        <Plug>(VM-Show-Regions-Text)       :call b:VM_Selection.Funcs.regions_contents()<cr>
     nnoremap        <Plug>(VM-Switch-Mode)             :call vm#commands#change_mode()<cr>
+    nnoremap        <Plug>(VM-Motions-Toggle)          :call vm#maps#motions_toggle()<cr>
     nnoremap        <Plug>(VM-Reset)                   :call vm#funcs#reset()<cr>
 
     nnoremap        <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction()<cr>
@@ -78,6 +73,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Motion-W)                :call vm#commands#motion('W', 0)<cr>
     nnoremap        <Plug>(VM-Motion-e)                :call vm#commands#motion('e', 0)<cr>
     nnoremap        <Plug>(VM-Motion-E)                :call vm#commands#motion('E', 0)<cr>
+    nnoremap        <Plug>(VM-Fast-Back)               :call vm#commands#end_back(1, 0)<cr>
+    nnoremap        <Plug>(VM-End-Back)                :call vm#commands#end_back(0, 0)<cr>
 
     nnoremap        <Plug>(VM-Motion-f)                :call vm#commands#find_motion('f', '', 0)<cr>
     nnoremap        <Plug>(VM-Motion-F)                :call vm#commands#find_motion('F', '', 0)<cr>
@@ -87,4 +84,13 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Motion-0)                :call vm#commands#find_motion('0', '', 0)<cr>
     nnoremap        <Plug>(VM-Motion-^)                :call vm#commands#find_motion('^', '', 0)<cr>
     nnoremap        <Plug>(VM-Motion-%)                :call vm#commands#find_motion('%', '', 0)<cr>
+
+    fun! <SID>Mode()
+        let mode = g:VM_Global.extend_mode? ' (extend mode)' : ' (cursor mode)'
+        call b:VM_Selection.Funcs.msg('Enter regex'.mode.':')
+    endfun
+
+    nnoremap <expr> <Plug>(VM-:)                       vm#commands#regex_reset(':')
+    nnoremap <expr> <Plug>(VM-/)                       vm#commands#regex_reset('/')
+    nnoremap <expr> <Plug>(VM-?)                       vm#commands#regex_reset('?')
 endfun

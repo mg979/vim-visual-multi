@@ -60,6 +60,7 @@ fun! vm#funcs#reset(...)
     let &ignorecase = s:v.oldcase[1]
     call s:restore_regs()
     call vm#maps#end()
+    call vm#maps#motions(0, 1)
     let b:VM_Selection = {}
     let g:VM_Global.is_active = 0
     let g:VM_Global.extend_mode = 0
@@ -127,7 +128,8 @@ fun! s:Funcs.msg(text) dict
 endfun
 
 fun! s:Funcs.count_msg(force) dict
-    let i = '['.s:v['index'].']  '
+    let i = g:VM_Global.motions_enabled? '[M+ ' : '[m- '
+    let i .= s:v['index'].']  '
     if a:force | let s:v.silence = 0 | endif
     let s = len(s:Regions)>1 ? 's.' : '.'
     let t = g:VM_Global.extend_mode? ' region' : ' cursor'

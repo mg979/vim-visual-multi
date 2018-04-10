@@ -1,10 +1,12 @@
 let s:motion = 0 | let s:current_i = 0
 
-fun! s:init(whole, empty, extend_mode)
+fun! s:init(whole, cursor, extend_mode)
     if a:extend_mode | let g:VM_Global.extend_mode = 1 | endif
+
+    "return if already initialized
     if g:VM_Global.is_active | return 1 | endif
 
-    let s:V       = vm#init_buffer(a:empty)
+    let s:V       = vm#init_buffer(a:cursor)
     let s:v       = s:V.Vars
     let s:Regions = s:V.Regions
     let s:Matches = s:V.Matches
@@ -38,18 +40,18 @@ endfun
 " Add cursor
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:check_extend_default()
+fun! s:check_extend_default(X)
     """If just starting, enable extend mode if option is set."""
 
-    if g:VM_Global.extend_mode | return s:init(0, 1, 0)
-    elseif !g:VM_Global.is_active && g:VM.extend_by_default | return s:init(0, 1, 1)
-    else | return s:init(0, 1, 0) | endif
+    if g:VM_Global.extend_mode               | return s:init(0, 1, 0)
+    elseif ( a:X || g:VM.extend_by_default ) | return s:init(0, 1, 1)
+    else                                     | return s:init(0, 1, 0) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#add_cursor_at_word(yank, search)
-    call s:check_extend_default()
+    call s:check_extend_default(0)
 
     if a:yank | call s:yank(0) | endif
     normal! `[
@@ -61,8 +63,8 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#add_cursor_at_pos(where)
-    call s:check_extend_default()
+fun! vm#commands#add_cursor_at_pos(where, ...)
+    call s:check_extend_default(a:0)
 
     "silently add one cursor at pos
     call s:Global.new_cursor()
@@ -277,14 +279,29 @@ fun! s:extend_vars(n, this)
     let s:v.extending = a:n
     let s:current_i = s:v.index
     if a:this | let s:v.only_this = a:n | endif
+    let s:v.silence = 1
     "let b:VM_backup = copy(b:VM_Selection)
 endfun
+
+let s:sublime = { -> g:VM.sublime_mappings && !g:VM_Global.is_active }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#motion(motion, this)
+    if s:sublime() | call s:init(0, 0, 1) | endif
+
     call s:extend_vars(1, a:this)
     let s:motion = a:motion
+    call vm#commands#move(0, 0)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#end_back(fast, this)
+    if s:sublime() | call s:init(0, 0, 1) | endif
+
+    call s:extend_vars(1, a:this)
+    let s:motion = a:fast? 'BBE' : 'bbbe'
     call vm#commands#move(0, 0)
 endfun
 
@@ -403,6 +420,9 @@ fun! vm#commands#move(merge, restore_pos, ...)
             if a:restore_pos | call setpos('.', pos) | endif
         endfor | endif
 
+    "some motions will call this function more than once
+    if s:v.extending | return | endif
+
     "update variables, facing direction, highlighting
     let s:v.move_from_back = 0
 
@@ -413,6 +433,7 @@ fun! vm#commands#move(merge, restore_pos, ...)
     "call s:Global.update_regions()
     call s:Global.update_highlight()
     let r = s:Global.select_region(s:current_i)
+    call s:Funcs.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
