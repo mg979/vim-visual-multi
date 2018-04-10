@@ -49,7 +49,19 @@ xmap <silent> s]         <Plug>(VM-Find-A-Subword)
 xmap <silent> s[         <Plug>(VM-Find-A-Whole-Subword)
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Autocommands
 
-au BufLeave * call vm#funcs#buffer_leave()
-au BufEnter * call vm#funcs#buffer_enter()
+au BufLeave    * call s:buffer_leave()
+au BufEnter    * call s:buffer_enter()
+
+fun! s:buffer_leave()
+    if !empty(get(b:, 'VM_Selection', {}))
+        call vm#funcs#reset(1)
+    endif
+endfun
+
+fun! s:buffer_enter()
+    let b:VM_Selection = {}
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+

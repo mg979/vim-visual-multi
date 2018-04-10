@@ -49,30 +49,6 @@ endfun
 "Backup/restore buffer state on buffer change
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:key = { -> 'g:VM_Global.'.bufwinid("%") }
-
-fun! vm#funcs#buffer_leave()
-    if !empty(get(b:, 'VM_Selection', {}))
-        if !buflisted(bufnr("%")) | call vm#funcs#reset(1) | return | endif
-        let s:v.pos = getpos('.')
-        exe 'let '.s:key().' = copy(b:VM_Selection)'
-        call vm#funcs#reset(1)
-    endif
-endfun
-
-fun! vm#funcs#buffer_enter()
-    let b:VM_Selection = {}
-
-    if !buflisted(bufnr("%"))
-        return
-    elseif !empty(get(g:VM_Global, bufwinid("%"), {}))
-        call vm#init_buffer(0, 1)
-        call setmatches(s:v.matches)
-        call setpos('.', s:v.pos)
-        call vm#commands#add_under(0, s:v.whole_word, 0, 1)
-    endif
-endfun
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Reset
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -88,10 +64,8 @@ fun! vm#funcs#reset(...)
     let g:VM_Global.is_active = 0
     let g:VM_Global.extend_mode = 0
 
-    if !a:0    "exiting manually
-        call s:Funcs.msg('Exited Visual-Multi.')
-        call remove(g:VM_Global, bufwinid("%"))
-    endif
+    "exiting manually
+    if !a:0 | call s:Funcs.msg('Exited Visual-Multi.') | endif
 
     call s:augroup_end()
     call clearmatches()
@@ -107,6 +81,8 @@ let s:Funcs = {}
 
 let s:Funcs.byte_pos = { pos -> eval(line2byte(line(pos)) + col(pos)) }
 let s:Funcs.byte     = { pos -> eval(line2byte(pos[0]) + pos[1] ) }
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:default_reg()
     let clipboard_flags = split(&clipboard, ',')
@@ -161,6 +137,8 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Autocommands
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:augroup_start()
     augroup plugin-visual-multi
