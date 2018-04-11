@@ -30,7 +30,7 @@ fun! vm#funcs#init(empty)
     set ww=<,>,h,l
 
     let s:v.search = []
-    let s:v.move_from_back = 0
+    let s:v.ID = 0
 
     let s:v.oldcase = [&smartcase, &ignorecase]
     let s:v.index = -1
@@ -82,8 +82,30 @@ endfun
 
 let s:Funcs = {}
 
-let s:Funcs.byte_pos = { pos -> eval(line2byte(line(pos)) + col(pos)) }
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"byte offset of line/col
+"fun! s:Funcs.byte(pos) dict
+     "return eval(line2byte(a:pos[0]) + a:pos[1])
+"endfun
+
+"byte offset of line/col
 let s:Funcs.byte     = { pos -> eval(line2byte(pos[0]) + pos[1] ) }
+
+fun! s:Funcs.get_pos(...) dict
+    "pos can be a string, a list or a (line, col) couple
+
+    if a:0 > 1                          "a (line, col) couple
+        return self.byte([a:1, a:2])
+
+    elseif type(a:1) == v:t_string      "a string (like '.')
+        let pos = getpos(a:1)[1:2]
+        return self.byte(pos)
+
+    else                                "a list [line, col]
+        return self.byte(a:1)
+    endif
+endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -135,7 +157,7 @@ fun! s:Funcs.count_msg(force) dict
     if a:force | let s:v.silence = 0 | endif
     let s = len(s:Regions)>1 ? 's.' : '.'
     let t = g:VM.extend_mode? ' region' : ' cursor'
-    call self.msg(i.len(s:Regions).t.s.'   Current patterns: '.string(s:v.search))
+    "call self.msg(i.len(s:Regions).t.s.'   Current patterns: '.string(s:v.search))
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

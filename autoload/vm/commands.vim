@@ -250,10 +250,10 @@ fun! vm#commands#invert_direction(manual)
     "invert anchor
     if s:v.direction
         let s:v.direction = 0
-        for r in s:Regions | let r.h = r.b | endfor
+        for r in s:Regions | let r.h = r.b | let r.H = r.B | endfor
     else
         let s:v.direction = 1
-        for r in s:Regions | let r.h = r.a | endfor
+        for r in s:Regions | let r.h = r.a | let r.H = r.A | endfor
     endif
 
     call s:Global.update_highlight()

@@ -6,22 +6,23 @@ fun! vm#region#init()
     let s:Global  = s:V.Global
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
-
-    let s:Extend = { -> g:VM.extend_mode }
 endfun
+
+let s:X  = { -> g:VM.extend_mode }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Region class
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 " A new region will only been created if not already existant
+" Each region will receive an individual incremental id, that will never change.
 
 " b:VM_Selection (= s:V) contains Regions, Matches, Vars (= s:v = plugin variables)
 
-" s:Global holds the Global class methods
-" s:Regions contains the regions with their contents
-" s:Matches contains the matches as they are registered with matchaddpos()
-" s:v.matches contains the current matches as read with getmatches()
+" s:Global    : holds the Global class methods
+" s:Regions   : contains the regions with their contents
+" s:Matches   : contains the matches as they are registered with matchaddpos()
+" s:v.matches : contains the current matches as read with getmatches()
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -38,13 +39,15 @@ fun! s:Region.new(cursor)
     let R         = copy(self)
     let R.index   = len(s:Regions)
     let R.dir     = 1
+    let R.id      = s:v.ID + 1
 
-    let s:v.index = R.index
+    "update region index and ID count
+    let s:v.index = R.index | let s:v.ID += 1
 
     let R.A_   = { -> eval(line2byte(R.l) + R.a) }
     let R.B_   = { -> eval(line2byte(R.L) + R.b) }
     let R.edge = { -> s:v.direction ? R.b : R.a }
-    let R.char = { -> s:Extend()? getline(R.l)[R.edge()-1] : '' }
+    let R.char = { -> s:X()? getline(R.l)[R.edge()-1] : '' }
 
     if a:cursor    "/////////// CURSOR ///////////
 
@@ -66,24 +69,17 @@ fun! s:Region.new(cursor)
         let R.L     = getpos("']")[1]       " ending line
         let R.a     = getpos("'[")[2]       " begin
         let R.b     = getpos("']")[2]       " end
-        let R.w     = R.b - R.a + 1         " width
         let R.A     = R.A_()                " byte offset a
         let R.B     = R.B_()                " byte offset b
+        let R.w     = R.B - R.A + 1         " width
         let R.h     = R.a                   " anchor
         let R.H     = R.A                   " anchor offset
         let R.txt   = getreg(s:v.def_reg)   " text content
         let R.pat   = R.pattern()           " associated search pattern
     endif
 
-
-    "highlight entry
-    let region  = [R.l, R.a, R.w]
-    let cursor  = [R.l, R.b, 1]
-
-    let match   = matchaddpos(g:VM_Selection_hl, [region], 30)
-    let cursor  = matchaddpos('MultiCursor',     [cursor], 40)
-    call add(s:Matches, [match, cursor])
     call add(s:Regions, R)
+    call R.highlight()
     call s:Global.update_cursor_highlight()
 
     return R
@@ -111,13 +107,7 @@ endfun
 fun! s:Region.remove() dict
     let i = self.index
     call remove(s:Regions, i)
-    let m = s:Matches[i][0]
-    let c = s:Matches[i][1]
-    call remove(s:Matches, i)
-    call matchdelete(m)
-    call matchdelete(c)
-
-    let s:v.matches = getmatches()
+    call self.remove_highlight()
     call s:Global.update_indices()
 endfun
 
@@ -146,7 +136,7 @@ endfun
 
 fun! s:Region.move_cursor() dict
     """If not in extend mode, just move the cursors."""
-    if s:Extend() | return | endif
+    if s:X() | return | endif
 
     call cursor(self.l, self.a)
     exe "normal! ".s:motion
@@ -196,8 +186,6 @@ fun! s:move(r)
     else
         let r.a = new
     endif
-
-    "echom  " [" r.dir "] " a b " | " r.h " | " r.a r.b
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -230,12 +218,10 @@ fun! s:Region.move_back() dict
     "merge to bol motion
     if s:v.merge_to_beol
         let s:v.merge_to_beol = 0
-        let s:v.direction = 1
-        let r.a = 1
-        let r.b = 1
+        call self.update(r.l, r.l, 1, 1)
+    else
+        call self.update()
     endif
-
-    call self.update()
 endfun
 
 
@@ -243,14 +229,14 @@ endfun
 " Update functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.yank()
+fun! s:Region.yank() dict
     """Yank region content if in extend mode."""
 
     let r = self
 
     "if not in extend mode, the cursor will stay at r.a
     call cursor(r.l, r.a)
-    if s:Extend()
+    if s:X()
         normal! m[
         call cursor(r.L, r.b+1)
         normal! m]`[y`]
@@ -261,18 +247,10 @@ endfun
 
 fun! s:Region.update(...) dict
     """Update the main region positions."""
-    let r = self | let X = s:Extend()
+    let r = self
 
-    if a:0 | let l = a:1 | let L = a:2 | let a = a:3 | let b = a:4
-    else   | let l = r.l | let L = r.L | let a = r.a | let b = r.b | endif
+    if a:0 | let r.l = a:1 | let r.L = a:2 | let r.a = a:3 | let r.b = a:4 | endif
 
-    let r.l   = l                 " starting line
-    let r.L   = L                 " end line
-    "let r.a   = min([a, b])       " begin
-    "let r.b   = max([a, b])       " end
-
-    "echom r.a r.h r.b
-    "if X | let r.a = min([a, r.h]) | let r.b = max([b, r.h]) | endif
     call self.yank()
     call self.update_vars()
 endfun
@@ -289,23 +267,67 @@ fun! s:Region.update_vars() dict
     let r.B       = r.B_()
 
     "update anchor if in cursor mode
-    if !s:Extend() | let r.h = r.a | let r.H = r.A | endif
+    if !s:X() | let r.h = r.a | let r.H = r.A | endif
 
     let r.w       = r.b - r.a + 1
-    let r.txt     = s:Extend()? getreg(s:v.def_reg) : ''
+    let r.txt     = s:X()? getreg(s:v.def_reg) : ''
     let r.pat     = r.pattern()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Highlight functions
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region.highlight() dict
+    """Create the highlight entries."""
+
+    let R      = self
+    let max    = R.L - R.l
+    let region = []
+    let cursor = [R.l, R.edge(), 1]
+
+    "single line skip the for loop
+    if !max | let region = [[R.l, R.a, R.w]] | else | let max += 1 | endif
+
+    "define highlight
+    for n in range(max)
+        let line = n==0  ? [R.l, R.a, 1000] :
+              \    n<max ? [R.l + n]        :
+              \            [R.L, 1, R.b]
+
+        call add(region, line)
+    endfor
+
+    "build a list of highlight entries, one for each possible line
+    let s:Matches[R.id] = {'region': [], 'cursor': 0}
+    for line in region
+        call add(s:Matches[R.id].region, matchaddpos(g:VM_Selection_hl, [line], 30))
+    endfor
+    let s:Matches[R.id].cursor = matchaddpos('MultiCursor', [cursor], 40)
+    "echo max region s:Matches map(getmatches(), 'getmatches()[v:key].id')
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region.remove_highlight() dict
+    """Remove the highlight entries."""
+
+    "echo string(s:Matches)
+    let matches = remove(s:Matches, self.id)
+    let R       = matches.region
+    let c       = matches.cursor
+
+    for m in R | call matchdelete(m) | endfor | call matchdelete(c)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_highlight() dict
-    """Update the highlight match."""
+    """Update the region highlight."""
 
-    let r = self | let i = r.index
-
-    let s:v.matches[i].pos1 = [r.l, r.a, r.w]
-    let cursor = len(s:Matches) + i
-    let s:v.matches[cursor].pos1 = [r.l, r.edge(), 1]
+    if has_key(s:Matches, self.id) | call self.remove_highlight() | endif
+    call self.highlight()
+    let s:v.matches = getmatches()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

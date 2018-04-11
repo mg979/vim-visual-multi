@@ -13,7 +13,7 @@ fun! vm#init_buffer(empty, ...)
 
     if !empty(b:VM_Selection) | return s:V | endif
 
-    let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': [], 'Funcs': {}}
+    let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': {}, 'Funcs': {}}
 
     let g:VM.is_active = 1
 
@@ -27,8 +27,8 @@ fun! vm#init_buffer(empty, ...)
     let s:Funcs    = vm#funcs#init(a:empty)
     let s:Search   = s:V.Search
 
-    let s:byte = funcref('s:Funcs.byte')
-    let s:Extend = { -> g:VM.extend_mode }
+    let s:byte     = funcref('s:Funcs.byte')
+    let s:X        = { -> g:VM.extend_mode }
 
     call s:Funcs.msg('Visual-Multi started. Press <esc> to exit.')
     call vm#region#init()
@@ -80,12 +80,15 @@ endfun
 fun! s:Global.update_highlight(...) dict
     """Update highlight for all regions."""
 
+    let oldredraw = &lz | set lz
+
     for r in s:Regions
         call r.update_highlight()
     endfor
 
     call setmatches(s:v.matches)
     call self.update_cursor_highlight()
+    let &lz = oldredraw
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -94,7 +97,7 @@ fun! s:Global.update_cursor_highlight(...) dict
     """Set cursor highlight, depending on extending mode."""
 
     highlight clear MultiCursor
-    if !s:Extend() && self.all_empty()
+    if !s:X() && self.all_empty()
         exe "highlight link MultiCursor ".g:VM_Mono_Cursor_hl
     else
         exe "highlight link MultiCursor ".g:VM_Normal_Cursor_hl
@@ -110,8 +113,8 @@ fun! s:Global.all_empty() dict
 
     for r in s:Regions
         if r.a != r.b
-            if !s:Extend() | call vm#commands#change_mode() | endif
-            return 0 | endif
+            if !s:X() | call vm#commands#change_mode() | endif
+            return 0  | endif
     endfor
     return 1
 endfun
@@ -122,8 +125,8 @@ fun! s:Global.update_regions() dict
     """Force regions update."""
 
     for r in s:Regions | call r.update() | endfor
-    if s:Extend() | call self.update_highlight()
-    else | call s:Global.update_cursor_highlight() | endif
+    if s:X()           | call self.update_highlight()
+    else               | call s:Global.update_cursor_highlight() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -173,13 +176,7 @@ fun! s:Global.is_region_at_pos(pos) dict
     """Find if the cursor is on a highlighted region.
     "Return an empty dict otherwise."""
 
-    "pos can be a string (like '.') or a list
-    if type(a:pos) == v:t_string
-        let pos = getpos(a:pos)[1:2]
-        let pos = s:byte([pos[0], pos[1]])
-    else
-        let pos = s:byte([a:pos[0], a:pos[1]])
-    endif
+    let pos = s:Funcs.get_pos(a:pos)
 
     for r in s:Regions
         if pos >= r.A && pos <= r.B
