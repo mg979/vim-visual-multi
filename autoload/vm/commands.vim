@@ -1,10 +1,13 @@
-let s:motion = 0 | let s:current_i = 0
+let s:motion = 0 | let s:current_i = 0 | let s:starting_col = 0
+let s:Extend = { -> g:VM.extend_mode }
 
 fun! s:init(whole, cursor, extend_mode)
-    if a:extend_mode | let g:VM_Global.extend_mode = 1 | endif
+    if a:extend_mode | let g:VM.extend_mode = 1 | endif
 
     "return if already initialized
-    if g:VM_Global.is_active | return 1 | endif
+    if g:VM.is_active | return 1 | endif
+
+    if g:VM.motions_at_start | call vm#maps#motions(1) | endif
 
     let s:V       = vm#init_buffer(a:cursor)
     let s:v       = s:V.Vars
@@ -15,7 +18,7 @@ fun! s:init(whole, cursor, extend_mode)
     let s:Search  = s:V.Search
 
     let s:v.whole_word = a:whole
-    let s:Extend = { -> g:VM_Global.extend_mode }
+    let s:v.nav_direction = 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -23,7 +26,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#change_mode()
-    let g:VM_Global.extend_mode = !s:Extend()
+    let g:VM.extend_mode = !s:Extend()
 
     if s:Extend()
         call s:Funcs.msg('Switched to Extend Mode')
@@ -43,7 +46,7 @@ endfun
 fun! s:check_extend_default(X)
     """If just starting, enable extend mode if option is set."""
 
-    if g:VM_Global.extend_mode               | return s:init(0, 1, 0)
+    if s:Extend()                            | return s:init(0, 1, 1)
     elseif ( a:X || g:VM.extend_by_default ) | return s:init(0, 1, 1)
     else                                     | return s:init(0, 1, 0) | endif
 endfun
@@ -63,19 +66,26 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#add_cursor_at_pos(where, ...)
-    call s:check_extend_default(a:0)
+fun! vm#commands#add_cursor_at_pos(where, extend, ...)
+    call s:check_extend_default(a:extend)
+    if a:where && !s:starting_col | let s:starting_col = col('.') | endif
 
     "silently add one cursor at pos
-    call s:Global.new_cursor()
+    if !a:0 | call s:Global.new_cursor() | endif
 
     if a:where == 1
         normal! j
-        call s:Global.new_cursor()
+        let R = s:Global.new_cursor()
     elseif a:where == 2
         normal! k
-        call s:Global.new_cursor()
+        let R = s:Global.new_cursor()
     endif
+
+    "when adding cursors below or above, don't add on empty lines
+    if g:VM.cursors_skip_shorter_lines && a:where && R.a < s:starting_col
+        call R.remove()
+        call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return | endif
+    let s:starting_col = 0
     call s:Funcs.count_msg(0)
 endfun
 
@@ -115,13 +125,13 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_by_regex(...)
-    if !g:VM_Global.is_active | call vm#commands#regex_reset() | return | endif
+    if !g:VM.is_active | call vm#commands#regex_reset() | return | endif
 
     "store reg and position, to check if the search will be aborted
     let s:regex_pos = getpos('.')
     let s:regex_reg = @/
 
-    cnoremap <buffer> <cr> <cr>:call vm#commands#regex_done()<cr>
+    cnoremap <silent> <buffer> <cr> <cr>:call vm#commands#regex_done()<cr>
     cnoremap <buffer> <esc> <cr>:call vm#commands#regex_abort()<cr>
 endfun
 
@@ -207,28 +217,58 @@ fun! s:get_next(n)
         silent exe "normal! ".a:n."g".a:n."y`]"
         call vm#commands#add_cursor_at_word(0, 0)
     endif
+    if a:n ==# 'n' | let s:v.nav_direction = 1
+    else | let s:v.nav_direction = 0 | endif
 endfun
 
+fun! s:navigate(force, dir)
+    if a:force && s:v.nav_direction != a:dir
+        call s:Funcs.msg('Reversed direction.')
+        let s:v.nav_direction = a:dir
+        return 1
+    elseif a:force || @/==''
+        let i = a:dir? s:v.index+1 : s:v.index-1
+        call s:Global.select_region(i)
+        "redraw!
+        call s:Funcs.count_msg(0)
+        return 1
+    endif
+endfun
+
+fun! s:skip()
+    let r = s:Global.is_region_at_pos('.')
+    if empty(r) | call s:navigate(1, s:v.nav_direction)
+    else        | call r.remove()
+    endif
+endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#invert_direction()
     """Invert direction and reselect region."""
 
-    let s:v.direction = !s:v.direction
+    "invert anchor
+    if s:v.direction
+        let s:v.direction = 0
+        for r in s:Regions | let r.h = r.b | endfor
+    else
+        let s:v.direction = 1
+        for r in s:Regions | let r.h = r.a | endfor
+    endif
+
+    call s:Global.update_highlight()
     call s:Global.select_region(s:v.index)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav)
-    call s:Search.validate() | let i = s:v.index
+    call s:Search.validate()
 
     "just navigate to next
-    if a:nav || @/=='' | call s:Global.select_region(i+1)
-        redraw! | call s:Funcs.count_msg(0) | return
+    if s:navigate(a:nav, 1) | return
 
-    elseif a:skip | call s:Regions[i].remove() | endif
+    elseif a:skip | call s:skip() | endif
     "skip current match
 
     call s:get_next('n')
@@ -237,17 +277,16 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(skip, nav)
-    call s:Search.validate() | let i = s:v.index | let r = s:Regions[i]
+    call s:Search.validate() | let r = s:Global.is_region_at_pos('.')
 
     "just navigate to previous
-    if a:nav || @/=='' | call s:Global.select_region(i-1)
-        redraw! | call s:Funcs.count_msg(0) | return
+    if s:navigate(a:nav, 0) | return
 
-    elseif a:skip | call r.remove() | endif
+    elseif a:skip | call s:skip() | endif
     "skip current match
 
     "move to the beginning of the current match
-    call cursor(r.l, r.a)
+    if s:Extend() | call cursor(r.l, r.a) | endif
 
     call s:get_next('N')
 endfun
@@ -260,7 +299,7 @@ fun! vm#commands#skip(just_remove)
         if !empty(r) | call r.remove() | endif
         call s:Funcs.count_msg(0)
 
-    elseif s:v.direction
+    elseif s:v.nav_direction
         call vm#commands#find_next(1, 0)
     else
         call vm#commands#find_prev(1, 0)
@@ -283,12 +322,12 @@ fun! s:extend_vars(n, this)
     "let b:VM_backup = copy(b:VM_Selection)
 endfun
 
-let s:sublime = { -> g:VM.sublime_mappings && !g:VM_Global.is_active }
+let s:sublime = { -> !g:VM.is_active && g:VM.sublime_mappings }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#motion(motion, this)
-    if s:sublime() | call s:init(0, 0, 1) | endif
+    if s:sublime() | call s:init(0, 1, 1) | call s:Global.new_cursor() | endif
 
     call s:extend_vars(1, a:this)
     let s:motion = a:motion
@@ -298,7 +337,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#end_back(fast, this)
-    if s:sublime() | call s:init(0, 0, 1) | endif
+    if s:sublime() | call s:init(0, 1, 1) | call s:Global.new_cursor() | endif
 
     call s:extend_vars(1, a:this)
     let s:motion = a:fast? 'BBE' : 'bbbe'
@@ -311,7 +350,7 @@ fun! vm#commands#merge_to_beol(eol, this)
     call s:extend_vars(1, a:this)
     let s:motion = a:eol? "\<End>" : '0'
     let s:v.merge_to_beol = 1
-    let g:VM_Global.extend_mode = 0
+    let g:VM.extend_mode = 0
     call vm#commands#move(1, 0)
 endfun
 
@@ -389,31 +428,36 @@ endfun
 " Motion event
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:always_from_back = { -> index(['^', '0'], s:motion) >= 0 }
-let s:can_from_back    = { -> index(['$'], s:motion) == -1 && !s:v.direction }
+let s:can_from_back    = { -> s:motion == '$' && !s:v.direction }
 let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
-let s:forward          = { -> index(['w', 'W', 'e', 'E', 'l', 'f', 't'], s:motion)  >= 0 }
+let s:always_from_back = { -> index(['^', '0', 'F', 'T'],                     s:motion) >= 0 }
+let s:forward          = { -> index(['w', 'W', 'e', 'E', 'l', 'f', 't'],      s:motion)  >= 0 }
 
 fun! vm#commands#move(merge, restore_pos, ...)
     if !s:v.extending | return | endif
     let s:v.extending -= 1 | let merge = a:merge
 
+    "store orientation of currently selected region
+    let prev = s:Regions[s:current_i].dir
+
     if s:v.merge_to_beol
         let merge = 1
+
     elseif s:v.direction && s:always_from_back()
-        call vm#commands#find_prev(0, 0)
-        let s:v.move_from_back = 1
-    else
-        let s:v.move_from_back = s:can_from_back()
+        call vm#commands#invert_direction()
+
+    elseif s:can_from_back()
+        call vm#commands#invert_direction()
     endif
 
     "select motion: store position to move to, in between the 2 motions
     if a:restore_pos | let pos = getpos('.') | endif
 
-    if !len(s:Regions) | call vm#commands#add_cursor_at_pos('.') | endif
+    if !len(s:Regions) | call vm#commands#add_cursor_at_pos('.', 0) | endif
 
     if s:only_this()
         call s:Regions[s:v.index].move(s:motion) | let s:v.only_this -= 1
+        if a:restore_pos | call setpos('.', pos) | endif
     else
         for r in s:Regions
             call r.move(s:motion)
@@ -424,15 +468,14 @@ fun! vm#commands#move(merge, restore_pos, ...)
     if s:v.extending | return | endif
 
     "update variables, facing direction, highlighting
-    let s:v.move_from_back = 0
-
-    if s:motion == '$' | let s:v.direction = 0
-    elseif s:always_from_back() | let s:v.direction = 1 | endif
-
     if merge | call s:Global.merge_regions() | endif
-    "call s:Global.update_regions()
-    call s:Global.update_highlight()
+
     let r = s:Global.select_region(s:current_i)
+
+    "invert direction if regions orientation has changed
+    if r.dir != prev | call vm#commands#invert_direction()
+    else             | call s:Global.update_highlight() | endif
+
     call s:Funcs.count_msg(1)
 endfun
 

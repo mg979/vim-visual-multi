@@ -206,13 +206,13 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#maps#motions(activate, ...)
-    if a:activate && !g:VM_Global.motions_enabled
-        let g:VM_Global.motions_enabled = 1
+    if a:activate && !g:VM.motions_enabled
+        let g:VM.motions_enabled = 1
         for m in (s:motions + s:find)
             exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".m.")"
         endfor
-    elseif !a:activate && g:VM_Global.motions_enabled
-        let g:VM_Global.motions_enabled = 0
+    elseif !a:activate && g:VM.motions_enabled
+        let g:VM.motions_enabled = 0
         for m in (s:motions + s:find)
             exe "nunmap <buffer> ".m
         endfor
@@ -220,7 +220,7 @@ fun! vm#maps#motions(activate, ...)
 endfun
 
 fun! vm#maps#motions_toggle()
-    let activate = !g:VM_Global.motions_enabled
+    let activate = !g:VM.motions_enabled
     call vm#maps#motions(activate)
     redraw! | call b:VM_Selection.Funcs.count_msg(0)
 endfun

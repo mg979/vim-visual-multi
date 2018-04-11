@@ -15,7 +15,7 @@ fun! vm#init_buffer(empty, ...)
 
     let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': [], 'Funcs': {}}
 
-    let g:VM_Global.is_active = 1
+    let g:VM.is_active = 1
 
     let s:V        = b:VM_Selection
     let s:V.Global = s:Global
@@ -28,7 +28,7 @@ fun! vm#init_buffer(empty, ...)
     let s:Search   = s:V.Search
 
     let s:byte = funcref('s:Funcs.byte')
-    let s:Extend = { -> g:VM_Global.extend_mode }
+    let s:Extend = { -> g:VM.extend_mode }
 
     call s:Funcs.msg('Visual-Multi started. Press <esc> to exit.')
     call vm#region#init()
@@ -62,14 +62,13 @@ endfun
 fun! s:Global.new_cursor() dict
     """Create a new cursor if there is't already a region."""
 
-    let R = self.is_region_at_pos('.')
-    if !empty(R) | return R | endif
-    "if !empty(R) | call self.select_region(R.index) | return R | endif
+    let r = self.is_region_at_pos('.')
+    if !empty(r) | return r | endif
 
+    "when adding cursors below or above, don't add on empty lines
     let R = vm#region#new(1)
 
     let s:v.matches = getmatches()
-    "call self.select_region(R.index)
     return R
 endfun
 
@@ -95,7 +94,7 @@ fun! s:Global.update_cursor_highlight(...) dict
     """Set cursor highlight, depending on extending mode."""
 
     highlight clear MultiCursor
-    if self.all_empty() && !s:Extend()
+    if !s:Extend() && self.all_empty()
         exe "highlight link MultiCursor ".g:VM_Mono_Cursor_hl
     else
         exe "highlight link MultiCursor ".g:VM_Normal_Cursor_hl
@@ -107,7 +106,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.all_empty() dict
-    """If not all regions are empty, turn on extend mode."""
+    """If not all regions are empty, turn on extend mode, if not already active.
 
     for r in s:Regions
         if r.a != r.b
@@ -135,7 +134,7 @@ fun! s:Global.collapse_regions() dict
     for r in s:Regions
         if r.a != r.b | call r.update(r.l, r.L, r.a, r.a) | endif
     endfor
-    let g:VM_Global.extend_mode = 0
+    let g:VM.extend_mode = 0
     "call self.update_regions()
     call self.update_highlight()
 endfun
@@ -183,9 +182,7 @@ fun! s:Global.is_region_at_pos(pos) dict
     endif
 
     for r in s:Regions
-        let a = s:byte([r.l, r.a])
-        let b = s:byte([r.l, r.b])
-        if pos >= a && pos <= b
+        if pos >= r.A && pos <= r.B
             return r | endif | endfor
     return {}
 endfun

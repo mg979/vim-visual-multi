@@ -62,8 +62,8 @@ fun! vm#funcs#reset(...)
     call vm#maps#end()
     call vm#maps#motions(0, 1)
     let b:VM_Selection = {}
-    let g:VM_Global.is_active = 0
-    let g:VM_Global.extend_mode = 0
+    let g:VM.is_active = 0
+    let g:VM.extend_mode = 0
 
     "exiting manually
     if !a:0 | call s:Funcs.msg('Exited Visual-Multi.') | endif
@@ -128,11 +128,11 @@ fun! s:Funcs.msg(text) dict
 endfun
 
 fun! s:Funcs.count_msg(force) dict
-    let i = g:VM_Global.motions_enabled? '[M+ ' : '[m- '
+    let i = g:VM.motions_enabled? '[M+ ' : '[m- '
     let i .= s:v['index'].']  '
     if a:force | let s:v.silence = 0 | endif
     let s = len(s:Regions)>1 ? 's.' : '.'
-    let t = g:VM_Global.extend_mode? ' region' : ' cursor'
+    let t = g:VM.extend_mode? ' region' : ' cursor'
     call self.msg(i.len(s:Regions).t.s.'   Current patterns: '.string(s:v.search))
 endfun
 
@@ -143,34 +143,47 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:augroup_start()
-    augroup plugin-visual-multi
-        au!
-        au CursorMoved * call vm#commands#move(0, 0)
-    augroup END
+    "augroup plugin-visual-multi
+        "au!
+        "au CursorMoved * call vm#commands#move(0, 0)
+    "augroup END
 endfun
 
 fun! s:augroup_end()
-    augroup plugin-visual-multi
-        au!
-    augroup END
+    "augroup plugin-visual-multi
+        "au!
+    "augroup END
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Utility functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+function! s:pad(t, n)
+    if len(a:t) > a:n
+        return a:t[:(a:n-1)]."…"
+    else
+        let spaces = a:n - len(a:t)
+        let spaces = printf("%".spaces."s", "")
+        return a:t.spaces
+    endif
+endfunction
+
 fun! s:Funcs.regions_contents() dict
-    echohl WarningMsg | echo "Index, A, B, width    --- Regions contents ---" | echohl None
+    echohl WarningMsg | echo "Index\tA\tB\tw\tl / L\t\ta / b\t"
+                \ "       --- Regions contents ---" | echohl None
     for r in s:Regions | call self.region_txt(r) | endfor
 endfun
 
 fun! s:Funcs.region_txt(r) dict
-    let index = printf("%-4d", a:r.index)
-    let line = substitute(a:r.txt, '\V\n', '^M', 'g')
+    let r = a:r
+    let index = printf("%-4d", r.index)
+    let line = substitute(r.txt, '\V\n', '^M', 'g')
     if len(line) > 80 | let line = line[:80] . '…' | endif
 
-    echohl Directory | echo  index a:r.A a:r.B a:r.w
-    echohl None      | echon "      " line
+    echohl Directory | echo  index."\t".r.A."\t".r.B."\t".r.w."\t"
+                \.s:pad(r.l." / ".r.L, 14).s:pad("\t".r.a." / ".r.b, 14)
+    echohl None      | echon "\t".line
     echohl None
 endfun
 

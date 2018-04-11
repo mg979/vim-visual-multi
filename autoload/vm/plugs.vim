@@ -1,12 +1,13 @@
 fun! vm#plugs#init()
-    nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0)<cr>
+    nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0, 0)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-At-Word)      :call vm#commands#add_cursor_at_word(1, 1)<cr>
-    nnoremap        <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
-    xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(1, 1, 0)<cr>`]
-    nnoremap        <Plug>(VM-Add-Cursor-Down)         :call vm#commands#add_cursor_at_pos(1)<cr>
-    nnoremap        <Plug>(VM-Add-Cursor-Up)           :call vm#commands#add_cursor_at_pos(2)<cr>
+    nnoremap        <Plug>(VM-Add-Cursor-Down)         :call vm#commands#add_cursor_at_pos(1, 0)<cr>
+    nnoremap        <Plug>(VM-Add-Cursor-Up)           :call vm#commands#add_cursor_at_pos(2, 0)<cr>
     nnoremap        <Plug>(VM-Select-Down)             :call vm#commands#add_cursor_at_pos(1, 1)<cr>
     nnoremap        <Plug>(VM-Select-Up)               :call vm#commands#add_cursor_at_pos(2, 1)<cr>
+
+    nnoremap        <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
+    xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(1, 1, 0)<cr>`]
     nnoremap        <Plug>(VM-Find-I-Word)             :call vm#commands#find_under(0, 0, 0)<cr>
     nnoremap        <Plug>(VM-Find-A-Word)             :call vm#commands#find_under(0, 0, 1)<cr>
     nnoremap        <Plug>(VM-Find-I-Whole-Word)       :call vm#commands#find_under(0, 1, 0)<cr>
@@ -86,7 +87,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Motion-%)                :call vm#commands#find_motion('%', '', 0)<cr>
 
     fun! <SID>Mode()
-        let mode = g:VM_Global.extend_mode? ' (extend mode)' : ' (cursor mode)'
+        let mode = g:VM.extend_mode? ' (extend mode)' : ' (cursor mode)'
         call b:VM_Selection.Funcs.msg('Enter regex'.mode.':')
     endfun
 

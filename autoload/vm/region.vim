@@ -7,7 +7,7 @@ fun! vm#region#init()
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
 
-    let s:Extend = { -> g:VM_Global.extend_mode }
+    let s:Extend = { -> g:VM.extend_mode }
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -37,23 +37,27 @@ let s:Region = {}
 fun! s:Region.new(cursor)
     let R         = copy(self)
     let R.index   = len(s:Regions)
+    let R.dir     = 1
+
     let s:v.index = R.index
 
-    let R.A_ = { -> eval(line2byte(R.l) + R.a) }
-    let R.B_ = { -> eval(line2byte(R.L) + R.b) }
+    let R.A_   = { -> eval(line2byte(R.l) + R.a) }
+    let R.B_   = { -> eval(line2byte(R.L) + R.b) }
+    let R.edge = { -> s:v.direction ? R.b : R.a }
+    let R.char = { -> s:Extend()? getline(R.l)[R.edge()-1] : '' }
 
     if a:cursor    "/////////// CURSOR ///////////
 
-        let R.l     = getpos(".")[1]        " line
+        let R.l     = getpos('.')[1]        " line
         let R.L     = R.l
-        let R.a     = getpos(".")[2]        " position
+        let R.a     = getpos('.')[2]        " position
         let R.b     = R.a
         let R.w     = 1
         let R.A     = R.A_()                " byte offset
         let R.B     = R.A
         let R.h     = R.a                   " anchor (unused for cursors)
         let R.H     = R.A
-        let R.txt   = ''
+        let R.txt   = R.char()              " character under cursor in extend mode
         let R.pat   = ''
 
     else            "/////////// REGION ///////////
@@ -70,6 +74,7 @@ fun! s:Region.new(cursor)
         let R.txt   = getreg(s:v.def_reg)   " text content
         let R.pat   = R.pattern()           " associated search pattern
     endif
+
 
     "highlight entry
     let region  = [R.l, R.a, R.w]
@@ -121,35 +126,35 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "NOTE: these lambdas aren't really used much for now.
 
-let s:forward   = {m -> index(['w', 'W', 'e', 'E', 'l', 'j', 'f', 't', '$'], m)  >= 0}
-let s:backwards = {m -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], m)       >= 0}
-let s:simple    = {m -> index(['h', 'j', 'k', 'l'], m)                           >= 0}
-let s:extreme   = {m -> index(['$', '0', '^'], m)                                >= 0}
+let s:forward   = { -> index(['w', 'W', 'e', 'E', 'l', 'j', 'f', 't', '$'], s:motion[0]) >=0}
+let s:backwards = { -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'],      s:motion[0]) >=0}
+let s:simple    = { -> index(['h', 'j', 'k', 'l'],                          s:motion[0]) >=0}
+let s:extreme   = { -> index(['$', '0', '^'],                               s:motion[0]) >=0}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.move(motion) dict
-    if s:v.move_from_back
-        call self.move_from_back(a:motion)
-
-    elseif s:backwards(a:motion[0])
-        call self.move_back(a:motion)
-
+    let s:motion = a:motion
+    if s:backwards()
+        call self.move_back()
     else
-        call self.move_forward(a:motion)
+        call self.move_forward()
     endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.move_cursor(motion) dict
+fun! s:Region.move_cursor() dict
     """If not in extend mode, just move the cursors."""
     if s:Extend() | return | endif
 
     call cursor(self.l, self.a)
-    exe "normal! ".a:motion
+    exe "normal! ".s:motion
 
-    let self.a = self.end()
+    let pos = getpos('.')
+    let self.l = pos[1]
+    let self.L = self.L
+    let self.a = pos[2]
     let self.b = self.a
     call self.update_vars()
     return 1
@@ -157,31 +162,56 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.end() dict
-    """Ensure line boundaries aren't crossed."""
-    let r = self | let p = getpos('.')[1]
+fun! s:move(r)
+    let r = a:r | let a = r.a | let b = r.b | let up = 0 | let down = 0
 
-    if     ( p > r.l ) | return col([r.l, '$'])-1
-    elseif ( p < r.l ) | return col([r.l, 1])
-    else               | return col('.')
+    "move the cursor to the current edge and perform the motion
+    call cursor(r.l, r.edge())
+    exe "normal! ".s:motion
+
+    "check the line
+    let nl = line('.')
+
+    if       nl < r.l   |   let up   = 1   |   let r.l = nl
+    elseif   nl > r.L   |   let down = 1   |   let r.L = nl
     endif
+
+    "get the new position and see if there's been inversion
+    let new = col('.')
+    let inversion = r.dir? (new < r.h || up) : (new > r.h || down)
+
+    "assign new values
+    if inversion && r.dir
+        let r.dir = 0
+        let r.a = new
+        let r.b = r.h
+
+    elseif inversion
+        let r.dir = 1
+        let r.b = new
+        let r.a = r.h
+
+    elseif r.dir
+        let r.b = new
+    else
+        let r.a = new
+    endif
+
+    "echom  " [" r.dir "] " a b " | " r.h " | " r.a r.b
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Extend mode
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.move_forward(motion) dict
-    let r = self | if self.move_cursor(a:motion) | return | endif
+fun! s:Region.move_forward() dict
+    let r = self | if self.move_cursor() | return | endif
 
     "move to the end of the region and perform the motion
-    call cursor(r.l, r.b)
-    exe "normal! ".a:motion
-
-    let r.b = self.end()
+    call s:move(r)
 
     "merge to eol motion
-    if a:motion == "\<End>"
+    if s:motion == "\<End>"
         let s:v.merge_to_beol = 0
         let r.a = r.b
     endif
@@ -191,28 +221,11 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.move_from_back(motion) dict
-    let r = self | if self.move_cursor(a:motion) | return | endif
-
-    "set a mark and perform the motion
-    call cursor(r.l, r.b+1)
-    normal! m]
-    call cursor(r.l, r.a)
-    exe "normal! ".a:motion
-
-    let r.a = self.end()
-
-    call self.update()
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Region.move_back(motion) dict
-    let r = self | if self.move_cursor(a:motion) | return | endif
+fun! s:Region.move_back() dict
+    let r = self | if self.move_cursor() | return | endif
 
     "move to the end of the region and perform the motion
-    call cursor(r.l, r.b)
-    exe "normal! ".a:motion
+    call s:move(r)
 
     "merge to bol motion
     if s:v.merge_to_beol
@@ -220,13 +233,7 @@ fun! s:Region.move_back(motion) dict
         let s:v.direction = 1
         let r.a = 1
         let r.b = 1
-    else
-        let r.b = self.end()
     endif
-
-    "collapse if there's been inversion
-    if g:VM.keep_collapsed_while_moving_back
-        if r.a > r.b | let r.a = r.b | endif | endif
 
     call self.update()
 endfun
@@ -245,7 +252,7 @@ fun! s:Region.yank()
     call cursor(r.l, r.a)
     if s:Extend()
         normal! m[
-        call cursor(r.l, r.b+1)
+        call cursor(r.L, r.b+1)
         normal! m]`[y`]
     endif
 endfun
@@ -253,16 +260,19 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update(...) dict
-    """Update the region position and text."""
-    let r = self
+    """Update the main region positions."""
+    let r = self | let X = s:Extend()
+
     if a:0 | let l = a:1 | let L = a:2 | let a = a:3 | let b = a:4
     else   | let l = r.l | let L = r.L | let a = r.a | let b = r.b | endif
 
     let r.l   = l                 " starting line
     let r.L   = L                 " end line
-    let r.a   = min([a, b])       " begin
-    let r.b   = max([a, b])       " end
+    "let r.a   = min([a, b])       " begin
+    "let r.b   = max([a, b])       " end
 
+    "echom r.a r.h r.b
+    "if X | let r.a = min([a, r.h]) | let r.b = max([b, r.h]) | endif
     call self.yank()
     call self.update_vars()
 endfun
@@ -295,7 +305,7 @@ fun! s:Region.update_highlight() dict
 
     let s:v.matches[i].pos1 = [r.l, r.a, r.w]
     let cursor = len(s:Matches) + i
-    let s:v.matches[cursor].pos1 = [r.l, r.b, 1]
+    let s:v.matches[cursor].pos1 = [r.l, r.edge(), 1]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

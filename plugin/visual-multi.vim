@@ -3,7 +3,6 @@
 
 let s:NVIM                = has('gui_running') || has('nvim')
 
-let g:VM_Global           = {'is_active': 0, 'extend_mode': 0, 'motions_enabled': 0}
 let b:VM_Selection        = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -11,9 +10,12 @@ let b:VM_Selection        = {}
 "NOT YET: sublime_mappings
 
 call vm#plugs#init()
-let g:VM = {}
-let g:VM.anchor_selection                 = get(g:VM, 'anchor_selection', 1)
+let g:VM                                  = {'is_active': 0, 'extend_mode': 0, 'motions_enabled': 0}
+
 let g:VM.default_mappings                 = get(g:VM, 'default_mappings', 1)
+let g:VM.motions_at_start                 = get(g:VM, 'motions_at_start', 1)
+let g:VM.cursors_skip_shorter_lines       = get(g:VM, 'cursors_skip_shorter_lines', 1)
+
 let g:VM.custom_noremaps                  = get(g:VM, 'custom_noremaps', {',': ';', ';': ','})
 let g:VM.custom_remaps                    = get(g:VM, 'custom_remaps', [])
 let g:VM.extend_by_default                = get(g:VM, 'extend_by_default', 0)
@@ -24,10 +26,11 @@ let g:VM.keep_collapsed_while_moving_back = get(g:VM, 'keep_collapsed_while_movi
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Set up highlighting
 
-let g:VM_Selection_hl     = get(g:, 'VM_Selection_hl',     'Visual')
-let g:VM_Mono_Cursor_hl   = get(g:, 'VM_Mono_Cursor_hl',   'DiffChange')
-let g:VM_Normal_Cursor_hl = get(g:, 'VM_Normal_Cursor_hl', 'DiffAdd')
-let g:VM_Message_hl       = get(g:, 'VM_Message_hl',       'WarningMsg')
+let g:VM_Selection_hl                     = get(g:, 'VM_Selection_hl',     'Visual')
+let g:VM_Mono_Cursor_hl                   = get(g:, 'VM_Mono_Cursor_hl',   'DiffChange')
+let g:VM_Normal_Cursor_hl                 = get(g:, 'VM_Normal_Cursor_hl', 'DiffAdd')
+let g:VM_Message_hl                       = get(g:, 'VM_Message_hl',       'WarningMsg')
+
 exe "highlight link MultiCursor ".g:VM_Normal_Cursor_hl
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
