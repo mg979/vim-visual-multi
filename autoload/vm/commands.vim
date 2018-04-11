@@ -244,7 +244,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#invert_direction()
+fun! vm#commands#invert_direction(manual)
     """Invert direction and reselect region."""
 
     "invert anchor
@@ -258,6 +258,11 @@ fun! vm#commands#invert_direction()
 
     call s:Global.update_highlight()
     call s:Global.select_region(s:v.index)
+
+    if a:manual
+        if !s:v.direction | let s:v.move_from_back = 1
+        else              | let s:v.move_from_front = 1 | endif
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -387,10 +392,9 @@ endfun
 
 fun! vm#commands#select_motion(inclusive, this)
     if !s:Extend() | call vm#commands#change_mode() | endif
-    let merge = 0 | let s:v.silence = 1
-    if a:this     | call s:Global.new_cursor() | let merge = 1 | endif
+    if a:this      | call s:Global.new_cursor()     | endif
 
-    call s:extend_vars(2, a:this)
+    call s:extend_vars(1, a:this)
 
     let c = nr2char(getchar())
     let a = a:inclusive ? 'F' : 'T'
@@ -417,11 +421,11 @@ fun! vm#commands#select_motion(inclusive, this)
     let b = a==#'F' ? 'f' : 't'
 
     let s:motion = a.c
-    call vm#commands#move(merge, 1)
+    call vm#commands#move(a:this, 1)
+    call vm#commands#invert_direction(1)
     let s:motion = b.d
-    call vm#commands#move(merge, 0)
-
-    let s:v.silence = 0
+    let s:v.extending = 1
+    call vm#commands#move(a:this, 0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -432,36 +436,30 @@ let s:can_from_back    = { -> s:motion == '$' && !s:v.direction }
 let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
 let s:always_from_back = { -> index(['^', '0', 'F', 'T'],                     s:motion) >= 0 }
 let s:forward          = { -> index(['w', 'W', 'e', 'E', 'l', 'f', 't'],      s:motion)  >= 0 }
+let s:backwards        = { -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], s:motion[0]) >=0}
 
-fun! vm#commands#move(merge, restore_pos, ...)
+fun! vm#commands#move(merge, double, ...)
     if !s:v.extending | return | endif
     let s:v.extending -= 1 | let merge = a:merge
 
     "store orientation of currently selected region
-    let prev = s:Regions[s:current_i].dir
+    let dir = s:Regions[s:current_i].dir
 
     if s:v.merge_to_beol
         let merge = 1
 
     elseif s:v.direction && s:always_from_back()
-        call vm#commands#invert_direction()
+        call vm#commands#invert_direction(0)
 
     elseif s:can_from_back()
-        call vm#commands#invert_direction()
+        call vm#commands#invert_direction(0)
     endif
-
-    "select motion: store position to move to, in between the 2 motions
-    if a:restore_pos | let pos = getpos('.') | endif
-
-    if !len(s:Regions) | call vm#commands#add_cursor_at_pos('.', 0) | endif
 
     if s:only_this()
         call s:Regions[s:v.index].move(s:motion) | let s:v.only_this -= 1
-        if a:restore_pos | call setpos('.', pos) | endif
     else
         for r in s:Regions
             call r.move(s:motion)
-            if a:restore_pos | call setpos('.', pos) | endif
         endfor | endif
 
     "some motions will call this function more than once
@@ -473,10 +471,20 @@ fun! vm#commands#move(merge, restore_pos, ...)
     let r = s:Global.select_region(s:current_i)
 
     "invert direction if regions orientation has changed
-    if r.dir != prev | call vm#commands#invert_direction()
+    if s:invert(dir) | call vm#commands#invert_direction(0)
     else             | call s:Global.update_highlight() | endif
 
-    call s:Funcs.count_msg(1)
+    let s:v.move_from_back = 0
+    let s:v.move_from_front = 0
+    call s:Funcs.count_msg(0)
+endfun
+
+fun! s:invert(prev)
+    let r = s:Global.select_region(s:current_i)
+    if r.dir == a:prev | return
+    elseif r.dir && s:v.move_from_front | return
+    elseif !r.dir && s:v.move_from_back | return | endif
+    return 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
