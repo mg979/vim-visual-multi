@@ -40,6 +40,8 @@ fun! <SID>VM_Init()
     if g:VM.sublime_mappings
         nmap <silent> <M-C-Down>  <Plug>(VM-Select-Down)
         nmap <silent> <M-C-Up>    <Plug>(VM-Select-Up)
+        nmap <silent> <S-Down>    <Plug>(VM-Motion-j)
+        nmap <silent> <S-Up>      <Plug>(VM-Motion-k)
         nmap <silent> <S-Right>   <Plug>(VM-Motion-l)
         nmap <silent> <S-Left>    <Plug>(VM-Motion-h)
         nmap <silent> <C-S-Right> <Plug>(VM-Motion-w)

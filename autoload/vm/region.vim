@@ -41,12 +41,14 @@ fun! s:Region.new(cursor)
     """Initialize region variables and methods.
     "
     " Uppercase variables (A,B,H) are for byte offsets, except L (end line).
-    " R.edge() : returns the current active edge(a or b), based on direction.
-    " R.char() : returns the char under the active edge, '' in cursor mode.
-    " R.id     : is used to retrieve highlighting matches.
-    " R.dir    : is the current orientation for the region.
-    " R.txt    : is the text content.
-    " R.pat    : is the search pattern associated with the region
+    " R.cur_col()  : returns the current cursor column(a or b), based on direction.
+    " R.cur_Col()  : cur_col() in byte offset form
+    " R.cur_ln()   : the line where cur_col() is located
+    " R.char()     : returns the char under the active head, '' in cursor mode.
+    " R.id         : is used to retrieve highlighting matches.
+    " R.dir        : is the current orientation for the region.
+    " R.txt        : is the text content.
+    " R.pat        : is the search pattern associated with the region
 
     let R         = copy(self)
     let R.index   = len(s:Regions)
@@ -56,11 +58,12 @@ fun! s:Region.new(cursor)
     "update region index and ID count
     let s:v.index = R.index | let s:v.ID += 1
 
-    let R.A_   = { -> line2byte(R.l) + R.a }
-    let R.B_   = { -> line2byte(R.L) + R.b }
-    let R.edge = { -> R.dir ? R.b : R.a }
-    let R.Edge = { -> R.edge() == R.b ? R.B : R.A }
-    let R.char = { -> s:X()? getline(R.l)[R.edge()-1] : '' }
+    let R.A_      = { -> line2byte(R.l) + R.a }
+    let R.B_      = { -> line2byte(R.L) + R.b }
+    let R.cur_ln  = { -> R.dir ? R.L : R.l }
+    let R.cur_col = { -> R.dir ? R.b : R.a }
+    let R.cur_Col = { -> R.cur_col() == R.b ? R.B : R.A }
+    let R.char    = { -> s:X()? getline(R.l)[R.cur_col()-1] : '' }
 
     if a:cursor    "/////////// CURSOR ///////////
 
@@ -168,9 +171,13 @@ endfun
 fun! s:move(r)
     let r = a:r | let a = r.a | let b = r.b | let up = 0 | let down = 0
 
-    "move the cursor to the current edge and perform the motion
-    call cursor(r.l, r.edge())
+    "move the cursor to the current head and perform the motion
+    call cursor(r.cur_ln(), r.cur_col())
     exe "keepjumps normal! ".s:motion
+
+    "in cursor mode, just set new positions
+    if !s:X() | let p = getpos('.')
+        call r.update_cursor(p[1], p[2]) | return | endif
 
     "check the line
     let nl = line('.')
@@ -182,8 +189,8 @@ fun! s:move(r)
     "get the new position and see if there's been inversion
     let new = col('.') | let New = s:Byte('.')
 
-    let went_back  =   ( New <  r.H )  &&  ( New <  r.Edge() )
-    let went_forth =   ( New >= r.H )  &&  ( New >= r.Edge() )
+    let went_back  =   ( New <  r.H )  &&  ( New <  r.cur_Col() )
+    let went_forth =   ( New >= r.H )  &&  ( New >= r.cur_Col() )
 
     "assign new values
     if went_back
@@ -254,8 +261,17 @@ fun! s:Region.yank() dict
     if s:X()
         keepjumps normal! m[
         call cursor(r.L, r.b+1)
-        keepjumps normal! m]`[y`]
+        silent keepjumps normal! m]`[y`]
     endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region.update_cursor(ln, col) dict
+    let r = self
+    let r.l = a:ln | let r.a = a:col
+    let r.L = r.l  | let r.b = r.a
+    let r.h = r.b  | let r.w = 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -282,7 +298,7 @@ fun! s:Region.update_vars() dict
     let r.B       = r.B_()
 
     "update anchor if in cursor mode
-    if !s:X() | let r.h = r.a | let r.H = r.A | endif
+    if !s:X() | let r.h = r.a | let r.H = r.A | let r.L = r.l | endif
 
     let r.w       = r.b - r.a + 1
     let r.txt     = s:X()? getreg(s:v.def_reg) : ''
@@ -298,24 +314,29 @@ fun! s:Region.highlight() dict
 
     let R      = self
 
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
     if !s:X()   "cursor mode
         let s:Matches[R.id] = {'region': [], 'cursor': 0}
         let s:Matches[R.id].cursor = matchaddpos('MultiCursor', [[R.l, R.a]], 40)
         return
     endif
 
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
     let max    = R.L - R.l
     let region = []
-    let cursor = [R.l, R.edge(), 1]
+    let cursor = [R.cur_ln(), R.cur_col()]
 
     "single line skip the for loop
     if !max | let region = [[R.l, R.a, R.w]] | else | let max += 1 | endif
 
     "define highlight
     for n in range(max)
-        let line = n==0  ? [R.l, R.a, len(getline(R.l))] :
-              \    n<max ? [R.l + n]        :
-              \            [R.L, 1, R.b]
+        "echom n max
+        let line = n==0    ? [R.l, R.a, len(getline(R.l))] :
+              \    n<max-1 ? [R.l + n]        :
+              \              [R.L, 1, R.b]
 
         call add(region, line)
     endfor

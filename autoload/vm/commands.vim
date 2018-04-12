@@ -115,7 +115,7 @@ endfun
 fun! vm#commands#regex_done()
     call vm#commands#regex_reset()
 
-    keepjumps normal! gny`]
+    silent keepjumps normal! gny`]
     call s:Search.get_slash_reg()
 
     if s:Extend() | call s:Global.get_region() | call s:Funcs.count_msg(0)

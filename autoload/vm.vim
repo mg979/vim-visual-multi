@@ -64,7 +64,6 @@ fun! s:Global.new_cursor() dict
     let r = self.is_region_at_pos('.')
     if !empty(r) | return r | endif
 
-    "when adding cursors below or above, don't add on empty lines
     let R = vm#region#new(1)
 
     let s:v.matches = getmatches()
@@ -134,7 +133,7 @@ fun! s:Global.collapse_regions() dict
     """Collapse regions to cursors and turn off extend mode."""
 
     for r in s:Regions
-        if r.a != r.b | call r.update(r.l, r.L, r.a, r.a) | endif
+        if r.A != r.B | call r.update(r.l, r.L, r.a, r.a) | endif
     endfor
     let g:VM.extend_mode = 0
     "call self.update_regions()
@@ -152,8 +151,7 @@ fun! s:Global.select_region(i) dict
     else | let i = a:i | endif
 
     let R = s:Regions[i]
-    let pos = s:v.direction ? R.b : R.a
-    call cursor([R.l, pos])
+    call cursor(R.cur_ln(), R.cur_col())
     let s:v.index = i
     return R
 endfun

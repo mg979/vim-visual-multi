@@ -101,8 +101,11 @@ fun! s:arrows()
     nmap     <silent> <nowait> <buffer> <C-S-Down>  <Plug>(VM-Goto-Next)
     nmap     <silent> <nowait> <buffer> <C-S-Up>    <Plug>(VM-Goto-Prev)
 
+    nmap     <silent> <nowait> <buffer> <S-Down>    <Plug>(VM-Motion-j)
+    nmap     <silent> <nowait> <buffer> <S-Up>      <Plug>(VM-Motion-k)
     nmap     <silent> <nowait> <buffer> <S-Right>   <Plug>(VM-Motion-l)
     nmap     <silent> <nowait> <buffer> <S-Left>    <Plug>(VM-Motion-h)
+
     nmap     <silent> <nowait> <buffer> <C-Right>   <Plug>(VM-Motion-e)
     nmap     <silent> <nowait> <buffer> <C-Left>    <Plug>(VM-End-Back)
     nmap     <silent> <nowait> <buffer> <C-S-Right> <Plug>(VM-Motion-w)
@@ -193,6 +196,8 @@ fun! s:arrows_end()
     nunmap <buffer> <C-S-Up>
     nunmap <buffer> <S-Right>
     nunmap <buffer> <S-Left>
+    nunmap <buffer> <S-Down>
+    nunmap <buffer> <S-Up>
     nunmap <buffer> <C-Right>
     nunmap <buffer> <C-Left>
     nunmap <buffer> <C-S-Right>
