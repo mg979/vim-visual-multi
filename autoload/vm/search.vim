@@ -156,6 +156,7 @@ fun! s:update_search(p, update)
             if a:p =~ p || p =~ a:p
                 let old = s:v.search[i]
                 let s:v.search[i] = a:p
+                call s:Global.update_patterns(a:p)
                 break | endif
             let i += 1
         endfor

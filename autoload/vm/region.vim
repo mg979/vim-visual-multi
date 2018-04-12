@@ -56,9 +56,10 @@ fun! s:Region.new(cursor)
     "update region index and ID count
     let s:v.index = R.index | let s:v.ID += 1
 
-    let R.A_   = { -> eval(line2byte(R.l) + R.a) }
-    let R.B_   = { -> eval(line2byte(R.L) + R.b) }
-    let R.edge = { -> s:v.direction ? R.b : R.a }
+    let R.A_   = { -> line2byte(R.l) + R.a }
+    let R.B_   = { -> line2byte(R.L) + R.b }
+    let R.edge = { -> R.dir ? R.b : R.a }
+    let R.Edge = { -> R.edge() == R.b ? R.B : R.A }
     let R.char = { -> s:X()? getline(R.l)[R.edge()-1] : '' }
 
     if a:cursor    "/////////// CURSOR ///////////
@@ -180,15 +181,17 @@ fun! s:move(r)
 
     "get the new position and see if there's been inversion
     let new = col('.') | let New = s:Byte('.')
-    let inversion = r.dir? (New < r.H ) : (New > r.H)
+
+    let went_back  =   ( New <  r.H )  &&  ( New <  r.Edge() )
+    let went_forth =   ( New >= r.H )  &&  ( New >= r.Edge() )
 
     "assign new values
-    if inversion && r.dir
+    if went_back
         let r.dir = 0
         let r.a = new
         let r.b = r.h
 
-    elseif inversion
+    elseif went_forth
         let r.dir = 1
         let r.b = new
         let r.a = r.h

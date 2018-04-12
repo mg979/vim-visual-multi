@@ -185,6 +185,18 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Global.update_patterns(pat) dict
+    """Update the patterns for the appropriate regions."""
+
+    for r in s:Regions
+        if a:p =~ r.pat || r.pat =~ a:p
+            let r.pat = a:p
+        endif
+    endfor
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Global.update_indices() dict
     """Adjust region indices."""
 

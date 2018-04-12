@@ -1,4 +1,5 @@
-let s:motion = 0 | let s:current_i = 0 | let s:starting_col = 0
+let s:motion = 0 | let s:starting_col = 0
+let s:merge = 0  | let s:dir = 0
 let s:Extend = { -> g:VM.extend_mode }
 
 fun! s:init(whole, cursor, extend_mode)
@@ -244,10 +245,10 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#invert_direction(move_vars)
+fun! vm#commands#invert_direction()
     """Invert direction and reselect region."""
 
-    "for r in s:Regions | let r.dir = !r.dir | endfor
+    for r in s:Regions | let r.dir = !r.dir | endfor
 
     "invert anchor
     if s:v.direction
@@ -260,11 +261,6 @@ fun! vm#commands#invert_direction(move_vars)
 
     call s:Global.update_highlight()
     call s:Global.select_region(s:v.index)
-
-    if a:move_vars
-        if !s:v.direction | let s:v.move_from_back = 1
-        else              | let s:v.move_from_front = 1 | endif
-    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -323,7 +319,6 @@ endfun
 
 fun! s:extend_vars(n, this)
     let s:v.extending = a:n
-    let s:current_i = s:v.index
     if a:this | let s:v.only_this = a:n | endif
     let s:v.silence = 1
     "let b:VM_backup = copy(b:VM_Selection)
@@ -338,7 +333,7 @@ fun! vm#commands#motion(motion, this)
 
     call s:extend_vars(1, a:this)
     let s:motion = a:motion
-    call vm#commands#move(0, 0)
+    call vm#commands#move()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -348,7 +343,7 @@ fun! vm#commands#end_back(fast, this)
 
     call s:extend_vars(1, a:this)
     let s:motion = a:fast? 'BBE' : 'bbbe'
-    call vm#commands#move(0, 0)
+    call vm#commands#move()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -357,24 +352,25 @@ fun! vm#commands#merge_to_beol(eol, this)
     call s:extend_vars(1, a:this)
     let s:motion = a:eol? "\<End>" : '0'
     let s:v.merge_to_beol = 1
+    let s:merge = 1
     let g:VM.extend_mode = 0
-    call vm#commands#move(1, 0)
+    call vm#commands#move()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_motion(motion, char, this, ...)
-    call s:extend_vars(1, a:this) | let merge = 0
+    call s:extend_vars(1, a:this)
 
     if index(['$', '0', '^', '%'], a:motion) >= 0
-        let s:motion = a:motion | let merge = 1
+        let s:motion = a:motion | let s:merge = 1
     elseif a:char != ''
         let s:motion = a:motion.a:char
     else
         let s:motion = a:motion.nr2char(getchar())
     endif
 
-    call vm#commands#move(merge, 0)
+    call vm#commands#move()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -392,6 +388,38 @@ fun! s:inclusive(c)
     return [c, d]
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#shrink(this)
+    """Reduce selection size by 1."""
+
+    if s:Global.all_empty() | return | endif
+
+    let dir = s:v.direction
+    let motion = dir? ['h', 'l'] : ['l', 'h']
+    call vm#commands#motion(motion[0], a:this)
+    call vm#commands#invert_direction()
+    call vm#commands#motion(motion[1], a:this)
+
+    if s:v.direction != dir | call vm#commands#invert_direction() | endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#enlarge(this)
+    """Enlarge selection size by 1."""
+
+    let dir = s:v.direction
+    let motion = dir? ['l', 'h'] : ['h', 'l']
+    call vm#commands#motion(motion[0], a:this)
+    call vm#commands#invert_direction()
+    call vm#commands#motion(motion[1], a:this)
+
+    if s:v.direction != dir | call vm#commands#invert_direction() | endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#commands#select_motion(inclusive, this)
     if !s:Extend() | call vm#commands#change_mode() | endif
     if a:this      | call s:Global.new_cursor()     | endif
@@ -399,7 +427,7 @@ fun! vm#commands#select_motion(inclusive, this)
     let c = nr2char(getchar())
     let a = a:inclusive ? 'F' : 'T'
 
-    if index(['"', "'", '`', '_', '-'], c) != -1
+    if index(['"', "'", '`', '_', '|'], c) != -1
         let d = c
 
     elseif a:inclusive
@@ -420,42 +448,32 @@ fun! vm#commands#select_motion(inclusive, this)
 
     let b = a==#'F' ? 'f' : 't'
 
-    let s:motion = a.c
-    call s:extend_vars(1, a:this)
-    call vm#commands#move(a:this, 0)
-    call vm#commands#invert_direction(0)   "it breaks if I set arg=1....??
-    let s:motion = b.d
-    call s:extend_vars(1, a:this)
-    call vm#commands#move(a:this, 0)
-    call vm#commands#invert_direction(0)
+    call vm#commands#motion(a.c, a:this)
+    call vm#commands#invert_direction()
+    call vm#commands#motion(b.d, a:this)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Motion event
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:can_from_back    = { -> s:motion == '$' && !s:v.direction }
 let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
-let s:always_from_back = { -> index(['^', '0', 'F', 'T'],                     s:motion) >= 0 }
-let s:forward          = { -> index(['w', 'W', 'e', 'E', 'l', 'f', 't'],      s:motion)  >= 0 }
-let s:backwards        = { -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], s:motion[0]) >=0}
+let s:can_from_back    = { -> s:motion == '$' && !s:v.direction }
+let s:always_from_back = { -> index(['^', '0', 'F', 'T'],                     s:motion)     >= 0 }
+let s:forward          = { -> index(['w', 'W', 'e', 'E', 'l', 'f', 't'],      s:motion)     >= 0 }
+let s:backwards        = { -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], s:motion[0])  >= 0 }
 
-fun! vm#commands#move(merge, double, ...)
+fun! vm#commands#move(...)
     if !s:v.extending | return | endif
-    let s:v.extending -= 1 | let merge = a:merge
+    let r = s:Regions[ s:v.index ]
+    let s:v.extending -= 1
 
-    if s:v.merge_to_beol
-        let merge = 1
-
-    elseif s:v.direction && s:always_from_back()
-        call vm#commands#invert_direction(1)     "arg=0 breaks it...????
+    if s:v.direction && s:always_from_back()
+        call vm#commands#invert_direction()
 
     elseif s:can_from_back()
-        call vm#commands#invert_direction(0)
+        call vm#commands#invert_direction()
     endif
-
-    "store orientation of currently selected region
-    let dir = s:Regions[s:current_i].dir
 
     if s:only_this()
         call s:Regions[s:v.index].move(s:motion) | let s:v.only_this -= 1
@@ -464,29 +482,24 @@ fun! vm#commands#move(merge, double, ...)
             call r.move(s:motion)
         endfor | endif
 
-    "PROBLEM: some motions will call this function more than once
-    if s:v.extending | return | endif
-
     "update variables, facing direction, highlighting
-    if merge | call s:Global.merge_regions() | endif
+    if s:after_move() | return | endif
 
-    let r = s:Global.select_region(s:current_i)
+    let s:v.direction = r.dir
+    call s:Global.update_highlight()
+    call s:Global.select_region(s:v.index)
 
-    "invert direction if regions orientation has changed
-    if s:invert(dir) | call vm#commands#invert_direction(0)
-    else             | call s:Global.update_highlight() | endif
-
-    let s:v.move_from_back = 0
-    let s:v.move_from_front = 0
     call s:Funcs.count_msg(0)
 endfun
 
-fun! s:invert(prev)
-    let r = s:Global.select_region(s:current_i)
-    if r.dir == a:prev | return
-    elseif r.dir && s:v.move_from_front | return
-    elseif !r.dir && s:v.move_from_back | return | endif
-    return 1
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:after_move()
+    if s:merge | call s:Global.merge_regions() | endif | let s:merge = 0
+
+    if s:always_from_back()
+        call vm#commands#invert_direction()
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -496,7 +509,7 @@ fun! vm#commands#undo()
     echom b:VM_backup == b:VM_Selection
     let b:VM_Selection = copy(b:VM_backup)
     call s:Global.update_highlight()
-    call s:Global.select_region(s:current_i)
+    call s:Global.select_region(s:v.index)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

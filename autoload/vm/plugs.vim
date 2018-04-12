@@ -39,7 +39,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Motions-Toggle)          :call vm#maps#motions_toggle()<cr>
     nnoremap        <Plug>(VM-Reset)                   :call vm#funcs#reset()<cr>
 
-    nnoremap        <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction(1)<cr>
+    nnoremap        <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction()<cr>
     nnoremap        <Plug>(VM-Goto-Next)               :call vm#commands#find_next(0, 1)<cr>
     nnoremap        <Plug>(VM-Goto-Prev)               :call vm#commands#find_prev(0, 1)<cr>
     nnoremap        <Plug>(VM-Find-Next)               :call vm#commands#find_next(0, 0)<cr>
@@ -85,6 +85,9 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Motion-0)                :call vm#commands#find_motion('0', '', 0)<cr>
     nnoremap        <Plug>(VM-Motion-^)                :call vm#commands#find_motion('^', '', 0)<cr>
     nnoremap        <Plug>(VM-Motion-%)                :call vm#commands#find_motion('%', '', 0)<cr>
+
+    nnoremap        <Plug>(VM-Motion-Shrink)           :call vm#commands#shrink(0)<cr>
+    nnoremap        <Plug>(VM-Motion-Enlarge)          :call vm#commands#enlarge(0)<cr>
 
     fun! <SID>Mode()
         let mode = g:VM.extend_mode? ' (extend mode)' : ' (cursor mode)'
