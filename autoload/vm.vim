@@ -27,7 +27,6 @@ fun! vm#init_buffer(empty, ...)
     let s:Funcs    = vm#funcs#init(a:empty)
     let s:Search   = s:V.Search
 
-    let s:byte     = funcref('s:Funcs.byte')
     let s:X        = { -> g:VM.extend_mode }
 
     call s:Funcs.msg('Visual-Multi started. Press <esc> to exit.')
@@ -176,7 +175,7 @@ fun! s:Global.is_region_at_pos(pos) dict
     """Find if the cursor is on a highlighted region.
     "Return an empty dict otherwise."""
 
-    let pos = s:Funcs.get_pos(a:pos)
+    let pos = s:Funcs.pos2byte(a:pos)
 
     for r in s:Regions
         if pos >= r.A && pos <= r.B

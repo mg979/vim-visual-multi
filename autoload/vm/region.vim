@@ -6,9 +6,11 @@ fun! vm#region#init()
     let s:Global  = s:V.Global
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
+
+    let s:X    = { -> g:VM.extend_mode }
+    let s:Byte = { pos -> s:Funcs.pos2byte(pos) }
 endfun
 
-let s:X  = { -> g:VM.extend_mode }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Region class
@@ -36,6 +38,16 @@ endfun
 let s:Region = {}
 
 fun! s:Region.new(cursor)
+    """Initialize region variables and methods.
+    "
+    " Uppercase variables (A,B,H) are for byte offsets, except L (end line).
+    " R.edge() : returns the current active edge(a or b), based on direction.
+    " R.char() : returns the char under the active edge, '' in cursor mode.
+    " R.id     : is used to retrieve highlighting matches.
+    " R.dir    : is the current orientation for the region.
+    " R.txt    : is the text content.
+    " R.pat    : is the search pattern associated with the region
+
     let R         = copy(self)
     let R.index   = len(s:Regions)
     let R.dir     = 1
@@ -139,7 +151,7 @@ fun! s:Region.move_cursor() dict
     if s:X() | return | endif
 
     call cursor(self.l, self.a)
-    exe "normal! ".s:motion
+    exe "keepjumps normal! ".s:motion
 
     let pos = getpos('.')
     let self.l = pos[1]
@@ -157,7 +169,7 @@ fun! s:move(r)
 
     "move the cursor to the current edge and perform the motion
     call cursor(r.l, r.edge())
-    exe "normal! ".s:motion
+    exe "keepjumps normal! ".s:motion
 
     "check the line
     let nl = line('.')
@@ -167,8 +179,8 @@ fun! s:move(r)
     endif
 
     "get the new position and see if there's been inversion
-    let new = col('.')
-    let inversion = r.dir? (new < r.h || up) : (new > r.h || down)
+    let new = col('.') | let New = s:Byte('.')
+    let inversion = r.dir? (New < r.H ) : (New > r.H)
 
     "assign new values
     if inversion && r.dir
@@ -237,9 +249,9 @@ fun! s:Region.yank() dict
     "if not in extend mode, the cursor will stay at r.a
     call cursor(r.l, r.a)
     if s:X()
-        normal! m[
+        keepjumps normal! m[
         call cursor(r.L, r.b+1)
-        normal! m]`[y`]
+        keepjumps normal! m]`[y`]
     endif
 endfun
 
@@ -291,7 +303,7 @@ fun! s:Region.highlight() dict
 
     "define highlight
     for n in range(max)
-        let line = n==0  ? [R.l, R.a, 1000] :
+        let line = n==0  ? [R.l, R.a, len(getline(R.l))] :
               \    n<max ? [R.l + n]        :
               \            [R.L, 1, R.b]
 

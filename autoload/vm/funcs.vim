@@ -89,21 +89,18 @@ let s:Funcs = {}
      "return eval(line2byte(a:pos[0]) + a:pos[1])
 "endfun
 
-"byte offset of line/col
-let s:Funcs.byte     = { pos -> eval(line2byte(pos[0]) + pos[1] ) }
-
-fun! s:Funcs.get_pos(...) dict
+fun! s:Funcs.pos2byte(...) dict
     "pos can be a string, a list or a (line, col) couple
 
     if a:0 > 1                          "a (line, col) couple
-        return self.byte([a:1, a:2])
+        return line2byte(a:1) + a:2
 
     elseif type(a:1) == v:t_string      "a string (like '.')
         let pos = getpos(a:1)[1:2]
-        return self.byte(pos)
+        return line2byte(pos[0]) + pos[1]
 
     else                                "a list [line, col]
-        return self.byte(a:1)
+        return line2byte(a:1[0]) + a:1[1]
     endif
 endfun
 

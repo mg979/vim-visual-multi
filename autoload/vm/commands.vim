@@ -57,7 +57,7 @@ fun! vm#commands#add_cursor_at_word(yank, search)
     call s:check_extend_default(0)
 
     if a:yank | call s:yank(0) | endif
-    normal! `[
+    keepjumps normal! `[
     call s:Global.new_cursor()
 
     if a:search | call s:Search.set() | endif
@@ -74,10 +74,10 @@ fun! vm#commands#add_cursor_at_pos(where, extend, ...)
     if !a:0 | call s:Global.new_cursor() | endif
 
     if a:where == 1
-        normal! j
+        keepjumps normal! j
         let R = s:Global.new_cursor()
     elseif a:where == 2
-        normal! k
+        keepjumps normal! k
         let R = s:Global.new_cursor()
     endif
 
@@ -114,7 +114,7 @@ endfun
 fun! vm#commands#regex_done()
     call vm#commands#regex_reset()
 
-    normal! gny`]
+    keepjumps normal! gny`]
     call s:Search.get_slash_reg()
 
     if s:Extend() | call s:Global.get_region() | call s:Funcs.count_msg(0)
@@ -144,8 +144,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:yank(inclusive)
-    if a:inclusive | normal! yiW`]
-    else           | normal! yiw`]
+    if a:inclusive | keepjumps normal! yiW`]
+    else           | keepjumps normal! yiw`]
     endif
 endfun
 
@@ -210,11 +210,11 @@ endfun
 
 fun! s:get_next(n)
     if s:Extend()
-        silent exe "normal! ".a:n."g".a:n."y`]"
+        silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
         call s:Global.get_region()
         call s:Funcs.count_msg(0)
     else
-        silent exe "normal! ".a:n."g".a:n."y`]"
+        silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
         call vm#commands#add_cursor_at_word(0, 0)
     endif
     if a:n ==# 'n' | let s:v.nav_direction = 1
@@ -244,8 +244,10 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#invert_direction(manual)
+fun! vm#commands#invert_direction(move_vars)
     """Invert direction and reselect region."""
+
+    "for r in s:Regions | let r.dir = !r.dir | endfor
 
     "invert anchor
     if s:v.direction
@@ -259,7 +261,7 @@ fun! vm#commands#invert_direction(manual)
     call s:Global.update_highlight()
     call s:Global.select_region(s:v.index)
 
-    if a:manual
+    if a:move_vars
         if !s:v.direction | let s:v.move_from_back = 1
         else              | let s:v.move_from_front = 1 | endif
     endif
@@ -394,8 +396,6 @@ fun! vm#commands#select_motion(inclusive, this)
     if !s:Extend() | call vm#commands#change_mode() | endif
     if a:this      | call s:Global.new_cursor()     | endif
 
-    call s:extend_vars(1, a:this)
-
     let c = nr2char(getchar())
     let a = a:inclusive ? 'F' : 'T'
 
@@ -421,11 +421,13 @@ fun! vm#commands#select_motion(inclusive, this)
     let b = a==#'F' ? 'f' : 't'
 
     let s:motion = a.c
-    call vm#commands#move(a:this, 1)
-    call vm#commands#invert_direction(1)
-    let s:motion = b.d
-    let s:v.extending = 1
+    call s:extend_vars(1, a:this)
     call vm#commands#move(a:this, 0)
+    call vm#commands#invert_direction(0)   "it breaks if I set arg=1....??
+    let s:motion = b.d
+    call s:extend_vars(1, a:this)
+    call vm#commands#move(a:this, 0)
+    call vm#commands#invert_direction(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -442,18 +444,18 @@ fun! vm#commands#move(merge, double, ...)
     if !s:v.extending | return | endif
     let s:v.extending -= 1 | let merge = a:merge
 
-    "store orientation of currently selected region
-    let dir = s:Regions[s:current_i].dir
-
     if s:v.merge_to_beol
         let merge = 1
 
     elseif s:v.direction && s:always_from_back()
-        call vm#commands#invert_direction(0)
+        call vm#commands#invert_direction(1)     "arg=0 breaks it...????
 
     elseif s:can_from_back()
         call vm#commands#invert_direction(0)
     endif
+
+    "store orientation of currently selected region
+    let dir = s:Regions[s:current_i].dir
 
     if s:only_this()
         call s:Regions[s:v.index].move(s:motion) | let s:v.only_this -= 1
@@ -462,7 +464,7 @@ fun! vm#commands#move(merge, double, ...)
             call r.move(s:motion)
         endfor | endif
 
-    "some motions will call this function more than once
+    "PROBLEM: some motions will call this function more than once
     if s:v.extending | return | endif
 
     "update variables, facing direction, highlighting
