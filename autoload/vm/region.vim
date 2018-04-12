@@ -297,6 +297,13 @@ fun! s:Region.highlight() dict
     """Create the highlight entries."""
 
     let R      = self
+
+    if !s:X()   "cursor mode
+        let s:Matches[R.id] = {'region': [], 'cursor': 0}
+        let s:Matches[R.id].cursor = matchaddpos('MultiCursor', [[R.l, R.a]], 40)
+        return
+    endif
+
     let max    = R.L - R.l
     let region = []
     let cursor = [R.l, R.edge(), 1]

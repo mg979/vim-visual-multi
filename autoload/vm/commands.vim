@@ -27,7 +27,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#change_mode()
-    let g:VM.extend_mode = !s:Extend()
+    let g:VM.extend_mode = !s:Extend() | let s:v.silence = 0
 
     if s:Extend()
         call s:Funcs.msg('Switched to Extend Mode')

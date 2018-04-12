@@ -16,12 +16,6 @@ let s:remaps   = get(g:VM, 'custom_remaps', [])
 " Buffer maps init
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:sublime()
-
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! vm#maps#start()
 
     nmap              <nowait> <buffer> :          <Plug>(VM-:)

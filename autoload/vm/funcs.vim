@@ -66,6 +66,7 @@ fun! vm#funcs#reset(...)
     let b:VM_Selection = {}
     let g:VM.is_active = 0
     let g:VM.extend_mode = 0
+    let s:v.silence = 0
 
     "exiting manually
     if !a:0 | call s:Funcs.msg('Exited Visual-Multi.') | endif
@@ -154,7 +155,7 @@ fun! s:Funcs.count_msg(force) dict
     if a:force | let s:v.silence = 0 | endif
     let s = len(s:Regions)>1 ? 's.' : '.'
     let t = g:VM.extend_mode? ' region' : ' cursor'
-    "call self.msg(i.len(s:Regions).t.s.'   Current patterns: '.string(s:v.search))
+    call self.msg(i.len(s:Regions).t.s.'   Current patterns: '.string(s:v.search))
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
