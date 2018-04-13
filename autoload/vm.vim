@@ -111,7 +111,7 @@ fun! s:Global.all_empty() dict
 
     for r in s:Regions
         if r.a != r.b
-            if !s:X() | call vm#commands#change_mode() | endif
+            if !s:X() | call vm#commands#change_mode(0) | endif
             return 0  | endif
     endfor
     return 1

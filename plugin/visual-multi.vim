@@ -7,8 +7,6 @@ let b:VM_Selection        = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-call vm#plugs#init()
-
 fun! <SID>VM_Init()
 
     let g:VM                                  = {'is_active': 0, 'extend_mode': 0, 'motions_enabled': 0}
@@ -18,7 +16,7 @@ fun! <SID>VM_Init()
     let g:VM.cursors_skip_shorter_lines       = get(g:VM, 'cursors_skip_shorter_lines', 1)
 
     let g:VM.custom_noremaps                  = get(g:VM, 'custom_noremaps', {',': ';', ';': ','})
-    let g:VM.custom_remaps                    = get(g:VM, 'custom_remaps', [])
+    let g:VM.custom_remaps                    = get(g:VM, 'custom_remaps', {'r':'w'})
     let g:VM.extend_by_default                = get(g:VM, 'extend_by_default', 0)
     let g:VM.sublime_mappings                 = get(g:VM, 'sublime_mappings', 1)
     let g:VM.custom_mappings                  = get(g:VM, 'custom_mappings', 0)
@@ -36,6 +34,8 @@ fun! <SID>VM_Init()
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Global mappings
+
+    call vm#plugs#init()
 
     if g:VM.sublime_mappings
         nmap <silent> <M-C-Down>  <Plug>(VM-Select-Down)

@@ -1,6 +1,6 @@
 let s:motion = 0 | let s:starting_col = 0
 let s:merge = 0  | let s:dir = 0
-let s:Extend = { -> g:VM.extend_mode }
+let s:X = { -> g:VM.extend_mode }
 
 fun! s:init(whole, cursor, extend_mode)
     if a:extend_mode | let g:VM.extend_mode = 1 | endif
@@ -26,10 +26,11 @@ endfun
 " Change mode
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#change_mode()
-    let g:VM.extend_mode = !s:Extend() | let s:v.silence = 0
+fun! vm#commands#change_mode(silent)
+    let g:VM.extend_mode = !s:X()
+    if !a:silent | let s:v.silence = 0 | endif
 
-    if s:Extend()
+    if s:X()
         call s:Funcs.msg('Switched to Extend Mode')
         call s:Global.update_regions()
     else
@@ -47,7 +48,7 @@ endfun
 fun! s:check_extend_default(X)
     """If just starting, enable extend mode if option is set."""
 
-    if s:Extend()                            | return s:init(0, 1, 1)
+    if s:X()                                 | return s:init(0, 1, 1)
     elseif ( a:X || g:VM.extend_by_default ) | return s:init(0, 1, 1)
     else                                     | return s:init(0, 1, 0) | endif
 endfun
@@ -118,7 +119,7 @@ fun! vm#commands#regex_done()
     silent keepjumps normal! gny`]
     call s:Search.get_slash_reg()
 
-    if s:Extend() | call s:Global.get_region() | call s:Funcs.count_msg(0)
+    if s:X()      | call s:Global.get_region() | call s:Funcs.count_msg(0)
     else          | call vm#commands#add_cursor_at_word(0, 0)
     endif
 endfun
@@ -210,7 +211,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:get_next(n)
-    if s:Extend()
+    if s:X()
         silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
         call s:Global.get_region()
         call s:Funcs.count_msg(0)
@@ -224,7 +225,7 @@ endfun
 
 fun! s:navigate(force, dir)
     if a:force && s:v.nav_direction != a:dir
-        call s:Funcs.msg('Reversed direction.')
+        call s:Funcs.msg('Reversed direction.', 1)
         let s:v.nav_direction = a:dir
         return 1
     elseif a:force || @/==''
@@ -289,7 +290,7 @@ fun! vm#commands#find_prev(skip, nav)
     "skip current match
 
     "move to the beginning of the current match
-    if s:Extend() | call cursor(r.l, r.a) | endif
+    if s:X()      | call cursor(r.l, r.a) | endif
 
     call s:get_next('N')
 endfun
@@ -333,7 +334,44 @@ fun! vm#commands#motion(motion, this)
 
     call s:extend_vars(1, a:this)
     let s:motion = a:motion
-    call vm#commands#move()
+    exe "normal! ".s:motion
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#remap_motion(motion)
+    call s:extend_vars(1, 0)
+    let s:motion = a:motion
+    exe "normal ".s:motion
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#macro()
+
+    "forbid count
+    if v:count > 1
+        if !g:VM.is_active | return | endif
+        call s:Funcs.msg('Count not allowed.')
+        call vm#funcs#reset()
+        return | endif
+
+    call s:Funcs.msg('Macro register? ', 1)
+    let reg = nr2char(getchar())
+    if reg == "\<esc>" |
+        call s:Funcs.msg('Macro aborted.')
+        return | endif
+
+    let s:v.silence = 1
+
+    "change to cursor mode
+    if s:X() | call vm#commands#change_mode(1) | endif
+
+    for r in s:Regions
+        call cursor(r.l, r.a)
+        exe "normal! @".reg
+    endfor
+    let s:v.silence = 0
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -343,7 +381,7 @@ fun! vm#commands#end_back(fast, this)
 
     call s:extend_vars(1, a:this)
     let s:motion = a:fast? 'BBE' : 'bbbe'
-    call vm#commands#move()
+    exe "normal! ".s:motion
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -354,7 +392,7 @@ fun! vm#commands#merge_to_beol(eol, this)
     let s:v.merge_to_beol = 1
     let s:merge = 1
     let g:VM.extend_mode = 0
-    call vm#commands#move()
+    exe "normal! ".s:motion
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -370,7 +408,7 @@ fun! vm#commands#find_motion(motion, char, this, ...)
         let s:motion = a:motion.nr2char(getchar())
     endif
 
-    call vm#commands#move()
+    exe "normal! ".s:motion
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -421,8 +459,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#select_motion(inclusive, this)
-    if !s:Extend() | call vm#commands#change_mode() | endif
-    if a:this      | call s:Global.new_cursor()     | endif
+    if !s:X() | call vm#commands#change_mode(0) | endif
+    if a:this | call s:Global.new_cursor()      | endif
 
     let c = nr2char(getchar())
     let a = a:inclusive ? 'F' : 'T'
@@ -465,7 +503,7 @@ let s:backwards        = { -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], s:
 
 fun! vm#commands#move(...)
     if !s:v.extending | return | endif
-    let r = s:Regions[ s:v.index ]
+    let R = s:Regions[ s:v.index ]
     let s:v.extending -= 1
 
     if s:v.direction && s:always_from_back()
@@ -485,9 +523,9 @@ fun! vm#commands#move(...)
     "update variables, facing direction, highlighting
     if s:after_move() | return | endif
 
-    let s:v.direction = r.dir
+    let s:v.direction = R.dir
     call s:Global.update_highlight()
-    call s:Global.select_region(s:v.index)
+    call s:Global.select_region(R.index)
 
     call s:Funcs.count_msg(0)
 endfun
@@ -521,14 +559,15 @@ fun! vm#commands#toggle_option(option)
     exe "let" s "= !".s
 
     if a:option == 'whole_word'
+        redraw!
         let s = s:v.search[0]
 
         if s:v.whole_word
             if s[:1] != '\<' | let s:v.search[0] = '\<'.s.'\>' | endif
-            call s:Funcs.msg('Search ->  whole word')
+            call s:Funcs.msg('Search ->  whole word     ->  Current patterns: '.string(s:v.search))
         else
             if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
-            call s:Funcs.msg('Search ->  not whole word')
+            call s:Funcs.msg('Search ->  not whole word ->  Current patterns: '.string(s:v.search))
         endif
     endif
 endfun

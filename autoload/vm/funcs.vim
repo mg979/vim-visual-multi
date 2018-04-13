@@ -141,8 +141,8 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.msg(text) dict
-    if !s:v.silence
+fun! s:Funcs.msg(text, ...) dict
+    if !s:v.silence || a:0
         exe "echohl" g:VM_Message_hl
         echo a:text
         echohl None
@@ -150,9 +150,12 @@ fun! s:Funcs.msg(text) dict
 endfun
 
 fun! s:Funcs.count_msg(force) dict
+    if a:force         | let s:v.silence = 0
+    elseif s:v.silence | return
+    endif
+
     let i = g:VM.motions_enabled? '[M+ ' : '[m- '
     let i .= s:v['index'].']  '
-    if a:force | let s:v.silence = 0 | endif
     let s = len(s:Regions)>1 ? 's.' : '.'
     let t = g:VM.extend_mode? ' region' : ' cursor'
     call self.msg(i.len(s:Regions).t.s.'   Current patterns: '.string(s:v.search))
@@ -162,19 +165,17 @@ endfun
 " Autocommands
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:augroup_start()
-    "augroup plugin-visual-multi
-        "au!
-        "au CursorMoved * call vm#commands#move(0, 0)
-    "augroup END
+    augroup plugin-visual-multi
+        au!
+        au CursorMoved * call vm#commands#move()
+    augroup END
 endfun
 
 fun! s:augroup_end()
-    "augroup plugin-visual-multi
-        "au!
-    "augroup END
+    augroup plugin-visual-multi
+        au!
+    augroup END
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -192,8 +193,9 @@ function! s:pad(t, n)
 endfunction
 
 fun! s:Funcs.regions_contents() dict
-    echohl WarningMsg | echo "Index\tA\tB\tw\tl / L\t\ta / b\t"
-                \ "       --- Regions contents ---" | echohl None
+    echohl WarningMsg | echo "Index\tA\tB\tw\tl / L\t\ta / b\t\t"
+                \ "--- Pattern ---\t"
+                \ "--- Regions contents ---" | echohl None
     for r in s:Regions | call self.region_txt(r) | endfor
 endfun
 
@@ -203,9 +205,11 @@ fun! s:Funcs.region_txt(r) dict
     let line = substitute(r.txt, '\V\n', '^M', 'g')
     if len(line) > 80 | let line = line[:80] . '…' | endif
 
-    echohl Directory | echo  index."\t".r.A."\t".r.B."\t".r.w."\t"
-                \.s:pad(r.l." / ".r.L, 14).s:pad("\t".r.a." / ".r.b, 14)
-    echohl None      | echon "\t".line
+    echohl Directory  | echo  index."\t".r.A."\t".r.B."\t".r.w."\t"
+                \.s:pad(r.l." / ".r.L, 14).s:pad("\t".r.a." / ".r.b, 14)."\t"
+
+    echohl SpecialKey | echon s:pad(r.pat, 18)
+    echohl None       | echon "\t".line
     echohl None
 endfun
 

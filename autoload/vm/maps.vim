@@ -9,14 +9,14 @@ let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
 let s:cx_maps  = ['t', 'm', '/', ']', 's', 'S']
 let s:alt_maps = ['j', 'k', 'J', '{', '}', ]
 
-let s:noremaps = get(g:VM, 'custom_noremaps', {})
-let s:remaps   = get(g:VM, 'custom_remaps', [])
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#maps#start()
+
+    let s:noremaps = get(g:VM, 'custom_noremaps', {})
+    let s:remaps   = get(g:VM, 'custom_remaps', {})
 
     nmap              <nowait> <buffer> :          <Plug>(VM-:)
     nmap              <nowait> <buffer> /          <Plug>(VM-/)
@@ -27,6 +27,7 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> <Tab>      <Plug>(VM-Switch-Mode)
     nmap     <silent> <nowait> <buffer> <BS>       <Plug>(VM-Motions-Toggle)
     nmap     <silent> <nowait> <buffer> <leader>/  <Plug>(VM-Start-Regex-Search)
+    nmap     <silent> <nowait> <buffer> <leader>@  <Plug>(VM-Run-Macro)
 
     nmap     <silent> <nowait> <buffer> o          <Plug>(VM-Invert-Direction)
     nmap     <silent> <nowait> <buffer> q          <Plug>(VM-Skip-Region)
@@ -36,10 +37,10 @@ fun! vm#maps#start()
     nnoremap <silent> <nowait> <buffer> N          N
 
     "movement / selection
-    nmap     <silent> <nowait> <buffer> ]          <Plug>(VM-Find-Next)
-    nmap     <silent> <nowait> <buffer> [          <Plug>(VM-Find-Prev)
-    nmap     <silent> <nowait> <buffer> }          <Plug>(VM-Goto-Next)
-    nmap     <silent> <nowait> <buffer> {          <Plug>(VM-Goto-Prev)
+    nmap     <silent> <nowait> <buffer> }          <Plug>(VM-Find-Next)
+    nmap     <silent> <nowait> <buffer> {          <Plug>(VM-Find-Prev)
+    nmap     <silent> <nowait> <buffer> ]          <Plug>(VM-Goto-Next)
+    nmap     <silent> <nowait> <buffer> [          <Plug>(VM-Goto-Prev)
 
     nmap     <silent> <nowait> <buffer> *          <Plug>(VM-Star)
     nmap     <silent> <nowait> <buffer> #          <Plug>(VM-Hash)
@@ -64,11 +65,12 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> <c-w>      <Plug>(VM-Toggle-Whole-Word)
     nmap     <silent> <nowait> <buffer> <c-o>      <Plug>(VM-Toggle-Only-This-Region)
 
+
     for m in keys(s:noremaps)
         exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".s:noremaps[m].")"
     endfor
-    for m in s:remaps
-        exe "nmap <silent> <nowait> <buffer>     ".m." :call vm#commands#motion('".m."', 0)\<cr>"
+    for m in keys(s:remaps)
+        exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Remap-Motion-".s:remaps[m].")"
     endfor
     for m in s:signs
         exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".m.")"
@@ -146,15 +148,15 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#maps#end()
-    for m in (s:simple + s:remaps)
-        exe "nunmap <buffer> ".m
+    for m in (s:simple)
+        exe "silent! nunmap <buffer> ".m
     endfor
 
     for m in (s:signs)
         exe "nunmap <buffer> ".m
     endfor
 
-    for m in keys(s:noremaps)
+    for m in ( keys(s:noremaps) + keys(s:remaps) )
         exe "nunmap <buffer> ".m
     endfor
 
@@ -176,6 +178,7 @@ fun! vm#maps#end()
     nunmap <buffer> <esc>
     nunmap <buffer> <BS>
     nunmap <buffer> <leader>/
+    nunmap <buffer> <leader>@
 
     xunmap <buffer> *
     xunmap <buffer> #
