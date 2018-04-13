@@ -85,11 +85,6 @@ let s:Funcs = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-"byte offset of line/col
-"fun! s:Funcs.byte(pos) dict
-     "return eval(line2byte(a:pos[0]) + a:pos[1])
-"endfun
-
 fun! s:Funcs.pos2byte(...) dict
     "pos can be a string, a list or a (line, col) couple
 

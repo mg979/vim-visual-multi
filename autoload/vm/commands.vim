@@ -1,4 +1,4 @@
-let s:motion = 0 | let s:starting_col = 0
+let s:motion = 0 | let s:starting_col = 0 | let s:running_macro = 0
 let s:merge = 0  | let s:dir = 0
 let s:X = { -> g:VM.extend_mode }
 
@@ -84,9 +84,11 @@ fun! vm#commands#add_cursor_at_pos(where, extend, ...)
     endif
 
     "when adding cursors below or above, don't add on empty lines
-    if g:VM.cursors_skip_shorter_lines && a:where && R.a < s:starting_col
-        call R.remove()
-        call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return | endif
+    if g:VM.cursors_skip_shorter_lines && a:where
+        if R.a < s:starting_col || R.a == len(getline('.')) + 1
+            call R.remove()
+            call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return
+        endif | endif
     let s:starting_col = 0
     call s:Funcs.count_msg(0)
 endfun
@@ -362,7 +364,7 @@ fun! vm#commands#macro()
         call s:Funcs.msg('Macro aborted.')
         return | endif
 
-    let s:v.silence = 1
+    let s:v.silence = 1 | let s:running_macro = 1
 
     "change to cursor mode
     if s:X() | call vm#commands#change_mode(1) | endif
@@ -371,7 +373,7 @@ fun! vm#commands#macro()
         call cursor(r.l, r.a)
         exe "normal! @".reg
     endfor
-    let s:v.silence = 0
+    let s:v.silence = 0 | let s:running_macro = 0
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -408,7 +410,11 @@ fun! vm#commands#find_motion(motion, char, this, ...)
         let s:motion = a:motion.nr2char(getchar())
     endif
 
-    exe "normal! ".s:motion
+    if index(['$', '^'], a:motion) >= 0 && !s:running_macro
+        exe "normal! h".s:motion."l"
+    else
+        exe "normal! ".s:motion
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
