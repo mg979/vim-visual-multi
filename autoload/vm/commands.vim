@@ -8,7 +8,7 @@ fun! s:init(whole, cursor, extend_mode)
     "return if already initialized
     if g:VM.is_active | return 1 | endif
 
-    if g:VM.motions_at_start | call vm#maps#motions(1) | endif
+    if g:VM_motions_at_start | call vm#maps#motions(1) | endif
 
     let s:V       = vm#init_buffer(a:cursor)
     let s:v       = s:V.Vars
@@ -49,7 +49,7 @@ fun! s:check_extend_default(X)
     """If just starting, enable extend mode if option is set."""
 
     if s:X()                                 | return s:init(0, 1, 1)
-    elseif ( a:X || g:VM.extend_by_default ) | return s:init(0, 1, 1)
+    elseif ( a:X || g:VM_extend_by_default ) | return s:init(0, 1, 1)
     else                                     | return s:init(0, 1, 0) | endif
 endfun
 
@@ -84,7 +84,7 @@ fun! vm#commands#add_cursor_at_pos(where, extend, ...)
     endif
 
     "when adding cursors below or above, don't add on empty lines
-    if g:VM.cursors_skip_shorter_lines && a:where
+    if g:VM_cursors_skip_shorter_lines && a:where
         if R.a < s:starting_col || R.a == len(getline('.')) + 1
             call R.remove()
             call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return
@@ -148,8 +148,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:yank(inclusive)
-    if a:inclusive | keepjumps normal! yiW`]
-    else           | keepjumps normal! yiw`]
+    if a:inclusive | silent keepjumps normal! yiW`]
+    else           | silent keepjumps normal! yiw`]
     endif
 endfun
 
@@ -327,7 +327,7 @@ fun! s:extend_vars(n, this)
     "let b:VM_backup = copy(b:VM_Selection)
 endfun
 
-let s:sublime = { -> !g:VM.is_active && g:VM.sublime_mappings }
+let s:sublime = { -> !g:VM.is_active && g:VM_sublime_mappings }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -365,6 +365,7 @@ fun! vm#commands#macro()
         return | endif
 
     let s:v.silence = 1 | let s:running_macro = 1
+    let oldredraw = &lz | set lz
 
     "change to cursor mode
     if s:X() | call vm#commands#change_mode(1) | endif
@@ -374,6 +375,7 @@ fun! vm#commands#macro()
         exe "normal! @".reg
     endfor
     let s:v.silence = 0 | let s:running_macro = 0
+    let &lz = oldredraw
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

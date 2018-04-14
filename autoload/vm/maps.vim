@@ -1,6 +1,6 @@
 let s:NVIM = has('gui_running') || has('nvim')
 
-let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E', 'x']
+let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E']
 let s:signs    = ['$', '0', '^', '%']
 let s:find     = ['f', 'F', 't', 'T']
 let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'ga', 'gi', 'G', 'Ga', 'Gi', '?', '/', ':', '-', '+']
@@ -15,8 +15,8 @@ let s:alt_maps = ['j', 'k', 'J', '{', '}', ]
 
 fun! vm#maps#start()
 
-    let s:noremaps = get(g:VM, 'custom_noremaps', {})
-    let s:remaps   = get(g:VM, 'custom_remaps', {})
+    let s:noremaps = g:VM_custom_noremaps
+    let s:remaps   = g:VM_custom_remaps
 
     nmap              <nowait> <buffer> :          <Plug>(VM-:)
     nmap              <nowait> <buffer> /          <Plug>(VM-/)

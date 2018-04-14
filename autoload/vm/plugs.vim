@@ -7,7 +7,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Select-Up)               :call vm#commands#add_cursor_at_pos(2, 1)<cr>
 
     nnoremap        <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
-    xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(1, 1, 0)<cr>`]
+    xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(1, 0, 0)<cr>`]
     nnoremap        <Plug>(VM-Find-I-Word)             :call vm#commands#find_under(0, 0, 0)<cr>
     nnoremap        <Plug>(VM-Find-A-Word)             :call vm#commands#find_under(0, 0, 1)<cr>
     nnoremap        <Plug>(VM-Find-I-Whole-Word)       :call vm#commands#find_under(0, 1, 0)<cr>
@@ -22,7 +22,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Add-I-Whole-Word)        :call vm#commands#add_under(0, 1, 0)<cr>
     nnoremap        <Plug>(VM-Add-A-Whole-Word)        :call vm#commands#add_under(0, 1, 1)<cr>
     xnoremap        <Plug>(VM-Star)                    y:call vm#commands#add_under(1, 0, 0, 1)<cr>`]
-    nnoremap        <Plug>(VM-Hash)                    y:call vm#commands#add_under(1, 1, 0, 1)<cr>`]
+    xnoremap        <Plug>(VM-Hash)                    y:call vm#commands#add_under(1, 1, 0, 1)<cr>`]
 
     nnoremap        <Plug>(VM-Toggle-Whole-Word)       :call vm#commands#toggle_option('whole_word')<cr>
     nnoremap        <Plug>(VM-Toggle-Only-This-Region) :call vm#commands#toggle_option('only_this_always')<cr>
@@ -95,7 +95,7 @@ fun! vm#plugs#init()
         call b:VM_Selection.Funcs.msg('Enter regex'.mode.':')
     endfun
 
-    let remaps = g:VM.custom_remaps
+    let remaps = g:VM_custom_remaps
     for m in keys(remaps)
         exe "nnoremap <Plug>(VM-Remap-Motion-".remaps[m].") :call vm#commands#remap_motion('".remaps[m]."')\<cr>"
     endfor

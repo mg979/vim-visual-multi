@@ -11,16 +11,16 @@ fun! <SID>VM_Init()
 
     let g:VM                                  = {'is_active': 0, 'extend_mode': 0, 'motions_enabled': 0}
 
-    let g:VM.default_mappings                 = get(g:VM, 'default_mappings', 1)
-    let g:VM.motions_at_start                 = get(g:VM, 'motions_at_start', 1)
-    let g:VM.cursors_skip_shorter_lines       = get(g:VM, 'cursors_skip_shorter_lines', 1)
+    let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
+    let g:VM_motions_at_start                 = get(g:, 'VM_motions_at_start', 1)
+    let g:VM_cursors_skip_shorter_lines       = get(g:, 'VM_cursors_skip_shorter_lines', 1)
 
-    let g:VM.custom_noremaps                  = get(g:VM, 'custom_noremaps', {',': ';', ';': ','})
-    let g:VM.custom_remaps                    = get(g:VM, 'custom_remaps', {'r':'w'})
-    let g:VM.extend_by_default                = get(g:VM, 'extend_by_default', 0)
-    let g:VM.sublime_mappings                 = get(g:VM, 'sublime_mappings', 1)
-    let g:VM.custom_mappings                  = get(g:VM, 'custom_mappings', 0)
-    let g:VM.keep_collapsed_while_moving_back = get(g:VM, 'keep_collapsed_while_moving_back', 1)
+    let g:VM_custom_noremaps                  = get(g:, 'VM_custom_noremaps', {})
+    let g:VM_custom_remaps                    = get(g:, 'VM_custom_remaps', {})
+    let g:VM_extend_by_default                = get(g:, 'VM_extend_by_default', 0)
+    let g:VM_sublime_mappings                 = get(g:, 'VM_sublime_mappings', 1)
+    let g:VM_custom_mappings                  = get(g:, 'VM_custom_mappings', 0)
+    let g:VM_keep_collapsed_while_moving_back = get(g:, 'VM_keep_collapsed_while_moving_back', 1)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Set up highlighting
@@ -37,7 +37,7 @@ fun! <SID>VM_Init()
 
     call vm#plugs#init()
 
-    if g:VM.sublime_mappings
+    if g:VM_sublime_mappings
         nmap <silent> <M-C-Down>  <Plug>(VM-Select-Down)
         nmap <silent> <M-C-Up>    <Plug>(VM-Select-Up)
         nmap <silent> <S-Down>    <Plug>(VM-Motion-j)
@@ -50,7 +50,7 @@ fun! <SID>VM_Init()
         nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
     endif
 
-    if g:VM.default_mappings
+    if g:VM_default_mappings
         nmap <silent> g<space>   <Plug>(VM-Add-Cursor-At-Pos)
         nmap <silent> g<cr>      <Plug>(VM-Add-Cursor-At-Word)
 
