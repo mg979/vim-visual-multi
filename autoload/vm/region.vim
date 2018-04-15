@@ -38,10 +38,12 @@ endfun
 
 let s:Region = {}
 
-fun! s:Region.new(cursor)
+fun! s:Region.new(cursor, ...)
     """Initialize region variables and methods.
     "
-    " Uppercase variables (A,B,H) are for byte offsets, except L (end line).
+    " Uppercase variables (A,B,K) are for byte offsets, except L (end line).
+
+    " a/b/k/l/L    : start, end, anchor, first line, end line
     " R.cur_col()  : returns the current cursor column(a or b), based on direction.
     " R.cur_Col()  : cur_col() in byte offset form
     " R.cur_ln()   : the line where cur_col() is located
@@ -61,26 +63,31 @@ fun! s:Region.new(cursor)
 
     let R.A_      = { -> line2byte(R.l) + R.a }
     let R.B_      = { -> line2byte(R.L) + R.b }
+    let R._a      = { -> byte2line(R.A) + R.a }
+    let R._b      = { -> byte2line(R.B) + R.b }
     let R.cur_ln  = { -> R.dir ? R.L : R.l }
     let R.cur_col = { -> R.dir ? R.b : R.a }
     let R.cur_Col = { -> R.cur_col() == R.b ? R.B : R.A }
     let R.char    = { -> s:X()? getline(R.l)[R.cur_col()-1] : '' }
 
-    if a:cursor    "/////////// CURSOR ///////////
+
+    if a:cursor        "/////////// CURSOR ////////////
 
         let R.l     = getpos('.')[1]        " line
         let R.L     = R.l
         let R.a     = getpos('.')[2]        " position
         let R.b     = R.a
         let R.w     = 1
+        let R.h     = 0
         let R.A     = R.A_()                " byte offset
         let R.B     = R.A
-        let R.h     = R.a                   " anchor (unused for cursors)
-        let R.H     = R.A
+        let R.k     = R.a                   " anchor (unused for cursors)
+        let R.K     = R.A
         let R.txt   = R.char()              " character under cursor in extend mode
         let R.pat   = ''
 
-    else            "/////////// REGION ///////////
+
+    elseif !a:0        "/////////// REGION ////////////
 
         let R.l     = getpos("'[")[1]       " starting line
         let R.L     = getpos("']")[1]       " ending line
@@ -89,10 +96,27 @@ fun! s:Region.new(cursor)
         let R.A     = R.A_()                " byte offset a
         let R.B     = R.B_()                " byte offset b
         let R.w     = R.B - R.A + 1         " width
-        let R.h     = R.a                   " anchor
-        let R.H     = R.A                   " anchor offset
+        let R.h     = R.L - R.l             " height
+        let R.k     = R.a                   " anchor
+        let R.K     = R.A                   " anchor offset
         let R.txt   = getreg(s:v.def_reg)   " text content
         let R.pat   = R.pattern()           " associated search pattern
+
+
+    else               "///////// FROM ARGS ///////////
+
+        let R.l     = a:1
+        let R.L     = a:4
+        let R.a     = a:2
+        let R.b     = a:3
+        let R.A     = R.A_()
+        let R.B     = R.B_()
+        let R.w     = R.B - R.A + 1
+        let R.h     = R.L - R.l
+        let R.k     = R.a
+        let R.K     = R.A
+        let R.txt   = getline(R.l)[R._a():R._b()]
+        let R.pat   = s:Funcs.get_pattern(R.txt)
     endif
 
     call add(s:Regions, R)
@@ -160,14 +184,26 @@ fun! s:Region.move_cursor() dict
 
     let pos = getpos('.')
     let self.l = pos[1]
-    let self.L = self.L
+    let self.L = self.l
     let self.a = pos[2]
     let self.b = self.a
     call self.update_vars()
     return 1
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region.keep_line(ln) dict
+    """Ensure line boundaries aren't crossed."""
+    let r = self
+
+    if     ( a:ln > r.l ) | call cursor ( r.l, col([r.l, '$'])-1 )
+    elseif ( a:ln < r.l ) | call cursor ( r.l, col([r.l, 1]) )
+    else                  | call cursor ( r.l, col('.') )
+    endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:move(r)
     let r = a:r | let a = r.a | let b = r.b | let up = 0 | let down = 0
@@ -183,26 +219,30 @@ fun! s:move(r)
     "check the line
     let nl = line('.')
 
-    if       nl < r.l   |   let up   = 1   |   let r.l = nl
-    elseif   nl > r.L   |   let down = 1   |   let r.L = nl
+    if !g:VM.multiline  | call r.keep_line(nl)
+
+    elseif   nl < r.l                        |   let r.l = nl
+    elseif   nl > r.L                        |   let r.L = nl
+    elseif   nl > r.l && r.cur_ln() == r.l   |   let r.l = nl
+    elseif   nl < r.L && r.cur_ln() == r.L   |   let r.L = nl
     endif
 
     "get the new position and see if there's been inversion
     let new = col('.') | let New = s:Byte('.')
 
-    let went_back  =   ( New <  r.H )  &&  ( New <  r.cur_Col() )
-    let went_forth =   ( New >= r.H )  &&  ( New >= r.cur_Col() )
+    let went_back  =   ( New <  r.K )  &&  ( New <  r.cur_Col() )
+    let went_forth =   ( New >= r.K )  &&  ( New >= r.cur_Col() )
 
     "assign new values
     if went_back
         let r.dir = 0
         let r.a = new
-        let r.b = r.h
+        let r.b = r.k
 
     elseif went_forth
         let r.dir = 1
         let r.b = new
-        let r.a = r.h
+        let r.a = r.k
 
     elseif r.dir
         let r.b = new
@@ -272,7 +312,7 @@ fun! s:Region.update_cursor(ln, col) dict
     let r = self
     let r.l = a:ln | let r.a = a:col
     let r.L = r.l  | let r.b = r.a
-    let r.h = r.b  | let r.w = 1
+    let r.k = r.b  | let r.w = 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -299,9 +339,10 @@ fun! s:Region.update_vars() dict
     let r.B       = r.B_()
 
     "update anchor if in cursor mode
-    if !s:X() | let r.h = r.a | let r.H = r.A | let r.L = r.l | endif
+    if !s:X() | let r.k = r.a | let r.K = r.A | let r.L = r.l | endif
 
-    let r.w       = r.b - r.a + 1
+    let r.w       = r.B - r.A + 1
+    let r.h       = r.L - r.l
     let r.txt     = s:X()? getreg(s:v.def_reg) : ''
     let r.pat     = r.pattern()
 endfun

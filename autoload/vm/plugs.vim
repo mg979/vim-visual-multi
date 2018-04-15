@@ -24,11 +24,13 @@ fun! vm#plugs#init()
     xnoremap        <Plug>(VM-Star)                    y:call vm#commands#add_under(1, 0, 0, 1)<cr>`]
     xnoremap        <Plug>(VM-Hash)                    y:call vm#commands#add_under(1, 1, 0, 1)<cr>`]
 
-    nnoremap        <Plug>(VM-Toggle-Whole-Word)       :call vm#commands#toggle_option('whole_word')<cr>
-    nnoremap        <Plug>(VM-Toggle-Only-This-Region) :call vm#commands#toggle_option('only_this_always')<cr>
+    nnoremap        <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline')<cr>
+    nnoremap        <Plug>(VM-Toggle-Whole-Word)       :call b:VM_Selection.Funcs.toggle_option('whole_word')<cr>
+    nnoremap        <Plug>(VM-Toggle-Only-This-Region) :call b:VM_Selection.Funcs.toggle_option('only_this_always')<cr>
     nnoremap        <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
     nnoremap        <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
-    nnoremap        <Plug>(VM-Rewrite-Search-Index)    :call b:VM_Selection.Search.rewrite()<cr>
+    nnoremap        <Plug>(VM-Rewrite-Last-Search)     :call b:VM_Selection.Search.rewrite(1)<cr>
+    nnoremap        <Plug>(VM-Rewrite-All-Search)      :call b:VM_Selection.Search.rewrite(0)<cr>
     nnoremap        <Plug>(VM-Read-From-Search)        :call b:VM_Selection.Search.get_slash_reg()<cr>
     nnoremap        <Plug>(VM-Remove-Search)           :call b:VM_Selection.Search.remove(0)<cr>
     nnoremap        <Plug>(VM-Remove-Search-Regions)   :call b:VM_Selection.Search.remove(1)<cr>
@@ -87,8 +89,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Motion-^)                :call vm#commands#find_motion('^', '', 0)<cr>
     nnoremap        <Plug>(VM-Motion-%)                :call vm#commands#find_motion('%', '', 0)<cr>
 
-    nnoremap        <Plug>(VM-Motion-Shrink)           :call vm#commands#shrink(0)<cr>
-    nnoremap        <Plug>(VM-Motion-Enlarge)          :call vm#commands#enlarge(0)<cr>
+    nnoremap        <Plug>(VM-Motion-Shrink)           :call vm#commands#shrink_or_enlarge(1, 0)<cr>
+    nnoremap        <Plug>(VM-Motion-Enlarge)          :call vm#commands#shrink_or_enlarge(0, 0)<cr>
 
     fun! <SID>Mode()
         let mode = g:VM.extend_mode? ' (extend mode)' : ' (cursor mode)'

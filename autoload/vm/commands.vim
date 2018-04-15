@@ -1,4 +1,4 @@
-let s:motion = 0 | let s:starting_col = 0
+let s:motion = '' | let s:starting_col = 0
 let s:merge = 0  | let s:dir = 0
 let s:X = { -> g:VM.extend_mode }
 
@@ -63,7 +63,7 @@ fun! vm#commands#add_cursor_at_word(yank, search)
     keepjumps normal! `[
     call s:Global.new_cursor()
 
-    if a:search | call s:Search.set() | endif
+    if a:search | call s:Search.add() | endif
     call s:Funcs.count_msg(1)
 endfun
 
@@ -162,7 +162,7 @@ fun! vm#commands#find_under(visual, whole, inclusive)
     " yank and create region
     if !a:visual | call s:yank(a:inclusive) | endif
 
-    call s:Search.set()
+    call s:Search.add()
     call s:Global.get_region()
     call s:Funcs.count_msg(0)
 endfun
@@ -180,7 +180,7 @@ fun! vm#commands#add_under(visual, whole, inclusive, ...)
         else | call s:Funcs.set_reg(R.txt) | endif
     endif
 
-    call s:Search.set()
+    call s:Search.add()
     let R = s:Global.get_region()
     call s:Global.merge_regions(R.l)
     if !a:0 | call vm#commands#find_next(0, 0) | endif
@@ -220,8 +220,7 @@ fun! s:get_next(n)
         silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
         call vm#commands#add_cursor_at_word(0, 0)
     endif
-    if a:n ==# 'n' | let s:v.nav_direction = 1
-    else | let s:v.nav_direction = 0 | endif
+    let s:v.nav_direction = a:n ==# 'n'? 1 : 0
 endfun
 
 fun! s:navigate(force, dir)
@@ -255,10 +254,10 @@ fun! vm#commands#invert_direction()
     "invert anchor
     if s:v.direction
         let s:v.direction = 0
-        for r in s:Regions | let r.h = r.b | let r.H = r.B | endfor
+        for r in s:Regions | let r.k = r.b | let r.K = r.B | endfor
     else
         let s:v.direction = 1
-        for r in s:Regions | let r.h = r.a | let r.H = r.A | endfor
+        for r in s:Regions | let r.k = r.a | let r.K = r.A | endfor
     endif
 
     call s:Global.update_highlight()
@@ -268,6 +267,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav)
+
+    "rewrite search patterns if extending with hjkl
+    if s:simple() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
+
     call s:Search.validate()
 
     "just navigate to next
@@ -282,6 +285,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(skip, nav)
+
+    "rewrite search patterns if extending with hjkl
+    if s:simple() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
+
     call s:Search.validate() | let r = s:Global.is_region_at_pos('.')
 
     "just navigate to previous
@@ -319,9 +326,10 @@ endfun
 " function that moves the cursor, else the autocmd will be triggered for the
 " wrong function.
 
-fun! s:extend_vars(n, this)
-    let s:v.extending = a:n
-    if a:this | let s:v.only_this = a:n | endif
+fun! s:extend_vars(auto, this)
+    let s:v.extending = 1
+    let s:v.auto = a:auto
+    let s:v.only_this = a:this
     let s:v.silence = 1
     "let b:VM_backup = copy(b:VM_Selection)
 endfun
@@ -335,6 +343,7 @@ fun! vm#commands#motion(motion, this)
 
     call s:extend_vars(1, a:this)
     let s:motion = a:motion
+    if !g:VM.multiline && s:vertical() | let g:VM.multiline = 1 | endif
     exe "normal! ".s:motion
 endfun
 
@@ -404,30 +413,22 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#shrink(this)
+fun! vm#commands#shrink_or_enlarge(shrink, this)
     """Reduce selection size by 1."""
 
     if s:Global.all_empty() | return | endif
 
     let dir = s:v.direction
-    let motion = dir? ['h', 'l'] : ['l', 'h']
-    call vm#commands#motion(motion[0], a:this)
+
+    let s:motion = a:shrink? (dir? 'h':'l') : (dir? 'l':'h')
+    call s:extend_vars(0, a:this)
+    call vm#commands#move()
+
     call vm#commands#invert_direction()
-    call vm#commands#motion(motion[1], a:this)
 
-    if s:v.direction != dir | call vm#commands#invert_direction() | endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#commands#enlarge(this)
-    """Enlarge selection size by 1."""
-
-    let dir = s:v.direction
-    let motion = dir? ['l', 'h'] : ['h', 'l']
-    call vm#commands#motion(motion[0], a:this)
-    call vm#commands#invert_direction()
-    call vm#commands#motion(motion[1], a:this)
+    let s:motion = a:shrink? (dir? 'l':'h') : (dir? 'h':'l')
+    call s:extend_vars(0, a:this)
+    call vm#commands#move()
 
     if s:v.direction != dir | call vm#commands#invert_direction() | endif
 endfun
@@ -473,9 +474,11 @@ endfun
 
 let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
 let s:can_from_back    = { -> s:motion == '$' && !s:v.direction }
+let s:vertical         = { -> index(['j', 'k'],                               s:motion)     >= 0 }
 let s:always_from_back = { -> index(['^', '0', 'F', 'T'],                     s:motion)     >= 0 }
 let s:forward          = { -> index(['w', 'W', 'e', 'E', 'l', 'f', 't'],      s:motion)     >= 0 }
 let s:backwards        = { -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], s:motion[0])  >= 0 }
+let s:simple           = { -> index(['h', 'j', 'k', 'l'],                     s:motion)     >= 0 }
 
 fun! vm#commands#move(...)
     if !s:v.extending | return | endif
@@ -490,7 +493,7 @@ fun! vm#commands#move(...)
     endif
 
     if s:only_this()
-        call s:Regions[s:v.index].move(s:motion) | let s:v.only_this -= 1
+        call s:Regions[s:v.index].move(s:motion) | let s:v.only_this = 0
     else
         for r in s:Regions
             call r.move(s:motion)
@@ -524,28 +527,6 @@ fun! vm#commands#undo()
     let b:VM_Selection = copy(b:VM_backup)
     call s:Global.update_highlight()
     call s:Global.select_region(s:v.index)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Toggle options
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#commands#toggle_option(option)
-    let s = "s:v.".a:option
-    exe "let" s "= !".s
-
-    if a:option == 'whole_word'
-        redraw!
-        let s = s:v.search[0]
-
-        if s:v.whole_word
-            if s[:1] != '\<' | let s:v.search[0] = '\<'.s.'\>' | endif
-            call s:Funcs.msg('Search ->  whole word     ->  Current patterns: '.string(s:v.search))
-        else
-            if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
-            call s:Funcs.msg('Search ->  not whole word ->  Current patterns: '.string(s:v.search))
-        endif
-    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

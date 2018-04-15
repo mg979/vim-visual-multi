@@ -8,7 +8,6 @@ fun! vm#search#init()
     let s:Regions  = s:V.Regions
     let s:Matches  = s:V.Matches
 
-    let s:Global   = s:V.Global
     let s:Funcs    = s:V.Funcs
     let s:Edit     = s:V.Edit
 
@@ -23,48 +22,49 @@ endfun
 
 let s:Search = {}
 
-fun! s:Search.case() dict
-    if &smartcase              "smartcase        ->  case sensitive
-        set nosmartcase
-        set noignorecase
-        call s:Funcs.msg('Search ->  case sensitive')
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    elseif !&ignorecase        "case sensitive   ->  ignorecase
-        set ignorecase
-        call s:Funcs.msg('Search ->  ignore case')
+fun! s:pattern(register, regex)
+    let t = eval('@'.a:register)
+    if !a:regex
+        let t = s:Funcs.get_pattern(t)
+        if s:v.whole_word | let t = '\<'.t.'\>' | endif | endif
+    return t
+endfun
 
-    else                       "ignore case      ->  smartcase
-        set smartcase
-        set ignorecase
-        call s:Funcs.msg('Search ->  smartcase')
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:update_search(p)
+
+    if empty(s:v.search)
+        call insert(s:v.search, a:p)    "just started
+
+    elseif index(s:v.search, a:p) < 0   "not in list
+        call insert(s:v.search, a:p)
     endif
+
+    let @/ = join(s:v.search, '\|')
+    set hlsearch
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.rewrite() dict
-    let r = s:Global.is_region_at_pos('.')
-    if empty(r) | return | endif
-    call s:update_search(escape(r.txt, '\|'), 1)
-    call s:Funcs.count_msg(1)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Search.set() dict
-    call s:update_search(s:pattern(s:v.def_reg, 0), 0)
+fun! s:Search.add() dict
+    """Add a new search pattern."
+    call s:update_search(s:pattern(s:v.def_reg, 0))
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Search.get_slash_reg() dict
-    call s:update_search(s:pattern('/', 1), 0)
+    """Get pattern from current "/" register."
+    call s:update_search(s:pattern('/', 1))
     call s:Funcs.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.update(...) dict
+fun! s:Search.update_current(...) dict
     """Update current search pattern to index 0 or <arg>."""
 
     if empty(s:v.search)          | let @/ = ''
@@ -87,7 +87,7 @@ fun! s:Search.remove(also_regions) dict
         if ( i < 0 || i >= len(pats) ) | call s:Funcs.msg('      Wrong index') | return | endif
         let pat = pats[i]
         call remove(pats, i)
-        call self.update()
+        call self.update_current()
     else
         call s:Funcs.msg('No search patters yet.') | return | endif
 
@@ -99,7 +99,7 @@ fun! s:Search.remove(also_regions) dict
                 let removed += 1 | endif
             let i -= 1 | endwhile
 
-        if removed | call s:Global.update_regions() | endif
+        if removed | call s:V.Global.update_regions() | endif
     endif
     call s:Funcs.count_msg(1)
 endfun
@@ -135,44 +135,58 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:pattern(register, regex)
-    let t = eval('@'.a:register)
-    if !a:regex
-        let t = substitute(escape(t, '\/.*$^~[]()'), "\n", '\\n', "g")
-        if s:v.whole_word | let t = '\<'.t.'\>' | endif | endif
-    return t
+fun! s:Search.case() dict
+    if &smartcase              "smartcase        ->  case sensitive
+        set nosmartcase
+        set noignorecase
+        call s:Funcs.msg('Search ->  case sensitive')
+
+    elseif !&ignorecase        "case sensitive   ->  ignorecase
+        set ignorecase
+        call s:Funcs.msg('Search ->  ignore case')
+
+    else                       "ignore case      ->  smartcase
+        set smartcase
+        set ignorecase
+        call s:Funcs.msg('Search ->  smartcase')
+    endif
 endfun
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Search rewrite
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"Try to rewrite last or all patterns, if one of the matches is a substring of
+"the selected text.
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:update_search(p, update)
+fun! s:pattern_found(t, i)
+    if @/ == '' | return | endif
 
-    if empty(s:v.search)
-        call insert(s:v.search, a:p)    "just started
-
-    elseif a:update                     "updating a match
-
-        "if there's a match that is a substring of
-        "the selected text, replace it with the new one
-        let i = 0
-        for p in s:v.search
-            if a:p =~ p || p =~ a:p
-                let old = s:v.search[i]
-                let s:v.search[i] = a:p
-                call s:Global.update_patterns(a:p)
-                break | endif
-            let i += 1
-        endfor
-
-        call s:Funcs.msg('Pattern updated:           '.old.'  ->  '.a:p)
-
-    elseif index(s:v.search, a:p) < 0   "not in list
-
-        call insert(s:v.search, a:p)
+    let p = s:v.search[a:i]
+    if a:t =~ p || p =~ a:t
+        let old = s:v.search[a:i]
+        let s:v.search[a:i] = a:t
+        call s:V.Global.update_region_patterns(a:t)
+        call s:Funcs.msg('Pattern updated:    '.old.'  ->  '.a:t)
+        return 1
     endif
-
-    let @/ = join(s:v.search, '\|')
-    set hlsearch
 endfun
 
+fun! s:Search.rewrite(last) dict
+    let r = s:V.Global.is_region_at_pos('.') | if empty(r) | return | endif
+
+    let t = s:Funcs.get_pattern(r.txt)
+
+    if a:last
+        "add a new pattern if not found
+        if !s:pattern_found(t, 0) | call self.add() | endif
+    else
+        "rewrite if found among any pattern, else do nothing
+        for i in range ( len(s:v.search) )
+            if s:pattern_found(t, i) | break | endif
+        endfor
+    endif
+    call s:Funcs.count_msg(1)
+endfun
 

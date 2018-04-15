@@ -32,10 +32,13 @@ let s:Funcs = {}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.pos2byte(...) dict
-    "pos can be a string, a list or a (line, col) couple
+    "pos can be a string, a list or a (line, col) couple, or the offset itself
 
     if a:0 > 1                          "a (line, col) couple
         return line2byte(a:1) + a:2
+
+    elseif type(a:1) == v:t_number      "an offset
+        return a:1
 
     elseif type(a:1) == v:t_string      "a string (like '.')
         let pos = getpos(a:1)[1:2]
@@ -81,6 +84,13 @@ fun! s:Funcs.restore_regs() dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.get_pattern(t) dict
+    return substitute(escape(a:t, '\/.*$^~[]()'), "\n", '\\n', "g")
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 fun! s:Funcs.msg(text, ...) dict
     if !s:v.silence || a:0
@@ -135,6 +145,34 @@ fun! s:Funcs.region_txt(r) dict
     echohl SpecialKey | echon self.pad(r.pat, 18)
     echohl None       | echon "\t".line
     echohl None
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Toggle options
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.toggle_option(option) dict
+
+    if a:option == 'multiline'
+        let g:VM.multiline = !g:VM.multiline
+        "if !g:VM.multiline | call s:V.Global.split_lines() | endif
+        return | endif
+
+    let s = "s:v.".a:option
+    exe "let" s "= !".s
+
+    if a:option == 'whole_word'
+        redraw!
+        let s = s:v.search[0]
+
+        if s:v.whole_word
+            if s[:1] != '\<' | let s:v.search[0] = '\<'.s.'\>' | endif
+            call s:Funcs.msg('Search ->  whole word     ->  Current patterns: '.string(s:v.search))
+        else
+            if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
+            call s:Funcs.msg('Search ->  not whole word ->  Current patterns: '.string(s:v.search))
+        endif
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

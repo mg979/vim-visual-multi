@@ -9,7 +9,8 @@ let b:VM_Selection        = {}
 
 fun! <SID>VM_Init()
 
-    let g:VM                                  = {'is_active': 0, 'extend_mode': 0, 'motions_enabled': 0}
+    let g:VM                                  = {'is_active': 0, 'extend_mode': 0,
+                                              \  'multiline': 0, 'motions_enabled': 0}
 
     let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
     let g:VM_motions_at_start                 = get(g:, 'VM_motions_at_start', 1)

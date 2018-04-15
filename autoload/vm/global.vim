@@ -114,6 +114,58 @@ fun! s:Global.collapse_regions() dict
     call self.update_highlight()
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.split_lines() dict
+    """When switching off multiline, split selections, so that each is
+    "contained in a single line."""
+
+    "make a list of regions to split
+    let lts = []
+    for r in s:Regions | if r.h | call add(lts, r.index) | endif | endfor
+
+    for i in lts
+        let R = s:Regions[i].remove
+
+        for n in range(R.h)
+            if n == 0  "first line
+                call vm#region#new(0, R.l, R.L, R.a, len(getline(R.l)))
+            elseif n != R.h
+                call vm#region#new(0, R.l, R.L, 1, len(getline(R.l)))
+            else
+                call vm#region#new(0, R.l, R.L, 1, R.b)
+            endif
+            let s:v.matches = getmatches()
+        endfor
+    endfor
+
+    "reorder regions when done
+    call self.reorder_regions()
+    call self.update_highlight()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.reorder_regions() dict
+    """Reorder regions, so that their byte offsets are consecutive."""
+
+    let Regions = [s:Regions[0]]
+    let Matches = [s:Matches[0]]
+    let offsets = {}
+    for 
+    let offsets = map(s:Regions, 'v:val.A')
+    for r in s:Regions[1:]
+        if r.A > s:Regions[r.index-1]
+            call add(Regions, r)
+            call add(Matches, s:Matches[r.index])
+        elseif r.A > s:Regions[r.index-1]
+            call insert(Regions, r)
+            call insert(Matches, s:Matches[r.index])
+        endif
+    endfor
+    let s:Regions = Regions
+    let s:Matches = Matches
+endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -157,12 +209,12 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.update_patterns(pat) dict
+fun! s:Global.update_region_patterns(pat) dict
     """Update the patterns for the appropriate regions."""
 
     for r in s:Regions
-        if a:p =~ r.pat || r.pat =~ a:p
-            let r.pat = a:p
+        if a:pat =~ r.pat || r.pat =~ a:pat
+            let r.pat = a:pat
         endif
     endfor
 endfun

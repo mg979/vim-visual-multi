@@ -3,11 +3,11 @@ let s:NVIM = has('gui_running') || has('nvim')
 let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E']
 let s:signs    = ['$', '0', '^', '%']
 let s:find     = ['f', 'F', 't', 'T']
-let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'ga', 'gi', 'G', 'Ga', 'Gi', '?', '/', ':', '-', '+']
+let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'ga', 'gi', 'G', 'Ga', 'Gi', '?', '/', ':', '-', '+', 'M']
 
 let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
 let s:cx_maps  = ['t', 'm', '/', ']', 's', 'S']
-let s:alt_maps = ['j', 'k', 'J', '{', '}', ]
+let s:alt_maps = ['j', 'k', 'J', '{', '}', ']']
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
@@ -32,6 +32,7 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> o          <Plug>(VM-Invert-Direction)
     nmap     <silent> <nowait> <buffer> q          <Plug>(VM-Skip-Region)
     nmap     <silent> <nowait> <buffer> Q          <Plug>(VM-Remove-Region)
+    nmap     <silent> <nowait> <buffer> M          <Plug>(VM-Toggle-Multiline)
     nmap     <silent> <nowait> <buffer> U          <Plug>(VM-Undo-Last)
     nnoremap <silent> <nowait> <buffer> n          n
     nnoremap <silent> <nowait> <buffer> N          N
@@ -52,11 +53,13 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> <S-End>    <Plug>(VM-Merge-To-Eol)
     nmap     <silent> <nowait> <buffer> <S-Home>   <Plug>(VM-Merge-To-Bol)
 
+    nmap     <silent> <nowait> <buffer> <M-]>      <Plug>(VM-Rewrite-Last-Search)
+    nmap     <silent> <nowait> <buffer> <c-x>]     <Plug>(VM-Rewrite-All-Search)
+
     "utility
     nmap              <nowait> <buffer> <C-x>t     <Plug>(VM-Show-Regions-Text)
     nmap     <silent> <nowait> <buffer> <C-x>m     <Plug>(VM-Merge-Regions)
     nmap     <silent> <nowait> <buffer> <C-x>/     <Plug>(VM-Read-From-Search)
-    nmap     <silent> <nowait> <buffer> <c-x>]     <Plug>(VM-Rewrite-Search-Index)
     nmap     <silent> <nowait> <buffer> <C-x>s     <Plug>(VM-Remove-Search)
     nmap     <silent> <nowait> <buffer> <C-x>S     <Plug>(VM-Remove-Search-Regions)
 
@@ -124,20 +127,17 @@ fun! s:hjkl()
     nnoremap <silent> <nowait> <buffer> k           k
     nnoremap <silent> <nowait> <buffer> l           l
 
+    nmap     <silent> <nowait> <buffer> J           <Plug>(VM-Motion-j)
+    nmap     <silent> <nowait> <buffer> K           <Plug>(VM-Motion-k)
+    nmap     <silent> <nowait> <buffer> H           <Plug>(VM-Motion-h)
+    nmap     <silent> <nowait> <buffer> L           <Plug>(VM-Motion-l)
+
+    nmap     <silent> <nowait> <buffer> <C-h>       <Plug>(VM-This-Motion-h)
+    nmap     <silent> <nowait> <buffer> <C-l>       <Plug>(VM-This-Motion-l)
+
     nmap     <silent> <nowait> <buffer> <M-j>       <Plug>(VM-Add-Cursor-Down)
     nmap     <silent> <nowait> <buffer> <M-k>       <Plug>(VM-Add-Cursor-Up)
 
-
-    "multiline disabled for now
-    "nmap     <silent> <nowait> <buffer> J           <Plug>(VM-Motion-j)
-    "nmap     <silent> <nowait> <buffer> K           <Plug>(VM-Motion-k)
-    nnoremap <silent> <nowait> <buffer> J           J
-    nnoremap <silent> <nowait> <buffer> K           K
-
-    nmap     <silent> <nowait> <buffer> H           <Plug>(VM-Motion-h)
-    nmap     <silent> <nowait> <buffer> L           <Plug>(VM-Motion-l)
-    nmap     <silent> <nowait> <buffer> <C-h>       <Plug>(VM-This-Motion-h)
-    nmap     <silent> <nowait> <buffer> <C-l>       <Plug>(VM-This-Motion-l)
     nmap     <silent> <nowait> <buffer> <M-J>       <Plug>(VM-Motion-J)
 endfun
 
