@@ -24,6 +24,7 @@ fun! vm#plugs#init()
     xnoremap        <Plug>(VM-Star)                    y:call vm#commands#add_under(1, 0, 0, 1)<cr>`]
     xnoremap        <Plug>(VM-Hash)                    y:call vm#commands#add_under(1, 1, 0, 1)<cr>`]
 
+    nnoremap        <Plug>(VM-Toggle-Motions)          :call vm#maps#motions_toggle()<cr>
     nnoremap        <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline')<cr>
     nnoremap        <Plug>(VM-Toggle-Whole-Word)       :call b:VM_Selection.Funcs.toggle_option('whole_word')<cr>
     nnoremap        <Plug>(VM-Toggle-Only-This-Region) :call b:VM_Selection.Funcs.toggle_option('only_this_always')<cr>
@@ -38,7 +39,6 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex()<cr>:call <SID>Mode()<cr>/
     nnoremap        <Plug>(VM-Show-Regions-Text)       :call b:VM_Selection.Funcs.regions_contents()<cr>
     nnoremap        <Plug>(VM-Switch-Mode)             :call vm#commands#change_mode(0)<cr>
-    nnoremap        <Plug>(VM-Motions-Toggle)          :call vm#maps#motions_toggle()<cr>
     nnoremap        <Plug>(VM-Reset)                   :call vm#reset()<cr>
     nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro()<cr>
 

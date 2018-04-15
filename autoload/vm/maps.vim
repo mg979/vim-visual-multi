@@ -25,7 +25,7 @@ fun! vm#maps#start()
     "basic mappings
     nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
     nmap     <silent> <nowait> <buffer> <Tab>      <Plug>(VM-Switch-Mode)
-    nmap     <silent> <nowait> <buffer> <BS>       <Plug>(VM-Motions-Toggle)
+    nmap     <silent> <nowait> <buffer> <BS>       <Plug>(VM-Toggle-Motions)
     nmap     <silent> <nowait> <buffer> <leader>/  <Plug>(VM-Start-Regex-Search)
     nmap     <silent> <nowait> <buffer> <leader>@  <Plug>(VM-Run-Macro)
 

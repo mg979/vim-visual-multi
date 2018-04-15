@@ -94,10 +94,29 @@ endfun
 
 fun! s:Funcs.msg(text, ...) dict
     if !s:v.silence || a:0
-        exe "echohl" g:VM_Message_hl
-        echo a:text
-        echohl None
+        if type(a:text) == v:t_string
+            exe "echohl" g:VM_Message_hl
+            echo a:text
+            echohl None | return | endif
+
+        for txt in a:text
+            exe "echohl ".txt[1]
+            echon txt[0]
+            echohl None
+        endfor
     endif
+endfun
+
+fun! s:m1()
+    let t = g:VM.motions_enabled? "M\+" : "M\-"
+    let hl = g:VM.motions_enabled? "Type" : "WarningMsg"
+    return [t, hl]
+endfun
+
+fun! s:m2()
+    let t = g:VM.multiline? "L\+" : "L\-"
+    let hl = g:VM.multiline? "Type" : "WarningMsg"
+    return [t, hl]
 endfun
 
 fun! s:Funcs.count_msg(force) dict
@@ -105,11 +124,17 @@ fun! s:Funcs.count_msg(force) dict
     elseif s:v.silence | return
     endif
 
-    let i = g:VM.motions_enabled? '[M+ ' : '[m- '
-    let i .= s:v['index'].']  '
+    let hl = 'Directory'
+    let i = [' ', hl]
+    let m1 = s:m1()
+    let i3 = [' / ', hl]
+    let m2 = s:m2()
+    let i2 = [' ['.s:v['index'].']  ', hl]
     let s = len(s:Regions)>1 ? 's.' : '.'
     let t = g:VM.extend_mode? ' region' : ' cursor'
-    call self.msg(i.len(s:Regions).t.s.'   Current patterns: '.string(s:v.search))
+    let t1 = [len(s:Regions).t.s.'   Current patterns: ', hl]
+    let t2 = [string(s:v.search), 'Type']
+    call self.msg([i, m1, i3, m2, i2, t1, t2])
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -142,7 +167,7 @@ fun! s:Funcs.region_txt(r) dict
     echohl Directory  | echo  index."\t".r.A."\t".r.B."\t".r.w."\t"
                 \.self.pad(r.l." / ".r.L, 14).self.pad("\t".r.a." / ".r.b, 14)."\t"
 
-    echohl SpecialKey | echon self.pad(r.pat, 18)
+    echohl Type       | echon self.pad(r.pat, 18)
     echohl None       | echon "\t".line
     echohl None
 endfun
@@ -155,6 +180,7 @@ fun! s:Funcs.toggle_option(option) dict
 
     if a:option == 'multiline'
         let g:VM.multiline = !g:VM.multiline
+        redraw! | call b:VM_Selection.Funcs.count_msg(0)
         "if !g:VM.multiline | call s:V.Global.split_lines() | endif
         return | endif
 
