@@ -45,9 +45,9 @@ fun! vm#init_buffer(empty, ...)
     let s:v.ID               = 0
     let s:v.index            = -1
     let s:v.direction        = 1
-    let s:v.auto             = 1
+    let s:v.auto             = 0
     let s:v.silence          = 0
-    let s:v.extending        = 0
+    let s:v.moving           = 0
     let s:v.only_this        = 0
     let s:v.only_this_always = 0
     let s:v.merge_to_beol    = 0
@@ -104,7 +104,6 @@ endfun
 fun! vm#augroup_start()
     augroup plugin-visual-multi
         au!
-        au CursorMoved * if s:v.auto | call vm#commands#move() | endif
     augroup END
 endfun
 

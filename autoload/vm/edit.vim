@@ -17,9 +17,25 @@ fun! vm#edit#init()
 
     let s:X       = { -> g:VM.extend_mode }
 
-    let s:v.running_macro = 0
-
     return s:Edit
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:before_macro()
+    let s:v.silence = 1 | let s:v.auto = 1
+    let s:old_multiline = g:VM.multiline
+    let g:VM.multiline
+    call vm#maps#end()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:after_macro()
+    let s:v.silence = 0 | let s:v.auto = 0
+    let g:VM.multiline = s:old_multiline
+
+    call vm#maps#start()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -39,7 +55,8 @@ fun! s:Edit.run_macro() dict
         call s:Funcs.msg('Macro aborted.')
         return | endif
 
-    let s:v.silence = 1 | let s:v.running_macro = 1
+    call s:before_macro()
+
     let W = [] | let X = s:X() | let change_for_ln = 0 | let replace_width = 0
 
     "store selections widths before they are collapsed
@@ -78,7 +95,7 @@ fun! s:Edit.run_macro() dict
             normal! @@
         endif
     endfor
-    let s:v.silence = 0 | let s:v.running_macro = 0
+    call s:after_macro()
     call s:Global.update_regions()
     redraw!
 endfun

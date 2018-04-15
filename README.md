@@ -36,3 +36,8 @@ Select all
 Macros. Shorter lines are skipped when adding cursors above/below.
 
 ![Imgur](https://i.imgur.com/3IsZzF3.gif)
+
+-------
+Another macro example that uses vim-sneak and vim-surround
+
+![Imgur](https://i.imgur.com/Uyqyux0.gif)

@@ -248,6 +248,7 @@ endfun
 
 fun! vm#commands#invert_direction()
     """Invert direction and reselect region."""
+    if s:v.auto | return | endif
 
     for r in s:Regions | let r.dir = !r.dir | endfor
 
@@ -268,7 +269,7 @@ endfun
 
 fun! vm#commands#find_next(skip, nav)
 
-    "rewrite search patterns if extending with hjkl
+    "rewrite search patterns if moving with hjkl
     if s:simple() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
 
     call s:Search.validate()
@@ -286,7 +287,7 @@ endfun
 
 fun! vm#commands#find_prev(skip, nav)
 
-    "rewrite search patterns if extending with hjkl
+    "rewrite search patterns if moving with hjkl
     if s:simple() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
 
     call s:Search.validate() | let r = s:Global.is_region_at_pos('.')
@@ -322,19 +323,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Extend regions commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" NOTE: always call s:extend_vars() before the motion, but after any other
-" function that moves the cursor, else the autocmd will be triggered for the
-" wrong function.
-" WARNING: some commands need the autocmd variable to be disabled, and the
-" move function must be called expressely. Not clear to me why it is so.
-
-fun! s:extend_vars(auto, this)
-    let s:v.extending = 1
-    let s:v.auto = a:auto
-    let s:v.only_this = a:this
-    let s:v.silence = 1
-    "let b:VM_backup = copy(b:VM_Selection)
-endfun
 
 let s:sublime = { -> !g:VM.is_active && g:VM_sublime_mappings }
 
@@ -343,18 +331,17 @@ let s:sublime = { -> !g:VM.is_active && g:VM_sublime_mappings }
 fun! vm#commands#motion(motion, this)
     if s:sublime() | call s:init(0, 1, 1) | call s:Global.new_cursor() | endif
 
-    call s:extend_vars(1, a:this)
     let s:motion = a:motion
-    if !g:VM.multiline && s:vertical() | let g:VM.multiline = 1 | endif
-    exe "normal! ".s:motion
+    if s:v.auto || ( !g:VM.multiline && s:vertical() )
+        let g:VM.multiline = 1 | endif
+    call s:call_motion(a:this)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#remap_motion(motion)
-    call s:extend_vars(1, 0)
     let s:motion = a:motion
-    exe "normal ".s:motion
+    call s:call_motion(a:this)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -362,27 +349,23 @@ endfun
 fun! vm#commands#end_back(fast, this)
     if s:sublime() | call s:init(0, 1, 1) | call s:Global.new_cursor() | endif
 
-    call s:extend_vars(1, a:this)
     let s:motion = a:fast? 'BBE' : 'bbbe'
-    exe "normal! ".s:motion
+    call s:call_motion(a:this)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#merge_to_beol(eol, this)
-    call s:extend_vars(1, a:this)
     let s:motion = a:eol? "\<End>" : '0'
     let s:v.merge_to_beol = 1
     let s:merge = 1
     let g:VM.extend_mode = 0
-    exe "normal! ".s:motion
+    call s:call_motion(a:this)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_motion(motion, char, this, ...)
-    call s:extend_vars(1, a:this)
-
     if index(['$', '0', '^', '%'], a:motion) >= 0
         let s:motion = a:motion | let s:merge = 1
     elseif a:char != ''
@@ -391,11 +374,7 @@ fun! vm#commands#find_motion(motion, char, this, ...)
         let s:motion = a:motion.nr2char(getchar())
     endif
 
-    if index(['$', '^'], a:motion) >= 0 && !s:v.running_macro
-        exe "normal! h".s:motion."l"
-    else
-        exe "normal! ".s:motion
-    endif
+    call s:call_motion(a:this)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -418,28 +397,37 @@ endfun
 fun! vm#commands#shrink_or_enlarge(shrink, this)
     """Reduce/enlarge selection size by 1."""
 
+    "NOTE: macros should disable these mappings in time, but it seems they don't
+    "Until I find a reliable way, it's a workaround
+    if s:v.auto | return | endif
+
     if s:Global.all_empty() | return | endif
 
     let dir = s:v.direction
 
     let s:motion = a:shrink? (dir? 'h':'l') : (dir? 'l':'h')
-    call s:extend_vars(0, a:this)
-    call vm#commands#move()
+    call s:call_motion(a:this)
 
     call vm#commands#invert_direction()
 
     let s:motion = a:shrink? (dir? 'l':'h') : (dir? 'h':'l')
-    call s:extend_vars(0, a:this)
-    call vm#commands#move()
+    call s:call_motion(a:this)
 
-    "reactivate auto when finished
-    let s:v.auto = 1
     if s:v.direction != dir | call vm#commands#invert_direction() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#select_motion(inclusive, this)
+
+    "NOTE: macros should disable these mappings in time, but it seems they don't
+    "Until I find a reliable way, it's a workaround
+    if s:v.auto
+        if a:this | exe "normal! g"
+        else      | exe "normal! G" | endif
+        return
+    endif
+
     if !s:X() | call vm#commands#change_mode(0) | endif
     if a:this | call s:Global.new_cursor()      | endif
 
@@ -467,16 +455,9 @@ fun! vm#commands#select_motion(inclusive, this)
 
     let b = a==#'F' ? 'f' : 't'
 
-    call vm#commands#find_motion(a, c, a:this)
-    call s:extend_vars(0, a:this)
-    call vm#commands#move()
+    call vm#commands#motion(a.c, a:this)
     call vm#commands#invert_direction()
-    call vm#commands#find_motion(b, d, a:this)
-    call s:extend_vars(0, a:this)
-    call vm#commands#move()
-
-    "reactivate auto when finished
-    let s:v.auto = 1
+    call vm#commands#motion(b.d, a:this)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -491,10 +472,25 @@ let s:forward          = { -> index(['w', 'W', 'e', 'E', 'l', 'f', 't'],      s:
 let s:backwards        = { -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], s:motion[0])  >= 0 }
 let s:simple           = { -> index(['h', 'j', 'k', 'l'],                     s:motion)     >= 0 }
 
+fun! s:call_motion(this)
+    let s:v.moving = 1
+    let s:v.silence = 1
+    let s:v.only_this = a:this
+    "let b:VM_backup = copy(b:VM_Selection)
+
+    if !s:v.auto | call vm#commands#move() | return | endif
+
+    "auto section
+    let s:merge = 0
+    exe "normal! ".s:motion
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#commands#move(...)
-    if !s:v.extending | return | endif
+    if !s:v.moving | return | endif
     let R = s:Regions[ s:v.index ]
-    let s:v.extending -= 1
+    let s:v.moving -= 1
 
     if s:v.direction && s:always_from_back()
         call vm#commands#invert_direction()

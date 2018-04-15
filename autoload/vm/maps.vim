@@ -3,7 +3,7 @@ let s:NVIM = has('gui_running') || has('nvim')
 let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E']
 let s:signs    = ['$', '0', '^', '%']
 let s:find     = ['f', 'F', 't', 'T']
-let s:simple   = ['h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'ga', 'gi', 'G', 'Ga', 'Gi', '?', '/', ':', '-', '+', 'M']
+let s:simple   = ['h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M']
 
 let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
 let s:cx_maps  = ['t', 'm', '/', ']', 's', 'S']
@@ -84,11 +84,7 @@ fun! vm#maps#start()
 
     "select
     nmap <silent> <nowait> <buffer> g  <Plug>(VM-Select-One-Inside)
-    nmap <silent> <nowait> <buffer> gi <Plug>(VM-Select-One-Inside)
-    nmap <silent> <nowait> <buffer> ga <Plug>(VM-Select-One-Around)
     nmap <silent> <nowait> <buffer> G  <Plug>(VM-Select-All-Inside)
-    nmap <silent> <nowait> <buffer> Gi <Plug>(VM-Select-All-Inside)
-    nmap <silent> <nowait> <buffer> Ga <Plug>(VM-Select-All-Around)
 
     "shrink/enlarge
     nmap <silent> <nowait> <buffer> -  <Plug>(VM-Motion-Shrink)
