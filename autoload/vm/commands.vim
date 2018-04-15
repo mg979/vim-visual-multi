@@ -1,4 +1,4 @@
-let s:motion = 0 | let s:starting_col = 0 | let s:running_macro = 0
+let s:motion = 0 | let s:starting_col = 0
 let s:merge = 0  | let s:dir = 0
 let s:X = { -> g:VM.extend_mode }
 
@@ -17,6 +17,7 @@ fun! s:init(whole, cursor, extend_mode)
     let s:Global  = s:V.Global
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
+    let s:Edit    = s:V.Edit
 
     let s:v.whole_word = a:whole
     let s:v.nav_direction = 1
@@ -191,7 +192,6 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
 
     let storepos = getpos('.')
-    let oldredraw = &lz | set lz
     let s:v.silence = 1
     let seen = []
 
@@ -203,7 +203,6 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     endwhile
 
     call setpos('.', storepos)
-    let &lz = oldredraw
     call s:Funcs.count_msg(1)
 endfun
 
@@ -349,37 +348,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#macro()
-
-    "forbid count
-    if v:count > 1
-        if !g:VM.is_active | return | endif
-        call s:Funcs.msg('Count not allowed.')
-        call vm#funcs#reset()
-        return | endif
-
-    call s:Funcs.msg('Macro register? ', 1)
-    let reg = nr2char(getchar())
-    if reg == "\<esc>" |
-        call s:Funcs.msg('Macro aborted.')
-        return | endif
-
-    let s:v.silence = 1 | let s:running_macro = 1
-    let oldredraw = &lz | set lz
-
-    "change to cursor mode
-    if s:X() | call vm#commands#change_mode(1) | endif
-
-    for r in s:Regions
-        call cursor(r.l, r.a)
-        exe "normal! @".reg
-    endfor
-    let s:v.silence = 0 | let s:running_macro = 0
-    let &lz = oldredraw
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! vm#commands#end_back(fast, this)
     if s:sublime() | call s:init(0, 1, 1) | call s:Global.new_cursor() | endif
 
@@ -412,7 +380,7 @@ fun! vm#commands#find_motion(motion, char, this, ...)
         let s:motion = a:motion.nr2char(getchar())
     endif
 
-    if index(['$', '^'], a:motion) >= 0 && !s:running_macro
+    if index(['$', '^'], a:motion) >= 0 && !s:v.running_macro
         exe "normal! h".s:motion."l"
     else
         exe "normal! ".s:motion

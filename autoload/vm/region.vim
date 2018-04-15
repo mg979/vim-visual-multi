@@ -6,6 +6,7 @@ fun! vm#region#init()
     let s:Global  = s:V.Global
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
+    let s:Edit    = s:V.Edit
 
     let s:X    = { -> g:VM.extend_mode }
     let s:Byte = { pos -> s:Funcs.pos2byte(pos) }

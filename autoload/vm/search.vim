@@ -5,9 +5,13 @@
 fun! vm#search#init()
     let s:V        = b:VM_Selection
     let s:v        = s:V.Vars
-    let s:Global   = s:V.Global
     let s:Regions  = s:V.Regions
+    let s:Matches  = s:V.Matches
+
+    let s:Global   = s:V.Global
     let s:Funcs    = s:V.Funcs
+    let s:Edit     = s:V.Edit
+
     let s:V.Search = s:Search
 
     return s:Search

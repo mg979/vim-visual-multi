@@ -79,7 +79,7 @@ augroup END
 
 fun! s:buffer_leave()
     if !empty(get(b:, 'VM_Selection', {}))
-        call vm#funcs#reset(1)
+        call vm#reset(1)
     endif
 endfun
 

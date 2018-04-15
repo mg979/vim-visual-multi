@@ -32,3 +32,7 @@ Select all
 
 ![Imgur](https://i.imgur.com/7kPW9Vi.gif)
 
+-------
+Macros. Shorter lines are skipped when adding cursors above/below.
+
+![Imgur](https://i.imgur.com/3IsZzF3.gif)
