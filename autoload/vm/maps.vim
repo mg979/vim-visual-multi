@@ -3,7 +3,7 @@ let s:NVIM = has('gui_running') || has('nvim')
 let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E']
 let s:signs    = ['$', '0', '^', '%']
 let s:find     = ['f', 'F', 't', 'T']
-let s:simple   = ['H', 'J', 'K', 'L', 'h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'ga', 'gi', 'G', 'Ga', 'Gi', '?', '/', ':', '-', '+', 'M']
+let s:simple   = ['h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'ga', 'gi', 'G', 'Ga', 'Gi', '?', '/', ':', '-', '+', 'M']
 
 let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
 let s:cx_maps  = ['t', 'm', '/', ']', 's', 'S']
@@ -127,10 +127,10 @@ fun! s:hjkl()
     nnoremap <silent> <nowait> <buffer> k           k
     nnoremap <silent> <nowait> <buffer> l           l
 
-    nmap     <silent> <nowait> <buffer> J           <Plug>(VM-Motion-j)
-    nmap     <silent> <nowait> <buffer> K           <Plug>(VM-Motion-k)
-    nmap     <silent> <nowait> <buffer> H           <Plug>(VM-Motion-h)
-    nmap     <silent> <nowait> <buffer> L           <Plug>(VM-Motion-l)
+    "nmap     <silent> <nowait> <buffer> J           <Plug>(VM-Motion-j)
+    "nmap     <silent> <nowait> <buffer> K           <Plug>(VM-Motion-k)
+    "nmap     <silent> <nowait> <buffer> H           <Plug>(VM-Motion-h)
+    "nmap     <silent> <nowait> <buffer> L           <Plug>(VM-Motion-l)
 
     nmap     <silent> <nowait> <buffer> <C-h>       <Plug>(VM-This-Motion-h)
     nmap     <silent> <nowait> <buffer> <C-l>       <Plug>(VM-This-Motion-l)

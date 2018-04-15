@@ -325,6 +325,8 @@ endfun
 " NOTE: always call s:extend_vars() before the motion, but after any other
 " function that moves the cursor, else the autocmd will be triggered for the
 " wrong function.
+" WARNING: some commands need the autocmd variable to be disabled, and the
+" move function must be called expressely. Not clear to me why it is so.
 
 fun! s:extend_vars(auto, this)
     let s:v.extending = 1
@@ -414,7 +416,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#shrink_or_enlarge(shrink, this)
-    """Reduce selection size by 1."""
+    """Reduce/enlarge selection size by 1."""
 
     if s:Global.all_empty() | return | endif
 
@@ -430,6 +432,8 @@ fun! vm#commands#shrink_or_enlarge(shrink, this)
     call s:extend_vars(0, a:this)
     call vm#commands#move()
 
+    "reactivate auto when finished
+    let s:v.auto = 1
     if s:v.direction != dir | call vm#commands#invert_direction() | endif
 endfun
 
@@ -463,9 +467,16 @@ fun! vm#commands#select_motion(inclusive, this)
 
     let b = a==#'F' ? 'f' : 't'
 
-    call vm#commands#motion(a.c, a:this)
+    call vm#commands#find_motion(a, c, a:this)
+    call s:extend_vars(0, a:this)
+    call vm#commands#move()
     call vm#commands#invert_direction()
-    call vm#commands#motion(b.d, a:this)
+    call vm#commands#find_motion(b, d, a:this)
+    call s:extend_vars(0, a:this)
+    call vm#commands#move()
+
+    "reactivate auto when finished
+    let s:v.auto = 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
