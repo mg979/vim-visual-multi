@@ -9,7 +9,6 @@ fun! vm#edit#init()
 
     let s:v       = s:V.Vars
     let s:Regions = s:V.Regions
-    let s:Matches = s:V.Matches
 
     let s:Global  = s:V.Global
     let s:Funcs   = s:V.Funcs
@@ -20,6 +19,22 @@ fun! vm#edit#init()
     return s:Edit
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Ex commands
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.run_ex() dict
+    if s:count(v:count) | return | endif
+
+    let cmd = input('Ex command? ')
+    if cmd == "\<esc>"
+        call s:Funcs.msg('Command aborted.')
+        return | endif
+
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Macros
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:before_macro()
@@ -40,14 +55,20 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_macro() dict
-
+fun! s:count(c)
     "forbid count
-    if v:count > 1
-        if !g:VM.is_active | return | endif
+    if a:c > 1
+        if !g:VM.is_active | return 1 | endif
         call s:Funcs.msg('Count not allowed.')
         call vm#reset()
-        return | endif
+        return 1
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.run_macro() dict
+    if s:count(v:count) | return | endif
 
     call s:Funcs.msg('Macro register? ', 1)
     let reg = nr2char(getchar())

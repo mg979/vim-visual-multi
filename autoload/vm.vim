@@ -5,7 +5,6 @@
 
 " s:Global holds the Global class methods
 " s:Regions contains the regions with their contents
-" s:Matches contains the matches as they are registered with matchaddpos()
 " s:v.matches contains the current matches as read with getmatches()
 
 fun! vm#init_buffer(empty, ...)
@@ -13,15 +12,14 @@ fun! vm#init_buffer(empty, ...)
 
     if !empty(b:VM_Selection) | return s:V | endif
 
-    let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Matches': {}, 'Funcs': {},
-                        \ 'Edit': {}, 'Global':  {}, 'Search':  {}}
+    let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Funcs':  {},
+                        \ 'Edit': {}, 'Global':  {}, 'Search': {}}
 
     let s:V            = b:VM_Selection
 
     "init classes
     let s:v            = s:V.Vars
     let s:Regions      = s:V.Regions
-    let s:Matches      = s:V.Matches
 
     let s:V.Funcs      = vm#funcs#init()
     let s:V.Search     = vm#search#init()

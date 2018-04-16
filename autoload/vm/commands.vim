@@ -13,7 +13,6 @@ fun! s:init(whole, cursor, extend_mode)
     let s:V       = vm#init_buffer(a:cursor)
     let s:v       = s:V.Vars
     let s:Regions = s:V.Regions
-    let s:Matches = s:V.Matches
     let s:Global  = s:V.Global
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search

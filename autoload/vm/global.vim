@@ -9,7 +9,6 @@ fun! vm#global#init()
 
     let s:v       = s:V.Vars
     let s:Regions = s:V.Regions
-    let s:Matches = s:V.Matches
 
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search

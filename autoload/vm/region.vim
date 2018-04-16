@@ -2,7 +2,6 @@ fun! vm#region#init()
     let s:V       = b:VM_Selection
     let s:v       = s:V.Vars
     let s:Regions = s:V.Regions
-    let s:Matches = s:V.Matches
     let s:Global  = s:V.Global
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
@@ -24,7 +23,6 @@ endfun
 
 " s:Global    : holds the Global class methods
 " s:Regions   : contains the regions with their contents
-" s:Matches   : contains the matches as they are registered with matchaddpos()
 " s:v.matches : contains the current matches as read with getmatches()
 
 
@@ -52,6 +50,7 @@ fun! s:Region.new(cursor, ...)
     " R.dir        : is the current orientation for the region.
     " R.txt        : is the text content.
     " R.pat        : is the search pattern associated with the region
+    " R.matches    : holds the highlighting matches
 
     let R         = copy(self)
     let R.index   = len(s:Regions)
@@ -147,8 +146,8 @@ endfun
 
 fun! s:Region.remove() dict
     let i = self.index
-    call remove(s:Regions, i)
     call self.remove_highlight()
+    call remove(s:Regions, i)
     call s:Global.update_indices()
 endfun
 
@@ -359,8 +358,8 @@ fun! s:Region.highlight() dict
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     if !s:X()   "cursor mode
-        let s:Matches[R.id] = {'region': [], 'cursor': 0}
-        let s:Matches[R.id].cursor = matchaddpos('MultiCursor', [[R.l, R.a]], 40)
+        let R.matches        = {'region': [], 'cursor': 0}
+        let R.matches.cursor = matchaddpos('MultiCursor', [[R.l, R.a]], 40)
         return
     endif
 
@@ -384,12 +383,11 @@ fun! s:Region.highlight() dict
     endfor
 
     "build a list of highlight entries, one for each possible line
-    let s:Matches[R.id] = {'region': [], 'cursor': 0}
+    let R.matches        = {'region': [], 'cursor': 0}
     for line in region
-        call add(s:Matches[R.id].region, matchaddpos(g:VM_Selection_hl, [line], 30))
+        call add(R.matches.region, matchaddpos(g:VM_Selection_hl, [line], 30))
     endfor
-    let s:Matches[R.id].cursor = matchaddpos('MultiCursor', [cursor], 40)
-    "echo max region s:Matches map(getmatches(), 'getmatches()[v:key].id')
+    let R.matches.cursor = matchaddpos('MultiCursor', [cursor], 40)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -397,12 +395,10 @@ endfun
 fun! s:Region.remove_highlight() dict
     """Remove the highlight entries."""
 
-    "echo string(s:Matches)
-    let matches = remove(s:Matches, self.id)
-    let R       = matches.region
-    let c       = matches.cursor
+    let r       = self.matches.region
+    let c       = self.matches.cursor
 
-    for m in R | call matchdelete(m) | endfor | call matchdelete(c)
+    for m in r | call matchdelete(m) | endfor | call matchdelete(c)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -410,7 +406,7 @@ endfun
 fun! s:Region.update_highlight() dict
     """Update the region highlight."""
 
-    if has_key(s:Matches, self.id) | call self.remove_highlight() | endif
+    call self.remove_highlight()
     call self.highlight()
     let s:v.matches = getmatches()
 endfun
