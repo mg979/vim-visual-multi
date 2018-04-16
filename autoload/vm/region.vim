@@ -28,8 +28,30 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#region#new(cursor)
-    return s:Region.new(a:cursor)
+fun! vm#region#new(cursor, ...)
+    if !a:0 | let R = s:Region.new(a:cursor)
+    else    | let R = s:Region.new(a:cursor, a:1, a:2, a:3, a:4)
+    endif
+
+    "update region index and ID count
+    let s:v.index = R.index | let s:v.ID += 1
+
+    "keep regions list ordered
+    if empty(s:Regions) || s:Regions[s:v.index-1].A < R.A
+        call add(s:Regions, R)
+    else
+        let i = 0
+        for r in s:Regions
+            if r.A > R.A
+                call insert(s:Regions, R, r.index)
+                break
+            endif
+            let i += 1
+        endfor
+        let s:v.index = i
+        call s:Global.update_indices()
+    endif
+    return R
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -56,9 +78,6 @@ fun! s:Region.new(cursor, ...)
     let R.index   = len(s:Regions)
     let R.dir     = 1
     let R.id      = s:v.ID + 1
-
-    "update region index and ID count
-    let s:v.index = R.index | let s:v.ID += 1
 
     let R.A_      = { -> line2byte(R.l) + R.a }
     let R.B_      = { -> line2byte(R.L) + R.b }
@@ -118,7 +137,6 @@ fun! s:Region.new(cursor, ...)
         let R.pat   = s:Funcs.get_pattern(R.txt)
     endif
 
-    call add(s:Regions, R)
     call R.highlight()
     call s:Global.update_cursor_highlight()
 
@@ -147,8 +165,9 @@ endfun
 fun! s:Region.remove() dict
     let i = self.index
     call self.remove_highlight()
-    call remove(s:Regions, i)
+    let R = remove(s:Regions, i)
     call s:Global.update_indices()
+    return R
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -374,7 +393,6 @@ fun! s:Region.highlight() dict
 
     "define highlight
     for n in range(max)
-        "echom n max
         let line = n==0    ? [R.l, R.a, len(getline(R.l))] :
               \    n<max-1 ? [R.l + n]        :
               \              [R.L, 1, R.b]

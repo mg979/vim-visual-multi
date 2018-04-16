@@ -14,9 +14,71 @@ fun! vm#edit#init()
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
 
-    let s:X       = { -> g:VM.extend_mode }
-
+    let s:size    = { -> line2byte(line('$') + 1) }
     return s:Edit
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Region processing
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.pre_process() dict
+    let s:W = []                  "list in which regions width will be stored
+    let s:X = g:VM.extend_mode    "current extend mode
+
+    "we'll process regions line by line, no matter the index
+    "if there are more regions in the same line, last ones must be edited first
+    "let R = s:Global.reorder_regions(0, s:v.index, 1)
+
+    "store selections widths before they are collapsed
+
+    "call s:Global.update_indices()
+    for r in s:Regions | call add(s:W, s:X? r.w : 0) | endfor
+
+    "delete the selected text and change to cursor mode
+    if s:X
+        for r in s:Regions
+            call cursor(r.l, r.a)
+            exe "normal! \"_d".r.w."l"
+        endfor
+        call vm#commands#change_mode(1)
+    endif
+endfun
+
+fun! s:Edit.process() dict
+    let s:replace_width = 0         "width of the replacement text
+    let change_for_ln   = 0         "counter for changes occurred in the same line
+
+    for r in s:V.Regions
+        "first edit: run actual command and store length of entered text
+        if r.index == 0
+            let size = s:size()
+            call cursor(r.l, r.a)
+            exe "normal! ".s:cmd
+            let s:replace_width = s:size() - size
+            echom s:replace_width
+        else
+            "subsequent cursors: adjust position if necessary, then run command
+            let prev = s:Regions[r.index-1]
+
+            "if there are more regions in the same line, store the width changes,
+            "and adjust every cursor with the cumulative change for that line
+
+            if r.l == prev.l
+
+                let changed_width   = s:replace_width - s:W[prev.index]
+                let r.a            += changed_width + change_for_ln
+                let change_for_ln  += changed_width
+
+                call r.update_cursor(r.l, r.a)
+            else
+                let change_for_ln = 0
+            endif
+
+            call cursor(r.l, r.a)
+            exe "normal! ".s:cmd
+        endif
+    endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -78,44 +140,10 @@ fun! s:Edit.run_macro() dict
 
     call s:before_macro()
 
-    let W = [] | let X = s:X() | let change_for_ln = 0 | let replace_width = 0
+    let s:cmd = "@".reg
+    call self.pre_process()
+    call self.process()
 
-    "store selections widths before they are collapsed
-    for r in s:Regions | call add(W, X? r.w : 0) | endfor
-
-    "change to cursor mode
-    if X | call vm#commands#change_mode(1) | endif
-
-    "run macro
-    for r in s:Regions
-
-        "first edit: run actual macro and store length of entered text
-        if r.index == 0
-            call cursor(r.l, r.a)
-            exe "normal! @".reg
-            let replace_width = len(@.)
-        else
-            "subsequent cursors: adjust position if necessary, then run macro
-            let prev = s:Regions[r.index-1]
-
-            "if there are more regions in the same line, store the width changes,
-            "and adjust every cursor with the cumulative change for that line
-
-            if r.l == prev.l
-
-                let changed_width   = replace_width - W[prev.index]
-                let r.a            += changed_width + change_for_ln
-                let change_for_ln  += changed_width
-
-                call r.update_cursor(r.l, r.a)
-            else
-                let change_for_ln = 0
-            endif
-
-            call cursor(r.l, r.a)
-            normal! @@
-        endif
-    endfor
     call s:after_macro()
     call s:Global.update_regions()
     redraw!

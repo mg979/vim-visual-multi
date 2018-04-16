@@ -43,6 +43,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.ID               = 0
     let s:v.index            = -1
     let s:v.direction        = 1
+    let s:v.debug            = 1
     let s:v.auto             = 0
     let s:v.silence          = 0
     let s:v.moving           = 0
@@ -57,7 +58,7 @@ fun! vm#init_buffer(empty, ...)
     call vm#region#init()
 
     set virtualedit=onemore
-    set ww=<,>,h,l
+    set ww=h,l
     set lz
 
     let g:VM.is_active = 1

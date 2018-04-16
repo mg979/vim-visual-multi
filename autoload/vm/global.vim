@@ -8,13 +8,13 @@ fun! vm#global#init()
     let s:V       = b:VM_Selection
 
     let s:v       = s:V.Vars
-    let s:Regions = s:V.Regions
 
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
     let s:Edit    = s:V.Edit
 
     let s:X       = { -> g:VM.extend_mode }
+    let s:R       = { -> s:V.Regions      }
 
     return s:Global
 endfun
@@ -55,7 +55,7 @@ endfun
 fun! s:Global.update_highlight(...) dict
     """Update highlight for all regions."""
 
-    for r in s:Regions
+    for r in s:R()
         call r.update_highlight()
     endfor
 
@@ -83,7 +83,7 @@ endfun
 fun! s:Global.all_empty() dict
     """If not all regions are empty, turn on extend mode, if not already active.
 
-    for r in s:Regions
+    for r in s:R()
         if r.a != r.b
             if !s:X() | call vm#commands#change_mode(0) | endif
             return 0  | endif
@@ -105,7 +105,7 @@ endfun
 fun! s:Global.collapse_regions() dict
     """Collapse regions to cursors and turn off extend mode."""
 
-    for r in s:Regions
+    for r in s:R()
         if r.A != r.B | call r.update(r.l, r.L, r.a, r.a) | endif
     endfor
     let g:VM.extend_mode = 0
@@ -115,69 +115,17 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.split_lines() dict
-    """When switching off multiline, split selections, so that each is
-    "contained in a single line."""
-
-    "make a list of regions to split
-    let lts = []
-    for r in s:Regions | if r.h | call add(lts, r.index) | endif | endfor
-
-    for i in lts
-        let R = s:Regions[i].remove
-
-        for n in range(R.h)
-            if n == 0  "first line
-                call vm#region#new(0, R.l, R.L, R.a, len(getline(R.l)))
-            elseif n != R.h
-                call vm#region#new(0, R.l, R.L, 1, len(getline(R.l)))
-            else
-                call vm#region#new(0, R.l, R.L, 1, R.b)
-            endif
-            let s:v.matches = getmatches()
-        endfor
-    endfor
-
-    "reorder regions when done
-    call self.reorder_regions()
-    call self.update_highlight()
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Global.reorder_regions() dict
-    """Reorder regions, so that their byte offsets are consecutive."""
-
-    let Regions = [s:Regions[0]]
-    let Matches = [s:Matches[0]]
-    let offsets = {}
-    for 
-    let offsets = map(s:Regions, 'v:val.A')
-    for r in s:Regions[1:]
-        if r.A > s:Regions[r.index-1]
-            call add(Regions, r)
-            call add(Matches, s:Matches[r.index])
-        elseif r.A > s:Regions[r.index-1]
-            call insert(Regions, r)
-            call insert(Matches, s:Matches[r.index])
-        endif
-    endfor
-    let s:Regions = Regions
-    let s:Matches = Matches
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:Global.select_region(i) dict
     """Adjust cursor position of the region at index, then return the region."""
 
-    if a:i >= len(s:Regions) | let i = 0
-    elseif a:i<0 | let i = len(s:Regions) - 1
-    else | let i = a:i | endif
+    if a:i >= len(s:R()) | let i = 0
+    elseif a:i<0         | let i = len(s:R()) - 1
+    else                 | let i = a:i
+    endif
 
-    let R = s:Regions[i]
+    let R = s:R()[i]
     call cursor(R.cur_ln(), R.cur_col())
-    let s:v.index = i
+    let s:v.index = R.index
     return R
 endfun
 
@@ -200,22 +148,10 @@ fun! s:Global.is_region_at_pos(pos) dict
 
     let pos = s:Funcs.pos2byte(a:pos)
 
-    for r in s:Regions
+    for r in s:R()
         if pos >= r.A && pos <= r.B
             return r | endif | endfor
     return {}
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Global.update_region_patterns(pat) dict
-    """Update the patterns for the appropriate regions."""
-
-    for r in s:Regions
-        if a:pat =~ r.pat || r.pat =~ a:pat
-            let r.pat = a:pat
-        endif
-    endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -224,12 +160,125 @@ fun! s:Global.update_indices() dict
     """Adjust region indices."""
 
     let i = 0
-    for r in s:Regions
+    for r in s:R()
         let r.index = i
         let i += 1
     endfor
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.update_region_patterns(pat) dict
+    """Update the patterns for the appropriate regions."""
+
+    for r in s:R()
+        if a:pat =~ r.pat || r.pat =~ a:pat
+            let r.pat = a:pat
+        endif
+    endfor
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.lines_with_regions(reverse, ...) dict
+    """Find lines with regions.""
+
+    let lines = {}
+    for r in s:R()
+        let sort_list = 0
+
+        "called for a specific line
+        if a:0 && r.l != a:1 | continue | endif
+
+        "add region index to indices for that line
+        let lines[r.l] = get(lines, r.l, [])
+
+        "mark for sorting if not empty
+        if !empty(lines[r.l]) | let sort_list = 1 | endif
+        call add(lines[r.l], r.index)
+
+        "sort list so that lower indices are put farther in the list
+        if sort_list
+            if a:reverse | call reverse(sort(lines[r.l], 'n'))
+            else         | call sort(lines[r.l], 'n')            | endif
+        endif
+    endfor
+    return lines
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.reorder_regions(reverse, start, reselect) dict
+    """Reorder regions, so that their byte offsets are consecutive.
+    """If needed, order of regions in the same line will be reversed.
+
+    let current = s:v.index | let added = 0 | let R = s:R()
+    call self.update_indices()
+
+    let Regions = []
+    let lines   = self.lines_with_regions(a:reverse)
+    let l_nrs   = sort(keys(lines))
+
+    for l in l_nrs
+        for i in lines[l]
+            if i == current | let current = added | endif
+            call add(Regions, R[i])
+            let added += 1
+        endfor
+    endfor
+
+    "make the index start at the given region (-1 means the current one)
+    let a = (a:start == -1)? current : a:start
+    let b = a - 1 - len(R)
+    let Regions = Regions[(a):] + Regions[:(b)]
+
+    "replace the old region set with the sorted one
+    let s:V.Regions = copy(Regions)
+    call self.update_indices()
+
+    "get the new index of the previously selected region
+    let current = (a:start == -1)?
+                \ 0 : (current < a)?
+                \     ( len(R) - a + current ) : (current - a)
+
+    if a:reselect | call self.select_region(current) | endif
+
+    "return the previously selected region
+    return [ s:R()[current], self.lines_with_regions(0) ]
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.split_lines() dict
+    """When switching off multiline, split selections, so that each is
+    "contained in a single line."""
+
+    let prev = s:v.index
+
+    "make a list of regions to split
+    let lts = []
+    for r in s:R() | if r.h | call add(lts, r.index) | endif | endfor
+
+    for i in lts
+        let R = s:R()[i].remove()
+
+        for n in range(R.h)
+            if n == 0  "first line
+                call vm#region#new(0, R.l, R.L, R.a, len(getline(R.l)))
+            elseif n != R.h
+                call vm#region#new(0, R.l, R.L, 1, len(getline(R.l)))
+            else
+                call vm#region#new(0, R.l, R.L, 1, R.b)
+            endif
+            let s:v.matches = getmatches()
+        endfor
+    endfor
+
+    "reorder regions when done
+    let R = self.reorder_regions(0, prev, 1)
+    call self.update_highlight()
+    return R
+endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Merging regions
@@ -238,13 +287,13 @@ endfun
 fun! s:Global.merge_cursors()
     """BROKEN: Merge overlapping cursors."""
 
-    let cursors_pos = map(s:Regions, 'v:val.A')
+    let cursors_pos = map(s:R(), 'v:val.A')
     "echom string(cursors_pos)
     while 1
         let i = 0
         for c in cursors_pos
             if count(cursors_pos, c) > 1
-                call s:Regions[i].remove() | break | endif
+                call s:R()[i].remove() | break | endif
             let i += 1
         endfor
         break
@@ -256,17 +305,8 @@ endfun
 fun! s:Global.merge_regions(...) dict
     """MUST BE IMPROVED: Merge overlapping regions."""
 
-    let lines = {}
     let storepos = getpos('.')
-
-    "find lines with regions
-    for r in s:Regions
-        "called a merge for a specific line
-        if a:0 && r.l != a:1 | continue | endif
-        "add region index to indices for that line
-        let lines[r.l] = get(lines, r.l, [])
-        call add(lines[r.l], r.index)
-    endfor
+    let lines = self.lines_with_regions()
 
     "remove lines and indices without multiple regions
     let lines = filter(lines, 'len(v:val) > 1')
@@ -279,7 +319,7 @@ fun! s:Global.merge_regions(...) dict
         for i in indices
             while (n < max)
                 let i1 = indices[n] | let i2 = indices[n+1] | let n += 1
-                let this = s:Regions[i1] | let next = s:Regions[i2]
+                let this = s:R()[i1] | let next = s:R()[i2]
 
                 let overlap = ( this.B >= next.A ) && ( this.A <= next.A ) ||
                             \ ( next.B >= this.A ) && ( next.A <= this.A )

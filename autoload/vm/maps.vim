@@ -55,6 +55,7 @@ fun! vm#maps#start()
 
     nmap     <silent> <nowait> <buffer> <M-]>      <Plug>(VM-Rewrite-Last-Search)
     nmap     <silent> <nowait> <buffer> <c-x>]     <Plug>(VM-Rewrite-All-Search)
+    nmap     <silent> <nowait> <buffer> <c-x><F12> <Plug>(VM-Toggle-Debug)
 
     "utility
     nmap              <nowait> <buffer> <C-x>t     <Plug>(VM-Show-Regions-Text)

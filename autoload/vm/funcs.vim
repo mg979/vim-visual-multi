@@ -123,12 +123,13 @@ fun! s:Funcs.count_msg(force) dict
     elseif s:v.silence | return
     endif
 
+    let ix = s:v.debug? " ".s:V.Regions[s:v.index].index : ''
     let hl = 'Directory'
     let i = [' ', hl]
     let m1 = s:m1()
     let i3 = [' / ', hl]
     let m2 = s:m2()
-    let i2 = [' ['.s:v['index'].']  ', hl]
+    let i2 = [' ['.s:v['index'].ix.']  ', hl]
     let s = len(s:Regions)>1 ? 's.' : '.'
     let t = g:VM.extend_mode? ' region' : ' cursor'
     let t1 = [len(s:Regions).t.s.'   Current patterns: ', hl]

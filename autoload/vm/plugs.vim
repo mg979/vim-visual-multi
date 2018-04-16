@@ -26,6 +26,7 @@ fun! vm#plugs#init()
 
     nnoremap        <Plug>(VM-Toggle-Motions)          :call vm#maps#motions_toggle()<cr>
     nnoremap        <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline')<cr>
+    nnoremap        <Plug>(VM-Toggle-Debug)            :let b:VM_Selection.Vars.debug = !b:VM_Selection.Vars.debug<cr>
     nnoremap        <Plug>(VM-Toggle-Whole-Word)       :call b:VM_Selection.Funcs.toggle_option('whole_word')<cr>
     nnoremap        <Plug>(VM-Toggle-Only-This-Region) :call b:VM_Selection.Funcs.toggle_option('only_this_always')<cr>
     nnoremap        <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
