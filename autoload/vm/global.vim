@@ -38,12 +38,11 @@ endfun
 fun! s:Global.new_cursor() dict
     """Create a new cursor if there is't already a region."""
 
-    let r = self.is_region_at_pos('.')
-    if !empty(r) | return r | endif
-
-    let R = vm#region#new(1)
+    let R = self.is_region_at_pos('.')
+    if empty(R) | let R = vm#region#new(1) | endif
 
     let s:v.matches = getmatches()
+    call self.select_region(R.index)
     return R
 endfun
 

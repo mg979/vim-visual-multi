@@ -27,9 +27,16 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.process(...) dict
+    "Optional args:
+    "arg1: prefix for normal command
+    "arg2: 0 for recursive command
+
+    "redir @t
+    "silent nmap <buffer>
+    "redir END
     let size = s:size() | let change = 0
 
-    let cmd = a:0? "normal! ".a:1.s:cmd : "normal! ".s:cmd
+    let cmd = a:0? a:1."normal".(a:2? "! ":" ").s:cmd : "normal! ".s:cmd
     for r in s:R()
         call r.shift(change, change)
         call cursor(r.l, r.a)
@@ -152,15 +159,17 @@ fun! s:before_macro()
     let s:old_multiline = g:VM.multiline
     let g:VM.multiline
     call vm#maps#end()
+    if g:VM.motions_enabled | call vm#maps#motions(0, 1) | return 1 | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:after_macro()
+fun! s:after_macro(motions)
     let s:v.silence = 0 | let s:v.auto = 0
     let g:VM.multiline = s:old_multiline
 
     call vm#maps#start()
+    if a:motions | call vm#maps#motions(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -175,11 +184,11 @@ fun! s:Edit.run_macro() dict
         return | endif
 
     let s:cmd = "@".reg
-    call s:before_macro()
+    let motions = s:before_macro()
     call self.delete()
     call self.process()
     call self.post_process(0)
-    call s:after_macro()
+    call s:after_macro(motions)
     redraw!
 endfun
 

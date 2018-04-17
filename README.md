@@ -45,4 +45,4 @@ Another macro example that uses vim-sneak and vim-surround
 -------
 First editing functions: yank, delete, paste from register, paste block from yanked regions
 
-![Imgur](https://i.imgur.com/Uyqyux0.gif)
+![Imgur](https://i.imgur.com/0jRkVdp.gif)

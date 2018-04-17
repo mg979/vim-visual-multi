@@ -6,7 +6,7 @@ let s:find     = ['f', 'F', 't', 'T']
 let s:simple   = ['h', 'j', 'k', 'l', 'd', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M']
 
 let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
-let s:cx_maps  = ['t', 'm', '/', ']', 's', 'S']
+let s:cx_maps  = ['t', 'm', '/', ']', '}', 's', 'S', '<F12>']
 let s:alt_maps = ['j', 'k', 'J', '{', '}', ']']
 let s:leader   = ['@', '/', 'y']
 
@@ -88,7 +88,7 @@ fun! vm#maps#start()
     call s:hjkl()
 
     "select
-    nmap <silent> <nowait> <buffer> g               <Plug>(VM-Select-One-Inside)
+    nmap <silent>          <buffer> g               <Plug>(VM-Select-One-Inside)
     nmap <silent> <nowait> <buffer> G               <Plug>(VM-Select-All-Inside)
 
     "shrink/enlarge
@@ -110,8 +110,8 @@ fun! s:arrows()
 
     nmap     <silent> <nowait> <buffer> <C-Down>    <Plug>(VM-Find-Next)
     nmap     <silent> <nowait> <buffer> <C-Up>      <Plug>(VM-Find-Prev)
-    nmap     <silent> <nowait> <buffer> <Down>      <Plug>(VM-Goto-Next)
-    nmap     <silent> <nowait> <buffer> <Up>        <Plug>(VM-Goto-Prev)
+    nmap     <silent> <nowait> <buffer> <M-Down>      <Plug>(VM-Goto-Next)
+    nmap     <silent> <nowait> <buffer> <M-Up>        <Plug>(VM-Goto-Prev)
 
     nmap     <silent> <nowait> <buffer> <S-Down>    <Plug>(VM-Motion-j)
     nmap     <silent> <nowait> <buffer> <S-Up>      <Plug>(VM-Motion-k)
@@ -205,8 +205,8 @@ fun! s:arrows_end()
     nunmap <buffer> <M-C-Up>
     nunmap <buffer> <C-Down>
     nunmap <buffer> <C-Up>
-    nunmap <buffer> <Down>
-    nunmap <buffer> <Up>
+    nunmap <buffer> <M-Down>
+    nunmap <buffer> <M-Up>
     nunmap <buffer> <S-Right>
     nunmap <buffer> <S-Left>
     nunmap <buffer> <S-Down>

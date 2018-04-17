@@ -414,7 +414,7 @@ fun! vm#commands#shrink_or_enlarge(shrink, this)
     "Until I find a reliable way, it's a workaround
     if s:v.auto | return | endif
 
-    if s:Global.all_empty() | return | endif
+    if !s:X() | call vm#commands#change_mode(1) | endif
 
     let dir = s:v.direction
 

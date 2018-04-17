@@ -118,6 +118,12 @@ fun! s:m2()
     return [t, hl]
 endfun
 
+fun! s:m3()
+    let t = s:v.only_this_always? "O\+" : "O\-"
+    let hl = s:v.only_this_always? "Type" : "WarningMsg"
+    return [t, hl]
+endfun
+
 fun! s:Funcs.count_msg(force) dict
     if a:force         | let s:v.silence = 0
     elseif s:v.silence | return
@@ -131,14 +137,16 @@ fun! s:Funcs.count_msg(force) dict
     let hl = 'Directory'
     let i = [' ', hl]
     let m1 = s:m1()
-    let i3 = [' / ', hl]
+    let i2 = [' / ', hl]
     let m2 = s:m2()
-    let i2 = [' ['.s:v['index'].ix.']  ', hl]
+    let i3 = [' / ', hl]
+    let m3 = s:m3()
+    let i4 = [' ['.s:v['index'].ix.']  ', hl]
     let s = len(s:Regions)>1 ? 's.' : '.'
     let t = g:VM.extend_mode? ' region' : ' cursor'
     let t1 = [len(s:Regions).t.s.'   Current patterns: ', hl]
     let t2 = [string(s:v.search), 'Type']
-    call self.msg([i, m1, i3, m2, i2, t1, t2])
+    call self.msg([i, m1, i2, m2, i3, m3, i4, t1, t2])
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -188,9 +196,6 @@ fun! s:Funcs.toggle_option(option) dict
         "if !g:VM.multiline | call s:V.Global.split_lines() | endif
         return | endif
 
-    let s = "s:v.".a:option
-    exe "let" s "= !".s
-
     if a:option == 'whole_word'
         redraw!
         let s = s:v.search[0]
@@ -202,7 +207,12 @@ fun! s:Funcs.toggle_option(option) dict
             if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
             call s:Funcs.msg('Search ->  not whole word ->  Current patterns: '.string(s:v.search))
         endif
+        return
     endif
+
+    let s = "s:v.".a:option
+    exe "let" s "= !".s
+    redraw! | call b:VM_Selection.Funcs.count_msg(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
