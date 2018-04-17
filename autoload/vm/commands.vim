@@ -243,30 +243,14 @@ fun! s:skip()
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#commands#invert_direction()
-    """Invert direction and reselect region."""
-    if s:v.auto | return | endif
-
-    for r in s:Regions | let r.dir = !r.dir | endfor
-
-    "invert anchor
-    if s:v.direction
-        let s:v.direction = 0
-        for r in s:Regions | let r.k = r.b | let r.K = r.B | endfor
-    else
-        let s:v.direction = 1
-        for r in s:Regions | let r.k = r.a | let r.K = r.A | endfor
-    endif
-
-    call s:Global.update_highlight()
-    call s:Global.select_region(s:v.index)
+fun! s:no_regions()
+    if s:v.index == -1 | call s:Funcs.msg('No selected regions.') | return 1 | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav)
+    if s:no_regions() | return | endif
 
     "rewrite search patterns if moving with hjkl
     if s:simple() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
@@ -285,6 +269,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(skip, nav)
+    if s:no_regions() | return | endif
 
     "rewrite search patterns if moving with hjkl
     if s:simple() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
@@ -306,9 +291,14 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#skip(just_remove)
+    if s:no_regions() | return | endif
+
     if a:just_remove
         let r = s:Global.is_region_at_pos('.')
-        if !empty(r) | call r.remove() | endif
+        if !empty(r)
+            call r.remove()
+            let s:v.index = len(s:Regions)? (s:v.index > 0? s:v.index-1 : 0) : -1
+        endif
         call s:Funcs.count_msg(0)
 
     elseif s:v.nav_direction
@@ -316,6 +306,27 @@ fun! vm#commands#skip(just_remove)
     else
         call vm#commands#find_prev(1, 0)
     endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#invert_direction()
+    """Invert direction and reselect region."""
+    if s:v.auto | return | endif
+
+    for r in s:Regions | let r.dir = !r.dir | endfor
+
+    "invert anchor
+    if s:v.direction
+        let s:v.direction = 0
+        for r in s:Regions | let r.k = r.b | let r.K = r.B | endfor
+    else
+        let s:v.direction = 1
+        for r in s:Regions | let r.k = r.a | let r.K = r.A | endfor
+    endif
+
+    call s:Global.update_highlight()
+    call s:Global.select_region(s:v.index)
 endfun
 
 
@@ -328,7 +339,8 @@ let s:sublime = { -> !g:VM.is_active && g:VM_sublime_mappings }
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#motion(motion, this)
-    if s:sublime() | call s:init(0, 1, 1) | call s:Global.new_cursor() | endif
+    if s:sublime()    | call s:init(0, 1, 1) | call s:Global.new_cursor() | endif
+    if s:no_regions() | return               | endif
 
     let s:motion = a:motion
     if s:v.auto || ( !g:VM.multiline && s:vertical() )

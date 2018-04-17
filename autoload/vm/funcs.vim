@@ -76,9 +76,16 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.restore_regs() dict
-    let r = s:v.oldreg | let s = s:v.oldsearch
+fun! s:Funcs.restore_reg() dict
+    let r = s:v.oldreg
     call setreg(r[0], r[1], r[2])
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.restore_regs() dict
+    let s = s:v.oldsearch
+    call self.restore_reg()
     call setreg("/", s[0], s[1])
 endfun
 
@@ -123,6 +130,11 @@ fun! s:Funcs.count_msg(force) dict
     elseif s:v.silence | return
     endif
 
+    if s:v.index < 0
+        call self.msg('No selected regions.')
+        return | endif
+
+    echom s:v.index
     let ix = s:v.debug? " ".s:V.Regions[s:v.index].index : ''
     let hl = 'Directory'
     let i = [' ', hl]

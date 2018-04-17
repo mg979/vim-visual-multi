@@ -139,6 +139,7 @@ fun! s:Region.new(cursor, ...)
 
     call R.highlight()
     call s:Global.update_cursor_highlight()
+    call s:Funcs.restore_reg()
 
     return R
 endfun
@@ -151,8 +152,9 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region._a(...) dict
-    """Update r.a and r.l from the A offset. Optional A shift of n bytes.
+fun! s:Region.a_(...) dict
+    """Update r.a and r.l from the A offset.
+    """Can also be used to extend the region from the left side. ( <- a_|--| )
     let r = self
 
     if a:0 | let r.A += a:1 | endif
@@ -163,8 +165,9 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region._b() dict
-    """Update r.b and r.L from the B offset. Optional B shift of n bytes.
+fun! s:Region._b(...) dict
+    """Update r.b and r.L from the B offset.
+    """Can also be used to extend the region from the right side. ( |--|_b -> )
     let r = self
 
     if a:0 | let r.B += a:1 | endif
@@ -402,6 +405,8 @@ fun! s:Region.update_vars() dict
     let r.h       = r.L - r.l
     let r.txt     = s:X()? getreg(s:v.def_reg) : ''
     let r.pat     = r.pattern()
+
+    call s:Funcs.restore_reg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

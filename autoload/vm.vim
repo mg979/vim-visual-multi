@@ -22,15 +22,12 @@ fun! vm#init_buffer(empty, ...)
     let s:Regions      = s:V.Regions
 
     let s:V.Funcs      = vm#funcs#init()
-    let s:V.Search     = vm#search#init()
-    let s:V.Global     = vm#global#init()
-    let s:V.Edit       = vm#edit#init()
 
     "init search
     let s:v.def_reg          = s:V.Funcs.default_reg()
     let s:v.oldreg           = s:V.Funcs.get_reg()
     let s:v.oldsearch        = [getreg("/"), getregtype("/")]
-    if a:empty | let @/      = '' | endif
+    let @/                   = a:empty? '' : @/
 
     "store old vars
     let s:v.oldvirtual       = &virtualedit
@@ -52,6 +49,10 @@ fun! vm#init_buffer(empty, ...)
     let s:v.merge_to_beol    = 0
     let s:v.move_from_back   = 0
     let s:v.move_from_front  = 0
+
+    let s:V.Search     = vm#search#init()
+    let s:V.Global     = vm#global#init()
+    let s:V.Edit       = vm#edit#init()
 
     call vm#augroup_start()
     call vm#maps#start()

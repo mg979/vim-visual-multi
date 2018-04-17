@@ -47,7 +47,16 @@ fun! s:Global.new_cursor() dict
     return R
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Global.erase_regions() dict
+    """Clear all regions, but stay in visual-multi mode.
+
+    let s:V.Regions = []
+    call clearmatches()
+    let s:v.index = -1
+    call s:Funcs.count_msg(1)
+endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Highlight
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

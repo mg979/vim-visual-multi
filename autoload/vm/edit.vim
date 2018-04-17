@@ -13,9 +13,12 @@ fun! vm#edit#init()
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
 
-    let s:R        = { -> s:V.Regions }
-    let s:size     = { -> line2byte(line('$') + 1) }
+    let s:R       = { -> s:V.Regions }
+    let s:X       = { -> g:VM.extend_mode }
+    let s:size    = { -> line2byte(line('$') + 1) }
+
     let s:v.insert = 0
+    let s:v.registers = {}
     return s:Edit
 endfun
 
@@ -23,85 +26,14 @@ endfun
 " Region processing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.pre_process() dict
-    let s:W = []                  "list in which regions width will be stored
-    let s:X = g:VM.extend_mode    "current extend mode
-
-    "we'll process regions line by line, no matter the index
-    "if there are more regions in the same line, last ones must be edited first
-    "let R = s:Global.reorder_regions(0, s:v.index, 1)
-
-    let lines = s:Global.lines_with_regions(0)
-    "store selections widths before they are collapsed
-
-    "call s:Global.update_indices()
-    for r in s:R() | call add(s:W, s:X? r.w : 0) | endfor
-
-    "delete the selected text and change to cursor mode
-    if s:X
-        call self.delete()
-        call vm#commands#change_mode(1)
-        call s:Global.update_highlight()
-    endif
-endfun
-
-fun! s:Edit.process() dict
-    let s:replace_width = 0         "width of the replacement text
-    let change_for_ln   = 0         "counter for changes occurred in the same line
-
-    for r in s:R()
-        "first edit: run actual command and store length of entered text
-        if r.index == 0
-            let size = s:size()
-            call cursor(r.l, r.a)
-            exe "normal! ".s:cmd
-            let s:replace_width = s:size() - size
-        else
-            "subsequent cursors: adjust position if necessary, then run command
-            let prev = s:R()[r.index-1]
-
-            "if there are more regions in the same line, store the width changes,
-            "and adjust every cursor with the cumulative change for that line
-
-            if r.l == prev.l
-
-                let changed_width   = s:replace_width - s:W[prev.index]
-                let r.a            += changed_width + change_for_ln
-                let change_for_ln  += changed_width
-
-                call r.update_cursor(r.l, r.a)
-            else
-                let change_for_ln = 0
-            endif
-
-            call cursor(r.l, r.a)
-            exe "normal! ".s:cmd
-        endif
-    endfor
-endfun
-
-fun! s:Edit.post_process() dict
-
-    if s:X && !s:v.insert
-        for r in s:R()
-            let r.b += s:replace_width - 1
-        endfor
-        call s:Global.update_regions()
-    elseif s:v.insert
-        for r in s:R()
-            call r.update_cursor(r.l, r.a + s:replace_width)
-        endfor
-        call s:Global.update_regions()
-    endif
-endfun
-
-fun! s:Edit.delete() dict
+fun! s:Edit.process(...) dict
     let size = s:size() | let change = 0
 
+    let cmd = a:0? "normal! ".a:1.s:cmd : "normal! ".s:cmd
     for r in s:R()
         call r.shift(change, change)
         call cursor(r.l, r.a)
-        exe "normal! \"_d".r.w."l"
+        exe cmd
 
         "update changed size
         let change = s:size() - size
@@ -109,11 +41,92 @@ fun! s:Edit.delete() dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.post_process(reselect) dict
+    if a:reselect
+        if !s:X()      | call vm#commands#change_mode(1) |  endif
+        for r in s:R() | call r._b(s:W[r.index])         | endfor
+    endif
+    call s:Global.update_regions()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.delete() dict
+    """Delete the selected text and change to cursor mode.
+
+    if s:X()
+        let size = s:size() | let change = 0
+        for r in s:R()
+            call r.shift(change, change)
+            call cursor(r.l, r.a)
+            exe "normal! \"_d".r.w."l"
+
+            "update changed size
+            let change = s:size() - size
+        endfor
+        call vm#commands#change_mode(1)
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.block_paste(text) dict
+    let size = s:size() | let change = 0 | let text = copy(a:text)
+
+    for r in s:R()
+        if !empty(text)
+            call r.shift(change, change)
+            call cursor(r.l, r.a)
+            let s = remove(text, 0)
+            call s:Funcs.set_reg(s)
+            normal! P
+
+            "update changed size
+            let change = s:size() - size
+        else | break | endif
+    endfor
+    call s:Funcs.restore_reg()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.Xcmd(cmd) dict
-    call self.pre_process()
+fun! s:Edit.paste(block) dict
+    let reg = v:register
+    call self.delete()
+
+    if !a:block || !has_key(s:v.registers, reg)
+        let text = s:default_text()
+    else
+        let text = s:v.registers[reg]
+    endif
+
+    call self.block_paste(text)
+    let s:W = s:store_widths(text)
+    call self.post_process(1)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.yank(hard) dict
+    if !s:X() | call s:Funcs.msg('Not in cursor mode.') | return | endif
+
+    let text = []  | let maxw = 0
+    for r in s:R()
+        if len(r.txt) > maxw | let maxw = len(r.txt) | endif
+        call add(text, r.txt)
+    endfor
+
+    let s:v.registers[v:register] = text
+    call setreg(v:register, join(text, "\n"), "".maxw)
+
+    "overwrite the old saved register
+    if a:hard
+        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), "".maxw)]
+    endif
+    call s:Funcs.msg('Yanked the content of '.len(s:R()).' regions.')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -152,6 +165,37 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Edit.run_macro() dict
+    if s:count(v:count) | return | endif
+
+    call s:Funcs.msg('Macro register? ', 1)
+    let reg = nr2char(getchar())
+    if reg == "\<esc>"
+        call s:Funcs.msg('Macro aborted.')
+        return | endif
+
+    let s:cmd = "@".reg
+    call s:before_macro()
+    call self.delete()
+    call self.process()
+    call self.post_process(0)
+    call s:after_macro()
+    redraw!
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Special commands
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.surround(type)
+    if s:X()
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Misc functions
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:count(c)
     "forbid count
     if a:c > 1
@@ -164,27 +208,27 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_macro() dict
-    if s:count(v:count) | return | endif
-
-    call s:Funcs.msg('Macro register? ', 1)
-    let reg = nr2char(getchar())
-    if reg == "\<esc>"
-        call s:Funcs.msg('Macro aborted.')
-        return | endif
-
-    call s:before_macro()
-
-    let s:cmd = "@".reg
-    call self.pre_process()
-    call self.process()
-    call self.post_process()
-
-    call s:after_macro()
-    call s:Global.update_regions()
-    redraw!
+fun! s:default_text()
+    "fill the content to past with the default register
+    let text = []
+    for n in range(len(s:R())) | call add(text, getreg(s:v.def_reg)) | endfor
+    return text
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:store_widths(...)
+    "store regions widths in a list
+    let W = [] | let x = s:X()
+    let use_text = 0
+    let use_list = 0
 
+    if a:0
+        if type(a:1) == v:t_string | let text = len(a:1)-1 | let use_text = 1
+        else                       | let list = a:1        | let use_list = 1 | endif
+    endif
+
+    for r in s:R()
+        call add(W, use_text? text : use_list? len(list[r.index])-1 : r.w) | endfor
+    return W
+endfun

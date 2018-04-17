@@ -39,9 +39,9 @@ fun! vm#plugs#init()
 
     nnoremap        <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex()<cr>:call <SID>Mode()<cr>/
     nnoremap        <Plug>(VM-Show-Regions-Text)       :call b:VM_Selection.Funcs.regions_contents()<cr>
+    nnoremap        <Plug>(VM-Erase-Regions)           :call b:VM_Selection.Global.erase_regions()<cr>
     nnoremap        <Plug>(VM-Switch-Mode)             :call vm#commands#change_mode(0)<cr>
     nnoremap        <Plug>(VM-Reset)                   :call vm#reset()<cr>
-    nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro()<cr>
 
     nnoremap        <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction()<cr>
     nnoremap        <Plug>(VM-Goto-Next)               :call vm#commands#find_next(0, 1)<cr>
@@ -93,8 +93,21 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Motion-Shrink)           :call vm#commands#shrink_or_enlarge(1, 0)<cr>
     nnoremap        <Plug>(VM-Motion-Enlarge)          :call vm#commands#shrink_or_enlarge(0, 0)<cr>
 
-    nnoremap        <Plug>(VM-X-Edit-d)                :call b:VM_Selection.Edit.Xcmd('d')<cr>
+    "Edit commands
+    nnoremap <expr> <Plug>(VM-Edit-Delete)             <SID>Delete()
+    nnoremap        <Plug>(VM-Edit-Paste)              :call b:VM_Selection.Edit.paste(0)<cr>
+    nnoremap        <Plug>(VM-Edit-Paste-Block)        :call b:VM_Selection.Edit.paste(1)<cr>
+    nnoremap        <Plug>(VM-Edit-Yank)               :call b:VM_Selection.Edit.yank(0)<cr>
+    nnoremap        <Plug>(VM-Edit-Hard-Yank)          :call b:VM_Selection.Edit.yank(1)<cr>
+    nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro()<cr>
 
+    fun! <SID>Delete()
+        if g:VM.extend_mode
+            return ":call b:VM_Selection.Edit.delete()\<cr>"
+        else
+            return ""
+        endif
+    endfun
 
     fun! <SID>Mode()
         let mode = g:VM.extend_mode? ' (extend mode)' : ' (cursor mode)'

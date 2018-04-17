@@ -3,11 +3,12 @@ let s:NVIM = has('gui_running') || has('nvim')
 let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E']
 let s:signs    = ['$', '0', '^', '%']
 let s:find     = ['f', 'F', 't', 'T']
-let s:simple   = ['h', 'j', 'k', 'l', 'd', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M']
+let s:simple   = ['h', 'j', 'k', 'l', 'd', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M']
 
 let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
 let s:cx_maps  = ['t', 'm', '/', ']', 's', 'S']
 let s:alt_maps = ['j', 'k', 'J', '{', '}', ']']
+let s:leader   = ['@', '/', 'y']
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
@@ -25,7 +26,8 @@ fun! vm#maps#start()
     "basic mappings
     nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
     nmap     <silent> <nowait> <buffer> <Tab>      <Plug>(VM-Switch-Mode)
-    nmap     <silent> <nowait> <buffer> <BS>       <Plug>(VM-Toggle-Motions)
+    nmap     <silent> <nowait> <buffer> <BS>       <Plug>(VM-Erase-Regions)
+    nmap     <silent> <nowait> <buffer> <CR>       <Plug>(VM-Toggle-Motions)
     nmap     <silent> <nowait> <buffer> <leader>/  <Plug>(VM-Start-Regex-Search)
     nmap     <silent> <nowait> <buffer> <leader>@  <Plug>(VM-Run-Macro)
 
@@ -84,14 +86,18 @@ fun! vm#maps#start()
     call s:hjkl()
 
     "select
-    nmap <silent> <nowait> <buffer> g  <Plug>(VM-Select-One-Inside)
-    nmap <silent> <nowait> <buffer> G  <Plug>(VM-Select-All-Inside)
+    nmap <silent> <nowait> <buffer> g               <Plug>(VM-Select-One-Inside)
+    nmap <silent> <nowait> <buffer> G               <Plug>(VM-Select-All-Inside)
 
     "shrink/enlarge
-    nmap <silent> <nowait> <buffer> -  <Plug>(VM-Motion-Shrink)
-    nmap <silent> <nowait> <buffer> +  <Plug>(VM-Motion-Enlarge)
+    nmap <silent> <nowait> <buffer> -               <Plug>(VM-Motion-Shrink)
+    nmap <silent> <nowait> <buffer> +               <Plug>(VM-Motion-Enlarge)
 
-    nmap <silent> <nowait> <buffer> d  <Plug>(VM-X-Edit-d)
+    nmap <silent> <nowait> <buffer> d               <Plug>(VM-Edit-Delete)
+    nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-Paste)
+    nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-Paste-Block)
+    nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
+    nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Hard-Yank)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -171,13 +177,16 @@ fun! vm#maps#end()
         exe "nunmap <buffer> <C-x>".m
     endfor
 
+    for m in (s:leader)
+        exe "nunmap <buffer> <leader>".m
+    endfor
+
     call s:arrows_end()
 
     nunmap <buffer> <Tab>
     nunmap <buffer> <esc>
     nunmap <buffer> <BS>
-    nunmap <buffer> <leader>/
-    nunmap <buffer> <leader>@
+    nunmap <buffer> <CR>
 
     xunmap <buffer> *
     xunmap <buffer> #
