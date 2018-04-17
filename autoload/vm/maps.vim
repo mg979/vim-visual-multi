@@ -8,7 +8,7 @@ let s:simple   = ['h', 'j', 'k', 'l', 'd', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U
 let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
 let s:cx_maps  = ['t', 'm', '/', ']', '}', 's', 'S', '<F12>']
 let s:alt_maps = ['j', 'k', 'J', '{', '}', ']']
-let s:leader   = ['@', '/', 'y']
+let s:leader   = ['@', '/', 'y', 'p']
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
@@ -96,10 +96,12 @@ fun! vm#maps#start()
     nmap <silent> <nowait> <buffer> +               <Plug>(VM-Motion-Enlarge)
 
     nmap <silent> <nowait> <buffer> d               <Plug>(VM-Edit-Delete)
-    nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-Paste)
-    nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-Paste-Block)
+    nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-p-Paste-Block)
+    nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-P-Paste-Block)
     nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
-    nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Hard-Yank)
+    nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
+    nmap <silent> <nowait> <buffer> <leader>p       <Plug>(VM-Edit-p-Paste)
+    nmap <silent> <nowait> <buffer> <leader>P       <Plug>(VM-Edit-P-Paste)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -110,8 +112,8 @@ fun! s:arrows()
 
     nmap     <silent> <nowait> <buffer> <C-Down>    <Plug>(VM-Find-Next)
     nmap     <silent> <nowait> <buffer> <C-Up>      <Plug>(VM-Find-Prev)
-    nmap     <silent> <nowait> <buffer> <M-Down>      <Plug>(VM-Goto-Next)
-    nmap     <silent> <nowait> <buffer> <M-Up>        <Plug>(VM-Goto-Prev)
+    nmap     <silent> <nowait> <buffer> <M-Down>    <Plug>(VM-Goto-Next)
+    nmap     <silent> <nowait> <buffer> <M-Up>      <Plug>(VM-Goto-Prev)
 
     nmap     <silent> <nowait> <buffer> <S-Down>    <Plug>(VM-Motion-j)
     nmap     <silent> <nowait> <buffer> <S-Up>      <Plug>(VM-Motion-k)

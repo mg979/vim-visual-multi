@@ -17,8 +17,10 @@ fun! vm#edit#init()
     let s:X       = { -> g:VM.extend_mode }
     let s:size    = { -> line2byte(line('$') + 1) }
 
-    let s:v.insert = 0
-    let s:v.registers = {}
+    let s:v.insert     = 0
+    let s:v.registers  = {}
+    let s:extra_spaces = []
+
     return s:Edit
 endfun
 
@@ -49,24 +51,45 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.post_process(reselect) dict
+fun! s:Edit.post_process(reselect, shift) dict
     if a:reselect
         if !s:X()      | call vm#commands#change_mode(1) |  endif
-        for r in s:R() | call r._b(s:W[r.index])         | endfor
+        for r in s:R()
+            if a:shift
+                call r._b(s:W[r.index])
+                call r.shift(a:shift, a:shift)
+            else
+                call r._b(s:W[r.index])
+            endif
+        endfor
     endif
+
+    "remove extra spaces that may have been added
+    for line in s:extra_spaces
+        let l = getline(line)
+        if l[-1:] ==# ' ' | call setline(line, l[:-2]) | endif
+    endfor
+
     call s:Global.update_regions()
+    call s:Global.select_region_at_pos('.')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.delete() dict
     """Delete the selected text and change to cursor mode.
+    """Remember the lines that have been added an extra space, for later removal
 
     if s:X()
-        let size = s:size() | let change = 0
+        let size = s:size() | let change = 0 | let s:extra_spaces = []
         for r in s:R()
             call r.shift(change, change)
             call cursor(r.l, r.a)
+            let L = getline(r.L)
+            if s:v.auto || r.b == len(L)
+                call setline(r.L, L.' ')
+                call add(s:extra_spaces, r.L)
+            endif
             exe "normal! \"_d".r.w."l"
 
             "update changed size
@@ -78,7 +101,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.block_paste(text) dict
+fun! s:Edit.block_paste(before, text) dict
     let size = s:size() | let change = 0 | let text = copy(a:text)
 
     for r in s:R()
@@ -87,7 +110,10 @@ fun! s:Edit.block_paste(text) dict
             call cursor(r.l, r.a)
             let s = remove(text, 0)
             call s:Funcs.set_reg(s)
-            normal! P
+
+            if a:before | normal! P
+            else        | normal! p
+            endif
 
             "update changed size
             let change = s:size() - size
@@ -100,7 +126,7 @@ endfun
 " Commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.paste(block) dict
+fun! s:Edit.paste(before, block) dict
     let reg = v:register
     call self.delete()
 
@@ -110,9 +136,9 @@ fun! s:Edit.paste(block) dict
         let text = s:v.registers[reg]
     endif
 
-    call self.block_paste(text)
+    call self.block_paste(a:before, text)
     let s:W = s:store_widths(text)
-    call self.post_process(1)
+    call self.post_process(1, !a:before)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -187,7 +213,7 @@ fun! s:Edit.run_macro() dict
     let motions = s:before_macro()
     call self.delete()
     call self.process()
-    call self.post_process(0)
+    call self.post_process(0, 0)
     call s:after_macro(motions)
     redraw!
 endfun

@@ -54,6 +54,7 @@ fun! <SID>VM_Init()
     if g:VM_default_mappings
         nmap <silent> g<space>   <Plug>(VM-Add-Cursor-At-Pos)
         nmap <silent> g<cr>      <Plug>(VM-Add-Cursor-At-Word)
+        nmap <silent> g/         <Plug>(VM-Start-Regex-Search)
 
         nmap <silent> <M-A>      <Plug>(VM-Select-All)
         xmap <silent> <M-A>      <Plug>(VM-Select-All)

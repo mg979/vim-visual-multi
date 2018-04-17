@@ -196,22 +196,24 @@ fun! s:Funcs.toggle_option(option) dict
         "if !g:VM.multiline | call s:V.Global.split_lines() | endif
         return | endif
 
+    let s = "s:v.".a:option
+    exe "let" s "= !".s
+
     if a:option == 'whole_word'
         redraw!
         let s = s:v.search[0]
+        let wm = 'WarningMsg' | let L = 'Label'
 
         if s:v.whole_word
             if s[:1] != '\<' | let s:v.search[0] = '\<'.s.'\>' | endif
-            call s:Funcs.msg('Search ->  whole word     ->  Current patterns: '.string(s:v.search))
+            call s:Funcs.msg([['Search ->', wm], ['    whole word  ', L], ['  ->  Current patterns: ', wm], [string(s:v.search), L]])
         else
             if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
-            call s:Funcs.msg('Search ->  not whole word ->  Current patterns: '.string(s:v.search))
+            call s:Funcs.msg([['Search ->', wm], ['  not whole word ', L], [' ->  Current patterns: ', wm], [string(s:v.search), L]])
         endif
         return
     endif
 
-    let s = "s:v.".a:option
-    exe "let" s "= !".s
     redraw! | call b:VM_Selection.Funcs.count_msg(0)
 endfun
 

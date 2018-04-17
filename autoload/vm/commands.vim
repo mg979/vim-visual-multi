@@ -128,7 +128,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_by_regex(...)
-    if !g:VM.is_active | call vm#commands#regex_reset() | return | endif
+    call s:init(0, 0, 1)
 
     "store reg and position, to check if the search will be aborted
     let s:regex_pos = getpos('.')
@@ -343,8 +343,7 @@ fun! vm#commands#motion(motion, this, ...)
     if a:0 && !s:X()  | let g:VM.extend_mode = 1 | endif
 
     let s:motion = a:motion
-    if s:v.auto || ( !g:VM.multiline && s:vertical() )
-        let g:VM.multiline = 1 | endif
+    if !g:VM.multiline && s:vertical() | let g:VM.multiline = 1 | endif
     call s:call_motion(a:this)
 endfun
 

@@ -89,10 +89,12 @@ fun! vm#plugs#init()
 
     "Edit commands
     nnoremap <expr> <Plug>(VM-Edit-Delete)             <SID>Delete()
-    nnoremap        <Plug>(VM-Edit-Paste)              :call b:VM_Selection.Edit.paste(0)<cr>
-    nnoremap        <Plug>(VM-Edit-Paste-Block)        :call b:VM_Selection.Edit.paste(1)<cr>
-    nnoremap        <Plug>(VM-Edit-Yank)               :call b:VM_Selection.Edit.yank(0)<cr>
-    nnoremap        <Plug>(VM-Edit-Hard-Yank)          :call b:VM_Selection.Edit.yank(1)<cr>
+    nnoremap        <Plug>(VM-Edit-p-Paste-Block)      :call b:VM_Selection.Edit.paste(0, 1)<cr>
+    nnoremap        <Plug>(VM-Edit-P-Paste-Block)      :call b:VM_Selection.Edit.paste(1, 1)<cr>
+    nnoremap        <Plug>(VM-Edit-p-Paste)            :call b:VM_Selection.Edit.paste(0, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-P-Paste)            :call b:VM_Selection.Edit.paste(1, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-Yank)               :call b:VM_Selection.Edit.yank(1)<cr>
+    nnoremap        <Plug>(VM-Edit-Soft-Yank)          :call b:VM_Selection.Edit.yank(0)<cr>
     nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro()<cr>
 
     fun! <SID>Delete()

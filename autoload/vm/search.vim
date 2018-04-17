@@ -146,16 +146,16 @@ fun! s:Search.case() dict
     if &smartcase              "smartcase        ->  case sensitive
         set nosmartcase
         set noignorecase
-        call s:Funcs.msg('Search ->  case sensitive')
+        call s:Funcs.msg([['Search -> ', 'WarningMsg'], ['  case sensitive', 'Label']])
 
     elseif !&ignorecase        "case sensitive   ->  ignorecase
         set ignorecase
-        call s:Funcs.msg('Search ->  ignore case')
+        call s:Funcs.msg([['Search -> ', 'WarningMsg'], ['  ignore case', 'Label']])
 
     else                       "ignore case      ->  smartcase
         set smartcase
         set ignorecase
-        call s:Funcs.msg('Search ->  smartcase')
+        call s:Funcs.msg([['Search -> ', 'WarningMsg'], ['  smartcase', 'Label']])
     endif
 endfun
 
@@ -175,7 +175,9 @@ fun! s:pattern_found(t, i)
         let old = s:v.search[a:i]
         let s:v.search[a:i] = a:t
         call s:V.Global.update_region_patterns(a:t)
-        call s:Funcs.msg('Pattern updated:    '.old.'  ->  '.a:t)
+        let wm = 'WarningMsg' | let L = 'Label'
+        call s:Funcs.msg([['Pattern updated: ', wm ],
+                         \['   '.old, L], ['  ->  ', wm], [a:t."\n", L]], 1)
         return 1
     endif
 endfun
