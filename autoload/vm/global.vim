@@ -96,7 +96,7 @@ endfun
 fun! s:Global.update_regions() dict
     """Force regions update."""
 
-    for r in s:Regions | call r.update() | endfor
+    for r in s:R() | call r.update() | endfor
     call self.update_highlight()
 endfun
 
@@ -306,7 +306,7 @@ fun! s:Global.merge_regions(...) dict
     """MUST BE IMPROVED: Merge overlapping regions."""
 
     let storepos = getpos('.')
-    let lines = self.lines_with_regions()
+    let lines = self.lines_with_regions(0)
 
     "remove lines and indices without multiple regions
     let lines = filter(lines, 'len(v:val) > 1')

@@ -81,8 +81,8 @@ fun! s:Region.new(cursor, ...)
 
     let R.A_      = { -> line2byte(R.l) + R.a }
     let R.B_      = { -> line2byte(R.L) + R.b }
-    let R._a      = { -> byte2line(R.A) + R.a }
-    let R._b      = { -> byte2line(R.B) + R.b }
+    let R._l      = { -> byte2line(R.A) }
+    let R._L      = { -> byte2line(R.B) }
     let R.cur_ln  = { -> R.dir ? R.L : R.l }
     let R.cur_col = { -> R.dir ? R.b : R.a }
     let R.cur_Col = { -> R.cur_col() == R.b ? R.B : R.A }
@@ -147,6 +147,45 @@ endfun
 
 fun! s:Region.empty() dict
     return self.A == self.B
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region._a(...) dict
+    """Update r.a and r.l from the A offset. Optional A shift of n bytes.
+    let r = self
+
+    if a:0 | let r.A += a:1 | endif
+
+    let r.l = byte2line(r.A)
+    let r.a = r.A - line2byte(r.l)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region._b() dict
+    """Update r.b and r.L from the B offset. Optional B shift of n bytes.
+    let r = self
+
+    if a:0 | let r.B += a:1 | endif
+
+    let r.L = byte2line(r.B)
+    let r.b = r.B - line2byte(r.L)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region.shift(a, b) dict
+    """Update the region from the new offsets, with shift.
+    let r = self
+
+    let r.A += a:a
+    let r.B += a:b
+
+    let r.l = byte2line(r.A)
+    let r.a = r.A - line2byte(r.l)
+    let r.L = byte2line(r.B)
+    let r.b = r.B - line2byte(r.L)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -93,6 +93,9 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Motion-Shrink)           :call vm#commands#shrink_or_enlarge(1, 0)<cr>
     nnoremap        <Plug>(VM-Motion-Enlarge)          :call vm#commands#shrink_or_enlarge(0, 0)<cr>
 
+    nnoremap        <Plug>(VM-X-Edit-d)                :call b:VM_Selection.Edit.Xcmd('d')<cr>
+
+
     fun! <SID>Mode()
         let mode = g:VM.extend_mode? ' (extend mode)' : ' (cursor mode)'
         call b:VM_Selection.Funcs.msg('Enter regex'.mode.':')

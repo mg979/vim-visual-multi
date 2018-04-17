@@ -8,13 +8,14 @@ fun! vm#edit#init()
     let s:V       = b:VM_Selection
 
     let s:v       = s:V.Vars
-    let s:Regions = s:V.Regions
 
     let s:Global  = s:V.Global
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
 
-    let s:size    = { -> line2byte(line('$') + 1) }
+    let s:R        = { -> s:V.Regions }
+    let s:size     = { -> line2byte(line('$') + 1) }
+    let s:v.insert = 0
     return s:Edit
 endfun
 
@@ -30,18 +31,17 @@ fun! s:Edit.pre_process() dict
     "if there are more regions in the same line, last ones must be edited first
     "let R = s:Global.reorder_regions(0, s:v.index, 1)
 
+    let lines = s:Global.lines_with_regions(0)
     "store selections widths before they are collapsed
 
     "call s:Global.update_indices()
-    for r in s:Regions | call add(s:W, s:X? r.w : 0) | endfor
+    for r in s:R() | call add(s:W, s:X? r.w : 0) | endfor
 
     "delete the selected text and change to cursor mode
     if s:X
-        for r in s:Regions
-            call cursor(r.l, r.a)
-            exe "normal! \"_d".r.w."l"
-        endfor
+        call self.delete()
         call vm#commands#change_mode(1)
+        call s:Global.update_highlight()
     endif
 endfun
 
@@ -49,17 +49,16 @@ fun! s:Edit.process() dict
     let s:replace_width = 0         "width of the replacement text
     let change_for_ln   = 0         "counter for changes occurred in the same line
 
-    for r in s:V.Regions
+    for r in s:R()
         "first edit: run actual command and store length of entered text
         if r.index == 0
             let size = s:size()
             call cursor(r.l, r.a)
             exe "normal! ".s:cmd
             let s:replace_width = s:size() - size
-            echom s:replace_width
         else
             "subsequent cursors: adjust position if necessary, then run command
-            let prev = s:Regions[r.index-1]
+            let prev = s:R()[r.index-1]
 
             "if there are more regions in the same line, store the width changes,
             "and adjust every cursor with the cumulative change for that line
@@ -79,6 +78,42 @@ fun! s:Edit.process() dict
             exe "normal! ".s:cmd
         endif
     endfor
+endfun
+
+fun! s:Edit.post_process() dict
+
+    if s:X && !s:v.insert
+        for r in s:R()
+            let r.b += s:replace_width - 1
+        endfor
+        call s:Global.update_regions()
+    elseif s:v.insert
+        for r in s:R()
+            call r.update_cursor(r.l, r.a + s:replace_width)
+        endfor
+        call s:Global.update_regions()
+    endif
+endfun
+
+fun! s:Edit.delete() dict
+    let size = s:size() | let change = 0
+
+    for r in s:R()
+        call r.shift(change, change)
+        call cursor(r.l, r.a)
+        exe "normal! \"_d".r.w."l"
+
+        "update changed size
+        let change = s:size() - size
+    endfor
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Commands
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.Xcmd(cmd) dict
+    call self.pre_process()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -143,6 +178,7 @@ fun! s:Edit.run_macro() dict
     let s:cmd = "@".reg
     call self.pre_process()
     call self.process()
+    call self.post_process()
 
     call s:after_macro()
     call s:Global.update_regions()

@@ -3,7 +3,7 @@ let s:NVIM = has('gui_running') || has('nvim')
 let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E']
 let s:signs    = ['$', '0', '^', '%']
 let s:find     = ['f', 'F', 't', 'T']
-let s:simple   = ['h', 'j', 'k', 'l', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M']
+let s:simple   = ['h', 'j', 'k', 'l', 'd', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M']
 
 let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
 let s:cx_maps  = ['t', 'm', '/', ']', 's', 'S']
@@ -90,6 +90,8 @@ fun! vm#maps#start()
     "shrink/enlarge
     nmap <silent> <nowait> <buffer> -  <Plug>(VM-Motion-Shrink)
     nmap <silent> <nowait> <buffer> +  <Plug>(VM-Motion-Enlarge)
+
+    nmap <silent> <nowait> <buffer> d  <Plug>(VM-X-Edit-d)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
