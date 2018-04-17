@@ -91,13 +91,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.get_pattern(t) dict
-    return substitute(escape(a:t, '\/.*$^~[]()'), "\n", '\\n', "g")
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-
 fun! s:Funcs.msg(text, ...) dict
     if !s:v.silence || a:0
         if type(a:text) == v:t_string
@@ -134,8 +127,7 @@ fun! s:Funcs.count_msg(force) dict
         call self.msg('No selected regions.')
         return | endif
 
-    echom s:v.index
-    let ix = s:v.debug? " ".s:V.Regions[s:v.index].index : ''
+    let ix = g:VM_debug? " ".s:V.Regions[s:v.index].index : ''
     let hl = 'Directory'
     let i = [' ', hl]
     let m1 = s:m1()

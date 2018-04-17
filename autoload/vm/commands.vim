@@ -28,7 +28,7 @@ endfun
 
 fun! vm#commands#change_mode(silent)
     let g:VM.extend_mode = !s:X()
-    if !a:silent | let s:v.silence = 0 | endif
+    let s:v.silence = a:silent
 
     if s:X()
         call s:Funcs.msg('Switched to Extend Mode')
@@ -56,13 +56,12 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#add_cursor_at_word(yank, search)
-    call s:check_extend_default(0)
+    call s:init(0, 1, 0)
 
-    if a:yank | call s:yank(0) | endif
-    keepjumps normal! `[
-    call s:Global.new_cursor()
-
+    if a:yank   | call s:yank(0)      | exe "keepjumps normal! `[" | endif
     if a:search | call s:Search.add() | endif
+
+    call s:Global.new_cursor()
     call s:Funcs.count_msg(1)
 endfun
 
@@ -216,7 +215,7 @@ fun! s:get_next(n)
         call s:Global.get_region()
         call s:Funcs.count_msg(0)
     else
-        silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
+        silent exe "keepjumps normal! ".a:n."g".a:n."y`["
         call vm#commands#add_cursor_at_word(0, 0)
     endif
     let s:v.nav_direction = a:n ==# 'n'? 1 : 0
@@ -338,9 +337,10 @@ let s:sublime = { -> !g:VM.is_active && g:VM_sublime_mappings }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#motion(motion, this)
-    if s:sublime()    | call s:init(0, 1, 1) | call s:Global.new_cursor() | endif
-    if s:no_regions() | return               | endif
+fun! vm#commands#motion(motion, this, ...)
+    if s:sublime()    | call s:init(0, 1, 1)     | call s:Global.new_cursor() | endif
+    if s:no_regions() | return                   | endif
+    if a:0 && !s:X()  | let g:VM.extend_mode = 1 | endif
 
     let s:motion = a:motion
     if s:v.auto || ( !g:VM.multiline && s:vertical() )
@@ -357,10 +357,12 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#end_back(fast, this)
-    if s:sublime() | call s:init(0, 1, 1) | call s:Global.new_cursor() | endif
+fun! vm#commands#end_back(fast, this, ...)
+    if s:sublime()    | call s:init(0, 1, 1)     | call s:Global.new_cursor() | endif
+    if s:no_regions() | return                   | endif
+    if a:0 && !s:X()  | let g:VM.extend_mode = 1 | endif
 
-    let s:motion = a:fast? 'BBE' : 'bbbe'
+    let s:motion = a:fast? 'BBW' : 'bbbe'
     call s:call_motion(a:this)
 endfun
 

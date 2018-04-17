@@ -134,7 +134,7 @@ fun! s:Region.new(cursor, ...)
         let R.k     = R.a
         let R.K     = R.A
         let R.txt   = getline(R.l)[R._a():R._b()]
-        let R.pat   = s:Funcs.get_pattern(R.txt)
+        let R.pat   = s:Search.escape_pattern(R.txt)
     endif
 
     call R.highlight()

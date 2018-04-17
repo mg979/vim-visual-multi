@@ -40,10 +40,10 @@ fun! vm#maps#start()
     nnoremap <silent> <nowait> <buffer> N          N
 
     "movement / selection
-    nmap     <silent> <nowait> <buffer> }          <Plug>(VM-Find-Next)
-    nmap     <silent> <nowait> <buffer> {          <Plug>(VM-Find-Prev)
-    nmap     <silent> <nowait> <buffer> ]          <Plug>(VM-Goto-Next)
-    nmap     <silent> <nowait> <buffer> [          <Plug>(VM-Goto-Prev)
+    nmap     <silent> <nowait> <buffer> ]          <Plug>(VM-Find-Next)
+    nmap     <silent> <nowait> <buffer> [          <Plug>(VM-Find-Prev)
+    nmap     <silent> <nowait> <buffer> }          <Plug>(VM-Goto-Next)
+    nmap     <silent> <nowait> <buffer> {          <Plug>(VM-Goto-Prev)
 
     nmap     <silent> <nowait> <buffer> *          <Plug>(VM-Star)
     nmap     <silent> <nowait> <buffer> #          <Plug>(VM-Hash)
@@ -55,16 +55,18 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> <S-End>    <Plug>(VM-Merge-To-Eol)
     nmap     <silent> <nowait> <buffer> <S-Home>   <Plug>(VM-Merge-To-Bol)
 
+    "search
+    nmap     <silent> <nowait> <buffer> <c-x>]     <Plug>(VM-Add-Search)
+    nmap     <silent> <nowait> <buffer> <C-x>/     <Plug>(VM-Read-From-Search)
+    nmap     <silent> <nowait> <buffer> <c-x>}     <Plug>(VM-Rewrite-All-Search)
     nmap     <silent> <nowait> <buffer> <M-]>      <Plug>(VM-Rewrite-Last-Search)
-    nmap     <silent> <nowait> <buffer> <c-x>]     <Plug>(VM-Rewrite-All-Search)
-    nmap     <silent> <nowait> <buffer> <c-x><F12> <Plug>(VM-Toggle-Debug)
 
     "utility
     nmap              <nowait> <buffer> <C-x>t     <Plug>(VM-Show-Regions-Text)
     nmap     <silent> <nowait> <buffer> <C-x>m     <Plug>(VM-Merge-Regions)
-    nmap     <silent> <nowait> <buffer> <C-x>/     <Plug>(VM-Read-From-Search)
     nmap     <silent> <nowait> <buffer> <C-x>s     <Plug>(VM-Remove-Search)
     nmap     <silent> <nowait> <buffer> <C-x>S     <Plug>(VM-Remove-Search-Regions)
+    nmap     <silent> <nowait> <buffer> <c-x><F12> <Plug>(VM-Toggle-Debug)
 
     "ctrl
     nmap     <silent> <nowait> <buffer> <c-c>      <Plug>(VM-Case-Setting)
@@ -108,19 +110,19 @@ fun! s:arrows()
 
     nmap     <silent> <nowait> <buffer> <C-Down>    <Plug>(VM-Find-Next)
     nmap     <silent> <nowait> <buffer> <C-Up>      <Plug>(VM-Find-Prev)
-    nmap     <silent> <nowait> <buffer> <C-S-Down>  <Plug>(VM-Goto-Next)
-    nmap     <silent> <nowait> <buffer> <C-S-Up>    <Plug>(VM-Goto-Prev)
+    nmap     <silent> <nowait> <buffer> <Down>      <Plug>(VM-Goto-Next)
+    nmap     <silent> <nowait> <buffer> <Up>        <Plug>(VM-Goto-Prev)
 
     nmap     <silent> <nowait> <buffer> <S-Down>    <Plug>(VM-Motion-j)
     nmap     <silent> <nowait> <buffer> <S-Up>      <Plug>(VM-Motion-k)
     nmap     <silent> <nowait> <buffer> <S-Right>   <Plug>(VM-Motion-l)
     nmap     <silent> <nowait> <buffer> <S-Left>    <Plug>(VM-Motion-h)
 
-    nmap     <silent> <nowait> <buffer> <C-Right>   <Plug>(VM-Motion-e)
+    nmap     <silent> <nowait> <buffer> <C-Right>   <Plug>(VM-Select-e)
     nmap     <silent> <nowait> <buffer> <C-Left>    <Plug>(VM-End-Back)
-    nmap     <silent> <nowait> <buffer> <C-S-Right> <Plug>(VM-Motion-w)
-    nmap     <silent> <nowait> <buffer> <C-S-Left>  <Plug>(VM-Motion-b)
-    nmap     <silent> <nowait> <buffer> <M-C-Right> <Plug>(VM-Motion-E)
+    nmap     <silent> <nowait> <buffer> <C-S-Right> <Plug>(VM-Select-w)
+    nmap     <silent> <nowait> <buffer> <C-S-Left>  <Plug>(VM-Select-b)
+    nmap     <silent> <nowait> <buffer> <M-C-Right> <Plug>(VM-Select-E)
     nmap     <silent> <nowait> <buffer> <M-C-Left>  <Plug>(VM-Fast-Back)
 endfun
 
@@ -203,8 +205,8 @@ fun! s:arrows_end()
     nunmap <buffer> <M-C-Up>
     nunmap <buffer> <C-Down>
     nunmap <buffer> <C-Up>
-    nunmap <buffer> <C-S-Down>
-    nunmap <buffer> <C-S-Up>
+    nunmap <buffer> <Down>
+    nunmap <buffer> <Up>
     nunmap <buffer> <S-Right>
     nunmap <buffer> <S-Left>
     nunmap <buffer> <S-Down>

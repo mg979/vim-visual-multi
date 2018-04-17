@@ -45,9 +45,9 @@ fun! <SID>VM_Init()
         nmap <silent> <S-Up>      <Plug>(VM-Motion-k)
         nmap <silent> <S-Right>   <Plug>(VM-Motion-l)
         nmap <silent> <S-Left>    <Plug>(VM-Motion-h)
-        nmap <silent> <C-S-Right> <Plug>(VM-Motion-w)
-        nmap <silent> <C-S-Left>  <Plug>(VM-Motion-b)
-        nmap <silent> <M-C-Right> <Plug>(VM-Motion-E)
+        nmap <silent> <C-S-Right> <Plug>(VM-Select-w)
+        nmap <silent> <C-S-Left>  <Plug>(VM-Select-b)
+        nmap <silent> <M-C-Right> <Plug>(VM-Select-E)
         nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
     endif
 

@@ -23,10 +23,10 @@ let s:Search = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:pattern(register, regex)
+fun! s:Search.get_pattern(register, regex) dict
     let t = eval('@'.a:register)
     if !a:regex
-        let t = s:Funcs.get_pattern(t)
+        let t = self.escape_pattern(t)
         if s:v.whole_word | let t = '\<'.t.'\>' | endif | endif
     return t
 endfun
@@ -48,16 +48,17 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.add() dict
+fun! s:Search.add(...) dict
     """Add a new search pattern."
-    call s:update_search(s:pattern(s:v.def_reg, 0))
+    let pat = a:0? self.escape_pattern(a:1) : self.get_pattern(s:v.def_reg, 0)
+    call s:update_search(pat)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Search.get_slash_reg() dict
     """Get pattern from current "/" register."
-    call s:update_search(s:pattern('/', 1))
+    call s:update_search(self.get_pattern('/', 1))
     call s:Funcs.count_msg(1)
 endfun
 
@@ -134,6 +135,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Search.escape_pattern(t) dict
+    return substitute(escape(a:t, '\/.*$^~[]()'), "\n", '\\n', "g")
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
 fun! s:Search.case() dict
     if &smartcase              "smartcase        ->  case sensitive
         set nosmartcase
@@ -175,11 +183,11 @@ endfun
 fun! s:Search.rewrite(last) dict
     let r = s:V.Global.is_region_at_pos('.') | if empty(r) | return | endif
 
-    let t = s:Funcs.get_pattern(r.txt)
+    let t = self.escape_pattern(r.txt)
 
     if a:last
         "add a new pattern if not found
-        if !s:pattern_found(t, 0) | call self.add() | endif
+        if !s:pattern_found(t, 0) | call self.add(t) | endif
     else
         "rewrite if found among any pattern, else do nothing
         for i in range ( len(s:v.search) )

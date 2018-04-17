@@ -120,13 +120,13 @@ fun! s:Edit.yank(hard) dict
     endfor
 
     let s:v.registers[v:register] = text
-    call setreg(v:register, join(text, "\n"), "".maxw)
+    call setreg(v:register, join(text, "\n"), "b".maxw)
 
     "overwrite the old saved register
     if a:hard
-        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), "".maxw)]
+        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), "b".maxw]
     endif
-    call s:Funcs.msg('Yanked the content of '.len(s:R()).' regions.')
+    call s:Funcs.msg('Yanked the content of '.len(s:R()).' regions.', 1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

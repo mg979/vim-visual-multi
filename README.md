@@ -41,3 +41,8 @@ Macros. Shorter lines are skipped when adding cursors above/below.
 Another macro example that uses vim-sneak and vim-surround
 
 ![Imgur](https://i.imgur.com/Uyqyux0.gif)
+
+-------
+First editing functions: yank, delete, paste from register, paste block from yanked regions
+
+![Imgur](https://i.imgur.com/Uyqyux0.gif)
