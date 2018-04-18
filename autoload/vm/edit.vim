@@ -33,12 +33,14 @@ fun! s:Edit.process(...) dict
     "arg1: prefix for normal command
     "arg2: 0 for recursive command
 
-    "redir @t
-    "silent nmap <buffer>
-    "redir END
+    redir @t
+    silent nmap <buffer>
+    redir END
     let size = s:size() | let change = 0
 
-    let cmd = a:0? a:1."normal".(a:2? "! ":" ").s:cmd : "normal! ".s:cmd
+    let cmd = a:0? (a:1."normal".(a:2? "! ":" ").s:cmd)
+            \    : ("normal! ".s:cmd)
+
     for r in s:R()
         call r.shift(change, change)
         call cursor(r.l, r.a)
@@ -144,7 +146,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.yank(hard) dict
-    if !s:X() | call s:Funcs.msg('Not in cursor mode.') | return | endif
+    if !s:X() | call s:Funcs.msg('Not in cursor mode.', 0) | return | endif
 
     let text = []  | let maxw = 0
     for r in s:R()
@@ -171,7 +173,7 @@ fun! s:Edit.run_ex() dict
 
     let cmd = input('Ex command? ')
     if cmd == "\<esc>"
-        call s:Funcs.msg('Command aborted.')
+        call s:Funcs.msg('Command aborted.', 0)
         return | endif
 
 endfun
@@ -200,18 +202,21 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_macro() dict
+fun! s:Edit.run_macro(replace) dict
     if s:count(v:count) | return | endif
 
     call s:Funcs.msg('Macro register? ', 1)
     let reg = nr2char(getchar())
     if reg == "\<esc>"
-        call s:Funcs.msg('Macro aborted.')
+        call s:Funcs.msg('Macro aborted.', 0)
         return | endif
 
     let s:cmd = "@".reg
     let motions = s:before_macro()
-    call self.delete()
+
+    if a:replace | call self.delete()
+    elseif s:X() | call vm#commands#change_mode(1) | endif
+
     call self.process()
     call self.post_process(0, 0)
     call s:after_macro(motions)
@@ -235,7 +240,7 @@ fun! s:count(c)
     "forbid count
     if a:c > 1
         if !g:VM.is_active | return 1 | endif
-        call s:Funcs.msg('Count not allowed.')
+        call s:Funcs.msg('Count not allowed.', 0)
         call vm#reset()
         return 1
     endif

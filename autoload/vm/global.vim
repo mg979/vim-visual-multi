@@ -171,6 +171,12 @@ fun! s:Global.update_indices() dict
         let r.index = i
         let i += 1
     endfor
+    let nr = len(s:R())
+    if nr && (s:v.index >= nr || s:v.index == -1)
+        let s:v.index = 0
+    elseif !nr
+        let s:v.index = -1
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

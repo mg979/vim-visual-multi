@@ -64,7 +64,7 @@ fun! vm#init_buffer(empty, ...)
     let g:VM.is_active = 1
     let g:VM.multiline = 0
 
-    call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.\n")
+    call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.\n", 0)
 
     return s:V
 endfun
@@ -88,7 +88,7 @@ fun! vm#reset(...)
     let s:v.silence = 0
 
     "exiting manually
-    if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.') | endif
+    if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif
 
     call vm#augroup_end()
     call clearmatches()

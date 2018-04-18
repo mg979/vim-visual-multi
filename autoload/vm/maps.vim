@@ -9,6 +9,7 @@ let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
 let s:cx_maps  = ['t', 'm', '/', ']', '}', 's', 'S', '<F12>']
 let s:alt_maps = ['j', 'k', 'J', '{', '}', ']']
 let s:leader   = ['@', '/', 'y', 'p']
+let s:leader2  = ['@']
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
@@ -96,12 +97,24 @@ fun! vm#maps#start()
     nmap <silent> <nowait> <buffer> +               <Plug>(VM-Motion-Enlarge)
 
     nmap <silent> <nowait> <buffer> d               <Plug>(VM-Edit-Delete)
-    nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-p-Paste-Block)
-    nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-P-Paste-Block)
     nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
     nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
-    nmap <silent> <nowait> <buffer> <leader>p       <Plug>(VM-Edit-p-Paste)
-    nmap <silent> <nowait> <buffer> <leader>P       <Plug>(VM-Edit-P-Paste)
+
+    if g:VM_invert_paste_behaviour
+        nmap <silent> <nowait> <buffer> P           <Plug>(VM-Edit-p-Paste-Block)
+        nmap <silent> <nowait> <buffer> p           <Plug>(VM-Edit-P-Paste-Block)
+        nmap <silent> <nowait> <buffer> <leader>P   <Plug>(VM-Edit-p-Paste)
+        nmap <silent> <nowait> <buffer> <leader>p   <Plug>(VM-Edit-P-Paste)
+    else
+        nmap <silent> <nowait> <buffer> p           <Plug>(VM-Edit-p-Paste-Block)
+        nmap <silent> <nowait> <buffer> P           <Plug>(VM-Edit-P-Paste-Block)
+        nmap <silent> <nowait> <buffer> <leader>p   <Plug>(VM-Edit-p-Paste)
+        nmap <silent> <nowait> <buffer> <leader>P   <Plug>(VM-Edit-P-Paste)
+    endif
+
+    "double leader
+    nmap     <silent> <nowait> <buffer> <leader><leader>@ <Plug>(VM-Run-Macro-Replace)
+
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -183,6 +196,10 @@ fun! vm#maps#end()
 
     for m in (s:leader)
         exe "nunmap <buffer> <leader>".m
+    endfor
+
+    for m in (s:leader2)
+        exe "nunmap <buffer> <leader><leader>".m
     endfor
 
     call s:arrows_end()

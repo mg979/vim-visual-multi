@@ -95,7 +95,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-P-Paste)            :call b:VM_Selection.Edit.paste(1, 0)<cr>
     nnoremap        <Plug>(VM-Edit-Yank)               :call b:VM_Selection.Edit.yank(1)<cr>
     nnoremap        <Plug>(VM-Edit-Soft-Yank)          :call b:VM_Selection.Edit.yank(0)<cr>
-    nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro()<cr>
+    nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
+    nnoremap        <Plug>(VM-Run-Macro-Replace)       :call b:VM_Selection.Edit.run_macro(1)<cr>
 
     fun! <SID>Delete()
         if g:VM.extend_mode
@@ -107,7 +108,7 @@ fun! vm#plugs#init()
 
     fun! <SID>Mode()
         let mode = g:VM.extend_mode? ' (extend mode)' : ' (cursor mode)'
-        call b:VM_Selection.Funcs.msg('Enter regex'.mode.':')
+        call b:VM_Selection.Funcs.msg('Enter regex'.mode.':', 0)
     endfun
 
     let remaps = g:VM_custom_remaps

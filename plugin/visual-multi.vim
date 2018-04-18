@@ -21,6 +21,7 @@ fun! <SID>VM_Init()
     let g:VM_extend_by_default                = get(g:, 'VM_extend_by_default', 0)
     let g:VM_sublime_mappings                 = get(g:, 'VM_sublime_mappings', 1)
     let g:VM_custom_mappings                  = get(g:, 'VM_custom_mappings', 0)
+    let g:VM_invert_paste_behaviour           = get(g:, 'VM_invert_paste_behaviour', 0)
     let g:VM_keep_collapsed_while_moving_back = get(g:, 'VM_keep_collapsed_while_moving_back', 1)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -31,10 +31,10 @@ fun! vm#commands#change_mode(silent)
     let s:v.silence = a:silent
 
     if s:X()
-        call s:Funcs.msg('Switched to Extend Mode')
+        call s:Funcs.msg("Switched to Extend Mode\n", 0)
         call s:Global.update_regions()
     else
-        call s:Funcs.msg('Switched to Cursor Mode')
+        call s:Funcs.msg("Switched to Cursor Mode\n", 0)
         call s:Global.collapse_regions()
     endif
     call s:Funcs.count_msg(0)
@@ -109,7 +109,7 @@ endfun
 
 fun! vm#commands#regex_abort()
     let @/ = s:regex_reg
-    call s:Funcs.msg('Regex search aborted.') | call s:Funcs.count_msg(1)
+    call s:Funcs.msg('Regex search aborted.', 0) | call s:Funcs.count_msg(1)
     call setpos('.', s:regex_pos)
     call vm#commands#regex_reset()
 endfun
@@ -232,7 +232,7 @@ fun! s:navigate(force, dir)
         let i = a:dir? s:v.index+1 : s:v.index-1
         call s:Global.select_region(i)
         "redraw!
-        call s:Funcs.count_msg(0)
+        call s:Funcs.count_msg(1)
         return 1
     endif
 endfun
@@ -245,7 +245,7 @@ fun! s:skip()
 endfun
 
 fun! s:no_regions()
-    if s:v.index == -1 | call s:Funcs.msg('No selected regions.') | return 1 | endif
+    if s:v.index == -1 | call s:Funcs.msg('No selected regions.', 0) | return 1 | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

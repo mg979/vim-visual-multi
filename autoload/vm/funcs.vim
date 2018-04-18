@@ -50,6 +50,12 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Funcs.lastcol(line) dict
+    return len(getline(a:line))
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Funcs.default_reg() dict
     let clipboard_flags = split(&clipboard, ',')
     if index(clipboard_flags, 'unnamedplus') >= 0
@@ -91,19 +97,19 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.msg(text, ...) dict
-    if !s:v.silence || a:0
-        if type(a:text) == v:t_string
-            exe "echohl" g:VM_Message_hl
-            echo a:text
-            echohl None | return | endif
+fun! s:Funcs.msg(text, force) dict
+    if s:v.silence && !a:force | return | endif
 
-        for txt in a:text
-            exe "echohl ".txt[1]
-            echon txt[0]
-            echohl None
-        endfor
-    endif
+    if type(a:text) == v:t_string
+        exe "echohl" g:VM_Message_hl
+        echo a:text
+        echohl None | return | endif
+
+    for txt in a:text
+        exe "echohl ".txt[1]
+        echon txt[0]
+        echohl None
+    endfor
 endfun
 
 fun! s:m1()
@@ -125,9 +131,7 @@ fun! s:m3()
 endfun
 
 fun! s:Funcs.count_msg(force) dict
-    if a:force         | let s:v.silence = 0
-    elseif s:v.silence | return
-    endif
+    if s:v.silence && !a:force | return | endif
 
     if s:v.index < 0
         call self.msg('No selected regions.')
@@ -146,7 +150,7 @@ fun! s:Funcs.count_msg(force) dict
     let t = g:VM.extend_mode? ' region' : ' cursor'
     let t1 = [len(s:Regions).t.s.'   Current patterns: ', hl]
     let t2 = [string(s:v.search), 'Type']
-    call self.msg([i, m1, i2, m2, i3, m3, i4, t1, t2])
+    call self.msg([i, m1, i2, m2, i3, m3, i4, t1, t2], a:force)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -206,10 +210,10 @@ fun! s:Funcs.toggle_option(option) dict
 
         if s:v.whole_word
             if s[:1] != '\<' | let s:v.search[0] = '\<'.s.'\>' | endif
-            call s:Funcs.msg([['Search ->', wm], ['    whole word  ', L], ['  ->  Current patterns: ', wm], [string(s:v.search), L]])
+            call s:Funcs.msg([['Search ->', wm], ['    whole word  ', L], ['  ->  Current patterns: ', wm], [string(s:v.search), L]], 0)
         else
             if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
-            call s:Funcs.msg([['Search ->', wm], ['  not whole word ', L], [' ->  Current patterns: ', wm], [string(s:v.search), L]])
+            call s:Funcs.msg([['Search ->', wm], ['  not whole word ', L], [' ->  Current patterns: ', wm], [string(s:v.search), L]], 0)
         endif
         return
     endif

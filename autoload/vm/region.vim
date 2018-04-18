@@ -9,6 +9,7 @@ fun! vm#region#init()
 
     let s:X    = { -> g:VM.extend_mode }
     let s:Byte = { pos -> s:Funcs.pos2byte(pos) }
+    let s:lcol = { ln  -> s:Funcs.lastcol(ln) }
 endfun
 
 
@@ -29,9 +30,29 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#region#new(cursor, ...)
-    if !a:0 | let R = s:Region.new(a:cursor)
-    else    | let R = s:Region.new(a:cursor, a:1, a:2, a:3, a:4)
+
+    "----------------------------------------------------------------------
+
+    if a:0
+        if a:0 == 2             "making a new region from offsets
+            let a = byte2line(a:1) | let c = a:1 - a
+            let b = byte2line(a:2) | let d = a:2 - b
+
+        else                    "making a new region from positions
+            let a = a:1 | let b = a:2 | let c = a:3 | let d = a:4
+        endif | endif
+
+    "----------------------------------------------------------------------
+
+    let cursor = a:cursor || ( a:0 && c==d && a==b )          "cursor or region?
+
+    if !g:VM.is_active | call vm#init_buffer(cursor) | endif  "activate if needed
+
+    if !a:0 | let R = s:Region.new(cursor)                    "create region
+    else    | let R = s:Region.new(cursor, a, b, c, d)
     endif
+
+    "----------------------------------------------------------------------
 
     "update region index and ID count
     let s:v.index = R.index | let s:v.ID += 1
@@ -43,7 +64,7 @@ fun! vm#region#new(cursor, ...)
         let i = 0
         for r in s:Regions
             if r.A > R.A
-                call insert(s:Regions, R, r.index)
+                call insert(s:Regions, R, i)
                 break
             endif
             let i += 1
@@ -76,7 +97,7 @@ fun! s:Region.new(cursor, ...)
 
     let R         = copy(self)
     let R.index   = len(s:Regions)
-    let R.dir     = 1
+    let R.dir     = s:v.direction
     let R.id      = s:v.ID + 1
 
     let R.A_      = { -> line2byte(R.l) + R.a }
@@ -133,7 +154,7 @@ fun! s:Region.new(cursor, ...)
         let R.h     = R.L - R.l
         let R.k     = R.a
         let R.K     = R.A
-        let R.txt   = getline(R.l)[R._a():R._b()]
+        let R.txt   = R.get_text()
         let R.pat   = s:Search.escape_pattern(R.txt)
     endif
 
@@ -161,6 +182,7 @@ fun! s:Region.a_(...) dict
 
     let r.l = byte2line(r.A)
     let r.a = r.A - line2byte(r.l)
+    return r.a
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -174,6 +196,7 @@ fun! s:Region._b(...) dict
 
     let r.L = byte2line(r.B)
     let r.b = r.B - line2byte(r.L)
+    return r.b
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -189,6 +212,7 @@ fun! s:Region.shift(a, b) dict
     let r.a = r.A - line2byte(r.l)
     let r.L = byte2line(r.B)
     let r.b = r.B - line2byte(r.L)
+    return [r.l, r.L, r.a, r.b]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -210,6 +234,21 @@ fun! s:Region.remove() dict
     let R = remove(s:Regions, i)
     call s:Global.update_indices()
     return R
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region.get_text() dict
+    """INCOMPLETE: Get text content between A and B offsets.
+    let r = self
+
+    if r.h == 0 | return getline(r.l)[r.a-1:r.b-1]             | endif
+    if r.h == 1 | return
+                \ getline(r.l)[(r.a)-1:(s:lcol(r.l))-1] . getline(r.L)[:r.b-1] | endif
+
+    for ln in range(self.h)
+
+    endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -84,12 +84,12 @@ fun! s:Search.remove(also_regions) dict
     if !empty(pats)
         call s:Funcs.count_msg(1)
         let i = input('Which index? ') | let i = str2nr(i)
-        if ( i < 0 || i >= len(pats) ) | call s:Funcs.msg('      Wrong index') | return | endif
+        if ( i < 0 || i >= len(pats) ) | call s:Funcs.msg('      Wrong index', 0) | return | endif
         let pat = pats[i]
         call remove(pats, i)
         call self.update_current()
     else
-        call s:Funcs.msg('No search patters yet.') | return | endif
+        call s:Funcs.msg('No search patters yet.', 0) | return | endif
 
     if a:also_regions
         let i = len(s:Regions) - 1 | let removed = 0
@@ -146,16 +146,16 @@ fun! s:Search.case() dict
     if &smartcase              "smartcase        ->  case sensitive
         set nosmartcase
         set noignorecase
-        call s:Funcs.msg([['Search -> ', 'WarningMsg'], ['  case sensitive', 'Label']])
+        call s:Funcs.msg([['Search -> ', 'WarningMsg'], ['  case sensitive', 'Label']], 0)
 
     elseif !&ignorecase        "case sensitive   ->  ignorecase
         set ignorecase
-        call s:Funcs.msg([['Search -> ', 'WarningMsg'], ['  ignore case', 'Label']])
+        call s:Funcs.msg([['Search -> ', 'WarningMsg'], ['  ignore case', 'Label']], 0)
 
     else                       "ignore case      ->  smartcase
         set smartcase
         set ignorecase
-        call s:Funcs.msg([['Search -> ', 'WarningMsg'], ['  smartcase', 'Label']])
+        call s:Funcs.msg([['Search -> ', 'WarningMsg'], ['  smartcase', 'Label']], 0)
     endif
 endfun
 
