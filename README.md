@@ -46,3 +46,18 @@ Another macro example that uses vim-sneak and vim-surround
 First editing functions: yank, delete, paste from register, paste block from yanked regions
 
 ![Imgur](https://i.imgur.com/0jRkVdp.gif)
+
+-------
+Shift regions left and right (M-S-\<\>)
+
+![Imgur](https://i.imgur.com/B1AiXcQ.gif)
+
+-------
+Synched transposition
+
+![Imgur](https://i.imgur.com/hsYZudK.gif)
+
+-------
+Inline transposition
+
+![Imgur](https://i.imgur.com/H7ul6mT.gif)

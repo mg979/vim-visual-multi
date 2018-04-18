@@ -183,7 +183,8 @@ fun! vm#commands#add_under(visual, whole, inclusive, ...)
     call s:Search.add()
     let R = s:Global.get_region()
     "call s:Global.merge_regions(R.l)
-    if !a:0 | call vm#commands#find_next(0, 0) | endif
+    if !a:0 | call vm#commands#find_next(0, 0)
+    else    | call s:Funcs.count_msg(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

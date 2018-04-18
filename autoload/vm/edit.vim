@@ -33,9 +33,6 @@ fun! s:Edit.process(...) dict
     "arg1: prefix for normal command
     "arg2: 0 for recursive command
 
-    redir @t
-    silent nmap <buffer>
-    redir END
     let size = s:size() | let change = 0
 
     let cmd = a:0? (a:1."normal".(a:2? "! ":" ").s:cmd)
@@ -145,23 +142,26 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.yank(hard) dict
-    if !s:X() | call s:Funcs.msg('Not in cursor mode.', 0) | return | endif
+fun! s:Edit.yank(hard, def_reg, ...) dict
+    if !s:X()    | call s:Funcs.msg('Not in cursor mode.', 0)  | return | endif
+    if !s:min(1) | call s:Funcs.msg('No regions selected.', 0) | return | endif
 
+    let register = a:def_reg? s:v.def_reg : v:register
     let text = []  | let maxw = 0
+
     for r in s:R()
         if len(r.txt) > maxw | let maxw = len(r.txt) | endif
         call add(text, r.txt)
     endfor
 
-    let s:v.registers[v:register] = text
-    call setreg(v:register, join(text, "\n"), "b".maxw)
+    let s:v.registers[register] = text
+    call setreg(register, join(text, "\n"), "b".maxw)
 
     "overwrite the old saved register
     if a:hard
-        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), "b".maxw]
-    endif
-    call s:Funcs.msg('Yanked the content of '.len(s:R()).' regions.', 1)
+        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), "b".maxw] | endif
+    if !a:0
+        call s:Funcs.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -227,8 +227,59 @@ endfun
 " Special commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.surround(type)
+fun! s:Edit.surround(type) dict
     if s:X()
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.transpose() dict
+    if !s:min(2)                                 | return         | endif
+    let rlines = s:Global.lines_with_regions(0)  | let inline = 1 | let l = 0
+
+    "check if there is the same nr of regions in each line
+    if len(keys(rlines)) == 1 | let inline = 0
+    else
+        for rl in keys(rlines)
+            let nr = len(rlines[rl])
+
+            if nr == 1     | let inline = 0 | break
+            elseif !l      | let l = nr
+            elseif nr != l | let inline = 0 | break
+            endif
+        endfor
+    endif
+
+    call self.yank(0, 1, 1)
+
+    "non-inline transposition
+    if !inline
+        let t = remove(s:v.registers[s:v.def_reg], 0)
+        call add(s:v.registers[s:v.def_reg], t)
+        call self.paste(1, 1)
+        return | endif
+
+    "inline transpositions
+    for rl in keys(rlines)
+        let t = remove(s:v.registers[s:v.def_reg], rlines[rl][-1])
+        call insert(s:v.registers[s:v.def_reg], t, rlines[rl][0])
+        call self.paste(1, 1)
+    endfor
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.shift(dir) dict
+    if !s:min(1) | return | endif
+
+    call self.yank(0, 1, 1)
+    if a:dir
+        call self.paste(0, 1)
+    else
+        call self.delete()
+        call vm#commands#motion('h', 0)
+        call self.paste(1, 1)
     endif
 endfun
 
@@ -244,6 +295,13 @@ fun! s:count(c)
         call vm#reset()
         return 1
     endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:min(nr)
+    "check for a minimum of available regions
+    return ( s:X() && len(s:R()) >= a:nr )
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

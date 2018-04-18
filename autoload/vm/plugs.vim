@@ -93,10 +93,13 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-P-Paste-Block)      :call b:VM_Selection.Edit.paste(1, 1)<cr>
     nnoremap        <Plug>(VM-Edit-p-Paste)            :call b:VM_Selection.Edit.paste(0, 0)<cr>
     nnoremap        <Plug>(VM-Edit-P-Paste)            :call b:VM_Selection.Edit.paste(1, 0)<cr>
-    nnoremap        <Plug>(VM-Edit-Yank)               :call b:VM_Selection.Edit.yank(1)<cr>
-    nnoremap        <Plug>(VM-Edit-Soft-Yank)          :call b:VM_Selection.Edit.yank(0)<cr>
+    nnoremap        <Plug>(VM-Edit-Yank)               :call b:VM_Selection.Edit.yank(1, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-Soft-Yank)          :call b:VM_Selection.Edit.yank(0, 0)<cr>
     nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
     nnoremap        <Plug>(VM-Run-Macro-Replace)       :call b:VM_Selection.Edit.run_macro(1)<cr>
+    nnoremap        <Plug>(VM-Edit-Shift-Right)        :call b:VM_Selection.Edit.shift(1)<cr>
+    nnoremap        <Plug>(VM-Edit-Shift-Left)         :call b:VM_Selection.Edit.shift(0)<cr>
+    nnoremap        <Plug>(VM-Edit-Transpose)          :call b:VM_Selection.Edit.transpose()<cr>
 
     fun! <SID>Delete()
         if g:VM.extend_mode

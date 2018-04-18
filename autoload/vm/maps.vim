@@ -6,7 +6,7 @@ let s:find     = ['f', 'F', 't', 'T']
 let s:simple   = ['h', 'j', 'k', 'l', 'd', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M']
 
 let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
-let s:cx_maps  = ['t', 'm', '/', ']', '}', 's', 'S', '<F12>']
+let s:cx_maps  = ['t', 'm', '/', ']', '}', 's', 'S', '<F12>', '<C-x>']
 let s:alt_maps = ['j', 'k', 'J', '{', '}', ']']
 let s:leader   = ['@', '/', 'y', 'p']
 let s:leader2  = ['@']
@@ -99,6 +99,7 @@ fun! vm#maps#start()
     nmap <silent> <nowait> <buffer> d               <Plug>(VM-Edit-Delete)
     nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
     nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
+    nmap <silent> <nowait> <buffer> <C-x><C-x>      <Plug>(VM-Edit-Transpose)
 
     if g:VM_invert_paste_behaviour
         nmap <silent> <nowait> <buffer> P           <Plug>(VM-Edit-p-Paste-Block)
@@ -139,6 +140,8 @@ fun! s:arrows()
     nmap     <silent> <nowait> <buffer> <C-S-Left>  <Plug>(VM-Select-b)
     nmap     <silent> <nowait> <buffer> <M-C-Right> <Plug>(VM-Select-E)
     nmap     <silent> <nowait> <buffer> <M-C-Left>  <Plug>(VM-Fast-Back)
+    nmap     <silent> <nowait> <buffer> <M-S-Right> <Plug>(VM-Edit-Shift-Right)
+    nmap     <silent> <nowait> <buffer> <M-S-Left>  <Plug>(VM-Edit-Shift-Left)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -236,6 +239,8 @@ fun! s:arrows_end()
     nunmap <buffer> <C-S-Left>
     nunmap <buffer> <M-C-Right>
     nunmap <buffer> <M-C-Left>
+    nunmap <buffer> <M-S-Right>
+    nunmap <buffer> <M-S-Left>
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
