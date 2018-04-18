@@ -76,9 +76,11 @@ fun! vm#commands#add_cursor_at_pos(where, extend, ...)
 
     if a:where == 1
         keepjumps normal! j
+        if line('.') == line('$') | return | endif
         let R = s:Global.new_cursor()
     elseif a:where == 2
         keepjumps normal! k
+        if line('.') == 1 | return | endif
         let R = s:Global.new_cursor()
     endif
 
