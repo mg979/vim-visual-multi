@@ -46,6 +46,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
     nnoremap        <Plug>(VM-Switch-Mode)             :call vm#commands#change_mode(0)<cr>
     nnoremap        <Plug>(VM-Reset)                   :call vm#reset()<cr>
+    nnoremap        <Plug>(VM-Undo)                    u:call b:VM_Selection.Global.update_regions()<cr>
 
     nnoremap        <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction()<cr>
     nnoremap        <Plug>(VM-Goto-Next)               :call vm#commands#find_next(0, 1)<cr>
@@ -54,7 +55,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Find-Prev)               :call vm#commands#find_prev(0, 0)<cr>
     nnoremap        <Plug>(VM-Skip-Region)             :call vm#commands#skip(0)<cr>
     nnoremap        <Plug>(VM-Remove-Region)           :call vm#commands#skip(1)<cr>
-    nnoremap        <Plug>(VM-Undo-Last)               :call vm#commands#undo()<cr>
+    nnoremap        <Plug>(VM-Remove-Last-Region)      :call b:VM_Selection.Global.remove_last_region()<cr>
+    nnoremap        <Plug>(VM-Undo-Visual)             :call vm#commands#undo()<cr>
 
     nnoremap        <Plug>(VM-Select-One-Inside)       :call vm#commands#select_motion(0, 1)<cr>
     nnoremap        <Plug>(VM-Select-One-Around)       :call vm#commands#select_motion(1, 1)<cr>
@@ -88,30 +90,23 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Merge-To-Bol)            :call vm#commands#merge_to_beol(0, 0)<cr>
 
     "Edit commands
-    nnoremap <expr> <Plug>(VM-Edit-Delete)             <SID>Delete()
+    nnoremap        <Plug>(VM-Edit-Delete)             :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, 1, v:count1)<cr>
+    nnoremap        <Plug>(VM-Edit-Change)             :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1)<cr>
     nnoremap        <Plug>(VM-Edit-p-Paste-Block)      :call b:VM_Selection.Edit.paste(0, 1)<cr>
     nnoremap        <Plug>(VM-Edit-P-Paste-Block)      :call b:VM_Selection.Edit.paste(1, 1)<cr>
     nnoremap        <Plug>(VM-Edit-p-Paste)            :call b:VM_Selection.Edit.paste(0, 0)<cr>
     nnoremap        <Plug>(VM-Edit-P-Paste)            :call b:VM_Selection.Edit.paste(1, 0)<cr>
-    nnoremap        <Plug>(VM-Edit-Yank)               :call b:VM_Selection.Edit.yank(1, 0)<cr>
-    nnoremap        <Plug>(VM-Edit-Soft-Yank)          :call b:VM_Selection.Edit.yank(0, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-Yank)               :call b:VM_Selection.Edit.yank(1, 0, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-Soft-Yank)          :call b:VM_Selection.Edit.yank(0, 0, 0)<cr>
     nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
     nnoremap        <Plug>(VM-Run-Macro-Replace)       :call b:VM_Selection.Edit.run_macro(1)<cr>
     nnoremap        <Plug>(VM-Edit-Shift-Right)        :call b:VM_Selection.Edit.shift(1)<cr>
     nnoremap        <Plug>(VM-Edit-Shift-Left)         :call b:VM_Selection.Edit.shift(0)<cr>
     nnoremap        <Plug>(VM-Edit-Transpose)          :call b:VM_Selection.Edit.transpose()<cr>
 
-    fun! <SID>Delete()
-        if g:VM.extend_mode
-            return ":call b:VM_Selection.Edit.delete()\<cr>"
-        else
-            return ""
-        endif
-    endfun
-
     fun! <SID>Mode()
         let mode = g:VM.extend_mode? ' (extend mode)' : ' (cursor mode)'
-        call b:VM_Selection.Funcs.msg('Enter regex'.mode.':', 0)
+        call b:VM_Selection.Funcs.msg([["Enter regex".mode.":", 'WarningMsg'], ["\n/", 'None']], 1)
     endfun
 
     let remaps = g:VM_custom_remaps

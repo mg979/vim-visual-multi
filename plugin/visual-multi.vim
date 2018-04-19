@@ -23,12 +23,14 @@ fun! <SID>VM_Init()
     let g:VM_custom_mappings                  = get(g:, 'VM_custom_mappings', 0)
     let g:VM_invert_paste_behaviour           = get(g:, 'VM_invert_paste_behaviour', 0)
     let g:VM_keep_collapsed_while_moving_back = get(g:, 'VM_keep_collapsed_while_moving_back', 1)
+    let g:VM_live_editing                     = get(g:, 'VM_live_editing', 0)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Set up highlighting
 
     let g:VM_Selection_hl                     = get(g:, 'VM_Selection_hl',     'Visual')
     let g:VM_Mono_Cursor_hl                   = get(g:, 'VM_Mono_Cursor_hl',   'DiffChange')
+    let g:VM_Ins_Mode_hl                      = get(g:, 'VM_Ins_Mode_hl',      'Pmenu')
     let g:VM_Normal_Cursor_hl                 = get(g:, 'VM_Normal_Cursor_hl', 'DiffAdd')
     let g:VM_Message_hl                       = get(g:, 'VM_Message_hl',       'WarningMsg')
 

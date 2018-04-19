@@ -102,6 +102,7 @@ endfun
 fun! vm#commands#regex_reset(...)
     silent! cunmap <buffer> <cr>
     silent! cunmap <buffer> <esc>
+    let s:v.using_regex = 0
     if a:0 | return a:1 | endif
 endfun
 
@@ -109,7 +110,7 @@ endfun
 
 fun! vm#commands#regex_abort()
     let @/ = s:regex_reg
-    call s:Funcs.msg('Regex search aborted.', 0) | call s:Funcs.count_msg(1)
+    call s:Funcs.msg('Regex search aborted. ', 0) | call s:Funcs.count_msg(1)
     call setpos('.', s:regex_pos)
     call vm#commands#regex_reset()
 endfun
@@ -131,6 +132,7 @@ endfun
 
 fun! vm#commands#find_by_regex(...)
     call s:init(0, 0, 1)
+    let s:v.using_regex = 1
 
     "store reg and position, to check if the search will be aborted
     let s:regex_pos = getpos('.')
@@ -216,7 +218,7 @@ fun! s:get_next(n)
     if s:X()
         silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
         call s:Global.get_region()
-        call s:Funcs.count_msg(0)
+        call s:Funcs.count_msg(1)
     else
         silent exe "keepjumps normal! ".a:n."g".a:n."y`["
         call vm#commands#add_cursor_at_word(0, 0)
@@ -255,7 +257,7 @@ fun! vm#commands#find_next(skip, nav)
     if s:no_regions() | return | endif
 
     "rewrite search patterns if moving with hjkl
-    if s:simple() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
+    if s:X() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
 
     call s:Search.validate()
 
@@ -274,7 +276,7 @@ fun! vm#commands#find_prev(skip, nav)
     if s:no_regions() | return | endif
 
     "rewrite search patterns if moving with hjkl
-    if s:simple() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
+    if s:X() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
 
     call s:Search.validate() | let r = s:Global.is_region_at_pos('.')
 

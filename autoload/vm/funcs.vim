@@ -41,11 +41,22 @@ fun! s:Funcs.pos2byte(...) dict
 
     elseif type(a:1) == v:t_string      "a string (like '.')
         let pos = getpos(a:1)[1:2]
-        return line2byte(pos[0]) + pos[1]
+        return (line2byte(pos[0]) + pos[1])
 
     else                                "a list [line, col]
-        return line2byte(a:1[0]) + a:1[1]
+        return (line2byte(a:1[0]) + a:1[1])
     endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.byte2pos(byte) dict
+    """Return the (line, col) position of a byte offset.
+
+    let line   = byte2line(a:byte)
+    let lnbyte = line2byte(line)
+    let col    = line + ( a:byte - lnbyte )
+    return [line, col]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -96,13 +107,15 @@ fun! s:Funcs.restore_regs() dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Messages
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.msg(text, force) dict
     if s:v.silence && !a:force | return | endif
 
     if type(a:text) == v:t_string
         exe "echohl" g:VM_Message_hl
-        echo a:text
+        echon a:text
         echohl None | return | endif
 
     for txt in a:text
@@ -119,8 +132,8 @@ fun! s:m1()
 endfun
 
 fun! s:m2()
-    let t = g:VM.multiline? "L\+" : "L\-"
-    let hl = g:VM.multiline? "Type" : "WarningMsg"
+    let t = !g:VM.multiline? "B\+" : "B\-"
+    let hl = !g:VM.multiline? "Type" : "WarningMsg"
     return [t, hl]
 endfun
 
@@ -134,7 +147,7 @@ fun! s:Funcs.count_msg(force) dict
     if s:v.silence && !a:force | return | endif
 
     if s:v.index < 0
-        call self.msg('No selected regions.')
+        call self.msg("No selected regions.", 1)
         return | endif
 
     let ix = g:VM_debug? " ".s:V.Regions[s:v.index].index : ''
@@ -168,7 +181,7 @@ function! s:Funcs.pad(t, n)
 endfunction
 
 fun! s:Funcs.regions_contents() dict
-    echohl WarningMsg | echo "Index\tA\tB\tw\tl / L\t\ta / b\t\t"
+    echohl WarningMsg | echo "Index\tID\tA\tB\tw\tl / L\t\ta / b\t\t"
                 \ "--- Pattern ---\t"
                 \ "--- Regions contents ---" | echohl None
     for r in s:Regions | call self.region_txt(r) | endfor
@@ -180,7 +193,7 @@ fun! s:Funcs.region_txt(r) dict
     let line = substitute(r.txt, '\V\n', '^M', 'g')
     if len(line) > 80 | let line = line[:80] . '…' | endif
 
-    echohl Directory  | echo  index."\t".r.A."\t".r.B."\t".r.w."\t"
+    echohl Directory  | echo  index."\t".r.id."\t".r.A."\t".r.B."\t".r.w."\t"
                 \.self.pad(r.l." / ".r.L, 14).self.pad("\t".r.a." / ".r.b, 14)."\t"
 
     echohl Type       | echon self.pad(r.pat, 18)

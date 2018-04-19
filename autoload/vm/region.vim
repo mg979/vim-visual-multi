@@ -158,6 +158,7 @@ fun! s:Region.new(cursor, ...)
         let R.pat   = s:Search.escape_pattern(R.txt)
     endif
 
+    call add(s:v.IDs_list, R.id)
     call R.highlight()
     call s:Global.update_cursor_highlight()
     call s:Funcs.restore_reg()
@@ -223,15 +224,21 @@ fun! s:Region.pattern() dict
     if empty(s:v.search) | return '' | endif
 
     for p in s:v.search | if self.txt =~ p | return p | endif | endfor
-    return ''
+
+    "return current search pattern in regex mode
+    if !has_key(self, 'pat')
+        if s:v.using_regex | return @/ | else | return '' | endif | endif
+
+    "return current pattern if one is present (in cursor mode text is empty)
+    return empty(self.pat)? '' : self.pat
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.remove() dict
-    let i = self.index
     call self.remove_highlight()
-    let R = remove(s:Regions, i)
+    let R = remove(s:Regions, self.index)
+    call remove(s:v.IDs_list, index(s:v.IDs_list, self.id))
     call s:Global.update_indices()
     return R
 endfun
@@ -393,16 +400,12 @@ endfun
 
 fun! s:Region.yank() dict
     """Yank region content if in extend mode."""
+    if !s:X() | return | endif
 
     let r = self
-
-    "if not in extend mode, the cursor will stay at r.a
-    call cursor(r.l, r.a)
-    if s:X()
-        keepjumps normal! m[
-        call cursor(r.L, r.b+1)
-        silent keepjumps normal! m]`[y`]
-    endif
+    keepjumps normal! m[
+    call cursor(r.L, r.b+1)
+    silent keepjumps normal! m]`[y`]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -422,6 +425,9 @@ fun! s:Region.update(...) dict
 
     if a:0 | let r.l = a:1 | let r.L = a:2 | let r.a = a:3 | let r.b = a:4 | endif
 
+    "if not in extend mode, the cursor will stay at r.a
+    call cursor(r.l, r.a)
+
     call self.yank()
     call self.update_vars()
 endfun
@@ -434,18 +440,24 @@ fun! s:Region.update_vars() dict
     let r         = self
     let s:v.index = r.index
 
-    let r.A       = r.A_()
-    let r.B       = r.B_()
+    "   "--------- cursor mode ----------------------------
 
-    "update anchor if in cursor mode
-    if !s:X() | let r.k = r.a | let r.K = r.A | let r.L = r.l | endif
+    if !s:X()
+        let r.L   = r.l
+        let r.A   = r.A_()        | let r.B = r.A
+        let r.k   = r.a           | let r.K = r.A
+        let r.w   = 1             | let r.h = 0
+        let r.pat = r.pattern()   | let r.txt = ''
 
-    let r.w       = r.B - r.A + 1
-    let r.h       = r.L - r.l
-    let r.txt     = s:X()? getreg(s:v.def_reg) : ''
-    let r.pat     = r.pattern()
+        "--------- extend mode ----------------------------
 
-    call s:Funcs.restore_reg()
+    else
+        let r.A   = r.A_()        | let r.B = r.B_()
+        let r.w   = r.B - r.A + 1 | let r.h = r.L - r.l
+        let r.pat = r.pattern()   | let r.txt = getreg(s:v.def_reg)
+
+        call s:Funcs.restore_reg()
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -455,17 +467,17 @@ endfun
 fun! s:Region.highlight() dict
     """Create the highlight entries."""
 
-    let R      = self
+    let R = self
 
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "------------------ cursor mode ----------------------------
 
-    if !s:X()   "cursor mode
+    if !s:X()
         let R.matches        = {'region': [], 'cursor': 0}
         let R.matches.cursor = matchaddpos('MultiCursor', [[R.l, R.a]], 40)
         return
     endif
 
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "------------------ extend mode ----------------------------
 
     let max    = R.L - R.l
     let region = []
@@ -499,7 +511,7 @@ fun! s:Region.remove_highlight() dict
     let r       = self.matches.region
     let c       = self.matches.cursor
 
-    for m in r | call matchdelete(m) | endfor | call matchdelete(c)
+    for m in r | silent! call matchdelete(m) | endfor | silent! call matchdelete(c)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

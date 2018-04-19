@@ -53,11 +53,11 @@ Shift regions left and right (M-S-\<\>)
 ![Imgur](https://i.imgur.com/B1AiXcQ.gif)
 
 -------
-Synched transposition
+Synched column transposition
 
 ![Imgur](https://i.imgur.com/hsYZudK.gif)
 
 -------
-Inline transposition
+Unsynched transposition (cycle all regions, also in different lines)
 
 ![Imgur](https://i.imgur.com/H7ul6mT.gif)

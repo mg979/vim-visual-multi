@@ -2,7 +2,7 @@
 " Edit class
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:Edit = {}
+let s:Edit = {'skip_index': -1}
 
 fun! vm#edit#init()
     let s:V       = b:VM_Selection
@@ -13,13 +13,14 @@ fun! vm#edit#init()
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
 
-    let s:R       = { -> s:V.Regions }
-    let s:X       = { -> g:VM.extend_mode }
-    let s:size    = { -> line2byte(line('$') + 1) }
+    let s:R       = {      -> s:V.Regions              }
+    let s:X       = {      -> g:VM.extend_mode         }
+    let s:size    = {      -> line2byte(line('$') + 1) }
+    let s:Byte    = { pos  -> s:Funcs.pos2byte(pos)    }
+    let s:Pos     = { byte -> s:Funcs.byte2pos(byte)   }
 
-    let s:v.insert     = 0
-    let s:v.registers  = {}
-    let s:extra_spaces = []
+    let s:v.registers   = {}
+    let s:extra_spaces  = []
 
     return s:Edit
 endfun
@@ -39,7 +40,8 @@ fun! s:Edit.process(...) dict
             \    : ("normal! ".s:cmd)
 
     for r in s:R()
-        call r.shift(change, change)
+        if r.index == self.skip_index | continue | endif
+        let test = r.shift(change, change)
         call cursor(r.l, r.a)
         exe cmd
 
@@ -74,12 +76,14 @@ fun! s:Edit.post_process(reselect, shift) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Delete
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.delete() dict
+fun! s:Edit.delete(X, keep, count) dict
     """Delete the selected text and change to cursor mode.
     """Remember the lines that have been added an extra space, for later removal
 
-    if s:X()
+    if a:X
         let size = s:size() | let change = 0 | let s:extra_spaces = []
         for r in s:R()
             call r.shift(change, change)
@@ -89,13 +93,113 @@ fun! s:Edit.delete() dict
                 call setline(r.L, L.' ')
                 call add(s:extra_spaces, r.L)
             endif
-            exe "normal! \"_d".r.w."l"
+            if a:keep
+                call self.yank(1, 1, 1, 1)
+            endif
+            let reg = a:keep? '' : "\"_"
+            exe "normal! ".reg."d".r.w."l"
 
             "update changed size
             let change = s:size() - size
         endfor
         call vm#commands#change_mode(1)
+
+    else
+        "ask for motion
+        call self.get_motion('d', a:count)
     endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Change
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.change(X, count) dict
+    if a:X
+        "delete existing region contents and leave the cursors
+        call self.delete(1, 0, 1)
+        call s:V.Insert.start('c')
+    else
+        call self.get_motion('c', a:count)
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Non-live edit mode
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.apply_change() dict
+    call vm#augroup_end()
+    let s:cmd = '.'
+    let self.skip_index = s:v.index
+    call self.process()
+endfun
+
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Get motion
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+let s:delchars = { c -> index(['d', 'w', 'e', 'b','W', 'E', 'B', '$', '^', '0'], c) >= 0 }
+let s:chgchars = { c -> index(['c', 'w', 'e', 'b','W', 'E', 'B', '$', '^', '0', 's'], c) >= 0 }
+let s:rplchars = { c -> index(['r', 'w', 'e', 'b','W', 'E', 'B', '$', '^', '0'], c) >= 0 }
+
+fun! s:Edit.get_motion(op, n) dict
+
+    let hl1 = 'WarningMsg' | let hl2 = 'Label'
+    let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  '  , hl2]] :
+                \ a:op==#'c'? [['Change ', hl1], ['([n] c/s/w/e/b/$...) ?  ', hl2]] :
+                \ a:op==#'r'? [['Replace', hl1], ['([n] r/w/e/b/$...) ?  '  , hl2]] : 'Aborted.'
+
+    call s:Funcs.msg(s, 1)
+
+    let m = (a:n>1? a:n : '').a:op
+    let M = (a:n>1? a:n : '').( a:op==#'c'? 'd' : a:op )
+    echon m
+
+    while 1
+        let c = nr2char(getchar())
+        if str2nr(c) > 0                     | echon c | let M .= c | let m .= c
+        elseif a:op ==# 'd' && s:delchars(c) | echon c | let M .= c | let m .= c | break
+        elseif a:op ==# 'c' && s:chgchars(c) | echon c | let M .= c | let m .= c | break
+        elseif a:op ==# 'r' && s:rplchars(c) | echon c | let M .= c | let m .= c | break
+
+        else | let M = '' | break | endif
+    endwhile
+
+    if empty(M) | echon ' ...Aborted'
+
+    elseif a:op == 'd'
+        let s:cmd = M
+        call self.process()
+    elseif a:op == 'c'
+        let s:cmd = M
+        call self.process()
+        call s:V.Insert.start('c')
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Commands
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.paste(before, block) dict
+    let reg = v:register | let X = s:X()
+
+    "force paste before in extend mode, as it works in visual mode
+    let before = X? 1 : a:before
+    if X | call self.delete(1, 0, 1) | endif
+
+    if !a:block || !has_key(s:v.registers, reg)
+        let text = s:default_text()
+    else
+        let text = s:v.registers[reg]
+    endif
+
+    call self.block_paste(before, text)
+    let s:W = s:store_widths(text)
+    call self.post_process(X, !before)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -122,27 +226,8 @@ fun! s:Edit.block_paste(before, text) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Commands
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.paste(before, block) dict
-    let reg = v:register
-    call self.delete()
-
-    if !a:block || !has_key(s:v.registers, reg)
-        let text = s:default_text()
-    else
-        let text = s:v.registers[reg]
-    endif
-
-    call self.block_paste(a:before, text)
-    let s:W = s:store_widths(text)
-    call self.post_process(1, !a:before)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Edit.yank(hard, def_reg, ...) dict
+fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     if !s:X()    | call s:Funcs.msg('Not in cursor mode.', 0)  | return | endif
     if !s:min(1) | call s:Funcs.msg('No regions selected.', 0) | return | endif
 
@@ -160,8 +245,9 @@ fun! s:Edit.yank(hard, def_reg, ...) dict
     "overwrite the old saved register
     if a:hard
         let s:v.oldreg = [s:v.def_reg, join(text, "\n"), "b".maxw] | endif
-    if !a:0
+    if !a:silent
         call s:Funcs.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
+    if !a:0 | call vm#commands#change_mode(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -214,7 +300,7 @@ fun! s:Edit.run_macro(replace) dict
     let s:cmd = "@".reg
     let motions = s:before_macro()
 
-    if a:replace | call self.delete()
+    if a:replace | call self.delete(0, 0, 1)
     elseif s:X() | call vm#commands#change_mode(1) | endif
 
     call self.process()
@@ -277,7 +363,7 @@ fun! s:Edit.shift(dir) dict
     if a:dir
         call self.paste(0, 1)
     else
-        call self.delete()
+        call self.delete(0, 0, 1)
         call vm#commands#motion('h', 0)
         call self.paste(1, 1)
     endif
@@ -309,7 +395,25 @@ endfun
 fun! s:default_text()
     "fill the content to past with the default register
     let text = []
-    for n in range(len(s:R())) | call add(text, getreg(s:v.def_reg)) | endfor
+    let block = char2nr(getregtype(s:v.def_reg)[0]) == 22
+
+    if block
+        "default register is of block type, assign a line to each region
+        let width = getregtype(s:v.def_reg)[1:]
+        let reg = split(getreg(s:v.def_reg), "\n")
+        for t in range(len(reg))
+            while len(reg[t]) < width | let reg[t] .= ' ' | endwhile
+        endfor
+
+        "ensure there are enough lines for all regions
+        while len(reg) < len(s:R()) | call add(reg, '') | endwhile
+
+        for n in range(len(s:R()))
+            call add(text, reg[n])
+        endfor
+    else
+        for n in range(len(s:R())) | call add(text, getreg(s:v.def_reg)) | endfor
+    endif
     return text
 endfun
 
@@ -325,6 +429,9 @@ fun! s:store_widths(...)
         if type(a:1) == v:t_string | let text = len(a:1)-1 | let use_text = 1
         else                       | let list = a:1        | let use_list = 1 | endif
     endif
+
+    "mismatching blocks must be corrected
+    if use_list | while len(list) < len(s:R()) | call add(list, 0) | endwhile | endif
 
     for r in s:R()
         call add(W, use_text? text : use_list? len(list[r.index])-1 : r.w) | endfor

@@ -3,12 +3,12 @@ let s:NVIM = has('gui_running') || has('nvim')
 let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E']
 let s:signs    = ['$', '0', '^', '%']
 let s:find     = ['f', 'F', 't', 'T']
-let s:simple   = ['h', 'j', 'k', 'l', 'd', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M']
+let s:simple   = ['h', 'j', 'k', 'l', 'd', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M', 'u']
 
 let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
 let s:cx_maps  = ['t', 'm', '/', ']', '}', 's', 'S', '<F12>', '<C-x>']
-let s:alt_maps = ['j', 'k', 'J', '{', '}', ']']
-let s:leader   = ['@', '/', 'y', 'p']
+let s:alt_maps = ['j', 'k', 'J', '{', '}', ']', '-', ]
+let s:leader   = ['@', '/', 'y', 'p', 'P']
 let s:leader2  = ['@']
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -36,7 +36,8 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> q          <Plug>(VM-Skip-Region)
     nmap     <silent> <nowait> <buffer> Q          <Plug>(VM-Remove-Region)
     nmap     <silent> <nowait> <buffer> M          <Plug>(VM-Toggle-Multiline)
-    nmap     <silent> <nowait> <buffer> U          <Plug>(VM-Undo-Last)
+    nmap     <silent> <nowait> <buffer> u          <Plug>(VM-Undo)
+    nmap     <silent> <nowait> <buffer> U          <Plug>(VM-Undo-Visual)
     nnoremap <silent> <nowait> <buffer> n          n
     nnoremap <silent> <nowait> <buffer> N          N
 
@@ -70,6 +71,7 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> <c-x><F12> <Plug>(VM-Toggle-Debug)
 
     "ctrl
+    nmap     <silent> <nowait> <buffer> <m-->      <Plug>(VM-Remove-Last-Region)
     nmap     <silent> <nowait> <buffer> <c-c>      <Plug>(VM-Case-Setting)
     nmap     <silent> <nowait> <buffer> <c-w>      <Plug>(VM-Toggle-Whole-Word)
     nmap     <silent> <nowait> <buffer> <c-o>      <Plug>(VM-Toggle-Only-This-Region)
@@ -96,6 +98,7 @@ fun! vm#maps#start()
     nmap <silent> <nowait> <buffer> -               <Plug>(VM-Motion-Shrink)
     nmap <silent> <nowait> <buffer> +               <Plug>(VM-Motion-Enlarge)
 
+    nmap <silent> <nowait> <buffer> c               <Plug>(VM-Edit-Change)
     nmap <silent> <nowait> <buffer> d               <Plug>(VM-Edit-Delete)
     nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
     nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)

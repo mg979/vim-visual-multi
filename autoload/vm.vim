@@ -13,7 +13,8 @@ fun! vm#init_buffer(empty, ...)
     if !empty(b:VM_Selection) | return s:V | endif
 
     let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Funcs':  {},
-                        \ 'Edit': {}, 'Global':  {}, 'Search': {}}
+                        \ 'Edit': {}, 'Global':  {}, 'Search': {},
+                        \}
 
     let s:V            = b:VM_Selection
 
@@ -37,6 +38,7 @@ fun! vm#init_buffer(empty, ...)
 
     "init new vars
     let s:v.search           = []
+    let s:v.IDs_list         = []
     let s:v.ID               = 0
     let s:v.index            = -1
     let s:v.direction        = 1
@@ -47,13 +49,14 @@ fun! vm#init_buffer(empty, ...)
     let s:v.only_this_always = 0
     let s:v.merge_to_beol    = 0
     let s:v.move_from_back   = 0
-    let s:v.move_from_front  = 0
+    let s:v.using_regex      = 0
 
     let s:V.Search     = vm#search#init()
     let s:V.Global     = vm#global#init()
     let s:V.Edit       = vm#edit#init()
+    let s:V.Insert     = vm#insert#init()
 
-    call vm#augroup_start()
+    call vm#augroup_start(0)
     call vm#maps#start()
     call vm#region#init()
 
@@ -100,9 +103,16 @@ endfun
 " Autocommands
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#augroup_start()
+fun! vm#augroup_start(type)
     augroup plugin-visual-multi
         au!
+        if a:type ==# 'c'
+            if g:VM_live_editing
+                au TextChangedI * call b:VM_Selection.Insert.live_insert()
+            else
+                au InsertLeave * call b:VM_Selection.Edit.apply_change()
+            endif
+        endif
     augroup END
 endfun
 

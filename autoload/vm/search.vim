@@ -50,7 +50,7 @@ endfun
 
 fun! s:Search.add(...) dict
     """Add a new search pattern."
-    let pat = a:0? self.escape_pattern(a:1) : self.get_pattern(s:v.def_reg, 0)
+    let pat = a:0? a:1 : self.get_pattern(s:v.def_reg, 0)
     call s:update_search(pat)
 endfun
 
@@ -136,7 +136,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Search.escape_pattern(t) dict
-    return substitute(escape(a:t, '\/.*$^~[]()'), "\n", '\\n', "g")
+    return substitute(escape(a:t, '\/.*$^~[]'), "\n", '\\n', "g")
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -176,8 +176,9 @@ fun! s:pattern_found(t, i)
         let s:v.search[a:i] = a:t
         call s:V.Global.update_region_patterns(a:t)
         let wm = 'WarningMsg' | let L = 'Label'
-        call s:Funcs.msg([['Pattern updated: ', wm ],
-                         \['   '.old, L], ['  ->  ', wm], [a:t."\n", L]], 1)
+        call s:Funcs.msg([['Pattern updated:   [', wm ], [old, L],
+                    \     [']  ->  [', wm],              [a:t, L],
+                    \     ["]\n", wm]], 1)
         return 1
     endif
 endfun

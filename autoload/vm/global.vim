@@ -55,6 +55,7 @@ fun! s:Global.erase_regions() dict
     let s:v.index = -1
     call s:Funcs.count_msg(1)
 endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Highlight
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -76,8 +77,13 @@ fun! s:Global.update_cursor_highlight(...) dict
     """Set cursor highlight, depending on extending mode."""
 
     highlight clear MultiCursor
-    if !s:X() && self.all_empty()
+    
+    if s:V.Insert.is_active
+        exe "highlight link MultiCursor ".g:VM_Ins_Mode_hl
+
+    elseif !s:X() && self.all_empty()
         exe "highlight link MultiCursor ".g:VM_Mono_Cursor_hl
+
     else
         exe "highlight link MultiCursor ".g:VM_Normal_Cursor_hl
     endif
@@ -163,19 +169,37 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Global.remove_last_region() dict
+    """Remove last region and reselect the previous one."""
+
+    for r in s:R()
+        if r.id == s:v.IDs_list[-1]
+            call r.remove()
+            break
+        endif
+    endfor
+
+    if !len(s:R()) | call s:Funcs.count_msg(1) | return | endif
+    call self.select_region(s:v.index)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Global.update_indices() dict
     """Adjust region indices."""
 
-    let i = 0
+    let i = 0 | let ix = s:v.index | let nr = len(s:R())
+    if !nr    | let s:v.index = -1 | return | endif
+
     for r in s:R()
         let r.index = i
         let i += 1
     endfor
-    let nr = len(s:R())
-    if nr && (s:v.index >= nr || s:v.index == -1)
+
+    if ix >= nr
+        let s:v.index = nr - 1
+    elseif ix == -1
         let s:v.index = 0
-    elseif !nr
-        let s:v.index = -1
     endif
 endfun
 
