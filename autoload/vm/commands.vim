@@ -12,11 +12,12 @@ fun! s:init(whole, cursor, extend_mode)
 
     let s:V       = vm#init_buffer(a:cursor)
     let s:v       = s:V.Vars
-    let s:Regions = s:V.Regions
     let s:Global  = s:V.Global
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
     let s:Edit    = s:V.Edit
+
+    let s:R    = { -> s:V.Regions }
 
     let s:v.whole_word = a:whole
     let s:v.nav_direction = 1
@@ -254,7 +255,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav)
-    if s:no_regions() | return | endif
+    if ( a:nav || a:skip ) && s:no_regions() | return | endif
 
     "rewrite search patterns if moving with hjkl
     if s:X() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
@@ -273,7 +274,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(skip, nav)
-    if s:no_regions() | return | endif
+    if ( a:nav || a:skip ) && s:no_regions() | return | endif
 
     "rewrite search patterns if moving with hjkl
     if s:X() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
@@ -287,7 +288,7 @@ fun! vm#commands#find_prev(skip, nav)
     "skip current match
 
     "move to the beginning of the current match
-    if s:X()      | call cursor(r.l, r.a) | endif
+    if s:X() && s:v.index >= 0 | call cursor(r.l, r.a) | endif
 
     call s:get_next('N')
 endfun
@@ -301,7 +302,7 @@ fun! vm#commands#skip(just_remove)
         let r = s:Global.is_region_at_pos('.')
         if !empty(r)
             call r.remove()
-            let s:v.index = len(s:Regions)? (s:v.index > 0? s:v.index-1 : 0) : -1
+            let s:v.index = len(s:R())? (s:v.index > 0? s:v.index-1 : 0) : -1
         endif
         call s:Funcs.count_msg(0)
 
@@ -318,15 +319,15 @@ fun! vm#commands#invert_direction()
     """Invert direction and reselect region."""
     if s:v.auto | return | endif
 
-    for r in s:Regions | let r.dir = !r.dir | endfor
+    for r in s:R() | let r.dir = !r.dir | endfor
 
     "invert anchor
     if s:v.direction
         let s:v.direction = 0
-        for r in s:Regions | let r.k = r.b | let r.K = r.B | endfor
+        for r in s:R() | let r.k = r.b | let r.K = r.B | endfor
     else
         let s:v.direction = 1
-        for r in s:Regions | let r.k = r.a | let r.K = r.A | endfor
+        for r in s:R() | let r.k = r.a | let r.K = r.A | endfor
     endif
 
     call s:Global.update_highlight()
@@ -355,6 +356,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#remap_motion(motion)
+    if s:no_regions() | return | endif
     let s:motion = a:motion
     call s:call_motion(a:this)
 endfun
@@ -373,6 +375,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#merge_to_beol(eol, this)
+    if s:no_regions() | return | endif
     let s:motion = a:eol? "\<End>" : '0'
     let s:v.merge_to_beol = 1
     let s:merge = 1
@@ -383,6 +386,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_motion(motion, char, this, ...)
+    if s:no_regions() | return | endif
+
     if index(['$', '0', '^', '%'], a:motion) >= 0
         let s:motion = a:motion | let s:merge = 1
     elseif a:char != ''
@@ -413,12 +418,8 @@ endfun
 
 fun! vm#commands#shrink_or_enlarge(shrink, this)
     """Reduce/enlarge selection size by 1."""
-
-    "NOTE: macros should disable these mappings in time, but it seems they don't
-    "Until I find a reliable way, it's a workaround
-    if s:v.auto | return | endif
-
-    if !s:X() | call vm#commands#change_mode(1) | endif
+    if s:no_regions() | return                          | endif
+    if !s:X()         | call vm#commands#change_mode(1) | endif
 
     let dir = s:v.direction
 
@@ -436,17 +437,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#select_motion(inclusive, this)
-
-    "NOTE: macros should disable these mappings in time, but it seems they don't
-    "Until I find a reliable way, it's a workaround
-    if s:v.auto
-        if a:this | exe "normal! g"
-        else      | exe "normal! G" | endif
-        return
-    endif
-
-    if !s:X() | call vm#commands#change_mode(0) | endif
-    if a:this | call s:Global.new_cursor()      | endif
+    if s:no_regions() | return                          | endif
+    if !s:X()         | call vm#commands#change_mode(0) | endif
+    if a:this         | call s:Global.new_cursor()      | endif
 
     let c = nr2char(getchar())
     let a = a:inclusive ? 'F' : 'T'
@@ -505,8 +498,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#move(...)
-    if !s:v.moving | return | endif
-    let R = s:Regions[ s:v.index ]
+    if !s:v.moving || s:no_regions() | return | endif
+    let R = s:R()[ s:v.index ]
     let s:v.moving -= 1
 
     if s:v.direction && s:always_from_back()
@@ -517,11 +510,9 @@ fun! vm#commands#move(...)
     endif
 
     if s:only_this()
-        call s:Regions[s:v.index].move(s:motion) | let s:v.only_this = 0
+        call s:R()[s:v.index].move(s:motion) | let s:v.only_this = 0
     else
-        for r in s:Regions
-            call r.move(s:motion)
-        endfor | endif
+        for r in s:R() | call r.move(s:motion) | endfor | endif
 
     "update variables, facing direction, highlighting
     if s:after_move() | return | endif

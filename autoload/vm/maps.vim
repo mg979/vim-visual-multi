@@ -6,7 +6,7 @@ let s:find     = ['f', 'F', 't', 'T']
 let s:simple   = ['h', 'j', 'k', 'l', 'd', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M', 'u']
 
 let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
-let s:cx_maps  = ['t', 'm', '/', ']', '}', 's', 'S', '<F12>', '<C-x>']
+let s:cx_maps  = ['t', 'm', '/', ']', '}', 's', 'S', '<F12>', '<C-x>', '"']
 let s:alt_maps = ['j', 'k', 'J', '{', '}', ']', '-', ]
 let s:leader   = ['@', '/', 'y', 'p', 'P']
 let s:leader2  = ['@']
@@ -65,6 +65,7 @@ fun! vm#maps#start()
 
     "utility
     nmap              <nowait> <buffer> <C-x>t     <Plug>(VM-Show-Regions-Text)
+    nmap              <nowait> <buffer> <C-x>"     <Plug>(VM-Show-Registers)
     nmap     <silent> <nowait> <buffer> <C-x>m     <Plug>(VM-Merge-Regions)
     nmap     <silent> <nowait> <buffer> <C-x>s     <Plug>(VM-Remove-Search)
     nmap     <silent> <nowait> <buffer> <C-x>S     <Plug>(VM-Remove-Search-Regions)

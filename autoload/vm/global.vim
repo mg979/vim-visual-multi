@@ -77,7 +77,7 @@ fun! s:Global.update_cursor_highlight(...) dict
     """Set cursor highlight, depending on extending mode."""
 
     highlight clear MultiCursor
-    
+
     if s:V.Insert.is_active
         exe "highlight link MultiCursor ".g:VM_Ins_Mode_hl
 

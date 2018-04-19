@@ -19,8 +19,9 @@ fun! vm#edit#init()
     let s:Byte    = { pos  -> s:Funcs.pos2byte(pos)    }
     let s:Pos     = { byte -> s:Funcs.byte2pos(byte)   }
 
-    let s:v.registers   = {}
-    let s:extra_spaces  = []
+    let s:v.registers    = {}
+    let s:v.use_register = s:v.def_reg
+    let s:extra_spaces   = []
 
     return s:Edit
 endfun
@@ -71,6 +72,7 @@ fun! s:Edit.post_process(reselect, shift) dict
         if l[-1:] ==# ' ' | call setline(line, l[:-2]) | endif
     endfor
 
+    let s:extra_spaces = []
     call s:Global.update_regions()
     call s:Global.select_region_at_pos('.')
 endfun
@@ -144,18 +146,28 @@ endfun
 let s:delchars = { c -> index(['d', 'w', 'e', 'b','W', 'E', 'B', '$', '^', '0'], c) >= 0 }
 let s:chgchars = { c -> index(['c', 'w', 'e', 'b','W', 'E', 'B', '$', '^', '0', 's'], c) >= 0 }
 let s:rplchars = { c -> index(['r', 'w', 'e', 'b','W', 'E', 'B', '$', '^', '0'], c) >= 0 }
+let s:ynkchars = { c -> index(['w', 'e', 'b','W', 'E', 'B', '$', '^', '0'], c) >= 0 }
 
 fun! s:Edit.get_motion(op, n) dict
 
+    let reg = v:register
     let hl1 = 'WarningMsg' | let hl2 = 'Label'
-    let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  '  , hl2]] :
+
+    let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
                 \ a:op==#'c'? [['Change ', hl1], ['([n] c/s/w/e/b/$...) ?  ', hl2]] :
-                \ a:op==#'r'? [['Replace', hl1], ['([n] r/w/e/b/$...) ?  '  , hl2]] : 'Aborted.'
+                \ a:op==#'y'? [['Yank   ', hl1], ['([n] w/e/b/$...) ?  ',   hl2]] :
+                \ a:op==#'r'? [['Replace', hl1], ['([n] r/w/e/b/$...) ?  ',   hl2]] : 'Aborted.'
 
     call s:Funcs.msg(s, 1)
 
-    let m = (a:n>1? a:n : '').a:op
-    let M = (a:n>1? a:n : '').( a:op==#'c'? 'd' : a:op )
+    if index(['y', 'd'], a:op) >= 0
+        let m = (a:n>1? a:n : '').( reg == s:v.def_reg? '' : '"'.reg ).a:op
+        let M = (a:n>1? a:n : '').( reg == s:v.def_reg? '' : '"'.reg ).a:op
+        let s:v.use_register = reg
+    else
+        let m = (a:n>1? a:n : '').a:op
+        let M = (a:n>1? a:n : '').( a:op==#'c'? 'd' : a:op )
+        endif
     echon m
 
     while 1
@@ -163,6 +175,7 @@ fun! s:Edit.get_motion(op, n) dict
         if str2nr(c) > 0                     | echon c | let M .= c | let m .= c
         elseif a:op ==# 'd' && s:delchars(c) | echon c | let M .= c | let m .= c | break
         elseif a:op ==# 'c' && s:chgchars(c) | echon c | let M .= c | let m .= c | break
+        elseif a:op ==# 'y' && s:ynkchars(c) | echon c | let M .= c | let m .= c | break
         elseif a:op ==# 'r' && s:rplchars(c) | echon c | let M .= c | let m .= c | break
 
         else | let M = '' | break | endif
@@ -173,6 +186,10 @@ fun! s:Edit.get_motion(op, n) dict
     elseif a:op == 'd'
         let s:cmd = M
         call self.process()
+    elseif a:op == 'y'
+        call vm#commands#change_mode(1)
+        let cmd = substitute(M, "^.*y", "", "")."\"".reg.'y'
+        call feedkeys(cmd)
     elseif a:op == 'c'
         let s:cmd = M
         call self.process()
@@ -228,10 +245,12 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.yank(hard, def_reg, silent, ...) dict
-    if !s:X()    | call s:Funcs.msg('Not in cursor mode.', 0)  | return | endif
+    if !s:X()    | call self.get_motion('y', v:count)          | return | endif
     if !s:min(1) | call s:Funcs.msg('No regions selected.', 0) | return | endif
 
-    let register = a:def_reg? s:v.def_reg : v:register
+    let register = s:v.use_register? s:v.use_register :
+                \  a:def_reg?        s:v.def_reg : v:register
+
     let text = []  | let maxw = 0
 
     for r in s:R()

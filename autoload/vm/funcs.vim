@@ -11,10 +11,12 @@ fun! vm#funcs#init()
     let s:V       = b:VM_Selection
 
     let s:v       = s:V.Vars
-    let s:Regions = s:V.Regions
     let s:Global  = s:V.Global
     let s:Search  = s:V.Search
     let s:Edit    = s:V.Edit
+
+    let s:R    = {     -> s:V.Regions           }
+
     return s:Funcs
 endfun
 
@@ -150,7 +152,7 @@ fun! s:Funcs.count_msg(force) dict
         call self.msg("No selected regions.", 1)
         return | endif
 
-    let ix = g:VM_debug? " ".s:V.Regions[s:v.index].index : ''
+    let ix = g:VM_debug? " ".s:R()[s:v.index].index : ''
     let hl = 'Directory'
     let i = [' ', hl]
     let m1 = s:m1()
@@ -159,9 +161,9 @@ fun! s:Funcs.count_msg(force) dict
     let i3 = [' / ', hl]
     let m3 = s:m3()
     let i4 = [' ['.s:v['index'].ix.']  ', hl]
-    let s = len(s:Regions)>1 ? 's.' : '.'
+    let s = len(s:R())>1 ? 's.' : '.'
     let t = g:VM.extend_mode? ' region' : ' cursor'
-    let t1 = [len(s:Regions).t.s.'   Current patterns: ', hl]
+    let t1 = [len(s:R()).t.s.'   Current patterns: ', hl]
     let t2 = [string(s:v.search), 'Type']
     call self.msg([i, m1, i2, m2, i3, m3, i4, t1, t2], a:force)
 endfun
@@ -169,6 +171,19 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Utility functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.show_registers() dict
+    echohl Label | echo " Register\tLine\t--- Register contents ---" | echohl None
+    for r in keys(s:v.registers)
+        echohl Directory  | echo "\n    ".r
+        let l = 1
+        for s in s:v.registers[r]
+            echohl WarningMsg | echo "\t\t".l."\t"
+            echohl None  | echon s
+            let l += 1
+        endfor
+    endfor
+endfun
 
 function! s:Funcs.pad(t, n)
     if len(a:t) > a:n
@@ -184,7 +199,7 @@ fun! s:Funcs.regions_contents() dict
     echohl WarningMsg | echo "Index\tID\tA\tB\tw\tl / L\t\ta / b\t\t"
                 \ "--- Pattern ---\t"
                 \ "--- Regions contents ---" | echohl None
-    for r in s:Regions | call self.region_txt(r) | endfor
+    for r in s:R() | call self.region_txt(r) | endfor
 endfun
 
 fun! s:Funcs.region_txt(r) dict

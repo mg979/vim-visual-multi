@@ -1,15 +1,15 @@
 fun! vm#region#init()
     let s:V       = b:VM_Selection
     let s:v       = s:V.Vars
-    let s:Regions = s:V.Regions
     let s:Global  = s:V.Global
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
     let s:Edit    = s:V.Edit
 
-    let s:X    = { -> g:VM.extend_mode }
+    let s:X    = {     -> g:VM.extend_mode      }
+    let s:R    = {     -> s:V.Regions           }
     let s:Byte = { pos -> s:Funcs.pos2byte(pos) }
-    let s:lcol = { ln  -> s:Funcs.lastcol(ln) }
+    let s:lcol = { ln  -> s:Funcs.lastcol(ln)   }
 endfun
 
 
@@ -22,9 +22,8 @@ endfun
 
 " b:VM_Selection (= s:V) contains Regions, Matches, Vars (= s:v = plugin variables)
 
-" s:Global    : holds the Global class methods
-" s:Regions   : contains the regions with their contents
-" s:v.matches : contains the current matches as read with getmatches()
+" s:V.Global    : holds the Global class methods
+" s:V.Regions   : contains the regions with their contents
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -58,13 +57,13 @@ fun! vm#region#new(cursor, ...)
     let s:v.index = R.index | let s:v.ID += 1
 
     "keep regions list ordered
-    if empty(s:Regions) || s:Regions[s:v.index-1].A < R.A
-        call add(s:Regions, R)
+    if empty(s:R()) || s:R()[s:v.index-1].A < R.A
+        call add(s:R(), R)
     else
         let i = 0
-        for r in s:Regions
+        for r in s:R()
             if r.A > R.A
-                call insert(s:Regions, R, i)
+                call insert(s:R(), R, i)
                 break
             endif
             let i += 1
@@ -96,7 +95,7 @@ fun! s:Region.new(cursor, ...)
     " R.matches    : holds the highlighting matches
 
     let R         = copy(self)
-    let R.index   = len(s:Regions)
+    let R.index   = len(s:R())
     let R.dir     = s:v.direction
     let R.id      = s:v.ID + 1
 
@@ -237,7 +236,7 @@ endfun
 
 fun! s:Region.remove() dict
     call self.remove_highlight()
-    let R = remove(s:Regions, self.index)
+    let R = remove(s:R(), self.index)
     call remove(s:v.IDs_list, index(s:v.IDs_list, self.id))
     call s:Global.update_indices()
     return R

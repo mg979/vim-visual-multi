@@ -42,6 +42,7 @@ fun! vm#plugs#init()
 
     nnoremap        <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex()<cr>:call <SID>Mode()<cr>/
     nnoremap        <Plug>(VM-Show-Regions-Text)       :call b:VM_Selection.Funcs.regions_contents()<cr>
+    nnoremap        <Plug>(VM-Show-Registers)          :call b:VM_Selection.Funcs.show_registers()<cr>
     nnoremap        <Plug>(VM-Erase-Regions)           :call b:VM_Selection.Global.erase_regions()<cr>
     nnoremap        <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
     nnoremap        <Plug>(VM-Switch-Mode)             :call vm#commands#change_mode(0)<cr>
@@ -96,8 +97,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-P-Paste-Block)      :call b:VM_Selection.Edit.paste(1, 1)<cr>
     nnoremap        <Plug>(VM-Edit-p-Paste)            :call b:VM_Selection.Edit.paste(0, 0)<cr>
     nnoremap        <Plug>(VM-Edit-P-Paste)            :call b:VM_Selection.Edit.paste(1, 0)<cr>
-    nnoremap        <Plug>(VM-Edit-Yank)               :call b:VM_Selection.Edit.yank(1, 0, 0)<cr>
-    nnoremap        <Plug>(VM-Edit-Soft-Yank)          :call b:VM_Selection.Edit.yank(0, 0, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-Yank)               :<C-u>call b:VM_Selection.Edit.yank(1, 0, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-Soft-Yank)          :<C-u>call b:VM_Selection.Edit.yank(0, 0, 0)<cr>
     nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
     nnoremap        <Plug>(VM-Run-Macro-Replace)       :call b:VM_Selection.Edit.run_macro(1)<cr>
     nnoremap        <Plug>(VM-Edit-Shift-Right)        :call b:VM_Selection.Edit.shift(1)<cr>

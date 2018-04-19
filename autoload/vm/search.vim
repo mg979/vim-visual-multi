@@ -5,12 +5,13 @@
 fun! vm#search#init()
     let s:V        = b:VM_Selection
     let s:v        = s:V.Vars
-    let s:Regions  = s:V.Regions
 
     let s:Funcs    = s:V.Funcs
     let s:Edit     = s:V.Edit
 
     let s:V.Search = s:Search
+
+    let s:R        = { -> s:V.Regions }
 
     return s:Search
 endfun
@@ -92,10 +93,10 @@ fun! s:Search.remove(also_regions) dict
         call s:Funcs.msg('No search patters yet.', 0) | return | endif
 
     if a:also_regions
-        let i = len(s:Regions) - 1 | let removed = 0
+        let i = len(s:R()) - 1 | let removed = 0
         while i>=0
-            if s:Regions[i].pat ==# pat
-                call s:Regions[i].remove()
+            if s:R()[i].pat ==# pat
+                call s:R()[i].remove()
                 let removed += 1 | endif
             let i -= 1 | endwhile
 

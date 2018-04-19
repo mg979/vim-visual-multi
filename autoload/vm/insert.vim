@@ -159,5 +159,6 @@ fun! s:Insert.stop() dict
     endfor
 
     let self.is_active = 0
+    call s:V.Edit.post_process(0,0)
     call s:Global.update_regions()
 endfun
