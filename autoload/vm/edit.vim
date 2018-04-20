@@ -308,8 +308,7 @@ fun! s:Edit.run_normal(cmd, recursive) dict
 
     if a:cmd == -1
         let cmd = input('Normal command? ')
-        if cmd == "\<esc>"
-            call s:Funcs.msg('Command aborted.', 0) | return | endif
+        if empty(cmd) | call s:Funcs.msg('Command aborted.', 1) | return | endif
     else
         let cmd = a:cmd | endif
 
@@ -325,9 +324,8 @@ endfun
 fun! s:Edit.run_ex(remember, ...) dict
     if !a:0
         let cmd = input('Ex command? ', '', 'command')
-        if cmd == "\<esc>"
-            call s:Funcs.msg('Command aborted.', 0)
-            return | endif
+        if empty(cmd) | call s:Funcs.msg('Command aborted.', 1) | return | endif
+
     elseif !empty(a:1)
         let cmd = a:1
     else
