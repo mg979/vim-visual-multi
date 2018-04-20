@@ -37,8 +37,8 @@ fun! s:Edit._process(cmd)
     let size = s:size() | let change = 0
 
     for r in s:R()
-        if r.index == self.skip_index | continue | endif
-        let test = r.shift(change, change)
+        if !s:v.auto && r.index == self.skip_index | continue | endif
+        call r.shift(change, change)
         call cursor(r.l, r.a)
         exe a:cmd
 
@@ -48,7 +48,6 @@ fun! s:Edit._process(cmd)
 endfun
 
 fun! s:Edit.process(...) dict
-    "Optional args:
     "arg1: prefix for normal command
     "arg2: 0 for recursive command
 
@@ -376,7 +375,7 @@ fun! s:Edit.run_macro(replace) dict
     let s:cmd = "@".reg
     let motions = s:before_macro()
 
-    if a:replace | call self.delete(0, 0, 1)
+    if a:replace | call self.delete(1, 0, 0)
     elseif s:X() | call vm#commands#change_mode(1) | endif
 
     call self.process()
@@ -514,7 +513,7 @@ fun! s:store_widths(...)
     for r in s:R()
         "if using list, w must be len[i]-1, but always >= 0, set it to 0 if empty
         if use_list | let w = len(list[r.index]) | endif
-        call add(W, use_text? text : 
+        call add(W, use_text? text :
                 \   use_list? (w? w-1 : 0) :
                 \   r.w
                 \) | endfor

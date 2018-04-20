@@ -90,7 +90,7 @@ fun! s:Insert.start(mode, ...) dict
             call r.remove_highlight() | endif | endfor
 
     "start tracking text changes
-    call vm#augroup_start(a:mode)
+    call self.auto_start(a:mode)
 
     inoremap <buffer> <esc>   <esc>:call b:VM_Selection.Insert.stop(-1)<cr>
     inoremap <buffer> <space> <esc>:call b:VM_Selection.Insert.stop(b:VM_Selection.Insert.mode)<cr>
@@ -149,7 +149,7 @@ endfun
 fun! s:Insert.stop(mode) dict
     iunmap <buffer> <esc>
     iunmap <buffer> <space>
-    call vm#augroup_end()
+    call self.auto_end()
 
     let self.mode = ''
 
@@ -174,3 +174,28 @@ fun! s:Insert.stop(mode) dict
     call s:Global.update_regions()
     if a:mode != -1 | call self.start(a:mode, 1) | return | endif
 endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Autocommands
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Insert.auto_start(type) dict
+    augroup plugin-vm-insert
+        au!
+        if a:type ==# 'c'
+            if g:VM_live_editing
+                au TextChangedI * call b:VM_Selection.Insert.live_insert()
+            else
+                au InsertLeave * call b:VM_Selection.Edit.apply_change()
+            endif
+        endif
+    augroup END
+endfun
+
+fun! s:Insert.auto_end() dict
+    augroup plugin-vm-insert
+        au!
+    augroup END
+endfun
+
+

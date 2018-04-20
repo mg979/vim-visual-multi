@@ -56,7 +56,6 @@ fun! vm#init_buffer(empty, ...)
     let s:V.Edit       = vm#edit#init()
     let s:V.Insert     = vm#insert#init()
 
-    call vm#augroup_start(0)
     call vm#maps#start()
     call vm#region#init()
 
@@ -93,33 +92,8 @@ fun! vm#reset(...)
     "exiting manually
     if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif
 
-    call vm#augroup_end()
     call clearmatches()
     set nohlsearch
     call garbagecollect()
 endfun
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Autocommands
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#augroup_start(type)
-    augroup plugin-visual-multi
-        au!
-        if a:type ==# 'c'
-            if g:VM_live_editing
-                au TextChangedI * call b:VM_Selection.Insert.live_insert()
-            else
-                au InsertLeave * call b:VM_Selection.Edit.apply_change()
-            endif
-        endif
-    augroup END
-endfun
-
-fun! vm#augroup_end()
-    augroup plugin-visual-multi
-        au!
-    augroup END
-endfun
-
 
