@@ -93,7 +93,7 @@ fun! s:Insert.start(mode, ...) dict
     call self.auto_start(a:mode)
 
     inoremap <buffer> <esc>   <esc>:call b:VM_Selection.Insert.stop(-1)<cr>
-    inoremap <buffer> <space> <esc>:call b:VM_Selection.Insert.stop(b:VM_Selection.Insert.mode)<cr>
+    "inoremap <buffer> <space> <esc>:call b:VM_Selection.Insert.stop(b:VM_Selection.Insert.mode)<cr>
     call s:Global.update_cursor_highlight()
 
     "start insert mode and break the undo point
@@ -148,7 +148,7 @@ endfun
 
 fun! s:Insert.stop(mode) dict
     iunmap <buffer> <esc>
-    iunmap <buffer> <space>
+    "iunmap <buffer> <space>
     call self.auto_end()
 
     let self.mode = ''

@@ -137,7 +137,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.apply_change() dict
-    call vm#augroup_end()
+    call s:V.Insert.auto_end()
     let s:cmd = '.'
     let self.skip_index = s:v.index
     call self.process()
