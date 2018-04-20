@@ -112,10 +112,10 @@ fun! vm#maps#start()
     nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
     nmap <silent> <nowait> <buffer> <C-t>           <Plug>(VM-Edit-Transpose)
 
-    nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-p-Paste-Block)
-    nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-P-Paste-Block)
-    nmap <silent> <nowait> <buffer> <leader>p       <Plug>(VM-Edit-p-Paste)
-    nmap <silent> <nowait> <buffer> <leader>P       <Plug>(VM-Edit-P-Paste)
+    nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-p-Paste)
+    nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-P-Paste)
+    nmap <silent> <nowait> <buffer> <leader>p       <Plug>(VM-Edit-p-Paste-Block)
+    nmap <silent> <nowait> <buffer> <leader>P       <Plug>(VM-Edit-P-Paste-Block)
 
     "double leader
     nmap     <silent> <nowait> <buffer> <leader><leader>@ <Plug>(VM-Run-Macro-Replace)
