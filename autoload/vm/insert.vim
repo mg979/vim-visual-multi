@@ -92,7 +92,7 @@ fun! s:Insert.start(mode, ...) dict
     "start tracking text changes
     call self.auto_start(a:mode)
 
-    inoremap <buffer> <esc>   <esc>:call b:VM_Selection.Insert.stop(-1)<cr>
+    inoremap <silent> <buffer> <esc>   <esc>:call b:VM_Selection.Insert.stop(-1)<cr>
     "inoremap <buffer> <space> <esc>:call b:VM_Selection.Insert.stop(b:VM_Selection.Insert.mode)<cr>
     call s:Global.update_cursor_highlight()
 
@@ -172,6 +172,7 @@ fun! s:Insert.stop(mode) dict
     let self.is_active = 0
     call s:V.Edit.post_process(0,0)
     call s:Global.update_regions()
+    call s:Funcs.count_msg(1)
     if a:mode != -1 | call self.start(a:mode, 1) | return | endif
 endfun
 
@@ -184,9 +185,9 @@ fun! s:Insert.auto_start(type) dict
         au!
         if a:type ==# 'c'
             if g:VM_live_editing
-                au TextChangedI * call b:VM_Selection.Insert.live_insert()
+                au TextChangedI * silent call b:VM_Selection.Insert.live_insert()
             else
-                au InsertLeave * call b:VM_Selection.Edit.apply_change()
+                au InsertLeave * silent call b:VM_Selection.Edit.apply_change()
             endif
         endif
     augroup END

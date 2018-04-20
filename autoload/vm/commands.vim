@@ -166,8 +166,9 @@ fun! vm#commands#find_under(visual, whole, inclusive)
     if !a:visual | call s:yank(a:inclusive) | endif
 
     call s:Search.add()
-    call s:Global.get_region()
+    let R = s:Global.get_region()
     call s:Funcs.count_msg(0)
+    return R
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -186,7 +187,7 @@ fun! vm#commands#add_under(visual, whole, inclusive, ...)
     call s:Search.add()
     let R = s:Global.get_region()
     "call s:Global.merge_regions(R.l)
-    if !a:0 | call vm#commands#find_next(0, 0)
+    if !a:0 | return vm#commands#find_next(0, 0)
     else    | call s:Funcs.count_msg(1) | endif
 endfun
 
@@ -196,17 +197,18 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
 
     let storepos = getpos('.')
-    let s:v.silence = 1
+    let s:v.total_silence = 1
     let seen = []
 
-    call vm#commands#find_under(a:visual, a:whole, a:inclusive)
+    let R = vm#commands#find_under(a:visual, a:whole, a:inclusive)
 
-    while index(seen, s:v.index) == -1
-        call add(seen, s:v.index)
-        call vm#commands#find_next(0, 0)
+    while index(seen, R.id) == -1
+        call add(seen, R.id)
+        let R = vm#commands#find_next(0, 0)
     endwhile
 
     call setpos('.', storepos)
+    let s:v.total_silence = 0
     call s:Funcs.count_msg(1)
 endfun
 
@@ -218,13 +220,14 @@ endfun
 fun! s:get_next(n)
     if s:X()
         silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
-        call s:Global.get_region()
+        let R = s:Global.get_region()
         call s:Funcs.count_msg(1)
     else
         silent exe "keepjumps normal! ".a:n."g".a:n."y`["
-        call vm#commands#add_cursor_at_word(0, 0)
+        let R = vm#commands#add_cursor_at_word(0, 0)
     endif
     let s:v.nav_direction = a:n ==# 'n'? 1 : 0
+    return R
 endfun
 
 fun! s:navigate(force, dir)
@@ -268,7 +271,7 @@ fun! vm#commands#find_next(skip, nav)
     elseif a:skip | call s:skip() | endif
     "skip current match
 
-    call s:get_next('n')
+    return s:get_next('n')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -290,7 +293,7 @@ fun! vm#commands#find_prev(skip, nav)
     "move to the beginning of the current match
     if s:X() && s:v.index >= 0 | call cursor(r.l, r.a) | endif
 
-    call s:get_next('N')
+    return s:get_next('N')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -301,10 +304,8 @@ fun! vm#commands#skip(just_remove)
     if a:just_remove
         let r = s:Global.is_region_at_pos('.')
         if !empty(r)
-            call r.remove()
-            let s:v.index = len(s:R())? (s:v.index > 0? s:v.index-1 : 0) : -1
+            call s:Global.remove_last_region(r.id)
         endif
-        call s:Funcs.count_msg(0)
 
     elseif s:v.nav_direction
         call vm#commands#find_next(1, 0)

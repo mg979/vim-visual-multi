@@ -169,11 +169,11 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.remove_last_region() dict
+fun! s:Global.remove_last_region(...) dict
     """Remove last region and reselect the previous one."""
 
     for r in s:R()
-        if r.id == s:v.IDs_list[-1]
+        if r.id == ( a:0? a:1 : s:v.IDs_list[-1] )
             call r.remove()
             break
         endif

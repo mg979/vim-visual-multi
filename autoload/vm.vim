@@ -44,6 +44,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.direction        = 1
     let s:v.auto             = 0
     let s:v.silence          = 0
+    let s:v.total_silence    = 0
     let s:v.moving           = 0
     let s:v.only_this        = 0
     let s:v.only_this_always = 0

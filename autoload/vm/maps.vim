@@ -1,13 +1,13 @@
 let s:NVIM = has('gui_running') || has('nvim')
 
-let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E']
+let s:motions  = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E']
 let s:signs    = ['$', '0', '^', '%']
 let s:find     = ['f', 'F', 't', 'T']
-let s:simple   = ['h', 'j', 'k', 'l', 'd', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M', 'u', 'x', 'X', 'r',]
+let s:simple   = ['d', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'Z', 'u', 'x', 'X', 'r',]
 
-let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', 't', 'q', ]
+let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', 't', 'q', 'b' ]
 let s:cx_maps  = ['t', 'm', '/', ']', '}', 's', 'S', '<F12>', '"', 'q']
-let s:alt_maps = ['j', 'k', 'J', '{', '}', ']', '-', ]
+let s:alt_maps = ['j', 'k', 'J', '{', '}', ']', 'q', ]
 let s:leader   = ['@', '/', 'y', 'p', 'P']
 let s:leader2  = ['@']
 
@@ -35,7 +35,7 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> o          <Plug>(VM-Invert-Direction)
     nmap     <silent> <nowait> <buffer> q          <Plug>(VM-Skip-Region)
     nmap     <silent> <nowait> <buffer> Q          <Plug>(VM-Remove-Region)
-    nmap     <silent> <nowait> <buffer> M          <Plug>(VM-Toggle-Multiline)
+    nmap     <silent> <nowait> <buffer> <M-q>      <Plug>(VM-Remove-Last-Region)
     nmap     <silent> <nowait> <buffer> u          <Plug>(VM-Undo)
     nmap     <silent> <nowait> <buffer> U          <Plug>(VM-Undo-Visual)
     nnoremap <silent> <nowait> <buffer> n          n
@@ -73,8 +73,8 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> <c-x><F12> <Plug>(VM-Toggle-Debug)
 
     "ctrl
+    nmap     <silent> <nowait> <buffer> <c-b>      <Plug>(VM-Toggle-Multiline)
     nmap              <nowait> <buffer> <C-q>      <Plug>(VM-Run-Ex)
-    nmap     <silent> <nowait> <buffer> <m-->      <Plug>(VM-Remove-Last-Region)
     nmap     <silent> <nowait> <buffer> <c-c>      <Plug>(VM-Case-Setting)
     nmap     <silent> <nowait> <buffer> <c-w>      <Plug>(VM-Toggle-Whole-Word)
     nmap     <silent> <nowait> <buffer> <c-o>      <Plug>(VM-Toggle-Only-This-Region)
@@ -151,10 +151,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:hjkl()
-    nnoremap <silent> <nowait> <buffer> h           h
-    nnoremap <silent> <nowait> <buffer> j           j
-    nnoremap <silent> <nowait> <buffer> k           k
-    nnoremap <silent> <nowait> <buffer> l           l
+    nmap <silent> <nowait> <buffer> h           <Plug>(VM-Motion-h)
+    nmap <silent> <nowait> <buffer> j           <Plug>(VM-Motion-j)
+    nmap <silent> <nowait> <buffer> k           <Plug>(VM-Motion-k)
+    nmap <silent> <nowait> <buffer> l           <Plug>(VM-Motion-l)
 
     "nmap     <silent> <nowait> <buffer> J           <Plug>(VM-Motion-j)
     "nmap     <silent> <nowait> <buffer> K           <Plug>(VM-Motion-k)
@@ -266,6 +266,6 @@ endfun
 fun! vm#maps#motions_toggle()
     let activate = !g:VM.motions_enabled
     call vm#maps#motions(activate)
-    redraw! | call b:VM_Selection.Funcs.count_msg(0)
+    call b:VM_Selection.Funcs.count_msg(1)
 endfun
 

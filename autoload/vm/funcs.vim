@@ -113,7 +113,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.msg(text, force) dict
-    if s:v.silence && !a:force | return | endif
+    if s:v.total_silence           | return
+    elseif s:v.silence && !a:force | return | endif
 
     if type(a:text) == v:t_string
         exe "echohl" g:VM_Message_hl
@@ -146,7 +147,8 @@ fun! s:m3()
 endfun
 
 fun! s:Funcs.count_msg(force) dict
-    if s:v.silence && !a:force | return | endif
+    if s:v.total_silence           | return
+    elseif s:v.silence && !a:force | return | endif
 
     if s:v.index < 0
         call self.msg("No selected regions.", 1)
