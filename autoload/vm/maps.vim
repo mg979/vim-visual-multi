@@ -3,10 +3,10 @@ let s:NVIM = has('gui_running') || has('nvim')
 let s:motions  = ['w', 'W', 'b', 'B', 'e', 'E']
 let s:signs    = ['$', '0', '^', '%']
 let s:find     = ['f', 'F', 't', 'T']
-let s:simple   = ['h', 'j', 'k', 'l', 'd', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M', 'u']
+let s:simple   = ['h', 'j', 'k', 'l', 'd', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'M', 'u', 'x', 'X', 'r',]
 
-let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', ]
-let s:cx_maps  = ['t', 'm', '/', ']', '}', 's', 'S', '<F12>', '<C-x>', '"']
+let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', 't', 'q', ]
+let s:cx_maps  = ['t', 'm', '/', ']', '}', 's', 'S', '<F12>', '"', 'q']
 let s:alt_maps = ['j', 'k', 'J', '{', '}', ']', '-', ]
 let s:leader   = ['@', '/', 'y', 'p', 'P']
 let s:leader2  = ['@']
@@ -64,6 +64,7 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> <M-]>      <Plug>(VM-Rewrite-Last-Search)
 
     "utility
+    nmap              <nowait> <buffer> <C-x>q     <Plug>(VM-Run-Last-Ex)
     nmap              <nowait> <buffer> <C-x>t     <Plug>(VM-Show-Regions-Text)
     nmap              <nowait> <buffer> <C-x>"     <Plug>(VM-Show-Registers)
     nmap     <silent> <nowait> <buffer> <C-x>m     <Plug>(VM-Merge-Regions)
@@ -72,6 +73,7 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> <c-x><F12> <Plug>(VM-Toggle-Debug)
 
     "ctrl
+    nmap              <nowait> <buffer> <C-q>      <Plug>(VM-Run-Ex)
     nmap     <silent> <nowait> <buffer> <m-->      <Plug>(VM-Remove-Last-Region)
     nmap     <silent> <nowait> <buffer> <c-c>      <Plug>(VM-Case-Setting)
     nmap     <silent> <nowait> <buffer> <c-w>      <Plug>(VM-Toggle-Whole-Word)
@@ -99,23 +101,21 @@ fun! vm#maps#start()
     nmap <silent> <nowait> <buffer> -               <Plug>(VM-Motion-Shrink)
     nmap <silent> <nowait> <buffer> +               <Plug>(VM-Motion-Enlarge)
 
+    "edit
+    nmap          <nowait> <buffer> Z               <Plug>(VM-Run-Normal)
+    nmap <silent> <nowait> <buffer> x               <Plug>(VM-Edit-x)
+    nmap <silent> <nowait> <buffer> X               <Plug>(VM-Edit-X)
+    nmap <silent> <nowait> <buffer> r               <Plug>(VM-Edit-Replace)
     nmap <silent> <nowait> <buffer> c               <Plug>(VM-Edit-Change)
     nmap <silent> <nowait> <buffer> d               <Plug>(VM-Edit-Delete)
     nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
     nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
-    nmap <silent> <nowait> <buffer> <C-x><C-x>      <Plug>(VM-Edit-Transpose)
+    nmap <silent> <nowait> <buffer> <C-t>           <Plug>(VM-Edit-Transpose)
 
-    if g:VM_invert_paste_behaviour
-        nmap <silent> <nowait> <buffer> P           <Plug>(VM-Edit-p-Paste-Block)
-        nmap <silent> <nowait> <buffer> p           <Plug>(VM-Edit-P-Paste-Block)
-        nmap <silent> <nowait> <buffer> <leader>P   <Plug>(VM-Edit-p-Paste)
-        nmap <silent> <nowait> <buffer> <leader>p   <Plug>(VM-Edit-P-Paste)
-    else
-        nmap <silent> <nowait> <buffer> p           <Plug>(VM-Edit-p-Paste-Block)
-        nmap <silent> <nowait> <buffer> P           <Plug>(VM-Edit-P-Paste-Block)
-        nmap <silent> <nowait> <buffer> <leader>p   <Plug>(VM-Edit-p-Paste)
-        nmap <silent> <nowait> <buffer> <leader>P   <Plug>(VM-Edit-P-Paste)
-    endif
+    nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-p-Paste-Block)
+    nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-P-Paste-Block)
+    nmap <silent> <nowait> <buffer> <leader>p       <Plug>(VM-Edit-p-Paste)
+    nmap <silent> <nowait> <buffer> <leader>P       <Plug>(VM-Edit-P-Paste)
 
     "double leader
     nmap     <silent> <nowait> <buffer> <leader><leader>@ <Plug>(VM-Run-Macro-Replace)

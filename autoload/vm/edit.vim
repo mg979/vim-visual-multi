@@ -13,14 +13,17 @@ fun! vm#edit#init()
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
 
-    let s:R       = {      -> s:V.Regions              }
-    let s:X       = {      -> g:VM.extend_mode         }
-    let s:size    = {      -> line2byte(line('$') + 1) }
-    let s:Byte    = { pos  -> s:Funcs.pos2byte(pos)    }
-    let s:Pos     = { byte -> s:Funcs.byte2pos(byte)   }
+    let s:R         = {      -> s:V.Regions                            }
+    let s:X         = {      -> g:VM.extend_mode                       }
+    let s:size      = {      -> line2byte(line('$') + 1)               }
+    let s:Byte      = { pos  -> s:Funcs.pos2byte(pos)                  }
+    let s:Pos       = { byte -> s:Funcs.byte2pos(byte)                 }
+    let s:Is_Region = {      -> !empty(s:Global.is_region_at_pos('.')) }
 
     let s:v.registers    = {}
     let s:v.use_register = s:v.def_reg
+    let s:v.last_ex      = ''
+    let s:v.new_text     = ''
     let s:extra_spaces   = []
 
     return s:Edit
@@ -30,25 +33,29 @@ endfun
 " Region processing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.process(...) dict
-    "Optional args:
-    "arg1: prefix for normal command
-    "arg2: 0 for recursive command
-
+fun! s:Edit._process(cmd)
     let size = s:size() | let change = 0
-
-    let cmd = a:0? (a:1."normal".(a:2? "! ":" ").s:cmd)
-            \    : ("normal! ".s:cmd)
 
     for r in s:R()
         if r.index == self.skip_index | continue | endif
         let test = r.shift(change, change)
         call cursor(r.l, r.a)
-        exe cmd
+        exe a:cmd
 
         "update changed size
         let change = s:size() - size
     endfor
+endfun
+
+fun! s:Edit.process(...) dict
+    "Optional args:
+    "arg1: prefix for normal command
+    "arg2: 0 for recursive command
+
+    let cmd = a:0? (a:1."normal".(a:2? "! ":" ").s:cmd)
+            \    : ("normal! ".s:cmd)
+
+    call self._process(cmd)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -96,7 +103,7 @@ fun! s:Edit.delete(X, keep, count) dict
                 call add(s:extra_spaces, r.L)
             endif
             if a:keep
-                call self.yank(1, 1, 1, 1)
+                call self.yank(1, 1, 1)
             endif
             let reg = a:keep? '' : "\"_"
             exe "normal! ".reg."d".r.w."l"
@@ -106,7 +113,7 @@ fun! s:Edit.delete(X, keep, count) dict
         endfor
         call vm#commands#change_mode(1)
 
-    else
+    elseif a:count
         "ask for motion
         call self.get_motion('d', a:count)
     endif
@@ -138,15 +145,112 @@ fun! s:Edit.apply_change() dict
 endfun
 
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Replace
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.replace() dict
+    if s:X()
+        let char = nr2char(getchar())
+        if char ==? "\<esc>" | return | endif
+
+        let s:W = s:store_widths() | let s:v.new_text = []
+
+        for i in s:W
+            let r = ''
+            while len(r) < i | let r .= char | endwhile
+            call add(s:v.new_text, r)
+        endfor
+
+        call self.delete(1, 0, 1)
+        call self.block_paste(1)
+        call self.post_process(1, 0)
+    else
+        call self.get_motion('c', a:count)
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Paste
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.paste(before, block, reselect) dict
+    let reg = v:register | let X = s:X()
+
+    if X | call self.delete(1, 0, 1) | endif
+
+    if !a:block || !has_key(s:v.registers, reg)
+        let s:v.new_text = s:default_text()
+    else
+        let s:v.new_text = s:v.registers[reg]
+    endif
+
+    call self.block_paste(a:before)
+    let s:W = s:store_widths(s:v.new_text)
+    call self.post_process(X? 1:a:reselect, !a:before)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.block_paste(before) dict
+    let size = s:size() | let change = 0 | let text = copy(s:v.new_text)
+
+    for r in s:R()
+        if !empty(text)
+            call r.shift(change, change)
+            call cursor(r.l, r.a)
+            let s = remove(text, 0)
+            call s:Funcs.set_reg(s)
+
+            if a:before | normal! P
+            else        | normal! p
+            endif
+
+            "update changed size
+            let change = s:size() - size
+        else | break | endif
+    endfor
+    call s:Funcs.restore_reg()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Yank
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.yank(hard, def_reg, silent, ...) dict
+    if !s:X()         | call self.get_motion('y', v:count)          | return | endif
+    if !s:min(1)      | call s:Funcs.msg('No regions selected.', 0) | return | endif
+
+    let register = s:v.use_register? s:v.use_register :
+                \  a:def_reg?        s:v.def_reg : v:register
+
+    let text = []  | let maxw = 0
+
+    for r in s:R()
+        if len(r.txt) > maxw | let maxw = len(r.txt) | endif
+        call add(text, r.txt)
+    endfor
+
+    let s:v.registers[register] = text
+    call setreg(register, join(text, "\n"), "b".maxw)
+
+    "overwrite the old saved register
+    if a:hard
+        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), "b".maxw] | endif
+    if !a:silent
+        call s:Funcs.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
+    if a:0 | call vm#commands#change_mode(1) | endif
+endfun
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Get motion
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:delchars = { c -> index(['d', 'w', 'e', 'b','W', 'E', 'B', '$', '^', '0'], c) >= 0 }
-let s:chgchars = { c -> index(['c', 'w', 'e', 'b','W', 'E', 'B', '$', '^', '0', 's'], c) >= 0 }
-let s:rplchars = { c -> index(['r', 'w', 'e', 'b','W', 'E', 'B', '$', '^', '0'], c) >= 0 }
-let s:ynkchars = { c -> index(['w', 'e', 'b','W', 'E', 'B', '$', '^', '0'], c) >= 0 }
+let s:delchars = { c -> index(['d', 'w', 'l', 'e', 'b', 'W', 'E', 'B', '$', '^', '0'], c) >= 0 }
+let s:chgchars = { c -> index(['c', 'w', 'l', 'e', 'b', 'W', 'E', 'B', '$', '^', '0', 's'], c) >= 0 }
+let s:rplchars = { c -> index(['r', 'w', 'l', 'e', 'b', 'W', 'E', 'B', '$', '^', '0'], c) >= 0 }
+let s:ynkchars = { c -> index(['w', 'e', 'l', 'b', 'W', 'E', 'B', '$', '^', '0'], c) >= 0 }
 
 fun! s:Edit.get_motion(op, n) dict
 
@@ -198,89 +302,42 @@ fun! s:Edit.get_motion(op, n) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Commands
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Edit.paste(before, block) dict
-    let reg = v:register | let X = s:X()
-
-    "force paste before in extend mode, as it works in visual mode
-    let before = X? 1 : a:before
-    if X | call self.delete(1, 0, 1) | endif
-
-    if !a:block || !has_key(s:v.registers, reg)
-        let text = s:default_text()
-    else
-        let text = s:v.registers[reg]
-    endif
-
-    call self.block_paste(before, text)
-    let s:W = s:store_widths(text)
-    call self.post_process(X, !before)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Edit.block_paste(before, text) dict
-    let size = s:size() | let change = 0 | let text = copy(a:text)
-
-    for r in s:R()
-        if !empty(text)
-            call r.shift(change, change)
-            call cursor(r.l, r.a)
-            let s = remove(text, 0)
-            call s:Funcs.set_reg(s)
-
-            if a:before | normal! P
-            else        | normal! p
-            endif
-
-            "update changed size
-            let change = s:size() - size
-        else | break | endif
-    endfor
-    call s:Funcs.restore_reg()
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Edit.yank(hard, def_reg, silent, ...) dict
-    if !s:X()    | call self.get_motion('y', v:count)          | return | endif
-    if !s:min(1) | call s:Funcs.msg('No regions selected.', 0) | return | endif
-
-    let register = s:v.use_register? s:v.use_register :
-                \  a:def_reg?        s:v.def_reg : v:register
-
-    let text = []  | let maxw = 0
-
-    for r in s:R()
-        if len(r.txt) > maxw | let maxw = len(r.txt) | endif
-        call add(text, r.txt)
-    endfor
-
-    let s:v.registers[register] = text
-    call setreg(register, join(text, "\n"), "b".maxw)
-
-    "overwrite the old saved register
-    if a:hard
-        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), "b".maxw] | endif
-    if !a:silent
-        call s:Funcs.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
-    if !a:0 | call vm#commands#change_mode(1) | endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Ex commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_ex() dict
-    if s:count(v:count) | return | endif
+fun! s:Edit.run_normal(cmd, recursive) dict
 
-    let cmd = input('Ex command? ')
-    if cmd == "\<esc>"
-        call s:Funcs.msg('Command aborted.', 0)
-        return | endif
+    if a:cmd == -1
+        let cmd = input('Normal command? ')
+        if cmd == "\<esc>"
+            call s:Funcs.msg('Command aborted.', 0) | return | endif
+    else
+        let cmd = a:cmd | endif
 
+    let s:cmd = a:recursive? ("normal ".cmd) : ("normal! ".cmd)
+    call self.delete(s:X(), 0, 0)
+    call self._process(s:cmd)
+
+    if a:cmd ==# 'X' | for r in s:R() | call r.shift(-1,-1) | endfor | endif
+
+    call self.post_process(0,0)
+endfun
+
+fun! s:Edit.run_ex(remember, ...) dict
+    if !a:0
+        let cmd = input('Ex command? ', '', 'command')
+        if cmd == "\<esc>"
+            call s:Funcs.msg('Command aborted.', 0)
+            return | endif
+    elseif !empty(a:1)
+        let cmd = a:1
+    else
+        call s:Funcs.msg('Command not found.', 1) | return | endif
+
+    if a:remember | let s:v.last_ex = cmd | endif
+    call self.delete(s:X(), 0, 0)
+    call self._process(cmd)
+    call self.post_process(0,0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -362,14 +419,14 @@ fun! s:Edit.transpose() dict
     if !inline
         let t = remove(s:v.registers[s:v.def_reg], 0)
         call add(s:v.registers[s:v.def_reg], t)
-        call self.paste(1, 1)
+        call self.paste(1, 1, 1)
         return | endif
 
     "inline transpositions
     for rl in keys(rlines)
         let t = remove(s:v.registers[s:v.def_reg], rlines[rl][-1])
         call insert(s:v.registers[s:v.def_reg], t, rlines[rl][0])
-        call self.paste(1, 1)
+        call self.paste(1, 1, 1)
     endfor
 endfun
 
@@ -380,11 +437,11 @@ fun! s:Edit.shift(dir) dict
 
     call self.yank(0, 1, 1)
     if a:dir
-        call self.paste(0, 1)
+        call self.paste(0, 1, 1)
     else
-        call self.delete(0, 0, 1)
+        call self.delete(1, 0, 0)
         call vm#commands#motion('h', 0)
-        call self.paste(1, 1)
+        call self.paste(1, 1, 1)
     endif
 endfun
 
@@ -439,7 +496,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:store_widths(...)
-    "store regions widths in a list
+    "Build a list that holds the widths(integers) of each region
+    "It will be used for various purposes (reselection, paste as block...)
+
     let W = [] | let x = s:X()
     let use_text = 0
     let use_list = 0
@@ -450,9 +509,14 @@ fun! s:store_widths(...)
     endif
 
     "mismatching blocks must be corrected
-    if use_list | while len(list) < len(s:R()) | call add(list, 0) | endwhile | endif
+    if use_list | while len(list) < len(s:R()) | call add(list, '') | endwhile | endif
 
     for r in s:R()
-        call add(W, use_text? text : use_list? len(list[r.index])-1 : r.w) | endfor
+        "if using list, w must be len[i]-1, but always >= 0, set it to 0 if empty
+        if use_list | let w = len(list[r.index]) | endif
+        call add(W, use_text? text : 
+                \   use_list? (w? w-1 : 0) :
+                \   r.w
+                \) | endfor
     return W
 endfun

@@ -2,7 +2,7 @@
 " Insert class
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:Insert = {'index': -1, 'cursors': [], 'begin': 0, 'is_active': 0}
+let s:Insert = {'index': -1, 'cursors': [], 'begin': 0, 'is_active': 0, 'mode': ''}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -70,7 +70,7 @@ endfun
 " Live insert mode
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.start(mode) dict
+fun! s:Insert.start(mode, ...) dict
     "--------------------------------------------------------------------------
 
     "Initialize Insert Mode dict. 'begin' is the initial offset, and will be
@@ -81,6 +81,7 @@ fun! s:Insert.start(mode) dict
     let self.index     = s:v.index
     let self.begin     = s:Byte('.')
     let self.is_active = 1
+    let self.mode      = a:mode
 
     for r in s:R()
         "remove the regular cursor highlight, add new cursor
@@ -91,11 +92,14 @@ fun! s:Insert.start(mode) dict
     "start tracking text changes
     call vm#augroup_start(a:mode)
 
-    inoremap <buffer> <esc> <esc>:call b:VM_Selection.Insert.stop()<cr>
+    inoremap <buffer> <esc>   <esc>:call b:VM_Selection.Insert.stop(-1)<cr>
+    inoremap <buffer> <space> <esc>:call b:VM_Selection.Insert.stop(b:VM_Selection.Insert.mode)<cr>
     call s:Global.update_cursor_highlight()
 
     "start insert mode and break the undo point
-    call feedkeys("i\<c-g>u")
+    let keys = "i\<c-g>u"
+    if a:0 | let keys .= "\<space>" | endif
+    call feedkeys(keys, 'n')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -142,23 +146,31 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.stop() dict
+fun! s:Insert.stop(mode) dict
     iunmap <buffer> <esc>
+    iunmap <buffer> <space>
     call vm#augroup_end()
+
+    let self.mode = ''
+
+    let dot = @.
+    let dot = substitute(dot, ".\<BS>", '', 'g')
 
     let i = 0
     for r in s:R()
         if g:VM_live_editing
             let r.A = self.cursors[i].A | let r.B = r.A | call r.shift(0,0)
         elseif r.A == self.begin
-            let r.A += len(s:R())*len(@.) | let r.B = r.A | call r.shift(0,0)
+            let r.A += len(s:R())*len(dot) | let r.B = r.A | call r.shift(0,0)
         else
-            let r.A += len(@.) | let r.B = r.A | call r.shift(0,0)
+            let r.A += len(dot) | let r.B = r.A | call r.shift(0,0)
         endif
         let i += 1
     endfor
 
+
     let self.is_active = 0
     call s:V.Edit.post_process(0,0)
     call s:Global.update_regions()
+    if a:mode != -1 | call self.start(a:mode, 1) | return | endif
 endfun

@@ -93,17 +93,28 @@ fun! vm#plugs#init()
     "Edit commands
     nnoremap        <Plug>(VM-Edit-Delete)             :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, 1, v:count1)<cr>
     nnoremap        <Plug>(VM-Edit-Change)             :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1)<cr>
-    nnoremap        <Plug>(VM-Edit-p-Paste-Block)      :call b:VM_Selection.Edit.paste(0, 1)<cr>
-    nnoremap        <Plug>(VM-Edit-P-Paste-Block)      :call b:VM_Selection.Edit.paste(1, 1)<cr>
-    nnoremap        <Plug>(VM-Edit-p-Paste)            :call b:VM_Selection.Edit.paste(0, 0)<cr>
-    nnoremap        <Plug>(VM-Edit-P-Paste)            :call b:VM_Selection.Edit.paste(1, 0)<cr>
-    nnoremap        <Plug>(VM-Edit-Yank)               :<C-u>call b:VM_Selection.Edit.yank(1, 0, 0)<cr>
-    nnoremap        <Plug>(VM-Edit-Soft-Yank)          :<C-u>call b:VM_Selection.Edit.yank(0, 0, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-Replace)            :<C-u>call b:VM_Selection.Edit.replace()<cr>
+    nnoremap        <Plug>(VM-Edit-p-Paste-Block)      :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 1, g:VM.extend_mode)<cr>
+    nnoremap        <Plug>(VM-Edit-P-Paste-Block)      :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 1, g:VM.extend_mode)<cr>
+    nnoremap        <Plug>(VM-Edit-p-Paste)            :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 0, g:VM.extend_mode)<cr>
+    nnoremap        <Plug>(VM-Edit-P-Paste)            :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 0, g:VM.extend_mode)<cr>
+    nnoremap <expr> <Plug>(VM-Edit-Yank)               <SID>Yank(1)
+    nnoremap <expr> <Plug>(VM-Edit-Soft-Yank)          <SID>Yank(0)
     nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
     nnoremap        <Plug>(VM-Run-Macro-Replace)       :call b:VM_Selection.Edit.run_macro(1)<cr>
     nnoremap        <Plug>(VM-Edit-Shift-Right)        :call b:VM_Selection.Edit.shift(1)<cr>
     nnoremap        <Plug>(VM-Edit-Shift-Left)         :call b:VM_Selection.Edit.shift(0)<cr>
     nnoremap        <Plug>(VM-Edit-Transpose)          :call b:VM_Selection.Edit.transpose()<cr>
+    nnoremap        <Plug>(VM-Run-Ex)                  :call b:VM_Selection.Edit.run_ex(1)<cr>
+    nnoremap        <Plug>(VM-Run-Last-Ex)             :call b:VM_Selection.Edit.run_ex(0, b:VM_Selection.Vars.last_ex)<cr>
+    nnoremap        <Plug>(VM-Edit-x)                  :call b:VM_Selection.Edit.run_normal('x', 0)<cr>
+    nnoremap        <Plug>(VM-Edit-X)                  :call b:VM_Selection.Edit.run_normal('X', 0)<cr>
+    nnoremap        <Plug>(VM-Run-Normal)              :call b:VM_Selection.Edit.run_normal(-1, 1)<cr>
+
+    fun! <SID>Yank(hard)
+        if empty(b:VM_Selection.Global.is_region_at_pos('.')) | return 'y' | endif
+        return ":\<C-u>call b:VM_Selection.Edit.yank(".a:hard.", 0, 0, 1)\<cr>"
+    endfun
 
     fun! <SID>Mode()
         let mode = g:VM.extend_mode? ' (extend mode)' : ' (cursor mode)'
