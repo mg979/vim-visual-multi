@@ -113,7 +113,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.msg(text, force) dict
-    if s:v.total_silence           | return
+    if s:v.eco                     | return
     elseif s:v.silence && !a:force | return | endif
 
     if type(a:text) == v:t_string
@@ -147,7 +147,7 @@ fun! s:m3()
 endfun
 
 fun! s:Funcs.count_msg(force) dict
-    if s:v.total_silence           | return
+    if s:v.eco                     | return
     elseif s:v.silence && !a:force | return | endif
 
     if s:v.index < 0

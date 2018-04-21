@@ -21,7 +21,6 @@ fun! s:init(whole, cursor, extend_mode)
 
     let s:v.whole_word = a:whole
     let s:v.nav_direction = 1
-    let s:v.eco = 0
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -199,7 +198,7 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
 
     let storepos = getpos('.')
-    let s:v.total_silence = 1 | let s:v.eco = 1
+    let s:v.eco = 1
     let seen = []
 
     let R = vm#commands#find_under(a:visual, a:whole, a:inclusive)
@@ -210,7 +209,7 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     endwhile
 
     call setpos('.', storepos)
-    let s:v.total_silence = 0 | let s:v.eco = 0
+    let s:v.eco = 0
     call s:Global.reorder_regions()
     call s:Global.update_highlight()
     call s:Global.select_region_at_pos('.')
@@ -296,7 +295,8 @@ fun! vm#commands#find_prev(skip, nav)
     "skip current match
 
     "move to the beginning of the current match
-    if s:X() && s:v.index >= 0 | call cursor(r.l, r.a) | endif
+    if s:X() && s:v.index >= 0 | call cursor(r.l, r.a)
+    else | exe "normal! h" | endif
 
     return s:get_next('N')
 endfun
