@@ -111,7 +111,7 @@ fun! s:Region.new(cursor, ...)
     let R.char    = { -> s:X()? getline(R.l)[R.cur_col()-1] : '' }
     let R.matches = {'region': [], 'cursor': 0}
 
-    if a:cursor        "/////////// CURSOR ////////////
+    if !a:0 && a:cursor    "/////////// CURSOR ////////////
 
         let R.l     = getpos('.')[1]        " line
         let R.L     = R.l
@@ -127,7 +127,7 @@ fun! s:Region.new(cursor, ...)
         let R.pat   = s:pattern(R)
 
 
-    elseif !a:0        "/////////// REGION ////////////
+    elseif !a:0            "/////////// REGION ////////////
 
         let R.l     = getpos("'[")[1]       " starting line
         let R.L     = getpos("']")[1]       " ending line
@@ -140,10 +140,10 @@ fun! s:Region.new(cursor, ...)
         let R.k     = R.a                   " anchor
         let R.K     = R.A                   " anchor offset
         let R.txt   = getreg(s:v.def_reg)   " text content
-        let R.pat   = s:pattern(R)           " associated search pattern
+        let R.pat   = s:pattern(R)          " associated search pattern
 
 
-    else               "///////// FROM ARGS ///////////
+    else                   "///////// FROM ARGS ///////////
 
         let R.l     = a:1
         let R.L     = a:2
@@ -174,40 +174,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.a_(...) dict
-    """Update r.a and r.l from the A offset.
-    """Can also be used to extend the region from the left side. ( <-> a_|--| )
+fun! s:Region.bytes(...) dict
+    """Update [l, L, a, b] from the new offsets.
+    "args: either new offsets A & B, or list [A shift, B shift]
     let r = self
 
-    if a:0 | let r.A += a:1 | endif
-
-    let r.l = byte2line(r.A)
-    let r.a = r.A - line2byte(r.l)
-    return [r.l, r.a]
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Region._b(...) dict
-    """Update r.b and r.L from the B offset.
-    """Can also be used to extend the region from the right side. ( |--|_b <-> )
-    let r = self
-
-    if a:0 | let r.B += a:1 | endif
-
-    let r.L = byte2line(r.B)
-    let r.b = r.B - line2byte(r.L)
-    return [r.L, r.b]
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Region.shift(a, b) dict
-    """Update the region from the new offsets, with shift.
-    let r = self
-
-    let r.A += a:a
-    let r.B += a:b
+    if a:0 > 1 | let r.A = a:1     | let r.B = a:2    
+    elseif a:0 | let r.A += a:1[0] | let r.B += a:1[1] | endif
 
     let r.l = byte2line(r.A)
     let r.a = r.A - line2byte(r.l)
@@ -351,13 +324,13 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_cursor(...) dict
-    """Update cursor vars from position [line, col] or offset + shift."""
+    """Update cursor vars from position [line, col] or offset shift."""
     let r = self
 
-    if a:0 == 1 | let r.l = a:1[0]         | let r.a = a:1[1]
-    else        | let res = r.a_(a:1, a:2) | let r.l = res[0] | let r.a = res[1]
-    endif
+    if a:0 && !type(a:1) | let r.l = byte2line(a:1)    | let r.a = a:1 - line2byte(r.l)
+    elseif a:0           | let r.l = a:1[0]            | let r.a = a:1[1] | endif
 
+    if !r.a | let r.a = 1 | endif
     call self.update_vars()
 endfun
 
@@ -367,8 +340,12 @@ fun! s:Region.update_region(...) dict
     """Update the main region positions."""
     let r = self
 
-    if a:0 | let r.l = a:1 | let r.L = a:2 | let r.a = a:3 | let r.b = a:4 | endif
+    if a:0 == 4 | let r.l = a:1 | let r.L = a:2 | let r.a = a:3 | let r.b = a:4
+    elseif a:0
+        let a = r.a_() | let r.l = a[0] | let r.a = a[1]
+        let b = r.b_() | let r.L = b[0] | let r.b = b[1] | endif
 
+    if !r.a | let r.a = 1 | endif
     call cursor(r.l, r.a)
     call self.yank()
     call self.update_vars()

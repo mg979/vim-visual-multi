@@ -154,23 +154,24 @@ fun! s:Insert.stop(mode) dict
     "iunmap <buffer> <space>
     call self.auto_end()
 
-    let self.mode = ''
-
     let dot = @.
     let dot = substitute(dot, ".\<BS>", '', 'g')
 
     let i = 0
     for r in s:R()
+        let s = s:append(self.mode)? 0 : 1
         if g:VM_live_editing
-            let r.A = self.cursors[i].A | let r.B = r.A | call r.shift(0,0)
+            let A = self.cursors[i].A
+            call r.bytes(A, A)
         elseif r.A == self.begin
-            let r.A += len(s:R())*len(dot) | let r.B = r.A | call r.shift(0,0)
+            call r.bytes([len(s:R())*len(dot) - s, 0])
         else
-            let r.A += len(dot) | let r.B = r.A | call r.shift(0,0)
+            call r.bytes([len(dot) - s, 0])
         endif
         let i += 1
     endfor
 
+    let self.mode = ''
 
     let self.is_active = 0
     call s:V.Edit.post_process(0,0)

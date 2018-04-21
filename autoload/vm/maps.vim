@@ -5,7 +5,7 @@ let s:signs    = ['$', '0', '^', '%']
 let s:find     = ['f', 'F', 't', 'T']
 let s:simple   = ['d', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'Z', 'u', 'x', 'X', 'r', 'M', 'a', 'A', 'i', 'I', 'O']
 
-let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', 't', 'q', 'b' ]
+let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', 't', 'q', 'b', 'z' ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"', 'q']
 let s:alt_maps = ['j', 'k', 'J', ']', 'q', ]
 let s:leader   = ['@', '/', 'y', 'p', 'P']
@@ -73,6 +73,7 @@ fun! vm#maps#start()
     "ctrl
     nmap     <silent> <nowait> <buffer> <c-b>      <Plug>(VM-Toggle-Multiline)
     nmap              <nowait> <buffer> <C-q>      <Plug>(VM-Run-Ex)
+    nmap              <nowait> <buffer> <C-z>      <Plug>(VM-Run-Last-Normal)
     nmap     <silent> <nowait> <buffer> <c-c>      <Plug>(VM-Case-Setting)
     nmap     <silent> <nowait> <buffer> <c-w>      <Plug>(VM-Toggle-Whole-Word)
     nmap     <silent> <nowait> <buffer> <c-o>      <Plug>(VM-Toggle-Only-This-Region)

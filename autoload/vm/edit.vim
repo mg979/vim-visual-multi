@@ -23,6 +23,7 @@ fun! vm#edit#init()
     let s:v.registers    = {}
     let s:v.use_register = s:v.def_reg
     let s:v.last_ex      = ''
+    let s:v.last_normal  = ''
     let s:v.new_text     = ''
     let s:extra_spaces   = []
 
@@ -38,7 +39,7 @@ fun! s:Edit._process(cmd)
 
     for r in s:R()
         if !s:v.auto && r.index == self.skip_index | continue | endif
-        call r.shift(change, change)
+        call r.bytes([change, change])
         call cursor(r.l, r.a)
         exe a:cmd
 
@@ -59,16 +60,11 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.post_process(reselect, shift) dict
+fun! s:Edit.post_process(reselect, ...) dict
     if a:reselect
         if !s:X()      | call vm#commands#change_mode(1) |  endif
         for r in s:R()
-            if a:shift
-                call r._b(s:W[r.index])
-                call r.shift(a:shift, a:shift)
-            else
-                call r._b(s:W[r.index])
-            endif
+            call r.bytes([a:1, a:1 + s:W[r.index]])
         endfor
     endif
 
@@ -95,7 +91,7 @@ fun! s:Edit.delete(X, keep, count) dict
     if a:X
         let size = s:size() | let change = 0 | let s:extra_spaces = []
         for r in s:R()
-            call r.shift(change, change)
+            call r.bytes([change, change])
             call cursor(r.l, r.a)
             let L = getline(r.L)
             if s:v.auto || r.b == len(L)
@@ -225,7 +221,7 @@ fun! s:Edit.paste(before, block, reselect) dict
 
     call self.block_paste(a:before)
     let s:W = s:store_widths(s:v.new_text)
-    call self.post_process(X? 1:a:reselect, !a:before)
+    call self.post_process((X? 1 : a:reselect), !a:before)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -235,7 +231,7 @@ fun! s:Edit.block_paste(before) dict
 
     for r in s:R()
         if !empty(text)
-            call r.shift(change, change)
+            call r.bytes([change, change])
             call cursor(r.l, r.a)
             let s = remove(text, 0)
             call s:Funcs.set_reg(s)
@@ -343,25 +339,32 @@ endfun
 " Ex commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_normal(cmd, recursive) dict
-
-    if a:cmd == -1
+fun! s:Edit.run_normal(cmd, recursive, ...) dict
+    if !a:0 && a:cmd == -1
         let cmd = input('Normal command? ')
         if empty(cmd) | call s:Funcs.msg('Command aborted.', 1) | return | endif
-    else
-        let cmd = a:cmd | endif
+
+    elseif empty(a:cmd)
+        call s:Funcs.msg('Command not found.', 1) | return
+
+    elseif !a:0
+        let cmd = a:cmd
+
+    elseif !empty(a:1)
+        call self.run_normal(a:1[0], a:1[1]) | endif
 
     let s:v.auto = 1
     let s:cmd = a:recursive? ("normal ".cmd) : ("normal! ".cmd)
     call self.delete(s:X(), 0, 0)
     call self._process(s:cmd)
 
-    if a:cmd ==# 'X' | for r in s:R() | call r.shift(-1,-1) | endfor | endif
+    if a:cmd ==# 'X' | for r in s:R() | call r.bytes([-1,-1]) | endfor | endif
 
-    call self.post_process(0,0)
+    let s:v.last_normal = [cmd, a:recursive]
+    call self.post_process(0)
 endfun
 
-fun! s:Edit.run_ex(remember, ...) dict
+fun! s:Edit.run_ex(...) dict
     if !a:0
         let cmd = input('Ex command? ', '', 'command')
         if empty(cmd) | call s:Funcs.msg('Command aborted.', 1) | return | endif
@@ -371,10 +374,10 @@ fun! s:Edit.run_ex(remember, ...) dict
     else
         call s:Funcs.msg('Command not found.', 1) | return | endif
 
-    if a:remember | let s:v.last_ex = cmd | endif
+    let s:v.last_ex = cmd
     call self.delete(s:X(), 0, 0)
     call self._process(cmd)
-    call self.post_process(0,0)
+    call self.post_process(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -417,7 +420,7 @@ fun! s:Edit.run_macro(replace) dict
     elseif s:X() | call vm#commands#change_mode(1) | endif
 
     call self.process()
-    call self.post_process(0, 0)
+    call self.post_process(0)
     call s:after_macro(motions)
     redraw!
 endfun

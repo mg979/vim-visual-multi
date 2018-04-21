@@ -109,11 +109,12 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-Shift-Right)        :call b:VM_Selection.Edit.shift(1)<cr>
     nnoremap        <Plug>(VM-Edit-Shift-Left)         :call b:VM_Selection.Edit.shift(0)<cr>
     nnoremap        <Plug>(VM-Edit-Transpose)          :call b:VM_Selection.Edit.transpose()<cr>
-    nnoremap        <Plug>(VM-Run-Ex)                  :call b:VM_Selection.Edit.run_ex(1)<cr>
-    nnoremap        <Plug>(VM-Run-Last-Ex)             :call b:VM_Selection.Edit.run_ex(0, b:VM_Selection.Vars.last_ex)<cr>
+    nnoremap        <Plug>(VM-Run-Ex)                  :call b:VM_Selection.Edit.run_ex()<cr>
+    nnoremap        <Plug>(VM-Run-Last-Ex)             :call b:VM_Selection.Edit.run_ex(b:VM_Selection.Vars.last_ex)<cr>
     nnoremap        <Plug>(VM-Edit-x)                  :call b:VM_Selection.Edit.run_normal('x', 0)<cr>
     nnoremap        <Plug>(VM-Edit-X)                  :call b:VM_Selection.Edit.run_normal('X', 0)<cr>
     nnoremap        <Plug>(VM-Run-Normal)              :call b:VM_Selection.Edit.run_normal(-1, 1)<cr>
+    nnoremap        <Plug>(VM-Run-Last-Normal)         :call b:VM_Selection.Edit.run_normal(b:VM_Selection.Vars.last_normal[0] ,b:VM_Selection.Vars.last_normal[1])<cr>
 
     fun! <SID>Yank(hard)
         if empty(b:VM_Selection.Global.is_region_at_pos('.')) | return 'y' | endif
