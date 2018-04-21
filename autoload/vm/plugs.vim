@@ -7,6 +7,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Add-Cursor-Up)           :call vm#commands#add_cursor_at_pos(2, 0)<cr>
     nnoremap        <Plug>(VM-Select-Down)             :call vm#commands#add_cursor_at_pos(1, 1)<cr>
     nnoremap        <Plug>(VM-Select-Up)               :call vm#commands#add_cursor_at_pos(2, 1)<cr>
+    nnoremap        <Plug>(VM-Select-Line-Down)        :call vm#commands#expand_line(1)<cr>
+    nnoremap        <Plug>(VM-Select-Line-Up)          :call vm#commands#expand_line(0)<cr>
 
     nnoremap        <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
     xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(1, 0, 0)<cr>`]
@@ -17,14 +19,10 @@ fun! vm#plugs#init()
     xnoremap        <Plug>(VM-Find-A-Subword)          y:call vm#commands#find_under(1, 0, 0)<cr>`]
     xnoremap        <Plug>(VM-Find-A-Whole-Subword)    y:call vm#commands#find_under(1, 1, 0)<cr>`]
 
-    nnoremap        <Plug>(VM-Star)                    :call vm#commands#add_under(0, 1, 0, 1)<cr>
-    nnoremap        <Plug>(VM-Hash)                    :call vm#commands#add_under(0, 1, 1, 1)<cr>
-    nnoremap        <Plug>(VM-Add-I-Word)              :call vm#commands#add_under(0, 0, 0)<cr>
-    nnoremap        <Plug>(VM-Add-A-Word)              :call vm#commands#add_under(0, 0, 1)<cr>
-    nnoremap        <Plug>(VM-Add-I-Whole-Word)        :call vm#commands#add_under(0, 1, 0)<cr>
-    nnoremap        <Plug>(VM-Add-A-Whole-Word)        :call vm#commands#add_under(0, 1, 1)<cr>
-    xnoremap        <Plug>(VM-Star)                    y:call vm#commands#add_under(1, 0, 0, 1)<cr>`]
-    xnoremap        <Plug>(VM-Hash)                    y:call vm#commands#add_under(1, 1, 0, 1)<cr>`]
+    nnoremap        <Plug>(VM-Star)                    :call vm#commands#find_under(0, 1, 0)<cr>
+    nnoremap        <Plug>(VM-Hash)                    :call vm#commands#find_under(0, 1, 1)<cr>
+    xnoremap        <Plug>(VM-Star)                    y:call vm#commands#find_under(1, 0, 0)<cr>`]
+    xnoremap        <Plug>(VM-Hash)                    y:call vm#commands#find_under(1, 1, 0)<cr>`]
 
     nnoremap        <Plug>(VM-Toggle-Motions)          :call vm#maps#motions_toggle()<cr>
     nnoremap        <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline')<cr>
@@ -91,6 +89,12 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Merge-To-Bol)            :call vm#commands#merge_to_beol(0, 0)<cr>
 
     "Edit commands
+    nnoremap        <Plug>(VM-Edit-a-Append)           :<C-u>call b:VM_Selection.Edit.insert('a')<cr>
+    nnoremap        <Plug>(VM-Edit-A-Append)           :<C-u>call b:VM_Selection.Edit.insert('A')<cr>
+    nnoremap        <Plug>(VM-Edit-i-Insert)           :<C-u>call b:VM_Selection.Edit.insert('i')<cr>
+    nnoremap        <Plug>(VM-Edit-I-Insert)           :<C-u>call b:VM_Selection.Edit.insert('I')<cr>
+    nnoremap        <Plug>(VM-Edit-o-New-Line)         :<C-u>call b:VM_Selection.Edit.insert('o')<cr>
+    nnoremap        <Plug>(VM-Edit-O-New-Line)         :<C-u>call b:VM_Selection.Edit.insert('O')<cr>
     nnoremap        <Plug>(VM-Edit-Delete)             :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, 1, v:count1)<cr>
     nnoremap        <Plug>(VM-Edit-Change)             :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1)<cr>
     nnoremap        <Plug>(VM-Edit-Replace)            :<C-u>call b:VM_Selection.Edit.replace()<cr>

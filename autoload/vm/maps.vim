@@ -3,11 +3,11 @@ let s:NVIM = has('gui_running') || has('nvim')
 let s:motions  = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E']
 let s:signs    = ['$', '0', '^', '%']
 let s:find     = ['f', 'F', 't', 'T']
-let s:simple   = ['d', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'Z', 'u', 'x', 'X', 'r',]
+let s:simple   = ['d', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'Z', 'u', 'x', 'X', 'r', 'M', 'a', 'A', 'i', 'I', 'O']
 
 let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', 't', 'q', 'b' ]
-let s:cx_maps  = ['t', 'm', '/', ']', '}', 's', 'S', '<F12>', '"', 'q']
-let s:alt_maps = ['j', 'k', 'J', '{', '}', ']', 'q', ]
+let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"', 'q']
+let s:alt_maps = ['j', 'k', 'J', ']', 'q', ]
 let s:leader   = ['@', '/', 'y', 'p', 'P']
 let s:leader2  = ['@']
 
@@ -36,6 +36,7 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> q          <Plug>(VM-Skip-Region)
     nmap     <silent> <nowait> <buffer> Q          <Plug>(VM-Remove-Region)
     nmap     <silent> <nowait> <buffer> <M-q>      <Plug>(VM-Remove-Last-Region)
+    nmap     <silent> <nowait> <buffer> M          <Plug>(VM-Merge-Regions)
     nmap     <silent> <nowait> <buffer> u          <Plug>(VM-Undo)
     nmap     <silent> <nowait> <buffer> U          <Plug>(VM-Undo-Visual)
     nnoremap <silent> <nowait> <buffer> n          n
@@ -52,8 +53,6 @@ fun! vm#maps#start()
     xmap     <silent> <nowait> <buffer> *          <Plug>(VM-Star)
     xmap     <silent> <nowait> <buffer> #          <Plug>(VM-Hash)
 
-    nmap     <silent> <nowait> <buffer> <M-}>      <Plug>(VM-Add-I-Word)
-    nmap     <silent> <nowait> <buffer> <M-{>      <Plug>(VM-Add-A-Word)
     nmap     <silent> <nowait> <buffer> <S-End>    <Plug>(VM-Merge-To-Eol)
     nmap     <silent> <nowait> <buffer> <S-Home>   <Plug>(VM-Merge-To-Bol)
 
@@ -67,7 +66,6 @@ fun! vm#maps#start()
     nmap              <nowait> <buffer> <C-x>q     <Plug>(VM-Run-Last-Ex)
     nmap              <nowait> <buffer> <C-x>t     <Plug>(VM-Show-Regions-Text)
     nmap              <nowait> <buffer> <C-x>"     <Plug>(VM-Show-Registers)
-    nmap     <silent> <nowait> <buffer> <C-x>m     <Plug>(VM-Merge-Regions)
     nmap     <silent> <nowait> <buffer> <C-x>s     <Plug>(VM-Remove-Search)
     nmap     <silent> <nowait> <buffer> <C-x>S     <Plug>(VM-Remove-Search-Regions)
     nmap     <silent> <nowait> <buffer> <c-x><F12> <Plug>(VM-Toggle-Debug)
@@ -103,6 +101,12 @@ fun! vm#maps#start()
 
     "edit
     nmap          <nowait> <buffer> Z               <Plug>(VM-Run-Normal)
+    nmap <silent> <nowait> <buffer> i               <Plug>(VM-Edit-i-Insert)
+    nmap <silent> <nowait> <buffer> I               <Plug>(VM-Edit-I-Insert)
+    nmap <silent> <nowait> <buffer> a               <Plug>(VM-Edit-a-Append)
+    nmap <silent> <nowait> <buffer> A               <Plug>(VM-Edit-A-Append)
+    nmap <silent> <nowait> <buffer> O               <Plug>(VM-Edit-o-New-Line)
+    nmap <silent> <nowait> <buffer> <M-o>           <Plug>(VM-Edit-O-New-Line)
     nmap <silent> <nowait> <buffer> x               <Plug>(VM-Edit-x)
     nmap <silent> <nowait> <buffer> X               <Plug>(VM-Edit-X)
     nmap <silent> <nowait> <buffer> r               <Plug>(VM-Edit-Replace)
@@ -127,6 +131,8 @@ endfun
 fun! s:arrows()
     nmap     <silent> <nowait> <buffer> <M-C-Down>  <Plug>(VM-Select-Down)
     nmap     <silent> <nowait> <buffer> <M-C-Up>    <Plug>(VM-Select-Up)
+    nmap     <silent> <nowait> <buffer> <C-S-Down>  <Plug>(VM-Select-Line-Down)
+    nmap     <silent> <nowait> <buffer> <C-S-Up>    <Plug>(VM-Select-Line-Up)
 
     nmap     <silent> <nowait> <buffer> <C-Down>    <Plug>(VM-Find-Next)
     nmap     <silent> <nowait> <buffer> <C-Up>      <Plug>(VM-Find-Prev)
@@ -178,7 +184,7 @@ endfun
 
 fun! vm#maps#end()
     for m in (s:simple)
-        exe "silent! nunmap <buffer> ".m
+        exe "nunmap <buffer> ".m
     endfor
 
     for m in (s:signs)
@@ -231,6 +237,8 @@ fun! s:arrows_end()
     nunmap <buffer> <M-C-Up>
     nunmap <buffer> <C-Down>
     nunmap <buffer> <C-Up>
+    nunmap <buffer> <C-S-Down>
+    nunmap <buffer> <C-S-Up>
     nunmap <buffer> <M-Down>
     nunmap <buffer> <M-Up>
     nunmap <buffer> <S-Right>

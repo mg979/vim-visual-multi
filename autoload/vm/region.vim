@@ -48,7 +48,7 @@ fun! vm#region#new(cursor, ...)
     if !g:VM.is_active | call vm#init_buffer(cursor) | endif  "activate if needed
 
     if !a:0 | let R = s:Region.new(cursor)                    "create region
-    else    | let R = s:Region.new(cursor, a, b, c, d)
+    else    | let R = s:Region.new(0, a, b, c, d)
     endif
 
     "----------------------------------------------------------------------
@@ -57,7 +57,7 @@ fun! vm#region#new(cursor, ...)
     let s:v.index = R.index | let s:v.ID += 1
 
     "keep regions list ordered
-    if empty(s:R()) || s:R()[s:v.index-1].A < R.A
+    if empty(s:R()) || s:v.eco || s:R()[s:v.index-1].A < R.A
         call add(s:R(), R)
     else
         let i = 0
@@ -71,6 +71,8 @@ fun! vm#region#new(cursor, ...)
         let s:v.index = i
         call s:Global.update_indices()
     endif
+
+    call s:Global.update_cursor_highlight()
     return R
 endfun
 
@@ -107,7 +109,7 @@ fun! s:Region.new(cursor, ...)
     let R.cur_col = { -> R.dir ? R.b : R.a }
     let R.cur_Col = { -> R.cur_col() == R.b ? R.B : R.A }
     let R.char    = { -> s:X()? getline(R.l)[R.cur_col()-1] : '' }
-
+    let R.matches = {'region': [], 'cursor': 0}
 
     if a:cursor        "/////////// CURSOR ////////////
 
@@ -122,7 +124,7 @@ fun! s:Region.new(cursor, ...)
         let R.k     = R.a                   " anchor (unused for cursors)
         let R.K     = R.A
         let R.txt   = R.char()              " character under cursor in extend mode
-        let R.pat   = ''
+        let R.pat   = s:pattern(R)
 
 
     elseif !a:0        "/////////// REGION ////////////
@@ -138,15 +140,15 @@ fun! s:Region.new(cursor, ...)
         let R.k     = R.a                   " anchor
         let R.K     = R.A                   " anchor offset
         let R.txt   = getreg(s:v.def_reg)   " text content
-        let R.pat   = R.pattern()           " associated search pattern
+        let R.pat   = s:pattern(R)           " associated search pattern
 
 
     else               "///////// FROM ARGS ///////////
 
         let R.l     = a:1
-        let R.L     = a:4
-        let R.a     = a:2
-        let R.b     = a:3
+        let R.L     = a:2
+        let R.a     = a:3
+        let R.b     = a:4
         let R.A     = R.A_()
         let R.B     = R.B_()
         let R.w     = R.B - R.A + 1
@@ -159,7 +161,6 @@ fun! s:Region.new(cursor, ...)
 
     call add(s:v.IDs_list, R.id)
     call R.highlight()
-    call s:Global.update_cursor_highlight()
     call s:Funcs.restore_reg()
 
     return R
@@ -175,28 +176,28 @@ endfun
 
 fun! s:Region.a_(...) dict
     """Update r.a and r.l from the A offset.
-    """Can also be used to extend the region from the left side. ( <- a_|--| )
+    """Can also be used to extend the region from the left side. ( <-> a_|--| )
     let r = self
 
     if a:0 | let r.A += a:1 | endif
 
     let r.l = byte2line(r.A)
     let r.a = r.A - line2byte(r.l)
-    return r.a
+    return [r.l, r.a]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region._b(...) dict
     """Update r.b and r.L from the B offset.
-    """Can also be used to extend the region from the right side. ( |--|_b -> )
+    """Can also be used to extend the region from the right side. ( |--|_b <-> )
     let r = self
 
     if a:0 | let r.B += a:1 | endif
 
     let r.L = byte2line(r.B)
     let r.b = r.B - line2byte(r.L)
-    return r.b
+    return [r.L, r.b]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -213,23 +214,6 @@ fun! s:Region.shift(a, b) dict
     let r.L = byte2line(r.B)
     let r.b = r.B - line2byte(r.L)
     return [r.l, r.L, r.a, r.b]
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Region.pattern() dict
-    """Find the search pattern associated with the region."""
-
-    if empty(s:v.search) | return '' | endif
-
-    for p in s:v.search | if self.txt =~ p | return p | endif | endfor
-
-    "return current search pattern in regex mode
-    if !has_key(self, 'pat')
-        if s:v.using_regex | return @/ | else | return '' | endif | endif
-
-    "return current pattern if one is present (in cursor mode text is empty)
-    return empty(self.pat)? '' : self.pat
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -271,36 +255,32 @@ let s:extreme   = { -> index(['$', '0', '^'],                               s:mo
 
 fun! s:Region.move(motion) dict
     let s:motion = a:motion
-    if s:backwards()
-        call self.move_back()
+    if !s:X()
+        call s:move_cursor(self)
     else
-        call self.move_forward()
+        call s:move_region(self)
     endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.move_cursor() dict
+fun! s:move_cursor(r)
     """If not in extend mode, just move the cursors."""
-    if s:X() | return | endif
 
-    call cursor(self.l, self.a)
+    call cursor(a:r.l, a:r.a)
     exe "keepjumps normal! ".s:motion
 
-    let pos = getpos('.')
-    let self.l = pos[1]
-    let self.L = self.l
-    let self.a = pos[2]
-    let self.b = self.a
-    call self.update_vars()
-    return 1
+    let nl = line('.')   "check the line
+    if !g:VM.multiline  | call s:keep_line(a:r, nl) | endif
+
+    call a:r.update_cursor(getpos('.')[1:2])
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.keep_line(ln) dict
+fun! s:keep_line(r, ln)
     """Ensure line boundaries aren't crossed."""
-    let r = self
+    let r = a:r
 
     if     ( a:ln > r.l ) | call cursor ( r.l, col([r.l, '$'])-1 )
     elseif ( a:ln < r.l ) | call cursor ( r.l, col([r.l, 1]) )
@@ -308,23 +288,19 @@ fun! s:Region.keep_line(ln) dict
     endif
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:move(r)
+fun! s:move_region(r)
     let r = a:r | let a = r.a | let b = r.b | let up = 0 | let down = 0
 
     "move the cursor to the current head and perform the motion
     call cursor(r.cur_ln(), r.cur_col())
     exe "keepjumps normal! ".s:motion
 
-    "in cursor mode, just set new positions
-    if !s:X() | let p = getpos('.')
-        call r.update_cursor(p[1], p[2]) | return | endif
-
     "check the line
     let nl = line('.')
 
-    if !g:VM.multiline  | call r.keep_line(nl)
+    if !g:VM.multiline  | call s:keep_line(r, nl)
 
     elseif   nl < r.l                        |   let r.l = nl
     elseif   nl > r.L                        |   let r.L = nl
@@ -354,44 +330,9 @@ fun! s:move(r)
     else
         let r.a = new
     endif
+
+    call r.update_region()
 endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Extend mode
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Region.move_forward() dict
-    let r = self | if self.move_cursor() | return | endif
-
-    "move to the end of the region and perform the motion
-    call s:move(r)
-
-    "merge to eol motion
-    if s:motion == "\<End>"
-        let s:v.merge_to_beol = 0
-        let r.a = r.b
-    endif
-
-    call self.update()
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Region.move_back() dict
-    let r = self | if self.move_cursor() | return | endif
-
-    "move to the end of the region and perform the motion
-    call s:move(r)
-
-    "merge to bol motion
-    if s:v.merge_to_beol
-        let s:v.merge_to_beol = 0
-        call self.update(r.l, r.l, 1, 1)
-    else
-        call self.update()
-    endif
-endfun
-
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Update functions
@@ -409,24 +350,26 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.update_cursor(ln, col) dict
+fun! s:Region.update_cursor(...) dict
+    """Update cursor vars from position [line, col] or offset + shift."""
     let r = self
-    let r.l = a:ln | let r.a = a:col
-    let r.L = r.l  | let r.b = r.a
-    let r.k = r.b  | let r.w = 1
+
+    if a:0 == 1 | let r.l = a:1[0]         | let r.a = a:1[1]
+    else        | let res = r.a_(a:1, a:2) | let r.l = res[0] | let r.a = res[1]
+    endif
+
+    call self.update_vars()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.update(...) dict
+fun! s:Region.update_region(...) dict
     """Update the main region positions."""
     let r = self
 
     if a:0 | let r.l = a:1 | let r.L = a:2 | let r.a = a:3 | let r.b = a:4 | endif
 
-    "if not in extend mode, the cursor will stay at r.a
     call cursor(r.l, r.a)
-
     call self.yank()
     call self.update_vars()
 endfun
@@ -442,18 +385,18 @@ fun! s:Region.update_vars() dict
     "   "--------- cursor mode ----------------------------
 
     if !s:X()
-        let r.L   = r.l
+        let r.L   = r.l           | let r.b = r.a
         let r.A   = r.A_()        | let r.B = r.A
         let r.k   = r.a           | let r.K = r.A
         let r.w   = 1             | let r.h = 0
-        let r.pat = r.pattern()   | let r.txt = ''
+        let r.pat = s:pattern(r)  | let r.txt = ''
 
         "--------- extend mode ----------------------------
 
     else
         let r.A   = r.A_()        | let r.B = r.B_()
         let r.w   = r.B - r.A + 1 | let r.h = r.L - r.l
-        let r.pat = r.pattern()   | let r.txt = getreg(s:v.def_reg)
+        let r.pat = s:pattern(r)  | let r.txt = getreg(s:v.def_reg)
 
         call s:Funcs.restore_reg()
     endif
@@ -466,12 +409,11 @@ endfun
 fun! s:Region.highlight() dict
     """Create the highlight entries."""
 
-    let R = self
+    if s:v.eco | return | endif | let R = self
 
     "------------------ cursor mode ----------------------------
 
     if !s:X()
-        let R.matches        = {'region': [], 'cursor': 0}
         let R.matches.cursor = matchaddpos('MultiCursor', [[R.l, R.a]], 40)
         return
     endif
@@ -495,7 +437,6 @@ fun! s:Region.highlight() dict
     endfor
 
     "build a list of highlight entries, one for each possible line
-    let R.matches        = {'region': [], 'cursor': 0}
     for line in region
         call add(R.matches.region, matchaddpos(g:VM_Selection_hl, [line], 30))
     endfor
@@ -525,3 +466,19 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:pattern(r)
+    """Find the search pattern associated with the region."""
+
+    if empty(s:v.search) | return '' | endif
+
+    for p in s:v.search | if a:r.txt =~ p | return p | endif | endfor
+
+    "return current search pattern in regex mode
+    if !has_key(a:r, 'pat')
+        if s:v.using_regex | return s:v.search[0] | else | return '' | endif | endif
+
+    "return current pattern if one is present (in cursor mode text is empty)
+    return empty(a:r.pat)? '' : a:r.pat
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -78,6 +78,7 @@ fun! s:Edit.post_process(reselect, shift) dict
         if l[-1:] ==# ' ' | call setline(line, l[:-2]) | endif
     endfor
 
+    let s:v.auto = 0
     let s:extra_spaces = []
     call s:Global.update_regions()
     call s:Global.select_region_at_pos('.')
@@ -129,6 +130,44 @@ fun! s:Edit.change(X, count) dict
         call s:V.Insert.start('c')
     else
         call self.get_motion('c', a:count)
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Insert
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.insert(type) dict
+
+    if a:type ==# 'I'
+        call vm#commands#merge_to_beol(0, 0)
+        call s:V.Insert.start('i')
+
+    elseif a:type ==# 'A'
+        call vm#commands#merge_to_beol(1, 0)
+        call s:V.Insert.start('a')
+
+    elseif a:type ==# 'o'
+        call vm#commands#merge_to_beol(1, 0)
+        call s:V.Insert.start('o')
+
+    elseif a:type ==# 'O'
+        call vm#commands#merge_to_beol(0, 0)
+        call s:V.Insert.start('O')
+
+    elseif a:type ==# 'a'
+        if s:X()
+            if s:v.direction | call vm#commands#invert_direction() | endif
+            call vm#commands#change_mode(1)
+        endif
+        call s:V.Insert.start('a')
+
+    else
+        if s:X()
+            if !s:v.direction | call vm#commands#invert_direction() | endif
+            call vm#commands#change_mode(1)
+        endif
+        call s:V.Insert.start('i')
     endif
 endfun
 
@@ -312,6 +351,7 @@ fun! s:Edit.run_normal(cmd, recursive) dict
     else
         let cmd = a:cmd | endif
 
+    let s:v.auto = 1
     let s:cmd = a:recursive? ("normal ".cmd) : ("normal! ".cmd)
     call self.delete(s:X(), 0, 0)
     call self._process(s:cmd)
@@ -352,7 +392,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:after_macro(motions)
-    let s:v.silence = 0 | let s:v.auto = 0
+    let s:v.silence = 0
     let g:VM.multiline = s:old_multiline
 
     call vm#maps#start()

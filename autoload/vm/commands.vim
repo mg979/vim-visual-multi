@@ -21,6 +21,7 @@ fun! s:init(whole, cursor, extend_mode)
 
     let s:v.whole_word = a:whole
     let s:v.nav_direction = 1
+    let s:v.eco = 0
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -37,6 +38,7 @@ fun! vm#commands#change_mode(silent)
     else
         call s:Funcs.msg("Switched to Cursor Mode\n", 0)
         call s:Global.collapse_regions()
+        call s:Global.select_region(s:v.index)
     endif
     call s:Funcs.count_msg(0)
 endfun
@@ -62,7 +64,7 @@ fun! vm#commands#add_cursor_at_word(yank, search)
     if a:yank   | call s:yank(0)      | exe "keepjumps normal! `[" | endif
     if a:search | call s:Search.add() | endif
 
-    call s:Global.new_cursor()
+    let R = s:Global.new_cursor() | let R.pat = s:v.search[0]
     call s:Funcs.count_msg(1)
 endfun
 
@@ -92,9 +94,29 @@ fun! vm#commands#add_cursor_at_pos(where, extend, ...)
             call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return
         endif | endif
     let s:starting_col = 0
-    call s:Funcs.count_msg(0)
+    call s:Funcs.count_msg(1)
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#expand_line(down)
+    call s:check_extend_default(1) | let s:v.multiline = 1
+    let R = s:Global.is_region_at_pos('.')
+    if empty(R)
+        call vm#region#new(0, line('.'), line('.'), 1, col('$')-1)
+    elseif a:down
+        call vm#commands#motion('j', 1)
+        let b = len(getline(R.L))
+        call R.update_region(R.l, R.L, 1, (b? b : b+1))
+    elseif !a:down
+        call vm#commands#motion('k', 1)
+        let b = len(getline(R.L))
+        call R.update_region(R.l, R.L, 1, (b? b : b+1))
+    endif
+    call s:Global.select_region_at_pos('.')
+    call s:Global.update_highlight()
+    call s:Funcs.count_msg(1)
+endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find by regex
@@ -173,31 +195,11 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#add_under(visual, whole, inclusive, ...)
-    call s:init(a:whole, 0, 1)
-
-    if !a:visual
-        let R = s:Global.is_region_at_pos('.')
-
-        "only yank if not on an existing region
-        if empty(R) | call s:yank(a:inclusive)
-        else | call s:Funcs.set_reg(R.txt) | endif
-    endif
-
-    call s:Search.add()
-    let R = s:Global.get_region()
-    "call s:Global.merge_regions(R.l)
-    if !a:0 | return vm#commands#find_next(0, 0)
-    else    | call s:Funcs.count_msg(1) | endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! vm#commands#find_all(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
 
     let storepos = getpos('.')
-    let s:v.total_silence = 1
+    let s:v.total_silence = 1 | let s:v.eco = 1
     let seen = []
 
     let R = vm#commands#find_under(a:visual, a:whole, a:inclusive)
@@ -208,7 +210,10 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     endwhile
 
     call setpos('.', storepos)
-    let s:v.total_silence = 0
+    let s:v.total_silence = 0 | let s:v.eco = 0
+    call s:Global.reorder_regions()
+    call s:Global.update_highlight()
+    call s:Global.select_region_at_pos('.')
     call s:Funcs.count_msg(1)
 endfun
 
@@ -337,7 +342,7 @@ endfun
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Extend regions commands
+" Motion commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:sublime = { -> !g:VM.is_active && g:VM_sublime_mappings }
@@ -378,19 +383,19 @@ endfun
 fun! vm#commands#merge_to_beol(eol, this)
     if s:no_regions() | return | endif
     let s:motion = a:eol? "\<End>" : '0'
-    let s:v.merge_to_beol = 1
-    let s:merge = 1
-    let g:VM.extend_mode = 0
+    if s:X() | call vm#commands#change_mode(1) | endif
     call s:call_motion(a:this)
+    call s:Global.merge_cursors()
+    call s:Funcs.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_motion(motion, char, this, ...)
-    if s:no_regions() | return | endif
+    if s:no_regions() | return | endif | let merge = 0
 
     if index(['$', '0', '^', '%'], a:motion) >= 0
-        let s:motion = a:motion | let s:merge = 1
+        let s:motion = a:motion | let merge = 1
     elseif a:char != ''
         let s:motion = a:motion.a:char
     else
@@ -398,6 +403,7 @@ fun! vm#commands#find_motion(motion, char, this, ...)
     endif
 
     call s:call_motion(a:this)
+    if merge | call s:Global.merge_regions() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -485,7 +491,6 @@ let s:simple           = { -> index(['h', 'j', 'k', 'l'],                     s:
 
 fun! s:call_motion(this)
     let s:v.moving = 1
-    let s:v.silence = 1
     let s:v.only_this = a:this
     "let b:VM_backup = copy(b:VM_Selection)
 
@@ -499,16 +504,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#move(...)
-    if !s:v.moving || s:no_regions() | return | endif
+    if !s:v.moving || s:no_regions() | return | endif | let s:v.moving -= 1
     let R = s:R()[ s:v.index ]
-    let s:v.moving -= 1
 
-    if s:v.direction && s:always_from_back()
-        call vm#commands#invert_direction()
-
-    elseif s:can_from_back()
-        call vm#commands#invert_direction()
-    endif
+    if s:X() | call s:before_move() | endif
 
     if s:only_this()
         call s:R()[s:v.index].move(s:motion) | let s:v.only_this = 0
@@ -516,20 +515,30 @@ fun! vm#commands#move(...)
         for r in s:R() | call r.move(s:motion) | endfor | endif
 
     "update variables, facing direction, highlighting
-    if s:after_move() | return | endif
+    if s:X() && s:after_move() | return | endif
 
     let s:v.direction = R.dir
     call s:Global.update_highlight()
     call s:Global.select_region(R.index)
 
     call s:Funcs.count_msg(0)
+    let s:v.silence = 1
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:before_move()
+    if s:v.direction && s:always_from_back()
+        call vm#commands#invert_direction()
+
+    elseif s:can_from_back()
+        call vm#commands#invert_direction()
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:after_move()
-    if s:merge | call s:Global.merge_regions() | endif | let s:merge = 0
-
     if s:always_from_back()
         call vm#commands#invert_direction()
     endif

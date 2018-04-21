@@ -48,8 +48,6 @@ fun! vm#init_buffer(empty, ...)
     let s:v.moving           = 0
     let s:v.only_this        = 0
     let s:v.only_this_always = 0
-    let s:v.merge_to_beol    = 0
-    let s:v.move_from_back   = 0
     let s:v.using_regex      = 0
 
     let s:V.Search     = vm#search#init()

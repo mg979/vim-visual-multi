@@ -43,7 +43,8 @@ fun! s:update_search(p)
         call insert(s:v.search, a:p)
     endif
 
-    let @/ = join(s:v.search, '\|')
+    if s:v.eco | let @/ = s:v.search[0]
+    else       | let @/ = join(s:v.search, '\|') | endif
     set hlsearch
 endfun
 
@@ -109,6 +110,8 @@ endfun
 
 fun! s:Search.validate() dict
     """Check whether the current search is valid, if not, clear the search."""
+    if s:v.eco | return | endif
+
     let @/ = join(s:v.search, '\|')
     if empty(@/) | return | endif
 

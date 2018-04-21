@@ -20,6 +20,8 @@ fun! vm#insert#init()
     let s:size    = {      -> line2byte(line('$') + 1) }
     let s:Byte    = { pos  -> s:Funcs.pos2byte(pos)    }
     let s:Pos     = { byte -> s:Funcs.byte2pos(byte)   }
+    let s:append  = { m    -> index(['a', 'A'], m) >= 0  }
+    let s:newline = { m    -> index(['o', 'O'], m) >= 0  }
 
     return s:Insert
 endfun
@@ -85,19 +87,20 @@ fun! s:Insert.start(mode, ...) dict
 
     for r in s:R()
         "remove the regular cursor highlight, add new cursor
-        call add(self.cursors, s:Cursor.new(r.A))
+        let A = s:append(a:mode)? r.A+1 : r.A
+        call add(self.cursors, s:Cursor.new(A))
         if g:VM_live_editing || r.index == self.index
             call r.remove_highlight() | endif | endfor
 
     "start tracking text changes
-    call self.auto_start(a:mode)
+    call self.auto_start()
 
     inoremap <silent> <buffer> <esc>   <esc>:call b:VM_Selection.Insert.stop(-1)<cr>
     "inoremap <buffer> <space> <esc>:call b:VM_Selection.Insert.stop(b:VM_Selection.Insert.mode)<cr>
     call s:Global.update_cursor_highlight()
 
     "start insert mode and break the undo point
-    let keys = "i\<c-g>u"
+    let keys = (a:mode=='c'? 'i': a:mode)."\<c-g>u"
     if a:0 | let keys .= "\<space>" | endif
     call feedkeys(keys, 'n')
 endfun
@@ -180,15 +183,13 @@ endfun
 " Autocommands
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.auto_start(type) dict
+fun! s:Insert.auto_start() dict
     augroup plugin-vm-insert
         au!
-        if a:type ==# 'c'
-            if g:VM_live_editing
-                au TextChangedI * silent call b:VM_Selection.Insert.live_insert()
-            else
-                au InsertLeave * silent call b:VM_Selection.Edit.apply_change()
-            endif
+        if g:VM_live_editing
+            au TextChangedI * silent call b:VM_Selection.Insert.live_insert()
+        else
+            au InsertLeave * silent call b:VM_Selection.Edit.apply_change()
         endif
     augroup END
 endfun

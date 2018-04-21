@@ -227,7 +227,7 @@ fun! s:Funcs.toggle_option(option) dict
     if a:option == 'multiline'
         let g:VM.multiline = !g:VM.multiline
         redraw! | call b:VM_Selection.Funcs.count_msg(0)
-        "if !g:VM.multiline | call s:V.Global.split_lines() | endif
+        if !g:VM.multiline | call s:V.Global.split_lines() | endif
         return | endif
 
     let s = "s:v.".a:option
