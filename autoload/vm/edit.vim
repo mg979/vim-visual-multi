@@ -266,11 +266,12 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     endfor
 
     let s:v.registers[register] = text
-    call setreg(register, join(text, "\n"), "b".maxw)
+    let type = g:VM.multiline? 'V' : 'b'.maxw
+    call setreg(register, join(text, "\n"), type)
 
     "overwrite the old saved register
     if a:hard
-        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), "b".maxw] | endif
+        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type] | endif
     if !a:silent
         call s:Funcs.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
     if a:0 | call vm#commands#change_mode(1) | endif
@@ -355,7 +356,7 @@ fun! s:Edit.run_normal(cmd, recursive, ...) dict
 
     let s:v.auto = 1
     let s:cmd = a:recursive? ("normal ".cmd) : ("normal! ".cmd)
-    call self.delete(s:X(), 0, 0)
+    if s:X() | call vm#commands#change_mode(1) | endif
     call self._process(s:cmd)
 
     if a:cmd ==# 'X' | for r in s:R() | call r.bytes([-1,-1]) | endfor | endif
@@ -375,7 +376,7 @@ fun! s:Edit.run_ex(...) dict
         call s:Funcs.msg('Command not found.', 1) | return | endif
 
     let s:v.last_ex = cmd
-    call self.delete(s:X(), 0, 0)
+    if s:X() | call vm#commands#change_mode(1) | endif
     call self._process(cmd)
     call self.post_process(0)
 endfun
@@ -416,8 +417,7 @@ fun! s:Edit.run_macro(replace) dict
     let s:cmd = "@".reg
     let motions = s:before_macro()
 
-    if a:replace | call self.delete(1, 0, 0)
-    elseif s:X() | call vm#commands#change_mode(1) | endif
+    if s:X() | call vm#commands#change_mode(1) | endif
 
     call self.process()
     call self.post_process(0)

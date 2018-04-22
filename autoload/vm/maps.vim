@@ -1,24 +1,19 @@
 let s:NVIM = has('gui_running') || has('nvim')
 
-let s:motions  = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E']
-let s:signs    = ['$', '0', '^', '%']
-let s:find     = ['f', 'F', 't', 'T']
-let s:simple   = ['d', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 'g', 'G', '?', '/', ':', '-', '+', 'Z', 'u', 'x', 'X', 'r', 'M', 'a', 'A', 'i', 'I', 'O']
+let s:simple   = ['d', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 's', '?', '/', ':', '-', '+', 'u', 'x', 'X', 'r', 'M', 'a', 'A', 'i', 'I', 'O', ]
 
-let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', 't', 'q', 'b', 'z' ]
-let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"', 'q']
-let s:alt_maps = ['j', 'k', 'J', ']', 'q', ]
-let s:leader   = ['@', '/', 'y', 'p', 'P']
-let s:leader2  = ['@']
+let s:zeta     = ['zz', 'za', 'zA', 'Z', 'zx', 'zX']
+let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', 't', 'b' ]
+let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
+let s:alt_maps = ['j', 'k', 'J', ']', 'q', 'o' ]
+let s:leader   = ['@', 'y', 'p', 'P']
+let s:leader2  = []
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#maps#start()
-
-    let s:noremaps = g:VM_custom_noremaps
-    let s:remaps   = g:VM_custom_remaps
 
     nmap              <nowait> <buffer> :          <Plug>(VM-:)
     nmap              <nowait> <buffer> /          <Plug>(VM-/)
@@ -29,7 +24,6 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> <Tab>      <Plug>(VM-Switch-Mode)
     nmap     <silent> <nowait> <buffer> <BS>       <Plug>(VM-Erase-Regions)
     nmap     <silent> <nowait> <buffer> <CR>       <Plug>(VM-Toggle-Motions)
-    nmap     <silent> <nowait> <buffer> <leader>/  <Plug>(VM-Start-Regex-Search)
     nmap     <silent> <nowait> <buffer> <leader>@  <Plug>(VM-Run-Macro)
 
     nmap     <silent> <nowait> <buffer> o          <Plug>(VM-Invert-Direction)
@@ -63,7 +57,6 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> <M-]>      <Plug>(VM-Rewrite-Last-Search)
 
     "utility
-    nmap              <nowait> <buffer> <C-x>q     <Plug>(VM-Run-Last-Ex)
     nmap              <nowait> <buffer> <C-x>t     <Plug>(VM-Show-Regions-Text)
     nmap              <nowait> <buffer> <C-x>"     <Plug>(VM-Show-Registers)
     nmap     <silent> <nowait> <buffer> <C-x>s     <Plug>(VM-Remove-Search)
@@ -72,36 +65,30 @@ fun! vm#maps#start()
 
     "ctrl
     nmap     <silent> <nowait> <buffer> <c-b>      <Plug>(VM-Toggle-Multiline)
-    nmap              <nowait> <buffer> <C-q>      <Plug>(VM-Run-Ex)
-    nmap              <nowait> <buffer> <C-z>      <Plug>(VM-Run-Last-Normal)
     nmap     <silent> <nowait> <buffer> <c-c>      <Plug>(VM-Case-Setting)
     nmap     <silent> <nowait> <buffer> <c-w>      <Plug>(VM-Toggle-Whole-Word)
     nmap     <silent> <nowait> <buffer> <c-o>      <Plug>(VM-Toggle-Only-This-Region)
 
 
-    for m in keys(s:noremaps)
-        exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".s:noremaps[m].")"
-    endfor
-    for m in keys(s:remaps)
-        exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Remap-Motion-".s:remaps[m].")"
-    endfor
-    for m in s:signs
-        exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".m.")"
-    endfor
-
     call s:arrows()
     call s:hjkl()
 
     "select
-    nmap <silent>          <buffer> g               <Plug>(VM-Select-One-Inside)
-    nmap <silent> <nowait> <buffer> G               <Plug>(VM-Select-All-Inside)
+    nmap <silent>          <buffer> s               <Plug>(VM-Select-Operator)
+    nmap <silent> <nowait> <buffer> za              <Plug>(VM-Select-All-Inside)
+    nmap <silent> <nowait> <buffer> zA              <Plug>(VM-Select-All-Around)
 
     "shrink/enlarge
     nmap <silent> <nowait> <buffer> -               <Plug>(VM-Motion-Shrink)
     nmap <silent> <nowait> <buffer> +               <Plug>(VM-Motion-Enlarge)
 
+    "normal/ex/visual
+    nmap          <nowait> <buffer> zz              <Plug>(VM-Run-Normal)
+    nmap <silent> <nowait> <buffer> Z               <Plug>(VM-Run-Last-Normal)
+    nmap          <nowait> <buffer> zx              <Plug>(VM-Run-Ex)
+    nmap <silent> <nowait> <buffer> zX              <Plug>(VM-Run-Last-Ex)
+
     "edit
-    nmap          <nowait> <buffer> Z               <Plug>(VM-Run-Normal)
     nmap <silent> <nowait> <buffer> i               <Plug>(VM-Edit-i-Insert)
     nmap <silent> <nowait> <buffer> I               <Plug>(VM-Edit-I-Insert)
     nmap <silent> <nowait> <buffer> a               <Plug>(VM-Edit-a-Append)
@@ -123,7 +110,7 @@ fun! vm#maps#start()
     nmap <silent> <nowait> <buffer> <leader>P       <Plug>(VM-Edit-P-Paste-Block)
 
     "double leader
-    nmap     <silent> <nowait> <buffer> <leader><leader>@ <Plug>(VM-Run-Macro-Replace)
+    "nmap     <silent> <nowait> <buffer> <leader><leader>@ <Plug>(VM-Run-Macro-Replace)
 
 endfun
 
@@ -184,15 +171,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#maps#end()
-    for m in (s:simple)
-        exe "nunmap <buffer> ".m
-    endfor
-
-    for m in (s:signs)
-        exe "nunmap <buffer> ".m
-    endfor
-
-    for m in ( keys(s:noremaps) + keys(s:remaps) )
+    for m in (s:simple + s:zeta)
         exe "nunmap <buffer> ".m
     endfor
 
@@ -259,15 +238,27 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#maps#motions(activate, ...)
+    let s:noremaps = g:VM_custom_noremaps
+    let s:remaps   = g:VM_custom_remaps
+
     if a:activate && !g:VM.motions_enabled
         let g:VM.motions_enabled = 1
-        for m in (s:motions + s:find)
+        for m in (g:VM.motions + g:VM.find_motions)
             exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".m.")"
+        endfor
+        for m in keys(s:noremaps)
+            exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".s:noremaps[m].")"
+        endfor
+        for m in keys(s:remaps)
+            exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Remap-Motion-".s:remaps[m].")"
         endfor
     elseif !a:activate && g:VM.motions_enabled
         let g:VM.motions_enabled = 0
-        for m in (s:motions + s:find)
+        for m in (g:VM.motions + g:VM.find_motions)
             exe "nunmap <buffer> ".m
+        endfor
+        for m in ( keys(s:noremaps) + keys(s:remaps) )
+            exe "silent! nunmap <buffer> ".m
         endfor
     endif
 endfun

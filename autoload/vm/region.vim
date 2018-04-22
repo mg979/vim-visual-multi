@@ -159,6 +159,10 @@ fun! s:Region.new(cursor, ...)
         let R.pat   = s:Search.escape_pattern(R.txt)
     endif
 
+    "correct bad positions
+    if !R.a                      | let R.a = 1                   | endif
+    if R.b > col([R.L, '$']) - 1 | let R.b = col([R.L, '$']) - 1 | endif
+
     call add(s:v.IDs_list, R.id)
     call R.highlight()
     call s:Funcs.restore_reg()
@@ -179,7 +183,7 @@ fun! s:Region.bytes(...) dict
     "args: either new offsets A & B, or list [A shift, B shift]
     let r = self
 
-    if a:0 > 1 | let r.A = a:1     | let r.B = a:2    
+    if a:0 > 1 | let r.A = a:1     | let r.B = a:2
     elseif a:0 | let r.A += a:1[0] | let r.B += a:1[1] | endif
 
     let r.l = byte2line(r.A)
@@ -345,7 +349,10 @@ fun! s:Region.update_region(...) dict
         let a = r.a_() | let r.l = a[0] | let r.a = a[1]
         let b = r.b_() | let r.L = b[0] | let r.b = b[1] | endif
 
-    if !r.a | let r.a = 1 | endif
+    "correct bad positions
+    if !r.a                      | let r.a = 1                   | endif
+    if r.b > col([r.L, '$']) - 1 | let r.b = col([r.L, '$']) - 1 | endif
+
     call cursor(r.l, r.a)
     call self.yank()
     call self.update_vars()

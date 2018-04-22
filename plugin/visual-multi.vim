@@ -9,7 +9,7 @@ let b:VM_Selection        = {}
 
 fun! <SID>VM_Init()
 
-    let g:VM                                  = {'is_active': 0, 'extend_mode': 0,
+    let g:VM                                  = {'is_active': 0, 'extend_mode': 0, 'selecting': 0,
                                               \  'multiline': 0, 'motions_enabled': 0}
 
     let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
@@ -57,6 +57,7 @@ fun! <SID>VM_Init()
     endif
 
     if g:VM_default_mappings
+        nmap <silent> gs         <Plug>(VM-Select-Operator)
         nmap <silent> g<space>   <Plug>(VM-Add-Cursor-At-Pos)
         nmap <silent> g<cr>      <Plug>(VM-Add-Cursor-At-Word)
         nmap <silent> g/         <Plug>(VM-Start-Regex-Search)
@@ -79,9 +80,10 @@ endfun
 
 augroup plugin-visual-multi-global
     au!
-    au BufLeave    * call s:buffer_leave()
-    au BufEnter    * call s:buffer_enter()
-    au VimEnter    * call <SID>VM_Init()
+    au BufLeave     * call s:buffer_leave()
+    au BufEnter     * call s:buffer_enter()
+    au VimEnter     * call <SID>VM_Init()
+    au TextYankPost * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
 augroup END
 
 fun! s:buffer_leave()

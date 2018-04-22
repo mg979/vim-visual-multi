@@ -44,6 +44,18 @@ endfun
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Select operator
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#select_operator(...)
+    """Perform a yank, the autocmd will create the region.
+
+    "call s:init(0, 0, 1)
+    let g:VM.selecting = 1
+    return 'y'
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Add cursor
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -186,8 +198,15 @@ fun! vm#commands#find_under(visual, whole, inclusive)
     " yank and create region
     if !a:visual | call s:yank(a:inclusive) | endif
 
-    call s:Search.add()
+    if g:VM.selecting
+        let g:VM.selecting = 0
+        if empty(s:v.search) | let @/ = '' | endif
+        nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
+    else
+        call s:Search.add()
+    endif
     let R = s:Global.get_region()
+    if R.h && !g:VM.multiline | call s:Funcs.toggle_option('multiline') | endif
     call s:Funcs.count_msg(0)
     return R
 endfun

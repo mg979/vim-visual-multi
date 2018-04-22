@@ -1,6 +1,9 @@
-let s:motions  = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E']
+let g:VM.select_motions = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E']
+let g:VM.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '~']
+let g:VM.find_motions   = ['f', 'F', 't', 'T', '$', '0', '^', '%']
 
 fun! vm#plugs#init()
+    nmap            <Plug>(VM-Select-Operator)         :let g:VM.selecting = 1<cr>:silent! nunmap <buffer> y<cr>y
     nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0, 0)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-At-Word)      :call vm#commands#add_cursor_at_word(1, 1)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-Down)         :call vm#commands#add_cursor_at_pos(1, 0)<cr>
@@ -65,23 +68,31 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-This-Motion-h)           :call vm#commands#motion('h', 1)<cr>
     nnoremap        <Plug>(VM-This-Motion-l)           :call vm#commands#motion('l', 1)<cr>
 
-    for m in s:motions
+    for m in g:VM.motions
         exe "nnoremap <Plug>(VM-Motion-".m.") :call vm#commands#motion('".m."', 0)\<cr>"
-        exe "nnoremap <Plug>(VM-Select-".m.") :call vm#commands#motion('".m."', 0, 1)\<cr>"
         exe "nnoremap <Plug>(VM-This-Motion-".m.") :call vm#commands#motion('".m."', 0)\<cr>"
+    endfor
+
+    for m in g:VM.find_motions
+        exe "nnoremap <Plug>(VM-Motion-".m.") :call vm#commands#find_motion('".m."', '', 0)\<cr>"
+    endfor
+
+    for m in g:VM.select_motions
+        exe "nnoremap <Plug>(VM-Select-".m.") :call vm#commands#motion('".m."', 0, 1)\<cr>"
+    endfor
+
+    let remaps = g:VM_custom_remaps
+    for m in keys(remaps)
+        exe "nnoremap <Plug>(VM-Remap-Motion-".remaps[m].") :call vm#commands#remap_motion('".remaps[m]."', 0)\<cr>"
+    endfor
+
+    let noremaps = g:VM_custom_noremaps
+    for m in keys(noremaps)
+        exe "nnoremap <Plug>(VM-Motion-".noremaps[m].") :call vm#commands#motion('".noremaps[m]."', 0)\<cr>"
     endfor
 
     nnoremap        <Plug>(VM-Fast-Back)               :call vm#commands#end_back(1, 0, 1)<cr>
     nnoremap        <Plug>(VM-End-Back)                :call vm#commands#end_back(0, 0, 1)<cr>
-
-    nnoremap        <Plug>(VM-Motion-f)                :call vm#commands#find_motion('f', '', 0)<cr>
-    nnoremap        <Plug>(VM-Motion-F)                :call vm#commands#find_motion('F', '', 0)<cr>
-    nnoremap        <Plug>(VM-Motion-t)                :call vm#commands#find_motion('t', '', 0)<cr>
-    nnoremap        <Plug>(VM-Motion-T)                :call vm#commands#find_motion('T', '', 0)<cr>
-    nnoremap        <Plug>(VM-Motion-$)                :call vm#commands#find_motion('$', '', 0)<cr>
-    nnoremap        <Plug>(VM-Motion-0)                :call vm#commands#find_motion('0', '', 0)<cr>
-    nnoremap        <Plug>(VM-Motion-^)                :call vm#commands#find_motion('^', '', 0)<cr>
-    nnoremap        <Plug>(VM-Motion-%)                :call vm#commands#find_motion('%', '', 0)<cr>
 
     nnoremap        <Plug>(VM-Motion-Shrink)           :call vm#commands#shrink_or_enlarge(1, 0)<cr>
     nnoremap        <Plug>(VM-Motion-Enlarge)          :call vm#commands#shrink_or_enlarge(0, 0)<cr>
@@ -125,11 +136,6 @@ fun! vm#plugs#init()
         let mode = g:VM.extend_mode? ' (extend mode)' : ' (cursor mode)'
         call b:VM_Selection.Funcs.msg([["Enter regex".mode.":", 'WarningMsg'], ["\n/", 'None']], 1)
     endfun
-
-    let remaps = g:VM_custom_remaps
-    for m in keys(remaps)
-        exe "nnoremap <Plug>(VM-Remap-Motion-".remaps[m].") :call vm#commands#remap_motion('".remaps[m]."')\<cr>"
-    endfor
 
     nnoremap <expr> <Plug>(VM-:)                       vm#commands#regex_reset(':')
     nnoremap <expr> <Plug>(VM-/)                       vm#commands#regex_reset('/')
