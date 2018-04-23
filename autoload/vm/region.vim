@@ -256,8 +256,8 @@ fun! s:vertical_col(r)
     "correct bad positions
     let r = a:r
     let nl = col([r.L, '$'])
-    if !r.a         | let r.a = 1                | endif
-    if r.b > nl - 1 | let r.b = nl? (nl - 1) : 1 | endif
+    if !r.a         | let r.a = 1                  | endif
+    if r.b > nl - 1 | let r.b = nl>1? (nl - 1) : 1 | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

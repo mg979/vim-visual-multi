@@ -52,8 +52,8 @@ fun! s:Edit.process_visual(cmd)
 
     for r in s:R()
         call r.bytes([change, change])
-        call cursor(r.L, r.b) | normal! m`
-        call cursor(r.l, r.a) | normal! v``
+        call cursor(r.L, r.b) | keepjumps normal! m`
+        call cursor(r.l, r.a) | keepjumps normal! v``
         exe "normal ".a:cmd
 
         "update changed size

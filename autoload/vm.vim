@@ -49,6 +49,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.only_this        = 0
     let s:v.only_this_always = 0
     let s:v.using_regex      = 0
+    let s:v.vertical_col     = 0
 
     let s:V.Search     = vm#search#init()
     let s:V.Global     = vm#global#init()

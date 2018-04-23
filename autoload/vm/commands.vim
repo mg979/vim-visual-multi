@@ -1,5 +1,4 @@
-let s:motion = '' | let s:starting_col = 0
-let s:merge = 0  | let s:dir = 0
+let s:motion = ''
 let s:X = { -> g:VM.extend_mode }
 
 fun! s:init(whole, cursor, extend_mode)
@@ -82,12 +81,19 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:skip_shorter_lines(where)
-    "stop at first and last line
-    if line('.') == 1 || line('.') == line('$') | return 1 | endif
+    let vcol    = s:v.vertical_col
+    let col     = col('.')
+    "we don't want cursors on final column('$'), except when adding at column 1
+    "in this case, moving to an empty line would give:
+    "   vcol     = 1
+    "   col      = 1
+    "   endline  = 1
+    "and the line would be skipped. 'Push' endline, so that the cursor is added
+    let endline = (col('$') > 1)? col('$') : 2
 
     "when adding cursors below or above, don't add on shorter lines
-    if col('.') < s:starting_col || col('.') == col('$')
-        let s:starting_col = 0
+    if ( col < vcol || col == endline )
+        let s:v.vertical_col = 0
         call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return 1
     endif
 
@@ -95,10 +101,13 @@ fun! s:skip_shorter_lines(where)
 endfun
 
 fun! vm#commands#add_cursor_at_pos(where, extend, ...)
-    call s:check_extend_default(a:extend)
-    if a:where && !s:starting_col | let s:starting_col = col('.') | endif
+    "stop at first and last line if adding cursors vertically
+    if a:where && ( line('.') == 1 || line('.') == line('$') ) | return | endif
 
-    "silently add one cursor at pos
+    call s:check_extend_default(a:extend)
+    if a:where | let s:v.vertical_col = col('.') | endif
+
+    "add one cursor at pos, if not adding vertically from callback function
     if !a:0 | call s:Global.new_cursor() | endif
 
     if a:where == 1
@@ -333,7 +342,6 @@ fun! vm#commands#skip(just_remove)
         let r = s:Global.is_region_at_pos('.')
         if !empty(r)
             call s:Global.remove_last_region(r.id)
-            call s:Funcs.count_msg(1)
         endif
 
     elseif s:v.nav_direction
@@ -518,11 +526,7 @@ fun! s:call_motion(this)
     let s:v.only_this = a:this
     "let b:VM_backup = copy(b:VM_Selection)
 
-    if !s:v.auto | call vm#commands#move() | return | endif
-
-    "auto section
-    let s:merge = 0
-    exe "normal! ".s:motion
+    call vm#commands#move()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
