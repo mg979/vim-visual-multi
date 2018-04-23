@@ -203,6 +203,7 @@ fun! s:Edit.apply_change() dict
     let s:cmd = '.'
     let self.skip_index = s:v.index
     call self.process()
+    let self.skip_index = -1
 endfun
 
 
@@ -351,15 +352,15 @@ fun! s:Edit.get_motion(op, n) dict
 
     if empty(M) | echon ' ...Aborted'
 
-    elseif a:op == 'd'
+    elseif a:op ==# 'd'
         let s:cmd = M
         call self.process()
         call self.post_process(0)
-    elseif a:op == 'y'
+    elseif a:op ==# 'y'
         call vm#commands#change_mode(1)
         let cmd = substitute(M, "^.*y", "", "")."\"".reg.'y'
         call feedkeys(cmd)
-    elseif a:op == 'c'
+    elseif a:op ==# 'c'
         let s:cmd = M
         call self.process()
         call s:V.Insert.start('c')
