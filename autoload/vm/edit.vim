@@ -22,10 +22,9 @@ fun! vm#edit#init()
 
     let s:v.registers    = {}
     let s:v.use_register = s:v.def_reg
-    let s:v.last_ex      = ''
-    let s:v.last_normal  = ''
     let s:v.new_text     = ''
     let s:extra_spaces   = []
+    let s:W              = []
 
     return s:Edit
 endfun
@@ -42,6 +41,20 @@ fun! s:Edit._process(cmd)
         call r.bytes([change, change])
         call cursor(r.l, r.a)
         exe a:cmd
+
+        "update changed size
+        let change = s:size() - size
+    endfor
+endfun
+
+fun! s:Edit.process_visual(cmd)
+    let size = s:size() | let change = 0
+
+    for r in s:R()
+        call r.bytes([change, change])
+        call cursor(r.L, r.b) | normal! m`
+        call cursor(r.l, r.a) | normal! v``
+        exe "normal ".a:cmd
 
         "update changed size
         let change = s:size() - size
@@ -341,6 +354,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.run_normal(cmd, recursive, ...) dict
+
+    "-----------------------------------------------------------------------
+
     if !a:0 && a:cmd == -1
         let cmd = input('Normal command? ')
         if empty(cmd) | call s:Funcs.msg('Command aborted.', 1) | return | endif
@@ -352,20 +368,59 @@ fun! s:Edit.run_normal(cmd, recursive, ...) dict
         let cmd = a:cmd
 
     elseif !empty(a:1)
-        call self.run_normal(a:1[0], a:1[1]) | endif
+        call self.run_normal(a:1[0], a:1[1]) | return | endif
 
-    let s:v.auto = 1
+    "-----------------------------------------------------------------------
+
     let s:cmd = a:recursive? ("normal ".cmd) : ("normal! ".cmd)
     if s:X() | call vm#commands#change_mode(1) | endif
+
+    call s:before_macro()
     call self._process(s:cmd)
 
     if a:cmd ==# 'X' | for r in s:R() | call r.bytes([-1,-1]) | endfor | endif
 
-    let s:v.last_normal = [cmd, a:recursive]
+    let g:VM.last_normal = [cmd, a:recursive]
     call self.post_process(0)
+    call s:after_macro(0)
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.run_visual(cmd, ...) dict
+
+    "-----------------------------------------------------------------------
+
+    if !a:0 && a:cmd == -1
+        let cmd = input('Visual command? ')
+        if empty(cmd) | call s:Funcs.msg('Command aborted.', 1) | return | endif
+
+    elseif empty(a:cmd)
+        call s:Funcs.msg('Command not found.', 1) | return
+
+    elseif !a:0
+        let cmd = a:cmd
+
+    elseif !empty(a:1)
+        call self.run_visual(a:1[0], a:1[1]) | return | endif
+
+    "-----------------------------------------------------------------------
+
+    call s:before_macro()
+    call self.process_visual(cmd)
+
+    let g:VM.last_visual = cmd
+    call self.post_process(0)
+    call s:after_macro(0)
+    if s:X() | call vm#commands#change_mode(1) | endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Edit.run_ex(...) dict
+
+    "-----------------------------------------------------------------------
+
     if !a:0
         let cmd = input('Ex command? ', '', 'command')
         if empty(cmd) | call s:Funcs.msg('Command aborted.', 1) | return | endif
@@ -375,10 +430,15 @@ fun! s:Edit.run_ex(...) dict
     else
         call s:Funcs.msg('Command not found.', 1) | return | endif
 
-    let s:v.last_ex = cmd
+    "-----------------------------------------------------------------------
+
+    let g:VM.last_ex = cmd
     if s:X() | call vm#commands#change_mode(1) | endif
+
+    call s:before_macro()
     call self._process(cmd)
     call self.post_process(0)
+    call s:after_macro(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

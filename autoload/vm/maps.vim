@@ -85,6 +85,8 @@ fun! vm#maps#start()
     "normal/ex/visual
     nmap          <nowait> <buffer> zz              <Plug>(VM-Run-Normal)
     nmap <silent> <nowait> <buffer> Z               <Plug>(VM-Run-Last-Normal)
+    nmap          <nowait> <buffer> zv              <Plug>(VM-Run-Visual)
+    nmap <silent> <nowait> <buffer> zV              <Plug>(VM-Run-Last-Visual)
     nmap          <nowait> <buffer> zx              <Plug>(VM-Run-Ex)
     nmap <silent> <nowait> <buffer> zX              <Plug>(VM-Run-Last-Ex)
 

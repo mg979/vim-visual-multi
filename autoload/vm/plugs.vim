@@ -100,6 +100,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Merge-To-Bol)            :call vm#commands#merge_to_beol(0, 0)<cr>
 
     "Edit commands
+    nnoremap        <Plug>(VM-Edit-x)                  :call b:VM_Selection.Edit.run_normal('x', 0)<cr>
+    nnoremap        <Plug>(VM-Edit-X)                  :call b:VM_Selection.Edit.run_normal('X', 0)<cr>
     nnoremap        <Plug>(VM-Edit-a-Append)           :<C-u>call b:VM_Selection.Edit.insert('a')<cr>
     nnoremap        <Plug>(VM-Edit-A-Append)           :<C-u>call b:VM_Selection.Edit.insert('A')<cr>
     nnoremap        <Plug>(VM-Edit-i-Insert)           :<C-u>call b:VM_Selection.Edit.insert('i')<cr>
@@ -115,17 +117,17 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-P-Paste-Block)      :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 0, g:VM.extend_mode)<cr>
     nnoremap <expr> <Plug>(VM-Edit-Yank)               <SID>Yank(1)
     nnoremap <expr> <Plug>(VM-Edit-Soft-Yank)          <SID>Yank(0)
-    nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
-    nnoremap        <Plug>(VM-Run-Macro-Replace)       :call b:VM_Selection.Edit.run_macro(1)<cr>
     nnoremap        <Plug>(VM-Edit-Shift-Right)        :call b:VM_Selection.Edit.shift(1)<cr>
     nnoremap        <Plug>(VM-Edit-Shift-Left)         :call b:VM_Selection.Edit.shift(0)<cr>
     nnoremap        <Plug>(VM-Edit-Transpose)          :call b:VM_Selection.Edit.transpose()<cr>
+
+    nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
     nnoremap        <Plug>(VM-Run-Ex)                  :call b:VM_Selection.Edit.run_ex()<cr>
-    nnoremap        <Plug>(VM-Run-Last-Ex)             :call b:VM_Selection.Edit.run_ex(b:VM_Selection.Vars.last_ex)<cr>
-    nnoremap        <Plug>(VM-Edit-x)                  :call b:VM_Selection.Edit.run_normal('x', 0)<cr>
-    nnoremap        <Plug>(VM-Edit-X)                  :call b:VM_Selection.Edit.run_normal('X', 0)<cr>
+    nnoremap        <Plug>(VM-Run-Last-Ex)             :call b:VM_Selection.Edit.run_ex(g:VM.last_ex)<cr>
     nnoremap        <Plug>(VM-Run-Normal)              :call b:VM_Selection.Edit.run_normal(-1, 1)<cr>
-    nnoremap        <Plug>(VM-Run-Last-Normal)         :call b:VM_Selection.Edit.run_normal(b:VM_Selection.Vars.last_normal[0] ,b:VM_Selection.Vars.last_normal[1])<cr>
+    nnoremap        <Plug>(VM-Run-Last-Normal)         :call b:VM_Selection.Edit.run_normal(g:VM.last_normal[0] ,g:VM.last_normal[1])<cr>
+    nnoremap        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1)<cr>
+    nnoremap        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:VM.last_visual)<cr>
 
     fun! <SID>Yank(hard)
         if empty(b:VM_Selection.Global.is_region_at_pos('.')) | return 'y' | endif
