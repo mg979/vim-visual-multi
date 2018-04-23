@@ -69,8 +69,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-This-Motion-l)           :call vm#commands#motion('l', 1)<cr>
 
     for m in g:VM.motions
-        exe "nnoremap <Plug>(VM-Motion-".m.") :call vm#commands#motion('".m."', 0)\<cr>"
-        exe "nnoremap <Plug>(VM-This-Motion-".m.") :call vm#commands#motion('".m."', 0)\<cr>"
+        exe "nnoremap <Plug>(VM-Motion-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 0)\<cr>"
+        exe "nnoremap <Plug>(VM-This-Motion-".m.") :\<C-u>call vm#commands#motion('".m."',v:count1,  1)\<cr>"
     endfor
 
     for m in g:VM.find_motions
@@ -102,6 +102,8 @@ fun! vm#plugs#init()
     "Edit commands
     nnoremap        <Plug>(VM-Edit-x)                  :call b:VM_Selection.Edit.run_normal('x', 0)<cr>
     nnoremap        <Plug>(VM-Edit-X)                  :call b:VM_Selection.Edit.run_normal('X', 0)<cr>
+    nnoremap        <Plug>(VM-Edit-J)                  :call b:VM_Selection.Edit.run_normal('J', 0)<cr>
+    nnoremap        <Plug>(VM-Edit-Del)                :call b:VM_Selection.Edit.del_key()<cr>
     nnoremap        <Plug>(VM-Edit-a-Append)           :<C-u>call b:VM_Selection.Edit.insert('a')<cr>
     nnoremap        <Plug>(VM-Edit-A-Append)           :<C-u>call b:VM_Selection.Edit.insert('A')<cr>
     nnoremap        <Plug>(VM-Edit-i-Insert)           :<C-u>call b:VM_Selection.Edit.insert('i')<cr>

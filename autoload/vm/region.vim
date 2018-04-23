@@ -115,7 +115,7 @@ fun! s:Region.new(cursor, ...)
 
         let R.l     = getpos('.')[1]        " line
         let R.L     = R.l
-        let R.a     = getpos('.')[2]        " position
+        let R.a     = col('$')>1? getpos('.')[2] : 0        " position
         let R.b     = R.a
         let R.w     = 1
         let R.h     = 0
@@ -160,7 +160,7 @@ fun! s:Region.new(cursor, ...)
     endif
 
     call add(s:v.IDs_list, R.id)
-    call s:vertical_col(R)
+    if s:X() | call s:fix_pos(R) | endif
     call R.highlight()
     call s:Funcs.restore_reg()
 
@@ -252,16 +252,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:vertical_col(r)
-    "correct bad positions
-    let r = a:r
-    let nl = col([r.L, '$'])
-    if !r.a         | let r.a = 1                  | endif
-    if r.b > nl - 1 | let r.b = nl>1? (nl - 1) : 1 | endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:keep_line(r, ln)
     """Ensure line boundaries aren't crossed."""
     let r = a:r
@@ -322,18 +312,6 @@ endfun
 " Update functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.yank() dict
-    """Yank region content if in extend mode."""
-    if !s:X() | return | endif
-
-    let r = self
-    keepjumps normal! m[
-    call cursor(r.L, r.b+1)
-    silent keepjumps normal! m]`[y`]
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:Region.update_cursor(...) dict
     """Update cursor vars from position [line, col] or offset shift."""
     let r = self
@@ -341,7 +319,21 @@ fun! s:Region.update_cursor(...) dict
     if a:0 && !type(a:1) | let r.l = byte2line(a:1)    | let r.a = a:1 - line2byte(r.l)
     elseif a:0           | let r.l = a:1[0]            | let r.a = a:1[1] | endif
 
+    "fix positions in empty lines or endline
+    if !r.a && len(getline(r.l))  | let r.a = 1
+    elseif r.a == col([r.l, '$']) | let r.a = col([r.l, '$']) - 1 | endif
+
     call self.update_vars()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region.update_content() dict
+    """Yank region content if in extend mode."""
+    call cursor(self.l, self.a)
+    keepjumps normal! m[
+    call cursor(self.L, self.b+1)
+    silent keepjumps normal! m]`[y`]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -355,9 +347,8 @@ fun! s:Region.update_region(...) dict
         let a = r.a_() | let r.l = a[0] | let r.a = a[1]
         let b = r.b_() | let r.L = b[0] | let r.b = b[1] | endif
 
-    if !g:VM.multiline | call s:vertical_col(r) | endif
-    call cursor(r.l, r.a)
-    call self.yank()
+    if g:VM.multiline | call s:fix_pos(r) | endif
+    call self.update_content()
     call self.update_vars()
 endfun
 
@@ -452,6 +443,8 @@ fun! s:Region.update_highlight() dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Misc functions
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:pattern(r)
     """Find the search pattern associated with the region."""
@@ -466,6 +459,16 @@ fun! s:pattern(r)
 
     "return current pattern if one is present (in cursor mode text is empty)
     return empty(a:r.pat)? '' : a:r.pat
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:fix_pos(r)
+    "correct bad positions
+    let r = a:r
+    let nl = col([r.L, '$'])
+    if !r.a && !len(getline(r.l)) | let r.a = 1                  | endif
+    if r.b > nl - 1               | let r.b = nl>1? (nl - 1) : 1 | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

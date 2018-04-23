@@ -110,7 +110,11 @@ endfun
 fun! s:Global.update_regions() dict
     """Force regions update."""
 
-    for r in s:R() | call r.update_region() | endfor
+    if s:X()
+        for r in s:R() | call r.update_region() | endfor
+    else
+        for r in s:R() | call r.update_cursor() | endfor
+    endif
     call self.update_highlight()
 endfun
 

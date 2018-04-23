@@ -1,11 +1,11 @@
 let s:NVIM = has('gui_running') || has('nvim')
 
-let s:simple   = ['d', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', 's', '?', '/', ':', '-', '+', 'u', 'x', 'X', 'r', 'M', 'a', 'A', 'i', 'I', 'O', ]
+let s:simple   = ['d', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', '?', '/', ':', '-', '+', 'u', 'x', 'X', 'r', 'M', 'a', 'A', 'i', 'I', 'O', 'J' ]
 
-let s:zeta     = ['zz', 'za', 'zA', 'Z', 'zx', 'zX']
+let s:zeta     = ['zz', 'za', 'zA', 'Z', 'zx', 'zX', 'zv', 'zV']
 let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', 't', 'b' ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
-let s:alt_maps = ['j', 'k', 'J', ']', 'q', 'o' ]
+let s:alt_maps = ['j', 'k', ']', 'q', 'o' ]
 let s:leader   = ['@', 'y', 'p', 'P']
 let s:leader2  = []
 
@@ -71,10 +71,18 @@ fun! vm#maps#start()
 
 
     call s:arrows()
-    call s:hjkl()
+
+    nmap     <silent> <nowait> <buffer> <C-h>       <Plug>(VM-This-Motion-h)
+    nmap     <silent> <nowait> <buffer> <C-l>       <Plug>(VM-This-Motion-l)
+
+    nmap     <silent> <nowait> <buffer> <M-j>       <Plug>(VM-Add-Cursor-Down)
+    nmap     <silent> <nowait> <buffer> <M-k>       <Plug>(VM-Add-Cursor-Up)
 
     "select
-    nmap <silent>          <buffer> s               <Plug>(VM-Select-Operator)
+    if has('nvim')
+        nmap <silent>      <buffer> s               <Plug>(VM-Select-Operator)
+    endif
+
     nmap <silent> <nowait> <buffer> za              <Plug>(VM-Select-All-Inside)
     nmap <silent> <nowait> <buffer> zA              <Plug>(VM-Select-All-Around)
 
@@ -99,6 +107,8 @@ fun! vm#maps#start()
     nmap <silent> <nowait> <buffer> <M-o>           <Plug>(VM-Edit-O-New-Line)
     nmap <silent> <nowait> <buffer> x               <Plug>(VM-Edit-x)
     nmap <silent> <nowait> <buffer> X               <Plug>(VM-Edit-X)
+    nmap <silent> <nowait> <buffer> J               <Plug>(VM-Edit-J)
+    nmap <silent> <nowait> <buffer> <del>           <Plug>(VM-Edit-Del)
     nmap <silent> <nowait> <buffer> r               <Plug>(VM-Edit-Replace)
     nmap <silent> <nowait> <buffer> c               <Plug>(VM-Edit-Change)
     nmap <silent> <nowait> <buffer> d               <Plug>(VM-Edit-Delete)
@@ -144,29 +154,6 @@ fun! s:arrows()
     nmap     <silent> <nowait> <buffer> <M-S-Left>  <Plug>(VM-Edit-Shift-Left)
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:hjkl()
-    nmap <silent> <nowait> <buffer> h           <Plug>(VM-Motion-h)
-    nmap <silent> <nowait> <buffer> j           <Plug>(VM-Motion-j)
-    nmap <silent> <nowait> <buffer> k           <Plug>(VM-Motion-k)
-    nmap <silent> <nowait> <buffer> l           <Plug>(VM-Motion-l)
-
-    "nmap     <silent> <nowait> <buffer> J           <Plug>(VM-Motion-j)
-    "nmap     <silent> <nowait> <buffer> K           <Plug>(VM-Motion-k)
-    "nmap     <silent> <nowait> <buffer> H           <Plug>(VM-Motion-h)
-    "nmap     <silent> <nowait> <buffer> L           <Plug>(VM-Motion-l)
-
-    nmap     <silent> <nowait> <buffer> <C-h>       <Plug>(VM-This-Motion-h)
-    nmap     <silent> <nowait> <buffer> <C-l>       <Plug>(VM-This-Motion-l)
-
-    nmap     <silent> <nowait> <buffer> <M-j>       <Plug>(VM-Add-Cursor-Down)
-    nmap     <silent> <nowait> <buffer> <M-k>       <Plug>(VM-Add-Cursor-Up)
-
-    nmap     <silent> <nowait> <buffer> <M-J>       <Plug>(VM-Motion-J)
-endfun
-
-
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps remove
@@ -199,6 +186,10 @@ fun! vm#maps#end()
 
     call s:arrows_end()
 
+    if has('nvim')
+        nunmap <buffer> s
+    endif
+
     nunmap <buffer> <Tab>
     nunmap <buffer> <esc>
     nunmap <buffer> <BS>
@@ -209,6 +200,7 @@ fun! vm#maps#end()
 
     nunmap <buffer> <S-End>
     nunmap <buffer> <S-Home>
+    nunmap <buffer> <Del>
 
     silent! cunmap <buffer> <cr>
     silent! cunmap <buffer> <esc>

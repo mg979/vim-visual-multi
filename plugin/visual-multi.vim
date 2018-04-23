@@ -65,7 +65,11 @@ fun! <SID>VM_Init()
     endif
 
     if g:VM_default_mappings
-        nmap <silent> gs         <Plug>(VM-Select-Operator)
+
+        if has('nvim')
+            nmap <silent> gs         <Plug>(VM-Select-Operator)
+        endif
+
         nmap <silent> g<space>   <Plug>(VM-Add-Cursor-At-Pos)
         nmap <silent> g<cr>      <Plug>(VM-Add-Cursor-At-Word)
         nmap <silent> g/         <Plug>(VM-Start-Regex-Search)

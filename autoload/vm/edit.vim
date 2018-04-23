@@ -33,14 +33,24 @@ endfun
 " Region processing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit._process(cmd)
-    let size = s:size() | let change = 0
+fun! s:Edit._process(cmd, ...)
+    let size = s:size() | let change = 0 | let cmd = a:cmd
 
     for r in s:R()
         if !s:v.auto && r.index == self.skip_index | continue | endif
+
         call r.bytes([change, change])
+        "cursors on empty lines still give problems, remove them
+        if !r.a && !len(getline(r.l)) | call r.remove() | continue | endif
         call cursor(r.l, r.a)
-        exe a:cmd
+
+        if a:0 && a:1==#'del'
+            if r.a == col([r.l, '$']) - 1 | normal! Jx
+            else                          | normal! x
+            endif
+        else
+            exe cmd
+        endif
 
         "update changed size
         let change = s:size() - size
@@ -89,8 +99,11 @@ fun! s:Edit.post_process(reselect, ...) dict
 
     let s:v.auto = 0
     let s:extra_spaces = []
+
+    "clear highlight now to prevent weirdinesses, then update regions
+    call clearmatches()
     call s:Global.update_regions()
-    call s:Global.select_region_at_pos('.')
+    call s:Global.select_region(-1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -378,11 +391,16 @@ fun! s:Edit.run_normal(cmd, recursive, ...) dict
     call s:before_macro()
     call self._process(s:cmd)
 
-    if a:cmd ==# 'X' | for r in s:R() | call r.bytes([-1,-1]) | endfor | endif
+    if a:cmd ==# 'X'
+        for r in s:R() | call r.bytes([-1,-1]) | endfor
+    elseif a:cmd ==# 'x'
+        for r in s:R() | if r.a == col([r.L, '$']) | call r.bytes([-1,-1]) | endif  | endfor
+    endif
+
 
     let g:VM.last_normal = [cmd, a:recursive]
     call self.post_process(0)
-    call s:after_macro(0)
+    call s:after_macro()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -411,7 +429,7 @@ fun! s:Edit.run_visual(cmd, ...) dict
 
     let g:VM.last_visual = cmd
     call self.post_process(0)
-    call s:after_macro(0)
+    call s:after_macro()
     if s:X() | call vm#commands#change_mode(1) | endif
 endfun
 
@@ -438,31 +456,11 @@ fun! s:Edit.run_ex(...) dict
     call s:before_macro()
     call self._process(cmd)
     call self.post_process(0)
-    call s:after_macro(0)
+    call s:after_macro()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Macros
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:before_macro()
-    let s:v.silence = 1 | let s:v.auto = 1
-    let s:old_multiline = g:VM.multiline
-    let g:VM.multiline = 1
-    call vm#maps#end()
-    if g:VM.motions_enabled | call vm#maps#motions(0, 1) | return 1 | endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:after_macro(motions)
-    let s:v.silence = 0
-    let g:VM.multiline = s:old_multiline
-
-    call vm#maps#start()
-    if a:motions | call vm#maps#motions(1) | endif
-endfun
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.run_macro(replace) dict
@@ -475,13 +473,13 @@ fun! s:Edit.run_macro(replace) dict
         return | endif
 
     let s:cmd = "@".reg
-    let motions = s:before_macro()
+    call s:before_macro()
 
     if s:X() | call vm#commands#change_mode(1) | endif
 
     call self.process()
     call self.post_process(0)
-    call s:after_macro(motions)
+    call s:after_macro()
     redraw!
 endfun
 
@@ -492,6 +490,17 @@ endfun
 fun! s:Edit.surround(type) dict
     if s:X()
     endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.del_key() dict
+    "if !s:min(1) | return | endif
+
+    call s:before_macro()
+    call self._process(0, 'del')
+    call self.post_process(0)
+    call s:after_macro()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -547,6 +556,27 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Misc functions
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:before_macro()
+    let s:v.silence = 1 | let s:v.auto = 1
+    let s:old_multiline = g:VM.multiline
+    let s:old_motions = g:VM.motions_enabled
+    let g:VM.multiline = 1
+    call vm#maps#end()
+    if g:VM.motions_enabled | call vm#maps#motions(0, 1) | endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:after_macro()
+    let s:v.silence = 0
+    let g:VM.multiline = s:old_multiline
+
+    call vm#maps#start()
+    if s:old_motions | call vm#maps#motions(1) | endif
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:count(c)

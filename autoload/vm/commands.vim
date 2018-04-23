@@ -381,12 +381,12 @@ let s:sublime = { -> !g:VM.is_active && g:VM_sublime_mappings }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#motion(motion, this, ...)
+fun! vm#commands#motion(motion, count, this, ...)
     if s:sublime()    | call s:init(0, 1, 1)     | call s:Global.new_cursor() | endif
     if s:no_regions() | return                   | endif
     if a:0 && !s:X()  | let g:VM.extend_mode = 1 | endif
 
-    let s:motion = a:motion
+    let s:motion = a:count.a:motion
     if !g:VM.multiline && s:vertical() | let g:VM.multiline = 1 | endif
     call s:call_motion(a:this)
 endfun

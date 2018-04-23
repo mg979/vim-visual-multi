@@ -154,7 +154,12 @@ fun! s:Funcs.count_msg(force) dict
         call self.msg("No selected regions.", 1)
         return | endif
 
-    let ix = g:VM_debug? " ".s:R()[s:v.index].index : ''
+    if g:VM_debug
+        let r = s:R()[s:v.index]
+        let ix = ' '.r.index.' '.r.a.' '.r.b
+    else
+        let ix = ''
+    endif
     let hl = 'Directory'
     let i = [' ', hl]
     let m1 = s:m1()
