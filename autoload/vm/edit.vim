@@ -62,8 +62,8 @@ fun! s:Edit.process_visual(cmd)
 
     for r in s:R()
         call r.bytes([change, change])
-        call cursor(r.L, r.b) | keepjumps normal! m`
-        call cursor(r.l, r.a) | keepjumps normal! v``
+        call cursor(r.L, r.b) | normal! m`
+        call cursor(r.l, r.a) | normal! v``
         exe "normal ".a:cmd
 
         "update changed size
@@ -134,6 +134,7 @@ fun! s:Edit.delete(X, keep, count) dict
             let change = s:size() - size
         endfor
         call vm#commands#change_mode(1)
+        if a:keep | call self.post_process(0) | endif
 
     elseif a:count
         "ask for motion
@@ -224,9 +225,14 @@ fun! s:Edit.replace() dict
 
         call self.delete(1, 0, 1)
         call self.block_paste(1)
+        for r in s:R() | call r.bytes([0,-1]) | endfor
         call self.post_process(1, 0)
     else
-        call self.get_motion('c', a:count)
+        call s:Funcs.msg('Replace char... ', 1)
+        let char = nr2char(getchar())
+        if char ==? "\<esc>" | call s:Funcs.msg('Canceled.', 1) | return | endif
+        call self.run_normal('r'.char, 0)
+        call s:Funcs.count_msg(1)
     endif
 endfun
 
@@ -308,10 +314,9 @@ endfun
 " Get motion
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:delchars = { c -> index(['d', 'w', 'l', 'e', 'b', 'W', 'E', 'B', '$', '^', '0'], c) >= 0 }
-let s:chgchars = { c -> index(['c', 'w', 'l', 'e', 'b', 'W', 'E', 'B', '$', '^', '0', 's'], c) >= 0 }
-let s:rplchars = { c -> index(['r', 'w', 'l', 'e', 'b', 'W', 'E', 'B', '$', '^', '0'], c) >= 0 }
-let s:ynkchars = { c -> index(['w', 'e', 'l', 'b', 'W', 'E', 'B', '$', '^', '0'], c) >= 0 }
+let s:delchars = { c -> index(split('dwlebWEB$^0', '\zs'), c) >= 0 }
+let s:chgchars = { c -> index(split('cwlebWEB$^0s', '\zs'), c) >= 0 }
+let s:ynkchars = { c -> index(split('welbWEB$^0', '\zs'), c) >= 0 }
 
 fun! s:Edit.get_motion(op, n) dict
 
@@ -320,8 +325,7 @@ fun! s:Edit.get_motion(op, n) dict
 
     let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
                 \ a:op==#'c'? [['Change ', hl1], ['([n] c/s/w/e/b/$...) ?  ', hl2]] :
-                \ a:op==#'y'? [['Yank   ', hl1], ['([n] w/e/b/$...) ?  ',   hl2]] :
-                \ a:op==#'r'? [['Replace', hl1], ['([n] r/w/e/b/$...) ?  ',   hl2]] : 'Aborted.'
+                \ a:op==#'y'? [['Yank   ', hl1], ['([n] w/e/b/$...) ?  ',   hl2]] : 'Aborted.'
 
     call s:Funcs.msg(s, 1)
 
@@ -341,7 +345,6 @@ fun! s:Edit.get_motion(op, n) dict
         elseif a:op ==# 'd' && s:delchars(c) | echon c | let M .= c | let m .= c | break
         elseif a:op ==# 'c' && s:chgchars(c) | echon c | let M .= c | let m .= c | break
         elseif a:op ==# 'y' && s:ynkchars(c) | echon c | let M .= c | let m .= c | break
-        elseif a:op ==# 'r' && s:rplchars(c) | echon c | let M .= c | let m .= c | break
 
         else | let M = '' | break | endif
     endwhile
@@ -351,6 +354,7 @@ fun! s:Edit.get_motion(op, n) dict
     elseif a:op == 'd'
         let s:cmd = M
         call self.process()
+        call self.post_process(0)
     elseif a:op == 'y'
         call vm#commands#change_mode(1)
         let cmd = substitute(M, "^.*y", "", "")."\"".reg.'y'
