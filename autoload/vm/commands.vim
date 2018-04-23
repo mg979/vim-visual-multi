@@ -129,11 +129,11 @@ fun! vm#commands#expand_line(down)
     if empty(R)
         call vm#region#new(0, line('.'), line('.'), 1, (col('$')>1? col('$')-1 : 1))
     elseif a:down
-        call vm#commands#motion('j', 1)
+        call vm#commands#motion('j', 1, 1)
         let b = len(getline(R.L))
         call R.update_region(R.l, R.L, 1, (b? b : b+1))
     elseif !a:down
-        call vm#commands#motion('k', 1)
+        call vm#commands#motion('k', 1, 1)
         let b = len(getline(R.L))
         call R.update_region(R.l, R.L, 1, (b? b : b+1))
     endif
@@ -504,9 +504,9 @@ fun! vm#commands#select_motion(inclusive, this)
 
     let b = a==#'F' ? 'f' : 't'
 
-    call vm#commands#motion(a.c, a:this)
+    call vm#commands#motion(a.c, 1, a:this)
     call vm#commands#invert_direction()
-    call vm#commands#motion(b.d, a:this)
+    call vm#commands#motion(b.d, 1, a:this)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -65,9 +65,6 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Select-All-Inside)       :call vm#commands#select_motion(0, 0)<cr>
     nnoremap        <Plug>(VM-Select-All-Around)       :call vm#commands#select_motion(1, 0)<cr>
 
-    nnoremap        <Plug>(VM-This-Motion-h)           :call vm#commands#motion('h', 1)<cr>
-    nnoremap        <Plug>(VM-This-Motion-l)           :call vm#commands#motion('l', 1)<cr>
-
     for m in g:VM.motions
         exe "nnoremap <Plug>(VM-Motion-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 0)\<cr>"
         exe "nnoremap <Plug>(VM-This-Motion-".m.") :\<C-u>call vm#commands#motion('".m."',v:count1,  1)\<cr>"
@@ -78,7 +75,7 @@ fun! vm#plugs#init()
     endfor
 
     for m in g:VM.select_motions
-        exe "nnoremap <Plug>(VM-Select-".m.") :call vm#commands#motion('".m."', 0, 1)\<cr>"
+        exe "nnoremap <Plug>(VM-Select-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 0, 1)\<cr>"
     endfor
 
     let remaps = g:VM_custom_remaps
@@ -88,7 +85,7 @@ fun! vm#plugs#init()
 
     let noremaps = g:VM_custom_noremaps
     for m in keys(noremaps)
-        exe "nnoremap <Plug>(VM-Motion-".noremaps[m].") :call vm#commands#motion('".noremaps[m]."', 0)\<cr>"
+        exe "nnoremap <Plug>(VM-Motion-".noremaps[m].") :\<C-u>call vm#commands#motion('".noremaps[m]."', 1, 0)\<cr>"
     endfor
 
     nnoremap        <Plug>(VM-Fast-Back)               :call vm#commands#end_back(1, 0, 1)<cr>
