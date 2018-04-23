@@ -388,7 +388,7 @@ endfun
 fun! s:before_macro()
     let s:v.silence = 1 | let s:v.auto = 1
     let s:old_multiline = g:VM.multiline
-    let g:VM.multiline
+    let g:VM.multiline = 1
     call vm#maps#end()
     if g:VM.motions_enabled | call vm#maps#motions(0, 1) | return 1 | endif
 endfun

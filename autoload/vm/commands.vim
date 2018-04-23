@@ -81,6 +81,19 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:skip_shorter_lines(where)
+    "stop at first and last line
+    if line('.') == 1 || line('.') == line('$') | return 1 | endif
+
+    "when adding cursors below or above, don't add on shorter lines
+    if col('.') < s:starting_col || col('.') == col('$')
+        let s:starting_col = 0
+        call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return 1
+    endif
+
+    call s:Global.new_cursor()
+endfun
+
 fun! vm#commands#add_cursor_at_pos(where, extend, ...)
     call s:check_extend_default(a:extend)
     if a:where && !s:starting_col | let s:starting_col = col('.') | endif
@@ -90,31 +103,22 @@ fun! vm#commands#add_cursor_at_pos(where, extend, ...)
 
     if a:where == 1
         keepjumps normal! j
-        if line('.') == line('$') | return | endif
-        let R = s:Global.new_cursor()
+        if s:skip_shorter_lines(a:where) | return | endif
     elseif a:where == 2
         keepjumps normal! k
-        if line('.') == 1 | return | endif
-        let R = s:Global.new_cursor()
+        if s:skip_shorter_lines(a:where) | return | endif
     endif
 
-    "when adding cursors below or above, don't add on empty lines
-    if g:VM_cursors_skip_shorter_lines && a:where
-        if R.a < s:starting_col || R.a == len(getline('.')) + 1
-            call R.remove()
-            call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return
-        endif | endif
-    let s:starting_col = 0
     call s:Funcs.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#expand_line(down)
-    call s:check_extend_default(1) | let s:v.multiline = 1
+    call s:check_extend_default(1) | let g:VM.multiline = 1
     let R = s:Global.is_region_at_pos('.')
     if empty(R)
-        call vm#region#new(0, line('.'), line('.'), 1, col('$')-1)
+        call vm#region#new(0, line('.'), line('.'), 1, (col('$')>1? col('$')-1 : 1))
     elseif a:down
         call vm#commands#motion('j', 1)
         let b = len(getline(R.L))
@@ -329,6 +333,7 @@ fun! vm#commands#skip(just_remove)
         let r = s:Global.is_region_at_pos('.')
         if !empty(r)
             call s:Global.remove_last_region(r.id)
+            call s:Funcs.count_msg(1)
         endif
 
     elseif s:v.nav_direction

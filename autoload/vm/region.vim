@@ -159,11 +159,8 @@ fun! s:Region.new(cursor, ...)
         let R.pat   = s:Search.escape_pattern(R.txt)
     endif
 
-    "correct bad positions
-    if !R.a                      | let R.a = 1                   | endif
-    if R.b > col([R.L, '$']) - 1 | let R.b = col([R.L, '$']) - 1 | endif
-
     call add(s:v.IDs_list, R.id)
+    call s:vertical_col(R)
     call R.highlight()
     call s:Funcs.restore_reg()
 
@@ -255,6 +252,16 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:vertical_col(r)
+    "correct bad positions
+    let r = a:r
+    let nl = col([r.L, '$'])
+    if !r.a         | let r.a = 1                | endif
+    if r.b > nl - 1 | let r.b = nl? (nl - 1) : 1 | endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:keep_line(r, ln)
     """Ensure line boundaries aren't crossed."""
     let r = a:r
@@ -334,7 +341,6 @@ fun! s:Region.update_cursor(...) dict
     if a:0 && !type(a:1) | let r.l = byte2line(a:1)    | let r.a = a:1 - line2byte(r.l)
     elseif a:0           | let r.l = a:1[0]            | let r.a = a:1[1] | endif
 
-    if !r.a | let r.a = 1 | endif
     call self.update_vars()
 endfun
 
@@ -349,10 +355,7 @@ fun! s:Region.update_region(...) dict
         let a = r.a_() | let r.l = a[0] | let r.a = a[1]
         let b = r.b_() | let r.L = b[0] | let r.b = b[1] | endif
 
-    "correct bad positions
-    if !r.a                      | let r.a = 1                   | endif
-    if r.b > col([r.L, '$']) - 1 | let r.b = col([r.L, '$']) - 1 | endif
-
+    if !g:VM.multiline | call s:vertical_col(r) | endif
     call cursor(r.l, r.a)
     call self.yank()
     call self.update_vars()
