@@ -15,6 +15,7 @@ fun! vm#global#init()
 
     let s:X       = { -> g:VM.extend_mode }
     let s:R       = { -> s:V.Regions      }
+    let s:B       = { -> s:v.block_mode && g:VM.extend_mode }
 
     return s:Global
 endfun

@@ -63,12 +63,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.lastcol(line) dict
-    return len(getline(a:line))
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:Funcs.default_reg() dict
     let clipboard_flags = split(&clipboard, ',')
     if index(clipboard_flags, 'unnamedplus') >= 0
@@ -203,7 +197,8 @@ endfun
 " Toggle options
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.toggle_option(option) dict
+fun! s:Funcs.toggle_option(option, ...) dict
+    if s:v.eco | return | endif
 
     let s = "s:v.".a:option
     exe "let" s "= !".s
@@ -212,18 +207,13 @@ fun! s:Funcs.toggle_option(option) dict
         if !s:v.multiline
             call s:V.Global.split_lines()
         elseif s:v.block_mode
-            call self.toggle_option('block_mode')      | return   | endif
+            call s:V.Block.stop(1) | return   | endif
 
     elseif a:option == 'block_mode'
         if s:v.block_mode
-            if s:v.multiline
-                let s:v.multiline = 0 | call s:V.Global.split_lines()     | endif
-            if s:v.index != -1
-                let r = s:R()[-1]
-                let s:v.block[0] = r.dir? r.a : r.b
-                let s:v.block[1] = r.dir? r.b : r.a            | endif
+            call s:V.Block.start()
         else
-            let s:v.block = [0,0,0] | endif
+            call s:V.Block.stop() | endif
 
     elseif a:option == 'whole_word'
         let s = s:v.search[0]
@@ -244,7 +234,7 @@ fun! s:Funcs.toggle_option(option) dict
         return
     endif
 
-    redraw! | call self.count_msg(1)
+    if !a:0 | redraw! | call self.count_msg(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

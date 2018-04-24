@@ -9,7 +9,8 @@ fun! vm#region#init()
     let s:X    = {     -> g:VM.extend_mode      }
     let s:R    = {     -> s:V.Regions           }
     let s:Byte = { pos -> s:Funcs.pos2byte(pos) }
-    let s:lcol = { ln  -> s:Funcs.lastcol(ln)   }
+    let s:lcol = { ln  -> len(getline(ln))      }
+    let s:B    = {     -> s:v.block_mode && g:VM.extend_mode }
 endfun
 
 
@@ -466,7 +467,7 @@ endfun
          let R.a     = col('$')>1? getpos('.')[2] : 0        " position
          let R.b     = R.a
 
-         if s:X() && s:v.block_mode && s:v.block[1] && s:v.block[0]
+         if s:B() && s:v.block[1] && s:v.block[0]
              if R.dir && R.a > s:v.block[0]
                  let R.a = s:v.block[0]
                  let R.b = s:v.block[1]

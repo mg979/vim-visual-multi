@@ -18,6 +18,7 @@ fun! <SID>VM_Init()
     let g:VM.last_ex         = ''
     let g:VM.last_normal     = ''
     let g:VM.last_visual     = ''
+    let g:VM.oldupdate       = &updatetime
 
     let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
     let g:VM_motions_at_start                 = get(g:, 'VM_motions_at_start', 1)
@@ -65,9 +66,7 @@ fun! <SID>VM_Init()
 
     if g:VM_default_mappings
 
-        if has('nvim')
-            nmap <silent> gs         <Plug>(VM-Select-Operator)
-        endif
+        nmap <silent> gs         <Plug>(VM-Select-Operator)
 
         nmap <silent> g<space>   <Plug>(VM-Add-Cursor-At-Pos)
         nmap <silent> g<cr>      <Plug>(VM-Add-Cursor-At-Word)
@@ -85,27 +84,11 @@ fun! <SID>VM_Init()
         xmap <silent> s]         <Plug>(VM-Find-A-Subword)
         xmap <silent> s[         <Plug>(VM-Find-A-Whole-Subword)
     endif
+
+    call vm#augroup()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-augroup plugin-visual-multi-global
+augroup plugin-visual-multi-start
     au!
-    au BufLeave     * call s:buffer_leave()
-    au BufEnter     * call s:buffer_enter()
     au VimEnter     * call <SID>VM_Init()
-    au TextYankPost * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
 augroup END
-
-fun! s:buffer_leave()
-    if !empty(get(b:, 'VM_Selection', {}))
-        call vm#reset(1)
-    endif
-endfun
-
-fun! s:buffer_enter()
-    let b:VM_Selection = {}
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-

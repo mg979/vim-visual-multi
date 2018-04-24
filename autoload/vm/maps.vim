@@ -79,9 +79,7 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> <M-k>       <Plug>(VM-Add-Cursor-Up)
 
     "select
-    if has('nvim')
-        nmap <silent>      <buffer> s               <Plug>(VM-Select-Operator)
-    endif
+    nmap <silent>          <buffer> s               <Plug>(VM-Select-Operator)
 
     nmap <silent> <nowait> <buffer> za              <Plug>(VM-Select-All-Inside)
     nmap <silent> <nowait> <buffer> zA              <Plug>(VM-Select-All-Around)
@@ -187,9 +185,7 @@ fun! vm#maps#end()
 
     call s:arrows_end()
 
-    if has('nvim')
-        nunmap <buffer> s
-    endif
+    nunmap <buffer> s
 
     nunmap <buffer> <Tab>
     nunmap <buffer> <esc>

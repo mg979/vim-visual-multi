@@ -554,7 +554,7 @@ fun! s:Edit.shift(dir) dict
         call self.paste(0, 1, 1)
     else
         call self.delete(1, 0, 0)
-        call vm#commands#motion('h', v:count1, 0)
+        call vm#commands#motion('h', 1, 0)
         call self.paste(1, 1, 1)
     endif
 endfun

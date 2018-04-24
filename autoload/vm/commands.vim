@@ -1,11 +1,16 @@
 let s:motion = ''
-let s:X = { -> g:VM.extend_mode }
+let s:X    = { -> g:VM.extend_mode }
+let s:B    = { -> g:VM.is_active && s:v.block_mode && g:VM.extend_mode }
+let s:is_r = { -> g:VM.is_active && !empty(s:Global.is_region_at_pos('.')) }
 
 fun! s:init(whole, cursor, extend_mode)
     if a:extend_mode | let g:VM.extend_mode = 1 | endif
 
     "return if already initialized
-    if g:VM.is_active | return 1 | endif
+    if g:VM.is_active
+
+        let s:v.whole_word = a:whole
+        return 1 | endif
 
     if g:VM_motions_at_start | call vm#maps#motions(1) | endif
 
@@ -15,6 +20,7 @@ fun! s:init(whole, cursor, extend_mode)
     let s:Funcs   = s:V.Funcs
     let s:Search  = s:V.Search
     let s:Edit    = s:V.Edit
+    let s:Block   = s:V.Block
 
     let s:R    = { -> s:V.Regions }
 
@@ -49,7 +55,6 @@ endfun
 fun! vm#commands#select_operator(...)
     """Perform a yank, the autocmd will create the region.
 
-    "call s:init(0, 0, 1)
     let g:VM.selecting = 1
     return 'y'
 endfun
@@ -75,6 +80,7 @@ fun! vm#commands#add_cursor_at_word(yank, search)
     if a:search | call s:Search.add() | endif
 
     let R = s:Global.new_cursor() | let R.pat = s:v.search[0]
+    call s:Block.stop()
     call s:Funcs.count_msg(1)
 endfun
 
@@ -96,13 +102,7 @@ fun! s:skip_shorter_lines(where)
         call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return 1
     endif
 
-    "block mode
-    if s:v.block_mode
-        if s:v.direction
-            if s:v.block[1] <= col('.') | let s:v.block[1] = col('.') | endif
-        else
-            if s:v.block[1] >= col('.') | let s:v.block[1] = col('.') | endif | endif | endif
-
+    call s:V.Block.vertical()
     let r = s:Global.new_cursor()
 endfun
 
@@ -112,7 +112,8 @@ fun! vm#commands#add_cursor_at_pos(where, extend, ...)
 
     call s:check_extend_default(a:extend)
 
-    if a:where | let s:v.vertical_col = col('.') | endif
+    if a:where | let s:v.vertical_col = col('.')
+    else       | call s:Block.stop() | endif
 
     "add one cursor at pos, if not adding vertically from callback function
     if !a:0 | call s:Global.new_cursor() | endif
@@ -131,7 +132,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#expand_line(down)
-    call s:check_extend_default(1) | let s:v.multiline = 1
+    call s:check_extend_default(1)
+    if !s:v.multiline | call s:Funcs.toggle_option('multiline', 1) | endif
+
     let R = s:Global.is_region_at_pos('.')
     if empty(R)
         call vm#region#new(0, line('.'), line('.'), 1, (col('$')>1? col('$')-1 : 1))
@@ -186,6 +189,7 @@ endfun
 
 fun! vm#commands#find_by_regex(...)
     call s:init(0, 0, 1)
+    call s:Block.stop()
     let s:v.using_regex = 1
 
     "store reg and position, to check if the search will be aborted
@@ -214,6 +218,7 @@ endfun
 
 fun! vm#commands#find_under(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
+    call s:Block.stop()
 
     " yank and create region
     if !a:visual | call s:yank(a:inclusive) | endif
@@ -222,12 +227,14 @@ fun! vm#commands#find_under(visual, whole, inclusive)
         let g:VM.selecting = 0
         if empty(s:v.search) | let @/ = '' | endif
         nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
+        if !has('nvim')
+            let &updatetime = g:VM.oldupdate
+        endif
     else
         call s:Search.add()
     endif
-    let s:v.block_mode = 0
     let R = s:Global.get_region()
-    if R.h && !s:v.multiline | call s:Funcs.toggle_option('multiline') | endif
+    if R.h && !s:v.multiline | call s:Funcs.toggle_option('multiline', 1) | endif
     call s:Funcs.count_msg(1)
     return R
 endfun
@@ -237,6 +244,7 @@ endfun
 fun! vm#commands#find_all(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
 
+    call s:Block.stop()
     let storepos = getpos('.')
     let s:v.eco = 1
     let seen = []
@@ -262,7 +270,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:get_next(n)
-    let s:v.block_mode = 0
+    call s:Block.stop()
     if s:X()
         silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
         let R = s:Global.get_region()
@@ -393,38 +401,25 @@ let s:sublime = { -> g:VM_sublime_mappings &&
 
 fun! vm#commands#motion(motion, count, this, ...)
 
+    "-----------------------------------------------------------------------
     "start if sublime mappings are set; if S-hl, turn on only_this_always
-    if s:sublime()    | call s:init(0, 1, 1) |  call s:Global.new_cursor()
-        if !s:v.block_mode && s:horizontal(a:motion) | let s:v.only_this_always = 1 | endif | endif
+    if s:sublime()    | call s:init(0, 1, 1)
+
+        call s:Global.new_cursor()
+        if !s:v.block_mode && s:horizontal(a:motion)
+            call s:Funcs.toggle_option('only_this_always') | endif | endif
+
+    "-----------------------------------------------------------------------
 
     if s:no_regions() | return                   | endif
     if a:0 && !s:X()  | let g:VM.extend_mode = 1 | endif
 
     let s:motion = a:count.a:motion
-    if !s:v.multiline && s:vertical(a:motion) | let s:v.multiline = 1 | endif
+    if !s:v.multiline && s:vertical(a:motion) | call s:Funcs.toggle_option('multiline', 1) | endif
 
-    "block mode, start
-    if s:v.block_mode && s:X()
-        if !s:v.block[0]      | let s:v.block[0] = col('.') | endif | endif
-
+    call s:V.Block.horizontal(1)
     call s:call_motion(a:this)
-
-    "block mode, continue
-    if s:v.block_mode && s:X()
-        let b0 = s:v.block[0] | let b1 = s:v.block[1]
-
-        if col('.') < b0 | let s:v.block[0] = col('.')
-        elseif col('.') < b1 | let s:v.block[1] = col('.') | endif
-
-        "set minimum edge
-        let bs = map(copy(s:R()), 'v:val.b')
-        if count(bs, bs[0]) == len(bs) | let s:v.block[2] = s:v.block[0]
-        else                           | let s:v.block[2] = min(bs) | endif
-
-    elseif s:X() && s:horizontal(a:motion) && !s:v.block_mode
-        call s:Funcs.toggle_option('block_mode')
-    endif
-
+    call s:V.Block.horizontal(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
