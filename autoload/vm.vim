@@ -37,6 +37,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldcase          = [&smartcase, &ignorecase]
 
     "init new vars
+    let s:v.block            = [0,0]
     let s:v.search           = []
     let s:v.IDs_list         = []
     let s:v.ID               = 0
@@ -49,7 +50,8 @@ fun! vm#init_buffer(empty, ...)
     let s:v.only_this        = 0
     let s:v.only_this_always = 0
     let s:v.using_regex      = 0
-    let s:v.vertical_col     = 0
+    let s:v.multiline        = 0
+    let s:v.block_mode       = 1
 
     let s:V.Search     = vm#search#init()
     let s:V.Global     = vm#global#init()
@@ -64,7 +66,7 @@ fun! vm#init_buffer(empty, ...)
     set lz
 
     let g:VM.is_active = 1
-    let g:VM.multiline = 0
+    let s:v.multiline = 0
 
     call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.\n", 0)
 

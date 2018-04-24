@@ -128,51 +128,27 @@ fun! s:Funcs.msg(text, force) dict
     endfor
 endfun
 
-fun! s:m1()
-    let t = g:VM.motions_enabled? "M\+" : "M\-"
-    let hl = g:VM.motions_enabled? "Type" : "WarningMsg"
-    return [t, hl]
-endfun
-
-fun! s:m2()
-    let t = !g:VM.multiline? "B\+" : "B\-"
-    let hl = !g:VM.multiline? "Type" : "WarningMsg"
-    return [t, hl]
-endfun
-
-fun! s:m3()
-    let t = s:v.only_this_always? "O\+" : "O\-"
-    let hl = s:v.only_this_always? "Type" : "WarningMsg"
-    return [t, hl]
-endfun
-
 fun! s:Funcs.count_msg(force) dict
     if s:v.eco                     | return
-    elseif s:v.silence && !a:force | return | endif
+    elseif s:v.silence && !a:force | return
+    elseif s:v.index < 0           | call self.msg("No selected regions.", 1) | return | endif
+    let r = s:R()[s:v.index]
 
-    if s:v.index < 0
-        call self.msg("No selected regions.", 1)
-        return | endif
+    let hl = 'Directory' | let H1 = 'Type' | let H2 = 'WarningMsg'
 
-    if g:VM_debug
-        let r = s:R()[s:v.index]
-        let ix = ' '.r.index.' '.r.a.' '.r.b
-    else
-        let ix = ''
-    endif
-    let hl = 'Directory'
-    let i = [' ', hl]
-    let m1 = s:m1()
-    let i2 = [' / ', hl]
-    let m2 = s:m2()
-    let i3 = [' / ', hl]
-    let m3 = s:m3()
-    let i4 = [' ['.s:v['index'].ix.']  ', hl]
-    let s = len(s:R())>1 ? 's.' : '.'
+    if g:VM_debug | let ix = ' '.r.index.' '.r.a.' '.r.b | else | let ix = '' | endif
+    let ix = ['  ['.s:v['index'].ix.']  ', hl]
+
+    let i1 = [' '  , hl] | let m1 = g:VM.motions_enabled? ["M\+", H1] : ["m\-", H2]
+    let i2 = [' / ', hl] | let m2 = s:v.multiline?        ["V\+", H1] : ["v\-", H2]
+    let i3 = [' / ', hl] | let m3 = s:v.block_mode?       ["B\+", H1] : ["b\-", H2]
+    let i4 = [' / ', hl] | let m4 = s:v.only_this_always? ["O\+", H1] : ["o\-", H2]
+
     let t = g:VM.extend_mode? ' region' : ' cursor'
+    let s = len(s:R())>1 ? 's.' : '.'
     let t1 = [len(s:R()).t.s.'   Current patterns: ', hl]
-    let t2 = [string(s:v.search), 'Type']
-    call self.msg([i, m1, i2, m2, i3, m3, i4, t1, t2], a:force)
+    let t2 = [self.pad(string(s:v.search), 120), H1]
+    call self.msg([i1, m1, i2, m2, i3, m3, i4, m4, ix, t1, t2], a:force)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -229,31 +205,46 @@ endfun
 
 fun! s:Funcs.toggle_option(option) dict
 
-    if a:option == 'multiline'
-        let g:VM.multiline = !g:VM.multiline
-        redraw! | call b:VM_Selection.Funcs.count_msg(0)
-        if !g:VM.multiline | call s:V.Global.split_lines() | endif
-        return | endif
-
     let s = "s:v.".a:option
     exe "let" s "= !".s
 
-    if a:option == 'whole_word'
-        redraw!
+    if a:option == 'multiline'
+        if !s:v.multiline
+            call s:V.Global.split_lines()
+        elseif s:v.block_mode
+            call self.toggle_option('block_mode')      | return   | endif
+
+    elseif a:option == 'block_mode'
+        if s:v.block_mode
+            if s:v.multiline
+                let s:v.multiline = 0 | call s:V.Global.split_lines()     | endif
+            if s:v.index != -1
+                let r = s:R()[-1]
+                let s:v.block[0] = r.dir? r.a : r.b
+                let s:v.block[1] = r.dir? r.b : r.a            | endif
+        else
+            let s:v.block = [0,0] | endif
+
+    elseif a:option == 'whole_word'
         let s = s:v.search[0]
         let wm = 'WarningMsg' | let L = 'Label'
+        let pats = self.pad(string(s:v.search), 120)
 
         if s:v.whole_word
             if s[:1] != '\<' | let s:v.search[0] = '\<'.s.'\>' | endif
-            call s:Funcs.msg([['Search ->', wm], ['    whole word  ', L], ['  ->  Current patterns: ', wm], [string(s:v.search), L]], 0)
+            call self.msg([
+                        \['Search ->'               , wm], ['    whole word  ', L],
+                        \['  ->  Current patterns: ', wm], [pats              , L]], 0)
         else
             if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
-            call s:Funcs.msg([['Search ->', wm], ['  not whole word ', L], [' ->  Current patterns: ', wm], [string(s:v.search), L]], 0)
+            call self.msg([
+                        \['Search ->'              , wm], ['  not whole word ', L],
+                        \[' ->  Current patterns: ', wm], [pats               , L]], 0)
         endif
         return
     endif
 
-    redraw! | call b:VM_Selection.Funcs.count_msg(0)
+    redraw! | call self.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

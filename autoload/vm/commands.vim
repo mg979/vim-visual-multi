@@ -81,7 +81,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:skip_shorter_lines(where)
-    let vcol    = s:v.vertical_col
+    let vcol    = s:v.block[1]
     let col     = col('.')
     "we don't want cursors on final column('$'), except when adding at column 1
     "in this case, moving to an empty line would give:
@@ -93,11 +93,11 @@ fun! s:skip_shorter_lines(where)
 
     "when adding cursors below or above, don't add on shorter lines
     if ( col < vcol || col == endline )
-        let s:v.vertical_col = 0
         call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return 1
     endif
 
     call s:Global.new_cursor()
+    let s:v.block[1] = 0
 endfun
 
 fun! vm#commands#add_cursor_at_pos(where, extend, ...)
@@ -105,7 +105,12 @@ fun! vm#commands#add_cursor_at_pos(where, extend, ...)
     if a:where && ( line('.') == 1 || line('.') == line('$') ) | return | endif
 
     call s:check_extend_default(a:extend)
-    if a:where | let s:v.vertical_col = col('.') | endif
+
+    "block mode
+    if s:v.block_mode && a:where
+        if !s:v.block[1] | let s:v.block[1] = col('.') | endif
+    elseif a:where
+        let s:v.block[1] = col('.') | endif
 
     "add one cursor at pos, if not adding vertically from callback function
     if !a:0 | call s:Global.new_cursor() | endif
@@ -124,7 +129,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#expand_line(down)
-    call s:check_extend_default(1) | let g:VM.multiline = 1
+    call s:check_extend_default(1) | let s:v.multiline = 1
     let R = s:Global.is_region_at_pos('.')
     if empty(R)
         call vm#region#new(0, line('.'), line('.'), 1, (col('$')>1? col('$')-1 : 1))
@@ -218,9 +223,10 @@ fun! vm#commands#find_under(visual, whole, inclusive)
     else
         call s:Search.add()
     endif
+    let s:v.block_mode = 0
     let R = s:Global.get_region()
-    if R.h && !g:VM.multiline | call s:Funcs.toggle_option('multiline') | endif
-    call s:Funcs.count_msg(0)
+    if R.h && !s:v.multiline | call s:Funcs.toggle_option('multiline') | endif
+    call s:Funcs.count_msg(1)
     return R
 endfun
 
@@ -254,6 +260,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:get_next(n)
+    let s:v.block_mode = 0
     if s:X()
         silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
         let R = s:Global.get_region()
@@ -296,8 +303,8 @@ endfun
 fun! vm#commands#find_next(skip, nav)
     if ( a:nav || a:skip ) && s:no_regions() | return | endif
 
-    "rewrite search patterns if moving with hjkl
-    if s:X() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
+    "write search pattern if not navigating and no search set
+    if s:X() && !a:nav && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
 
     call s:Search.validate()
 
@@ -315,8 +322,8 @@ endfun
 fun! vm#commands#find_prev(skip, nav)
     if ( a:nav || a:skip ) && s:no_regions() | return | endif
 
-    "rewrite search patterns if moving with hjkl
-    if s:X() && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
+    "write search pattern if not navigating and no search set
+    if s:X() && !a:nav && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
 
     call s:Search.validate() | let r = s:Global.is_region_at_pos('.')
 
@@ -377,18 +384,33 @@ endfun
 " Motion commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:sublime = { -> !g:VM.is_active && g:VM_sublime_mappings }
+let s:sublime = { -> g:VM_sublime_mappings &&
+            \        (!g:VM.is_active || empty(s:Global.is_region_at_pos('.'))) }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#motion(motion, count, this, ...)
-    if s:sublime()    | call s:init(0, 1, 1)     | call s:Global.new_cursor() | endif
+
+    "start if sublime mappings are set; if S-hl, turn on only_this_always
+    if s:sublime()    | call s:init(0, 1, 1) |  call s:Global.new_cursor()
+        if s:horizontal(a:motion) | let s:v.only_this_always = 1 | endif | endif
+
     if s:no_regions() | return                   | endif
     if a:0 && !s:X()  | let g:VM.extend_mode = 1 | endif
 
     let s:motion = a:count.a:motion
-    if !g:VM.multiline && s:vertical() | let g:VM.multiline = 1 | endif
+    if !s:v.multiline && s:vertical(a:motion) | let s:v.multiline = 1 | endif
     call s:call_motion(a:this)
+
+    "block mode
+    if s:v.block_mode
+        if s:X() && s:simple(a:motion) && !s:v.block[0] && !s:v.multiline
+            let r = s:R()[-1]
+            let s:v.block[0] = r.dir? r.a : r.b
+        endif
+    elseif s:X() && s:horizontal(a:motion) && !s:v.multiline
+        call s:Funcs.toggle_option('block_mode')
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -515,11 +537,10 @@ endfun
 
 let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
 let s:can_from_back    = { -> s:motion == '$' && !s:v.direction }
-let s:vertical         = { -> index(['j', 'k'],                               s:motion)     >= 0 }
 let s:always_from_back = { -> index(['^', '0', 'F', 'T'],                     s:motion)     >= 0 }
-let s:forward          = { -> index(['w', 'W', 'e', 'E', 'l', 'f', 't'],      s:motion)     >= 0 }
-let s:backwards        = { -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'], s:motion[0])  >= 0 }
-let s:simple           = { -> index(['h', 'j', 'k', 'l'],                     s:motion)     >= 0 }
+let s:simple           = { m -> index(split('hjklwebWEB', '\zs'),             m)            >= 0 }
+let s:horizontal       = { m -> index(['h', 'l'],                             m)            >= 0 }
+let s:vertical         = { m -> index(['j', 'k'],                             m)            >= 0 }
 
 fun! s:call_motion(this)
     let s:v.moving = 1

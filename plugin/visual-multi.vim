@@ -14,7 +14,6 @@ fun! <SID>VM_Init()
     let g:VM.is_active       = 0
     let g:VM.extend_mode     = 0
     let g:VM.selecting       = 0
-    let g:VM.multiline       = 0
     let g:VM.motions_enabled = 0
     let g:VM.last_ex         = ''
     let g:VM.last_normal     = ''

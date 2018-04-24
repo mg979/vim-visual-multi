@@ -299,7 +299,7 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     endfor
 
     let s:v.registers[register] = text
-    let type = g:VM.multiline? 'V' : 'b'.maxw
+    let type = s:v.multiline? 'V' : 'b'.maxw
     call setreg(register, join(text, "\n"), type)
 
     "overwrite the old saved register
@@ -565,9 +565,9 @@ endfun
 
 fun! s:before_macro()
     let s:v.silence = 1 | let s:v.auto = 1
-    let s:old_multiline = g:VM.multiline
+    let s:old_multiline = s:v.multiline
     let s:old_motions = g:VM.motions_enabled
-    let g:VM.multiline = 1
+    let s:v.multiline = 1
     call vm#maps#end()
     if g:VM.motions_enabled | call vm#maps#motions(0, 1) | endif
 endfun
@@ -576,7 +576,7 @@ endfun
 
 fun! s:after_macro()
     let s:v.silence = 0
-    let g:VM.multiline = s:old_multiline
+    let s:v.multiline = s:old_multiline
 
     call vm#maps#start()
     if s:old_motions | call vm#maps#motions(1) | endif

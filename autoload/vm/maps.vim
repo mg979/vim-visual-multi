@@ -2,11 +2,11 @@ let s:NVIM = has('gui_running') || has('nvim')
 
 let s:simple   = ['d', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', '?', '/', ':', '-', '+', 'u', 'x', 'X', 'r', 'M', 'a', 'A', 'i', 'I', 'O', 'J' ]
 
-let s:zeta     = ['zz', 'za', 'zA', 'Z', 'zx', 'zX', 'zv', 'zV']
-let s:ctr_maps = ['h', 'l', 'w', 'o', 'c', 't', 'b' ]
+let s:zeta     = ['zz', 'za', 'zA', 'Z', 'zq', 'zQ', 'zv', 'zV', 'z@']
+let s:ctr_maps = ['h', 'l', 'w', 'c', 't' ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
-let s:alt_maps = ['j', 'k', ']', 'q', 'o' ]
-let s:leader   = ['@', 'y', 'p', 'P']
+let s:alt_maps = ['j', 'k', ']', 'q', 'o', 'BS', 'm' ]
+let s:leader   = ['y', 'p', 'P']
 let s:leader2  = []
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -22,15 +22,17 @@ fun! vm#maps#start()
     "basic mappings
     nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
     nmap     <silent> <nowait> <buffer> <Tab>      <Plug>(VM-Switch-Mode)
-    nmap     <silent> <nowait> <buffer> <BS>       <Plug>(VM-Erase-Regions)
-    nmap     <silent> <nowait> <buffer> <CR>       <Plug>(VM-Toggle-Motions)
-    nmap     <silent> <nowait> <buffer> <leader>@  <Plug>(VM-Run-Macro)
+    nmap     <silent> <nowait> <buffer> <M-BS>     <Plug>(VM-Erase-Regions)
+    nmap     <silent> <nowait> <buffer> <BS>       <Plug>(VM-Toggle-Block)
+    nmap     <silent> <nowait> <buffer> <Space>    <Plug>(VM-Toggle-Motions)
+    nmap     <silent> <nowait> <buffer> <CR>       <Plug>(VM-Toggle-Only-This-Region)
 
     nmap     <silent> <nowait> <buffer> o          <Plug>(VM-Invert-Direction)
     nmap     <silent> <nowait> <buffer> q          <Plug>(VM-Skip-Region)
     nmap     <silent> <nowait> <buffer> Q          <Plug>(VM-Remove-Region)
     nmap     <silent> <nowait> <buffer> <M-q>      <Plug>(VM-Remove-Last-Region)
-    nmap     <silent> <nowait> <buffer> M          <Plug>(VM-Merge-Regions)
+    nmap     <silent> <nowait> <buffer> <M-m>      <Plug>(VM-Merge-Regions)
+    nmap     <silent> <nowait> <buffer> M          <Plug>(VM-Toggle-Multiline)
     nmap     <silent> <nowait> <buffer> u          <Plug>(VM-Undo)
     nmap     <silent> <nowait> <buffer> U          <Plug>(VM-Undo-Visual)
     nnoremap <silent> <nowait> <buffer> n          n
@@ -64,10 +66,8 @@ fun! vm#maps#start()
     nmap     <silent> <nowait> <buffer> <c-x><F12> <Plug>(VM-Toggle-Debug)
 
     "ctrl
-    nmap     <silent> <nowait> <buffer> <c-b>      <Plug>(VM-Toggle-Multiline)
     nmap     <silent> <nowait> <buffer> <c-c>      <Plug>(VM-Case-Setting)
     nmap     <silent> <nowait> <buffer> <c-w>      <Plug>(VM-Toggle-Whole-Word)
-    nmap     <silent> <nowait> <buffer> <c-o>      <Plug>(VM-Toggle-Only-This-Region)
 
 
     call s:arrows()
@@ -95,8 +95,9 @@ fun! vm#maps#start()
     nmap <silent> <nowait> <buffer> Z               <Plug>(VM-Run-Last-Normal)
     nmap          <nowait> <buffer> zv              <Plug>(VM-Run-Visual)
     nmap <silent> <nowait> <buffer> zV              <Plug>(VM-Run-Last-Visual)
-    nmap          <nowait> <buffer> zx              <Plug>(VM-Run-Ex)
-    nmap <silent> <nowait> <buffer> zX              <Plug>(VM-Run-Last-Ex)
+    nmap          <nowait> <buffer> zq              <Plug>(VM-Run-Ex)
+    nmap <silent> <nowait> <buffer> zQ              <Plug>(VM-Run-Last-Ex)
+    nmap <silent> <nowait> <buffer> z@              <Plug>(VM-Run-Macro)
 
     "edit
     nmap <silent> <nowait> <buffer> i               <Plug>(VM-Edit-i-Insert)
@@ -194,6 +195,7 @@ fun! vm#maps#end()
     nunmap <buffer> <esc>
     nunmap <buffer> <BS>
     nunmap <buffer> <CR>
+    nunmap <buffer> <Space>
 
     xunmap <buffer> *
     xunmap <buffer> #

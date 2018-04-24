@@ -18,7 +18,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 " A new region will only been created if not already existant
-" Each region will receive an individual incremental id, that will never change.
 
 " b:VM_Selection (= s:V) contains Regions, Matches, Vars (= s:v = plugin variables)
 
@@ -90,7 +89,7 @@ fun! s:Region.new(cursor, ...)
     " R.cur_Col()  : cur_col() in byte offset form
     " R.cur_ln()   : the line where cur_col() is located
     " R.char()     : returns the char under the active head, '' in cursor mode.
-    " R.id         : is used to retrieve highlighting matches.
+    " R.id         : an individual incremental id, that will never change.
     " R.dir        : is the current orientation for the region.
     " R.txt        : is the text content.
     " R.pat        : is the search pattern associated with the region
@@ -103,8 +102,6 @@ fun! s:Region.new(cursor, ...)
 
     let R.A_      = { -> line2byte(R.l) + R.a }
     let R.B_      = { -> line2byte(R.L) + R.b }
-    let R._l      = { -> byte2line(R.A) }
-    let R._L      = { -> byte2line(R.B) }
     let R.cur_ln  = { -> R.dir ? R.L : R.l }
     let R.cur_col = { -> R.dir ? R.b : R.a }
     let R.cur_Col = { -> R.cur_col() == R.b ? R.B : R.A }
@@ -113,50 +110,15 @@ fun! s:Region.new(cursor, ...)
 
     if !a:0 && a:cursor    "/////////// CURSOR ////////////
 
-        let R.l     = getpos('.')[1]        " line
-        let R.L     = R.l
-        let R.a     = col('$')>1? getpos('.')[2] : 0        " position
-        let R.b     = R.a
-        let R.w     = 1
-        let R.h     = 0
-        let R.A     = R.A_()                " byte offset
-        let R.B     = R.A
-        let R.k     = R.a                   " anchor (unused for cursors)
-        let R.K     = R.A
-        let R.txt   = R.char()              " character under cursor in extend mode
-        let R.pat   = s:pattern(R)
-
+        call s:region_vars(R, 1)
 
     elseif !a:0            "/////////// REGION ////////////
 
-        let R.l     = getpos("'[")[1]       " starting line
-        let R.L     = getpos("']")[1]       " ending line
-        let R.a     = getpos("'[")[2]       " begin
-        let R.b     = getpos("']")[2]       " end
-        let R.A     = R.A_()                " byte offset a
-        let R.B     = R.B_()                " byte offset b
-        let R.w     = R.B - R.A + 1         " width
-        let R.h     = R.L - R.l             " height
-        let R.k     = R.a                   " anchor
-        let R.K     = R.A                   " anchor offset
-        let R.txt   = getreg(s:v.def_reg)   " text content
-        let R.pat   = s:pattern(R)          " associated search pattern
-
+        call s:region_vars(R, 0)
 
     else                   "///////// FROM ARGS ///////////
 
-        let R.l     = a:1
-        let R.L     = a:2
-        let R.a     = a:3
-        let R.b     = a:4
-        let R.A     = R.A_()
-        let R.B     = R.B_()
-        let R.w     = R.B - R.A + 1
-        let R.h     = R.L - R.l
-        let R.k     = R.a
-        let R.K     = R.A
-        let R.txt   = R.get_text()
-        let R.pat   = s:Search.escape_pattern(R.txt)
+        call s:region_vars(R, a:cursor, a:1, a:2, a:3, a:4)
     endif
 
     call add(s:v.IDs_list, R.id)
@@ -245,7 +207,7 @@ fun! s:move_cursor(r)
     exe "keepjumps normal! ".s:motion
 
     let nl = line('.')   "check the line
-    if !g:VM.multiline  | call s:keep_line(a:r, nl) | endif
+    if !s:v.multiline  | call s:keep_line(a:r, nl) | endif
 
     call a:r.update_cursor(getpos('.')[1:2])
 endfun
@@ -274,7 +236,7 @@ fun! s:move_region(r)
     "check the line
     let nl = line('.')
 
-    if !g:VM.multiline  | call s:keep_line(r, nl)
+    if !s:v.multiline  | call s:keep_line(r, nl)
 
     elseif   nl < r.l                        |   let r.l = nl
     elseif   nl > r.L                        |   let r.L = nl
@@ -289,20 +251,40 @@ fun! s:move_region(r)
     let went_forth =   ( New >= r.K )  &&  ( New >= r.cur_Col() )
 
     "assign new values
-    if went_back
-        let r.dir = 0
-        let r.a = new
-        let r.b = r.k
+    if !s:v.block_mode
 
-    elseif went_forth
-        let r.dir = 1
-        let r.b = new
-        let r.a = r.k
+        if went_back
+            let r.dir = 0
+            let r.a = new
+            let r.b = r.k
 
-    elseif r.dir
-        let r.b = new
+        elseif went_forth
+            let r.dir = 1
+            let r.b = new
+            let r.a = r.k
+
+        elseif r.dir
+            let r.b = new
+        else
+            let r.a = new
+        endif
+
     else
-        let r.a = new
+        if went_back
+            let r.dir = 0
+            let r.a = new
+            let r.b = new
+
+        elseif went_forth
+            let r.dir = 1
+            let r.b = new
+            let r.a = r.k
+
+        elseif r.dir
+            let r.b = new
+        else
+            let r.a = new
+        endif
     endif
 
     call r.update_region()
@@ -330,10 +312,8 @@ endfun
 
 fun! s:Region.update_content() dict
     """Yank region content if in extend mode."""
-    call cursor(self.l, self.a)
-    keepjumps normal! m[
-    call cursor(self.L, self.b+1)
-    silent keepjumps normal! m]`[y`]
+    call cursor(self.l, self.a)   | keepjumps normal! m[
+    call cursor(self.L, self.b+1) | silent keepjumps normal! m]`[y`]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -347,7 +327,7 @@ fun! s:Region.update_region(...) dict
         let a = r.a_() | let r.l = a[0] | let r.a = a[1]
         let b = r.b_() | let r.L = b[0] | let r.b = b[1] | endif
 
-    if g:VM.multiline | call s:fix_pos(r) | endif
+    call s:fix_pos(r)
     call self.update_content()
     call self.update_vars()
 endfun
@@ -363,18 +343,19 @@ fun! s:Region.update_vars() dict
     "   "--------- cursor mode ----------------------------
 
     if !s:X()
-        let r.L   = r.l           | let r.b = r.a
-        let r.A   = r.A_()        | let r.B = r.A
-        let r.k   = r.a           | let r.K = r.A
-        let r.w   = 1             | let r.h = 0
-        let r.pat = s:pattern(r)  | let r.txt = ''
+        let r.L   = r.l              | let r.b = r.a
+        let r.A   = r.A_()           | let r.B = r.A
+        let r.k   = r.a              | let r.K = r.A
+        let r.w   = 1                | let r.h = 0
+        let r.pat = s:pattern(r)     | let r.txt = ''
 
         "--------- extend mode ----------------------------
 
     else
-        let r.A   = r.A_()        | let r.B = r.B_()
-        let r.w   = r.B - r.A + 1 | let r.h = r.L - r.l
-        let r.pat = s:pattern(r)  | let r.txt = getreg(s:v.def_reg)
+        let r.A   = r.A_()           | let r.B = r.B_()
+        let r.w   = r.B - r.A + 1    | let r.h = r.L - r.l
+        let r.k   = r.dir? r.a : r.b | let r.K   = r.dir? r.A : r.B
+        let r.pat = s:pattern(r)     | let r.txt = getreg(s:v.def_reg)
 
         call s:Funcs.restore_reg()
     endif
@@ -472,3 +453,72 @@ fun! s:fix_pos(r)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+ fun! s:region_vars(r, cursor, ...)
+     let R = a:r
+
+     if !a:0 && a:cursor    "/////////// CURSOR ////////////
+
+         let R.l     = getpos('.')[1]        " line
+         let R.L     = R.l
+         let R.a     = col('$')>1? getpos('.')[2] : 0        " position
+         let R.b     = R.a
+
+         if s:X() && s:v.block_mode && s:v.block[1] && s:v.block[0]
+             if R.dir && R.a > s:v.block[0]
+                 let R.a = s:v.block[0]
+                 let R.b = s:v.block[1]
+             elseif !R.dir && R.b < s:v.block[0]
+                 let R.b = s:v.block[0]
+                 let R.a = s:v.block[1]
+             endif
+         else
+             let R.a     = col('$')>1? getpos('.')[2] : 0        " position
+             let R.b     = R.a
+         endif
+
+         let R.A     = R.A_()                " byte offset a
+         let R.B     = R.B_()                " byte offset b
+         let R.w     = R.B - R.A + 1         " width
+         let R.h     = R.L - R.l             " height
+         let R.k     = R.dir? R.a : R.b      " anchor
+         let R.K     = R.dir? R.A : R.B      " anchor offset
+
+         let R.txt   = R.char()              " character under cursor in extend mode
+         let R.pat   = s:pattern(R)
+
+
+     elseif !a:0            "/////////// REGION ////////////
+
+         let R.l     = getpos("'[")[1]       " starting line
+         let R.L     = getpos("']")[1]       " ending line
+         let R.a     = getpos("'[")[2]       " begin
+         let R.b     = getpos("']")[2]       " end
+
+         let R.A     = R.A_()                " byte offset a
+         let R.B     = R.B_()                " byte offset b
+         let R.w     = R.B - R.A + 1         " width
+         let R.h     = R.L - R.l             " height
+         let R.k     = R.dir? R.a : R.b      " anchor
+         let R.K     = R.dir? R.A : R.B      " anchor offset
+
+         let R.txt   = getreg(s:v.def_reg)   " text content
+         let R.pat   = s:pattern(R)          " associated search pattern
+
+     else                   "///////// FROM ARGS ///////////
+
+         let R.l     = a:1
+         let R.L     = a:2
+         let R.a     = a:3
+         let R.b     = a:4
+
+         let R.A     = R.A_()                " byte offset a
+         let R.B     = R.B_()                " byte offset b
+         let R.w     = R.B - R.A + 1         " width
+         let R.h     = R.L - R.l             " height
+         let R.k     = R.dir? R.a : R.b      " anchor
+         let R.K     = R.dir? R.A : R.B      " anchor offset
+
+         let R.txt   = R.get_text()
+         let R.pat   = s:Search.escape_pattern(R.txt)
+     endif
+ endfun
