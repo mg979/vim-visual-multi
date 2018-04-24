@@ -81,7 +81,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:skip_shorter_lines(where)
-    let vcol    = s:v.block[1]
+    let vcol    = s:v.vertical_col
     let col     = col('.')
     "we don't want cursors on final column('$'), except when adding at column 1
     "in this case, moving to an empty line would give:
@@ -96,8 +96,14 @@ fun! s:skip_shorter_lines(where)
         call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return 1
     endif
 
-    call s:Global.new_cursor()
-    let s:v.block[1] = 0
+    "block mode
+    if s:v.block_mode
+        if s:v.direction
+            if s:v.block[1] <= col('.') | let s:v.block[1] = col('.') | endif
+        else
+            if s:v.block[1] >= col('.') | let s:v.block[1] = col('.') | endif | endif | endif
+
+    let r = s:Global.new_cursor()
 endfun
 
 fun! vm#commands#add_cursor_at_pos(where, extend, ...)
@@ -106,11 +112,7 @@ fun! vm#commands#add_cursor_at_pos(where, extend, ...)
 
     call s:check_extend_default(a:extend)
 
-    "block mode
-    if s:v.block_mode && a:where
-        if !s:v.block[1] | let s:v.block[1] = col('.') | endif
-    elseif a:where
-        let s:v.block[1] = col('.') | endif
+    if a:where | let s:v.vertical_col = col('.') | endif
 
     "add one cursor at pos, if not adding vertically from callback function
     if !a:0 | call s:Global.new_cursor() | endif
@@ -393,24 +395,36 @@ fun! vm#commands#motion(motion, count, this, ...)
 
     "start if sublime mappings are set; if S-hl, turn on only_this_always
     if s:sublime()    | call s:init(0, 1, 1) |  call s:Global.new_cursor()
-        if s:horizontal(a:motion) | let s:v.only_this_always = 1 | endif | endif
+        if !s:v.block_mode && s:horizontal(a:motion) | let s:v.only_this_always = 1 | endif | endif
 
     if s:no_regions() | return                   | endif
     if a:0 && !s:X()  | let g:VM.extend_mode = 1 | endif
 
     let s:motion = a:count.a:motion
     if !s:v.multiline && s:vertical(a:motion) | let s:v.multiline = 1 | endif
+
+    "block mode, start
+    if s:v.block_mode && s:X()
+        if !s:v.block[0]      | let s:v.block[0] = col('.') | endif | endif
+
     call s:call_motion(a:this)
 
-    "block mode
-    if s:v.block_mode
-        if s:X() && s:simple(a:motion) && !s:v.block[0] && !s:v.multiline
-            let r = s:R()[-1]
-            let s:v.block[0] = r.dir? r.a : r.b
-        endif
-    elseif s:X() && s:horizontal(a:motion) && !s:v.multiline
+    "block mode, continue
+    if s:v.block_mode && s:X()
+        let b0 = s:v.block[0] | let b1 = s:v.block[1]
+
+        if col('.') < b0 | let s:v.block[0] = col('.')
+        elseif col('.') < b1 | let s:v.block[1] = col('.') | endif
+
+        "set minimum edge
+        let bs = map(copy(s:R()), 'v:val.b')
+        if count(bs, bs[0]) == len(bs) | let s:v.block[2] = s:v.block[0]
+        else                           | let s:v.block[2] = min(bs) | endif
+
+    elseif s:X() && s:horizontal(a:motion) && !s:v.block_mode
         call s:Funcs.toggle_option('block_mode')
     endif
+
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -538,7 +552,7 @@ endfun
 let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
 let s:can_from_back    = { -> s:motion == '$' && !s:v.direction }
 let s:always_from_back = { -> index(['^', '0', 'F', 'T'],                     s:motion)     >= 0 }
-let s:simple           = { m -> index(split('hjklwebWEB', '\zs'),             m)            >= 0 }
+let s:simple           = { m -> index(split('hlwebWEB', '\zs'),               m)            >= 0 }
 let s:horizontal       = { m -> index(['h', 'l'],                             m)            >= 0 }
 let s:vertical         = { m -> index(['j', 'k'],                             m)            >= 0 }
 

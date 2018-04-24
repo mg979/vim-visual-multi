@@ -270,18 +270,21 @@ fun! s:move_region(r)
         endif
 
     else
-        if went_back
-            let r.dir = 0
+        if !r.dir && went_back
             let r.a = new
-            let r.b = new
+            let r.b = r.k
+            let s:v.block[0] = r.a
+
+        elseif went_back
+            let r.a = s:v.block[0]
+            let r.b = r.a
 
         elseif went_forth
-            let r.dir = 1
             let r.b = new
             let r.a = r.k
 
         elseif r.dir
-            let r.b = new
+            let r.b = new>s:v.block[2]? new : s:v.block[2]
         else
             let r.a = new
         endif

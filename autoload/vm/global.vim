@@ -54,6 +54,7 @@ fun! s:Global.erase_regions() dict
     let s:V.Regions = []
     call clearmatches()
     let s:v.index = -1
+    let s:v.block = [0,0,0]
     call s:Funcs.count_msg(1)
 endfun
 

@@ -223,7 +223,7 @@ fun! s:Funcs.toggle_option(option) dict
                 let s:v.block[0] = r.dir? r.a : r.b
                 let s:v.block[1] = r.dir? r.b : r.a            | endif
         else
-            let s:v.block = [0,0] | endif
+            let s:v.block = [0,0,0] | endif
 
     elseif a:option == 'whole_word'
         let s = s:v.search[0]
