@@ -104,6 +104,10 @@ fun! s:skip_shorter_lines(where)
 
     call s:V.Block.vertical()
     let r = s:Global.new_cursor()
+    if s:v.block_mode
+        call s:Global.update_regions()
+        call s:Global.select_region(s:v.index)
+    endif
 endfun
 
 fun! vm#commands#add_cursor_at_pos(where, extend, ...)

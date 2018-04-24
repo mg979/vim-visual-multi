@@ -144,6 +144,7 @@ fun! <SID>VM_cursor_moved()
     if s:v.block_mode
         if !s:v.block[3] && empty(s:V.Global.is_region_at_pos('.'))
             call s:V.Block.stop()
+            call s:V.Funcs.count_msg(1)
         else
             let s:v.block[3] = 0
         endif
