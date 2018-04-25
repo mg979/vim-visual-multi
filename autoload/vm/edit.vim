@@ -20,7 +20,6 @@ fun! vm#edit#init()
     let s:Pos       = { byte -> s:Funcs.byte2pos(byte)                 }
     let s:Is_Region = {      -> !empty(s:Global.is_region_at_pos('.')) }
 
-    let s:v.registers    = {}
     let s:v.use_register = s:v.def_reg
     let s:v.new_text     = ''
     let s:extra_spaces   = []
@@ -44,17 +43,16 @@ fun! s:Edit._process(cmd, ...)
         if !r.a && !len(getline(r.l)) | call r.remove() | continue | endif
         call cursor(r.l, r.a)
 
-        if a:0 && a:1==#'del'
-            if r.a == col([r.l, '$']) - 1 | normal! Jx
-            else                          | normal! x
-            endif
-        else
-            exe cmd
-        endif
+        "execute command, but also take special cases into account
+        if a:0 && s:special(cmd, r, a:000) | else | exe cmd | endif
 
         "update changed size
         let change = s:size() - size
+        doautocmd CursorMoved
     endfor
+
+    "reset index to skip
+    let self.skip_index = -1
 endfun
 
 fun! s:Edit.process_visual(cmd)
@@ -85,7 +83,7 @@ endfun
 
 fun! s:Edit.post_process(reselect, ...) dict
     if a:reselect
-        if !s:X()      | call vm#commands#change_mode(1) |  endif
+        if !s:X()      | call s:Global.change_mode(1) |  endif
         for r in s:R()
             call r.bytes([a:1, a:1 + s:W[r.index]])
         endfor
@@ -124,7 +122,8 @@ fun! s:Edit.delete(X, keep, count) dict
                 call setline(r.L, L.' ')
                 call add(s:extra_spaces, r.L)
             endif
-            if a:keep
+            if a:keep && v:register != "_"
+                let s:v.use_register = v:register
                 call self.yank(1, 1, 1)
             endif
             let reg = a:keep? '' : "\"_"
@@ -133,7 +132,7 @@ fun! s:Edit.delete(X, keep, count) dict
             "update changed size
             let change = s:size() - size
         endfor
-        call vm#commands#change_mode(1)
+        call s:Global.change_mode(1)
         if a:keep | call self.post_process(0) | endif
 
     elseif a:count
@@ -181,14 +180,14 @@ fun! s:Edit.insert(type) dict
     elseif a:type ==# 'a'
         if s:X()
             if s:v.direction | call vm#commands#invert_direction() | endif
-            call vm#commands#change_mode(1)
+            call s:Global.change_mode(1)
         endif
         call s:V.Insert.start('a')
 
     else
         if s:X()
             if !s:v.direction | call vm#commands#invert_direction() | endif
-            call vm#commands#change_mode(1)
+            call s:Global.change_mode(1)
         endif
         call s:V.Insert.start('i')
     endif
@@ -203,7 +202,6 @@ fun! s:Edit.apply_change() dict
     let s:cmd = '.'
     let self.skip_index = s:v.index
     call self.process()
-    let self.skip_index = -1
 endfun
 
 
@@ -246,10 +244,10 @@ fun! s:Edit.paste(before, block, reselect) dict
 
     if X | call self.delete(1, 0, 1) | endif
 
-    if !a:block || !has_key(s:v.registers, reg)
+    if !a:block || !has_key(g:VM.registers, reg)
         let s:v.new_text = s:default_text()
     else
-        let s:v.new_text = s:v.registers[reg]
+        let s:v.new_text = g:VM.registers[reg]
     endif
 
     call self.block_paste(a:before)
@@ -288,8 +286,8 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     if !s:X()         | call self.get_motion('y', v:count)          | return | endif
     if !s:min(1)      | call s:Funcs.msg('No regions selected.', 0) | return | endif
 
-    let register = s:v.use_register? s:v.use_register :
-                \  a:def_reg?        s:v.def_reg : v:register
+    let register = (s:v.use_register != s:v.def_reg)? s:v.use_register :
+                \  a:def_reg?                         s:v.def_reg : v:register
 
     let text = []  | let maxw = 0
 
@@ -298,16 +296,26 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
         call add(text, r.txt)
     endfor
 
-    let s:v.registers[register] = text
+    "write custom and vim registers
+    let g:VM.registers[register] = text
     let type = s:v.multiline? 'V' : 'b'.maxw
     call setreg(register, join(text, "\n"), type)
 
-    "overwrite the old saved register
-    if a:hard
-        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type] | endif
+    "restore default register if a different register was provided
+    if register !=# s:v.def_reg | call s:Funcs.restore_reg() | endif
+
+    "reset temp register
+    let s:v.use_register = s:v.def_reg
+
+    "overwrite the old saved register if yanked using default register
+    if a:hard && register ==# s:v.def_reg
+        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type]
+    elseif a:hard
+        call setreg(register, join(text, "\n"), type) | endif
+
     if !a:silent
         call s:Funcs.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
-    if a:0 | call vm#commands#change_mode(1) | endif
+    if a:0 | call s:Global.change_mode(1) | endif
 endfun
 
 
@@ -353,13 +361,19 @@ fun! s:Edit.get_motion(op, n) dict
     if empty(M) | echon ' ...Aborted'
 
     elseif a:op ==# 'd'
-        let s:cmd = M
-        call self.process()
+        let s:deleted_text = []
+        call self._process("normal! ".M, 'd')
         call self.post_process(0)
+        let maxw = max(map(copy(s:deleted_text), 'len(v:val)'))
+        let type = s:v.multiline? 'V' : 'b'.maxw
+        call setreg(reg, join(s:deleted_text, "\n"), type)
+        let g:VM.registers[reg] = s:deleted_text
+
     elseif a:op ==# 'y'
-        call vm#commands#change_mode(1)
+        call s:Global.change_mode(1)
         let cmd = substitute(M, "^.*y", "", "")."\"".reg.'y'
         call feedkeys(cmd)
+
     elseif a:op ==# 'c'
         let s:cmd = M
         call self.process()
@@ -391,7 +405,7 @@ fun! s:Edit.run_normal(cmd, recursive, ...) dict
     "-----------------------------------------------------------------------
 
     let s:cmd = a:recursive? ("normal ".cmd) : ("normal! ".cmd)
-    if s:X() | call vm#commands#change_mode(1) | endif
+    if s:X() | call s:Global.change_mode(1) | endif
 
     call s:before_macro()
     call self._process(s:cmd)
@@ -435,7 +449,7 @@ fun! s:Edit.run_visual(cmd, ...) dict
     let g:VM.last_visual = cmd
     call self.post_process(0)
     call s:after_macro()
-    if s:X() | call vm#commands#change_mode(1) | endif
+    if s:X() | call s:Global.change_mode(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -456,7 +470,7 @@ fun! s:Edit.run_ex(...) dict
     "-----------------------------------------------------------------------
 
     let g:VM.last_ex = cmd
-    if s:X() | call vm#commands#change_mode(1) | endif
+    if s:X() | call s:Global.change_mode(1) | endif
 
     call s:before_macro()
     call self._process(cmd)
@@ -480,7 +494,7 @@ fun! s:Edit.run_macro(replace) dict
     let s:cmd = "@".reg
     call s:before_macro()
 
-    if s:X() | call vm#commands#change_mode(1) | endif
+    if s:X() | call s:Global.change_mode(1) | endif
 
     call self.process()
     call self.post_process(0)
@@ -531,15 +545,15 @@ fun! s:Edit.transpose() dict
 
     "non-inline transposition
     if !inline
-        let t = remove(s:v.registers[s:v.def_reg], 0)
-        call add(s:v.registers[s:v.def_reg], t)
+        let t = remove(g:VM.registers[s:v.def_reg], 0)
+        call add(g:VM.registers[s:v.def_reg], t)
         call self.paste(1, 1, 1)
         return | endif
 
     "inline transpositions
     for rl in keys(rlines)
-        let t = remove(s:v.registers[s:v.def_reg], rlines[rl][-1])
-        call insert(s:v.registers[s:v.def_reg], t, rlines[rl][0])
+        let t = remove(g:VM.registers[s:v.def_reg], rlines[rl][-1])
+        call insert(g:VM.registers[s:v.def_reg], t, rlines[rl][0])
         call self.paste(1, 1, 1)
     endfor
 endfun
@@ -554,7 +568,7 @@ fun! s:Edit.shift(dir) dict
         call self.paste(0, 1, 1)
     else
         call self.delete(1, 0, 0)
-        call vm#commands#motion('h', 1, 0)
+        call vm#commands#motion('h', 1, 0, 0)
         call self.paste(1, 1, 1)
     endif
 endfun
@@ -626,6 +640,29 @@ fun! s:default_text()
         for n in range(len(s:R())) | call add(text, getreg(s:v.def_reg)) | endfor
     endif
     return text
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:special(cmd, r, args)
+    "Some commands need special adjustments while being processed.
+
+    if a:args[0] ==#'del'
+        "<del> key deletes \n if executed at eol
+        if a:r.a == col([a:r.l, '$']) - 1 | normal! Jx
+        else                              | normal! x
+        endif
+        return 1
+
+    elseif a:args[0] ==# 'd'
+        "store deleted text so that it can all be put in the register
+        exe a:cmd
+        if s:v.use_register != "_"
+            call add(s:deleted_text, getreg(s:v.use_register))
+        endif
+        return 1
+
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -29,34 +29,24 @@ fun! s:init(whole, cursor, extend_mode)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Change mode
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#commands#change_mode(silent)
-    let g:VM.extend_mode = !s:X()
-    let s:v.silence = a:silent
-
-    if s:X()
-        call s:Funcs.msg("Switched to Extend Mode\n", 0)
-        call s:Global.update_regions()
-    else
-        call s:Funcs.msg("Switched to Cursor Mode\n", 0)
-        call s:Global.collapse_regions()
-        call s:Global.select_region(s:v.index)
-    endif
-    call s:Funcs.count_msg(0)
-endfun
-
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Select operator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#select_operator(...)
     """Perform a yank, the autocmd will create the region.
 
-    let g:VM.selecting = 1
-    return 'y'
+    let ids = map(copy(s:R()), 'v:val.id')
+    let c = nr2char(getchar())
+    if index(split('webWEB$0^', '\zs'), c) >= 0
+        call s:Edit.run_normal('gs'.c, 1)
+    elseif index(['i', 'a'], c) >= 0
+        let d = nr2char(getchar())
+        call s:Edit.run_normal('gs'.c.d, 1)
+        for id in ids
+            call s:Funcs.region_with_id(id).remove()
+        endfor
+    endif
+    call s:Global.update_regions()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -102,12 +92,7 @@ fun! s:skip_shorter_lines(where)
         call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return 1
     endif
 
-    call s:V.Block.vertical()
-    let r = s:Global.new_cursor()
-    if s:v.block_mode
-        call s:Global.update_regions()
-        call s:Global.select_region(s:v.index)
-    endif
+    if !s:V.Block.vertical() | call s:Global.new_cursor() | endif
 endfun
 
 fun! vm#commands#add_cursor_at_pos(where, extend, ...)
@@ -143,11 +128,11 @@ fun! vm#commands#expand_line(down)
     if empty(R)
         call vm#region#new(0, line('.'), line('.'), 1, (col('$')>1? col('$')-1 : 1))
     elseif a:down
-        call vm#commands#motion('j', 1, 1)
+        call vm#commands#motion('j', 1, 1, 1)
         let b = len(getline(R.L))
         call R.update_region(R.l, R.L, 1, (b? b : b+1))
     elseif !a:down
-        call vm#commands#motion('k', 1, 1)
+        call vm#commands#motion('k', 1, 1, 1)
         let b = len(getline(R.L))
         call R.update_region(R.l, R.L, 1, (b? b : b+1))
     endif
@@ -265,6 +250,7 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     call s:Global.reorder_regions()
     call s:Global.update_highlight()
     call s:Global.select_region_at_pos('.')
+    call s:Funcs.restore_reg()
     call s:Funcs.count_msg(1)
 endfun
 
@@ -403,23 +389,22 @@ let s:sublime = { -> g:VM_sublime_mappings &&
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#motion(motion, count, this, ...)
+fun! vm#commands#motion(motion, count, select, this)
 
-    "-----------------------------------------------------------------------
-    "start if sublime mappings are set; if S-hl, turn on only_this_always
-    if s:sublime()    | call s:init(0, 1, 1)
-
-        call s:Global.new_cursor()
-        if !s:v.block_mode && s:horizontal(a:motion)
-            call s:Funcs.toggle_option('only_this_always') | endif | endif
+    let s:motion = a:count>1? a:count.a:motion : a:motion
 
     "-----------------------------------------------------------------------
 
-    if s:no_regions() | return                   | endif
-    if a:0 && !s:X()  | let g:VM.extend_mode = 1 | endif
+    "start if sublime mappings are set
+    if s:sublime()    | call s:init(0, 1, 1) | call s:Global.new_cursor() | endif
 
-    let s:motion = a:count.a:motion
-    if !s:v.multiline && s:vertical(a:motion) | call s:Funcs.toggle_option('multiline', 1) | endif
+    "-----------------------------------------------------------------------
+
+    if s:no_regions() | return | endif
+
+    if a:select && !s:X()  | let g:VM.extend_mode = 1 | endif
+    if a:select && !s:v.multiline && s:vertical()
+        call s:Funcs.toggle_option('multiline', 1) | endif
 
     call s:V.Block.horizontal(1)
     call s:call_motion(a:this)
@@ -450,7 +435,7 @@ endfun
 fun! vm#commands#merge_to_beol(eol, this)
     if s:no_regions() | return | endif
     let s:motion = a:eol? "\<End>" : '0'
-    if s:X() | call vm#commands#change_mode(1) | endif
+    if s:X() | call s:Global.change_mode(1) | endif
     call s:call_motion(a:this)
     call s:Global.merge_cursors()
     call s:Funcs.count_msg(1)
@@ -493,7 +478,7 @@ endfun
 fun! vm#commands#shrink_or_enlarge(shrink, this)
     """Reduce/enlarge selection size by 1."""
     if s:no_regions() | return                          | endif
-    if !s:X()         | call vm#commands#change_mode(1) | endif
+    if !s:X()         | call s:Global.change_mode(1) | endif
 
     let dir = s:v.direction
 
@@ -512,7 +497,7 @@ endfun
 
 fun! vm#commands#select_motion(inclusive, this)
     if s:no_regions() | return                          | endif
-    if !s:X()         | call vm#commands#change_mode(0) | endif
+    if !s:X()         | call s:Global.change_mode(0) | endif
     if a:this         | call s:Global.new_cursor()      | endif
 
     let c = nr2char(getchar())
@@ -551,9 +536,9 @@ endfun
 let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
 let s:can_from_back    = { -> s:motion == '$' && !s:v.direction }
 let s:always_from_back = { -> index(['^', '0', 'F', 'T'],                     s:motion)     >= 0 }
+let s:horizontal       = { -> index(['h', 'l'],                               s:motion)     >= 0 }
+let s:vertical         = { -> index(['j', 'k'],                               s:motion)     >= 0 }
 let s:simple           = { m -> index(split('hlwebWEB', '\zs'),               m)            >= 0 }
-let s:horizontal       = { m -> index(['h', 'l'],                             m)            >= 0 }
-let s:vertical         = { m -> index(['j', 'k'],                             m)            >= 0 }
 
 fun! s:call_motion(this)
     let s:v.moving = 1

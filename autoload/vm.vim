@@ -54,7 +54,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.only_this_always = 0
     let s:v.using_regex      = 0
     let s:v.multiline        = 0
-    let s:v.block_mode       = 1
+    let s:v.block_mode       = 0
     let s:v.vertical_col     = 0
 
     let s:V.Search     = vm#search#init()
@@ -121,7 +121,7 @@ fun! vm#augroup()
         if has('nvim')
             au TextYankPost * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
         else
-            au CursorHold   * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
+            au CursorMoved   * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
         endif
     augroup END
 endfun

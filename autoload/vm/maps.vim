@@ -1,6 +1,6 @@
 let s:NVIM = has('gui_running') || has('nvim')
 
-let s:simple   = ['d', 'c', 'p', 'P', 'y', 'n', 'N', 'q', 'Q', 'U', '*', '#', 'o', '[', ']', '{', '}', '?', '/', ':', '-', '+', 'u', 'x', 'X', 'r', 'M', 'a', 'A', 'i', 'I', 'O', 'J' ]
+let s:simple   = split('dcpPynNqQU*#o[]{}?/:-+uxXrMaAiIOJS', '\zs')
 
 let s:zeta     = ['zz', 'za', 'zA', 'Z', 'zq', 'zQ', 'zv', 'zV', 'z@']
 let s:ctr_maps = ['h', 'l', 'w', 'c', 't' ]
@@ -80,6 +80,7 @@ fun! vm#maps#start()
 
     "select
     nmap <silent>          <buffer> s               <Plug>(VM-Select-Operator)
+    nmap <silent>          <buffer> S               <Plug>(VM-Select-All-Operator)
 
     nmap <silent> <nowait> <buffer> za              <Plug>(VM-Select-All-Inside)
     nmap <silent> <nowait> <buffer> zA              <Plug>(VM-Select-All-Around)
@@ -128,8 +129,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:arrows()
-    nmap     <silent> <nowait> <buffer> <M-C-Down>  <Plug>(VM-Select-Down)
-    nmap     <silent> <nowait> <buffer> <M-C-Up>    <Plug>(VM-Select-Up)
+    nmap     <silent> <nowait> <buffer> <M-C-Down>  <Plug>(VM-Select-Cursor-Down)
+    nmap     <silent> <nowait> <buffer> <M-C-Up>    <Plug>(VM-Select-Cursor-Up)
     nmap     <silent> <nowait> <buffer> <C-S-Down>  <Plug>(VM-Select-Line-Down)
     nmap     <silent> <nowait> <buffer> <C-S-Up>    <Plug>(VM-Select-Line-Up)
 
@@ -138,10 +139,13 @@ fun! s:arrows()
     nmap     <silent> <nowait> <buffer> <M-Down>    <Plug>(VM-Goto-Next)
     nmap     <silent> <nowait> <buffer> <M-Up>      <Plug>(VM-Goto-Prev)
 
-    nmap     <silent> <nowait> <buffer> <S-Down>    <Plug>(VM-Motion-j)
-    nmap     <silent> <nowait> <buffer> <S-Up>      <Plug>(VM-Motion-k)
-    nmap     <silent> <nowait> <buffer> <S-Right>   <Plug>(VM-Motion-l)
-    nmap     <silent> <nowait> <buffer> <S-Left>    <Plug>(VM-Motion-h)
+    nmap     <silent> <nowait> <buffer> <S-Down>    <Plug>(VM-Select-j)
+    nmap     <silent> <nowait> <buffer> <S-Up>      <Plug>(VM-Select-k)
+    nmap     <silent> <nowait> <buffer> <S-Right>   <Plug>(VM-Select-l)
+    nmap     <silent> <nowait> <buffer> <S-Left>    <Plug>(VM-Select-h)
+    nmap     <silent> <nowait> <buffer> <M-Right>   <Plug>(VM-This-Select-l)
+    nmap     <silent> <nowait> <buffer> <M-Left>    <Plug>(VM-This-Select-h)
+
 
     nmap     <silent> <nowait> <buffer> <C-Right>   <Plug>(VM-Select-e)
     nmap     <silent> <nowait> <buffer> <C-Left>    <Plug>(VM-End-Back)
@@ -215,6 +219,8 @@ fun! s:arrows_end()
     nunmap <buffer> <M-Up>
     nunmap <buffer> <S-Right>
     nunmap <buffer> <S-Left>
+    nunmap <buffer> <M-Right>
+    nunmap <buffer> <M-Left>
     nunmap <buffer> <S-Down>
     nunmap <buffer> <S-Up>
     nunmap <buffer> <C-Right>

@@ -2,7 +2,8 @@ fun! vm#block#init()
     let s:V       = b:VM_Selection
     let s:v       = s:V.Vars
 
-    let s:R    = { -> s:V.Regions           }
+    let s:X    = { -> g:VM.extend_mode }
+    let s:R    = { -> s:V.Regions }
     let s:B    = { -> s:v.block_mode && g:VM.extend_mode }
     let s:is_r = { -> g:VM.is_active && !empty(s:V.Global.is_region_at_pos('.')) }
 
@@ -16,22 +17,27 @@ let s:Block = {}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Block.vertical() dict
+    if !s:B() | call self.stop() | return | endif
+
     let s:v.block[3] = 1
+    if s:v.direction
+        if s:v.block[1] <= col('.') | let s:v.block[1] = col('.') | endif
 
-    if s:B()
-        if s:v.direction
-            if s:v.block[1] <= col('.') | let s:v.block[1] = col('.') | endif
+    elseif s:v.block[1] >= col('.') | let s:v.block[1] = col('.') | endif
 
-        elseif s:v.block[1] >= col('.') | let s:v.block[1] = col('.') | endif
-    endif
+    call s:V.Global.new_cursor()
+    call s:V.Global.update_regions()
+    call s:V.Global.select_region(s:v.index)
+    return 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Block.horizontal(before) dict
+    if !s:B() | call self.stop() | return | endif
 
     "before motion
-    if a:before && s:B()
+    if a:before
         let s:v.block[3] = 1
 
         if !s:is_r()          | call self.stop()
@@ -40,7 +46,7 @@ fun! s:Block.horizontal(before) dict
     "-----------------------------------------------------------------------
     "after motion
 
-    elseif s:B()
+    else
         let b0 = s:v.block[0] | let b1 = s:v.block[1]
 
         if col('.') < b0 | let s:v.block[0] = col('.')
@@ -56,8 +62,36 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Block.positions(r, new, back, forth) dict
+    let r = a:r | let new = a:new
+
+    if !r.dir && a:back
+        let r.a = new
+        let r.b = r.k
+        let s:v.block[0] = r.a
+
+    elseif a:back
+        let r.a = s:v.block[0]
+        let r.b = r.a
+
+    elseif a:forth
+        let r.b = new
+        let r.a = r.k
+
+    elseif r.dir
+        let r.b = new>s:v.block[2]? new : s:v.block[2]
+    else
+        let r.a = new
+    endif
+    call r.update_region()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Block.start() dict
     if s:v.eco | return | endif
+
+    if !s:X() | call s:V.Global.change_mode(1) | endif
 
     let s:v.block_mode = 1
     if s:v.only_this_always | call s:V.Funcs.toggle_option('only_this_always') | endif

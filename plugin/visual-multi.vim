@@ -19,6 +19,7 @@ fun! <SID>VM_Init()
     let g:VM.last_normal     = ''
     let g:VM.last_visual     = ''
     let g:VM.oldupdate       = &updatetime
+    let g:VM.registers       = {}
 
     let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
     let g:VM_motions_at_start                 = get(g:, 'VM_motions_at_start', 1)
@@ -50,12 +51,12 @@ fun! <SID>VM_Init()
     call vm#plugs#init()
 
     if g:VM_sublime_mappings
-        nmap <silent> <M-C-Down>  <Plug>(VM-Select-Down)
-        nmap <silent> <M-C-Up>    <Plug>(VM-Select-Up)
-        nmap <silent> <S-Down>    <Plug>(VM-Motion-j)
-        nmap <silent> <S-Up>      <Plug>(VM-Motion-k)
-        nmap <silent> <S-Right>   <Plug>(VM-Motion-l)
-        nmap <silent> <S-Left>    <Plug>(VM-Motion-h)
+        nmap <silent> <M-C-Down>  <Plug>(VM-Select-Cursor-Down)
+        nmap <silent> <M-C-Up>    <Plug>(VM-Select-Cursor-Up)
+        nmap <silent> <S-Down>    <Plug>(VM-Select-j)
+        nmap <silent> <S-Up>      <Plug>(VM-Select-k)
+        nmap <silent> <S-Right>   <Plug>(VM-Select-l)
+        nmap <silent> <S-Left>    <Plug>(VM-Select-h)
         nmap <silent> <C-S-Right> <Plug>(VM-Select-w)
         nmap <silent> <C-S-Left>  <Plug>(VM-Select-b)
         nmap <silent> <C-S-Down>  <Plug>(VM-Select-Line-Down)

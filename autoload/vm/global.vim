@@ -31,7 +31,8 @@ fun! s:Global.get_region() dict
     let s:v.matches = getmatches()
     if !s:v.eco
         call self.select_region(R.index)
-        call s:Search.check_pattern() | endif
+        call s:Search.check_pattern()
+        call s:Funcs.restore_reg() | endif
     return R
 endfun
 
@@ -58,6 +59,25 @@ fun! s:Global.erase_regions() dict
     let s:v.block = [0,0,0]
     call s:Funcs.count_msg(1)
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Change mode
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.change_mode(silent) dict
+    let g:VM.extend_mode = !s:X()
+    let s:v.silence = a:silent
+
+    if s:X()
+        call s:Funcs.count_msg(0, ['Switched to Extend Mode. ', 'WarningMsg'])
+        call self.update_regions()
+    else
+        call s:Funcs.count_msg(0, ['Switched to Cursor Mode. ', 'WarningMsg'])
+        call self.collapse_regions()
+        call self.select_region(s:v.index)
+    endif
+endfun
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Highlight
@@ -101,7 +121,7 @@ fun! s:Global.all_empty() dict
 
     for r in s:R()
         if r.a != r.b
-            if !s:X() | call vm#commands#change_mode(0) | endif
+            if !s:X() | call self.change_mode(0) | endif
             return 0  | endif
     endfor
     return 1
@@ -118,6 +138,7 @@ fun! s:Global.update_regions() dict
         for r in s:R() | call r.update_cursor() | endfor
     endif
     call self.update_highlight()
+    call s:Funcs.restore_reg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -307,12 +328,14 @@ fun! s:Global.merge_cursors()
     """Merge overlapping cursors."""
 
     let cursors_pos = map(copy(s:R()), 'v:val.A')
-    while 1
-        for r in s:R()
-            if r.index == len(s:R()) - 1 | return
-            elseif count(cursors_pos, r.A) > 1
-                call r.remove() | break | endif
-                endfor | endwhile
+    let cursors_pos = map(cursors_pos, 'count(cursors_pos, v:val) == 1')
+    let cursors_ids = map(copy(s:R()), 'v:val.id')
+
+    let i = 0
+    for c in cursors_pos
+        if !c | call s:Funcs.region_with_id(cursors_ids[i]).remove() | endif
+        let i += 1
+    endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

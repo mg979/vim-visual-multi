@@ -6,14 +6,15 @@ fun! vm#plugs#init()
     if has('nvim')
         nmap            <Plug>(VM-Select-Operator)     :let g:VM.selecting = 1<cr>:silent! nunmap <buffer> y<cr>y
     else
-        nmap            <Plug>(VM-Select-Operator)     :set updatetime=100<cr>:let g:VM.selecting = 1<cr>:silent! nunmap <buffer> y<cr>y
+        nmap            <Plug>(VM-Select-Operator)     :let g:VM.selecting = 1<cr>:silent! nunmap <buffer> y<cr>y
     endif
+    nnoremap        <Plug>(VM-Select-All-Operator)     :call vm#commands#select_operator()<cr>
     nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0, 0)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-At-Word)      :call vm#commands#add_cursor_at_word(1, 1)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-Down)         :call vm#commands#add_cursor_at_pos(1, 0)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-Up)           :call vm#commands#add_cursor_at_pos(2, 0)<cr>
-    nnoremap        <Plug>(VM-Select-Down)             :call vm#commands#add_cursor_at_pos(1, 1)<cr>
-    nnoremap        <Plug>(VM-Select-Up)               :call vm#commands#add_cursor_at_pos(2, 1)<cr>
+    nnoremap        <Plug>(VM-Select-Cursor-Down)      :call vm#commands#add_cursor_at_pos(1, 1)<cr>
+    nnoremap        <Plug>(VM-Select-Cursor-Up)        :call vm#commands#add_cursor_at_pos(2, 1)<cr>
     nnoremap        <Plug>(VM-Select-Line-Down)        :call vm#commands#expand_line(1)<cr>
     nnoremap        <Plug>(VM-Select-Line-Up)          :call vm#commands#expand_line(0)<cr>
 
@@ -51,7 +52,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Show-Registers)          :call b:VM_Selection.Funcs.show_registers()<cr>
     nnoremap        <Plug>(VM-Erase-Regions)           :call b:VM_Selection.Global.erase_regions()<cr>
     nnoremap        <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
-    nnoremap        <Plug>(VM-Switch-Mode)             :call vm#commands#change_mode(0)<cr>
+    nnoremap        <Plug>(VM-Switch-Mode)             :call b:VM_Selection.Global.change_mode(0)<cr>
     nnoremap        <Plug>(VM-Reset)                   :call vm#reset()<cr>
     nnoremap        <Plug>(VM-Undo)                    u:call b:VM_Selection.Global.update_regions()<cr>
 
@@ -71,8 +72,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Select-All-Around)       :call vm#commands#select_motion(1, 0)<cr>
 
     for m in g:VM.motions
-        exe "nnoremap <Plug>(VM-Motion-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 0)\<cr>"
-        exe "nnoremap <Plug>(VM-This-Motion-".m.") :\<C-u>call vm#commands#motion('".m."',v:count1,  1)\<cr>"
+        exe "nnoremap <Plug>(VM-Motion-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 0, 0)\<cr>"
+        exe "nnoremap <Plug>(VM-This-Motion-".m.") :\<C-u>call vm#commands#motion('".m."',v:count1, 0, 1)\<cr>"
     endfor
 
     for m in g:VM.find_motions
@@ -80,7 +81,8 @@ fun! vm#plugs#init()
     endfor
 
     for m in g:VM.select_motions
-        exe "nnoremap <Plug>(VM-Select-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 0, 1)\<cr>"
+        exe "nnoremap <Plug>(VM-Select-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 1, 0)\<cr>"
+        exe "nnoremap <Plug>(VM-This-Select-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 1, 1)\<cr>"
     endfor
 
     let remaps = g:VM_custom_remaps
@@ -90,7 +92,7 @@ fun! vm#plugs#init()
 
     let noremaps = g:VM_custom_noremaps
     for m in keys(noremaps)
-        exe "nnoremap <Plug>(VM-Motion-".noremaps[m].") :\<C-u>call vm#commands#motion('".noremaps[m]."', 1, 0)\<cr>"
+        exe "nnoremap <Plug>(VM-Motion-".noremaps[m].") :\<C-u>call vm#commands#motion('".noremaps[m]."', 1, 0, 0)\<cr>"
     endfor
 
     nnoremap        <Plug>(VM-Fast-Back)               :call vm#commands#end_back(1, 0, 1)<cr>

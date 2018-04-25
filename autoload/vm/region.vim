@@ -123,9 +123,7 @@ fun! s:Region.new(cursor, ...)
     endif
 
     call add(s:v.IDs_list, R.id)
-    if s:X() | call s:fix_pos(R) | endif
     call R.highlight()
-    call s:Funcs.restore_reg()
 
     return R
 endfun
@@ -187,11 +185,17 @@ let s:forward   = { -> index(['w', 'W', 'e', 'E', 'l', 'j', 'f', 't', '$'], s:mo
 let s:backwards = { -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'],      s:motion[0]) >=0}
 let s:simple    = { -> index(['h', 'j', 'k', 'l'],                          s:motion[0]) >=0}
 let s:extreme   = { -> index(['$', '0', '^'],                               s:motion[0]) >=0}
+let s:vertical  = { -> index(['j', 'k'],                                    s:motion[0]) >=0}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.move(motion) dict
     let s:motion = a:motion
+
+    "set vertical column if motion is j or k
+    if s:vertical() && !s:v.vertical_col | let s:v.vertical_col = col('.')
+    elseif !s:vertical()                 | let s:v.vertical_col = 0 | endif
+
     if !s:X()
         call s:move_cursor(self)
     else
@@ -207,8 +211,9 @@ fun! s:move_cursor(r)
     call cursor(a:r.l, a:r.a)
     exe "keepjumps normal! ".s:motion
 
-    let nl = line('.')   "check the line
-    if !s:v.multiline  | call s:keep_line(a:r, nl) | endif
+    "keep line or column
+    if s:vertical()       | call s:vertical_col(a:r)
+    elseif !s:v.multiline | call s:keep_line(a:r, line('.')) | endif
 
     call a:r.update_cursor(getpos('.')[1:2])
 endfun
@@ -227,12 +232,29 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:vertical_col(r)
+    """Keep the vertical column if moving vertically."""
+    let vcol    = s:v.vertical_col
+    let ln      = line('.')
+    let endline = (col('$') > 1)? col('$') - 1 : 1
+
+    if ( vcol < endline )
+        call cursor ( ln, s:v.vertical_col )
+    elseif ( a:r.cur_col() < endline )
+        call cursor ( ln, endline )
+    endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:move_region(r)
     let r = a:r | let a = r.a | let b = r.b | let up = 0 | let down = 0
 
     "move the cursor to the current head and perform the motion
     call cursor(r.cur_ln(), r.cur_col())
     exe "keepjumps normal! ".s:motion
+
+    if s:vertical()       | call s:vertical_col(r) | endif
 
     "check the line
     let nl = line('.')
@@ -252,43 +274,23 @@ fun! s:move_region(r)
     let went_forth =   ( New >= r.K )  &&  ( New >= r.cur_Col() )
 
     "assign new values
-    if !s:v.block_mode
+    if s:v.block_mode
+        call s:V.Block.positions(r, new, went_back, went_forth) | return | endif
 
-        if went_back
-            let r.dir = 0
-            let r.a = new
-            let r.b = r.k
+    if went_back
+        let r.dir = 0
+        let r.a = new
+        let r.b = r.k
 
-        elseif went_forth
-            let r.dir = 1
-            let r.b = new
-            let r.a = r.k
+    elseif went_forth
+        let r.dir = 1
+        let r.b = new
+        let r.a = r.k
 
-        elseif r.dir
-            let r.b = new
-        else
-            let r.a = new
-        endif
-
+    elseif r.dir
+        let r.b = new
     else
-        if !r.dir && went_back
-            let r.a = new
-            let r.b = r.k
-            let s:v.block[0] = r.a
-
-        elseif went_back
-            let r.a = s:v.block[0]
-            let r.b = r.a
-
-        elseif went_forth
-            let r.b = new
-            let r.a = r.k
-
-        elseif r.dir
-            let r.b = new>s:v.block[2]? new : s:v.block[2]
-        else
-            let r.a = new
-        endif
+        let r.a = new
     endif
 
     call r.update_region()
@@ -305,10 +307,7 @@ fun! s:Region.update_cursor(...) dict
     if a:0 && !type(a:1) | let r.l = byte2line(a:1)    | let r.a = a:1 - line2byte(r.l)
     elseif a:0           | let r.l = a:1[0]            | let r.a = a:1[1] | endif
 
-    "fix positions in empty lines or endline
-    if !r.a && len(getline(r.l))  | let r.a = 1
-    elseif r.a == col([r.l, '$']) | let r.a = col([r.l, '$']) - 1 | endif
-
+    call s:fix_pos(r)
     call self.update_vars()
 endfun
 
@@ -361,7 +360,6 @@ fun! s:Region.update_vars() dict
         let r.k   = r.dir? r.a : r.b | let r.K   = r.dir? r.A : r.B
         let r.pat = s:pattern(r)     | let r.txt = getreg(s:v.def_reg)
 
-        call s:Funcs.restore_reg()
     endif
 endfun
 
@@ -449,80 +447,87 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:fix_pos(r)
-    "correct bad positions
+    "fix positions in empty lines or endline
     let r = a:r
-    let nl = col([r.L, '$'])
-    if !r.a && !len(getline(r.l)) | let r.a = 1                  | endif
-    if r.b > nl - 1               | let r.b = nl>1? (nl - 1) : 1 | endif
+    let nl = col([r.l, '$']) - 1
+    let nL = col([r.L, '$']) - 1
+
+    if !r.a && !nl      | let r.a = 1          | endif
+    if !r.b && !nL      | let r.b = 1          | endif
+    if r.a > nl         | let r.a = nl? nl : 1 | endif
+    if r.b > nL         | let r.b = nL? nL : 1 | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
- fun! s:region_vars(r, cursor, ...)
-     let R = a:r
 
-     if !a:0 && a:cursor    "/////////// CURSOR ////////////
+fun! s:region_vars(r, cursor, ...)
+    let R = a:r
 
-         let R.l     = getpos('.')[1]        " line
-         let R.L     = R.l
-         let R.a     = col('$')>1? getpos('.')[2] : 0        " position
-         let R.b     = R.a
+    if !a:0 && a:cursor    "/////////// CURSOR ////////////
 
-         if s:B() && s:v.block[1] && s:v.block[0]
-             if R.dir && R.a > s:v.block[0]
-                 let R.a = s:v.block[0]
-                 let R.b = s:v.block[1]
-             elseif !R.dir && R.b < s:v.block[0]
-                 let R.b = s:v.block[0]
-                 let R.a = s:v.block[1]
-             endif
-         else
-             let R.a     = col('$')>1? getpos('.')[2] : 0        " position
-             let R.b     = R.a
-         endif
+        let R.l     = getpos('.')[1]        " line
+        let R.L     = R.l
+        let R.a     = getpos('.')[2]        " position
+        let R.b     = R.a
 
-         let R.A     = R.A_()                " byte offset a
-         let R.B     = R.B_()                " byte offset b
-         let R.w     = R.B - R.A + 1         " width
-         let R.h     = R.L - R.l             " height
-         let R.k     = R.dir? R.a : R.b      " anchor
-         let R.K     = R.dir? R.A : R.B      " anchor offset
+        call s:fix_pos(R)
 
-         let R.txt   = R.char()              " character under cursor in extend mode
-         let R.pat   = s:pattern(R)
+        if s:B() && s:v.block[1] && s:v.block[0]
+            if R.dir && R.a > s:v.block[0]
+                let R.a = s:v.block[0]
+                let R.b = s:v.block[1]
+            elseif !R.dir && R.b < s:v.block[0]
+                let R.b = s:v.block[0]
+                let R.a = s:v.block[1]
+            endif
+        endif
 
+        let R.A     = R.A_()                " byte offset a
+        let R.B     = R.B_()                " byte offset b
+        let R.w     = R.B - R.A + 1         " width
+        let R.h     = R.L - R.l             " height
+        let R.k     = R.dir? R.a : R.b      " anchor
+        let R.K     = R.dir? R.A : R.B      " anchor offset
 
-     elseif !a:0            "/////////// REGION ////////////
+        let R.txt   = R.char()              " character under cursor in extend mode
+        let R.pat   = s:pattern(R)
 
-         let R.l     = getpos("'[")[1]       " starting line
-         let R.L     = getpos("']")[1]       " ending line
-         let R.a     = getpos("'[")[2]       " begin
-         let R.b     = getpos("']")[2]       " end
+    elseif !a:0            "/////////// REGION ////////////
 
-         let R.A     = R.A_()                " byte offset a
-         let R.B     = R.B_()                " byte offset b
-         let R.w     = R.B - R.A + 1         " width
-         let R.h     = R.L - R.l             " height
-         let R.k     = R.dir? R.a : R.b      " anchor
-         let R.K     = R.dir? R.A : R.B      " anchor offset
+        let R.l     = getpos("'[")[1]       " starting line
+        let R.L     = getpos("']")[1]       " ending line
+        let R.a     = getpos("'[")[2]       " begin
+        let R.b     = getpos("']")[2]       " end
 
-         let R.txt   = getreg(s:v.def_reg)   " text content
-         let R.pat   = s:pattern(R)          " associated search pattern
+        call s:fix_pos(R)
 
-     else                   "///////// FROM ARGS ///////////
+        let R.A     = R.A_()                " byte offset a
+        let R.B     = R.B_()                " byte offset b
+        let R.w     = R.B - R.A + 1         " width
+        let R.h     = R.L - R.l             " height
+        let R.k     = R.dir? R.a : R.b      " anchor
+        let R.K     = R.dir? R.A : R.B      " anchor offset
 
-         let R.l     = a:1
-         let R.L     = a:2
-         let R.a     = a:3
-         let R.b     = a:4
+        let R.txt   = getreg(s:v.def_reg)   " text content
+        let R.pat   = s:pattern(R)          " associated search pattern
 
-         let R.A     = R.A_()                " byte offset a
-         let R.B     = R.B_()                " byte offset b
-         let R.w     = R.B - R.A + 1         " width
-         let R.h     = R.L - R.l             " height
-         let R.k     = R.dir? R.a : R.b      " anchor
-         let R.K     = R.dir? R.A : R.B      " anchor offset
+    else                   "///////// FROM ARGS ///////////
 
-         let R.txt   = R.get_text()
-         let R.pat   = s:Search.escape_pattern(R.txt)
-     endif
- endfun
+        let R.l     = a:1
+        let R.L     = a:2
+        let R.a     = a:3
+        let R.b     = a:4
+
+        call s:fix_pos(R)
+
+        let R.A     = R.A_()                " byte offset a
+        let R.B     = R.B_()                " byte offset b
+        let R.w     = R.B - R.A + 1         " width
+        let R.h     = R.L - R.l             " height
+        let R.k     = R.dir? R.a : R.b      " anchor
+        let R.K     = R.dir? R.A : R.B      " anchor offset
+
+        let R.txt   = R.get_text()
+        let R.pat   = s:Search.escape_pattern(R.txt)
+    endif
+endfun

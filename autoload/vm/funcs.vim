@@ -103,6 +103,14 @@ fun! s:Funcs.restore_regs() dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.region_with_id(id) dict
+    for r in s:R()
+        if r.id == a:id | return r | endif
+    endfor
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Messages
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -122,7 +130,7 @@ fun! s:Funcs.msg(text, force) dict
     endfor
 endfun
 
-fun! s:Funcs.count_msg(force) dict
+fun! s:Funcs.count_msg(force, ...) dict
     if s:v.eco                     | return
     elseif s:v.silence && !a:force | return
     elseif s:v.index < 0           | call self.msg("No selected regions.", 1) | return | endif
@@ -142,7 +150,8 @@ fun! s:Funcs.count_msg(force) dict
     let s = len(s:R())>1 ? 's.' : '.'
     let t1 = [len(s:R()).t.s.'   Current patterns: ', hl]
     let t2 = [self.pad(string(s:v.search), 120), H1]
-    call self.msg([i1, m1, i2, m2, i3, m3, i4, m4, ix, t1, t2], a:force)
+    let msg = [i1, m1, i2, m2, i3, m3, i4, m4, ix, t1, t2]
+    if a:0 | call insert(msg, a:1, 0) | endif | call self.msg(msg, a:force)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -151,10 +160,10 @@ endfun
 
 fun! s:Funcs.show_registers() dict
     echohl Label | echo " Register\tLine\t--- Register contents ---" | echohl None
-    for r in keys(s:v.registers)
+    for r in keys(g:VM.registers)
         echohl Directory  | echo "\n    ".r
         let l = 1
-        for s in s:v.registers[r]
+        for s in g:VM.registers[r]
             echohl WarningMsg | echo "\t\t".l."\t"
             echohl None  | echon s
             let l += 1
