@@ -517,8 +517,20 @@ endfun
 fun! s:Edit.surround() dict
     if !s:X() | exe "normal Siw" | endif
 
+    let s:W = s:store_widths()
     let c = nr2char(getchar())
+
+    "not possible
+    if c == '<' | call s:Funcs.msg('Not possible. Use visual command instead. ', 1)
+        return | endif
+
     call self.run_visual('S'.c)
+    if index(['[', '{', '('], c) >= 0
+        call map(s:W, 'v:val + 3')
+    else
+        call map(s:W, 'v:val + 1')
+    endif
+    call self.post_process(1, 0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

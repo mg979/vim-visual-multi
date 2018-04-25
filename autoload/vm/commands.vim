@@ -49,6 +49,7 @@ fun! vm#commands#select_operator(...)
         endfor
     endif
     call s:Global.update_regions()
+    call s:Global.select_region_at_pos('.')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
