@@ -521,7 +521,7 @@ fun! s:Edit.surround() dict
     let c = nr2char(getchar())
 
     "not possible
-    if c == '<' | call s:Funcs.msg('Not possible. Use visual command instead. ', 1)
+    if c == '<' | call s:Funcs.msg('Not possible. Use visual command (zv) instead. ', 1)
         return | endif
 
     call self.run_visual('S'.c)

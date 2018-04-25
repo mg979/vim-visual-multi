@@ -155,11 +155,9 @@ endfun
 
 fun! s:Global.select_region(i) dict
     """Adjust cursor position of the region at index, then return the region."""
+    if !len(s:R()) | return | endif
 
-    if a:i >= len(s:R()) | let i = 0
-    elseif a:i<0         | let i = len(s:R()) - 1
-    else                 | let i = a:i
-    endif
+    let i = a:i >= len(s:R())? 0 : a:i
 
     let R = s:R()[i]
     call cursor(R.cur_ln(), R.cur_col())

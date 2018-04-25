@@ -80,7 +80,8 @@ fun! s:Insert.start(mode, ...) dict
 
     "--------------------------------------------------------------------------
 
-    let self.index     = s:v.index
+    let r = s:Global.select_region(-1)
+    let self.index     = r.index
     let self.begin     = s:Byte('.')
     let self.is_active = 1
     let self.mode      = a:mode
