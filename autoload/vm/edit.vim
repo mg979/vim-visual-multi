@@ -244,7 +244,7 @@ fun! s:Edit.paste(before, block, reselect) dict
 
     if X | call self.delete(1, 0, 1) | endif
 
-    if !a:block || !has_key(g:VM.registers, reg)
+    if !a:block || !has_key(g:VM.registers, reg) || empty(g:VM.registers[reg])
         let s:v.new_text = s:default_text()
     else
         let s:v.new_text = g:VM.registers[reg]

@@ -70,7 +70,7 @@ fun! vm#commands#add_cursor_at_word(yank, search)
     if a:search | call s:Search.add() | endif
 
     let R = s:Global.new_cursor() | let R.pat = s:v.search[0]
-    call s:Block.stop()
+    call s:Funcs.restore_reg()
     call s:Funcs.count_msg(1)
 endfun
 
@@ -178,7 +178,6 @@ endfun
 
 fun! vm#commands#find_by_regex(...)
     call s:init(0, 0, 1)
-    call s:Block.stop()
     let s:v.using_regex = 1
 
     "store reg and position, to check if the search will be aborted
@@ -207,7 +206,6 @@ endfun
 
 fun! vm#commands#find_under(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
-    call s:Block.stop()
 
     " yank and create region
     if !a:visual | call s:yank(a:inclusive) | endif
@@ -233,7 +231,6 @@ endfun
 fun! vm#commands#find_all(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
 
-    call s:Block.stop()
     let storepos = getpos('.')
     let s:v.eco = 1
     let seen = []
@@ -260,7 +257,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:get_next(n)
-    call s:Block.stop()
     if s:X()
         silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
         let R = s:Global.get_region()
@@ -384,8 +380,7 @@ endfun
 " Motion commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:sublime = { -> g:VM_sublime_mappings &&
-            \        (!g:VM.is_active || empty(s:Global.is_region_at_pos('.'))) }
+let s:sublime = { -> !g:VM.is_active && g:VM_sublime_mappings }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -395,8 +390,10 @@ fun! vm#commands#motion(motion, count, select, this)
 
     "-----------------------------------------------------------------------
 
-    "start if sublime mappings are set
-    if s:sublime()    | call s:init(0, 1, 1) | call s:Global.new_cursor() | endif
+    "start if sublime mappings are set;
+    "reselect region on motion unless a:this (eg M-<> adds a new region)
+    if s:sublime() | call s:init(0, 1, 1) | call s:Global.new_cursor()
+    elseif a:this && !s:is_r()            | call s:Global.new_cursor() | endif
 
     "-----------------------------------------------------------------------
 
@@ -589,6 +586,7 @@ fun! s:after_move()
     if s:always_from_back()
         call vm#commands#invert_direction()
     endif
+    call s:Funcs.restore_reg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

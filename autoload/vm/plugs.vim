@@ -136,7 +136,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:VM.last_visual)<cr>
 
     fun! <SID>Yank(hard)
-        if empty(b:VM_Selection.Global.is_region_at_pos('.')) | return 'y' | endif
+        if empty(b:VM_Selection.Global.is_region_at_pos('.')) | let b:VM_Selection.Vars.yanked = 1 | return 'y' | endif
         return ":\<C-u>call b:VM_Selection.Edit.yank(".a:hard.", 0, 0, 1)\<cr>"
     endfun
 

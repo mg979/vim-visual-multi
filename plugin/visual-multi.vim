@@ -19,7 +19,7 @@ fun! <SID>VM_Init()
     let g:VM.last_normal     = ''
     let g:VM.last_visual     = ''
     let g:VM.oldupdate       = &updatetime
-    let g:VM.registers       = {}
+    let g:VM.registers       = {'"': []}
 
     let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
     let g:VM_motions_at_start                 = get(g:, 'VM_motions_at_start', 1)

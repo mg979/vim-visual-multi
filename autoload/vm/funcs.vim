@@ -76,8 +76,8 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.get_reg() dict
-    let r = s:v.def_reg
+fun! s:Funcs.get_reg(...) dict
+    let r = a:0? a:1 : s:v.def_reg
     return [r, getreg(r), getregtype(r)]
 endfun
 
@@ -100,6 +100,7 @@ fun! s:Funcs.restore_regs() dict
     let s = s:v.oldsearch
     call self.restore_reg()
     call setreg("/", s[0], s[1])
+    let g:VM.registers['"'] = []
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -56,6 +56,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.multiline        = 0
     let s:v.block_mode       = 0
     let s:v.vertical_col     = 0
+    let s:v.yanked           = 0
 
     let s:V.Search     = vm#search#init()
     let s:V.Global     = vm#global#init()
@@ -120,8 +121,10 @@ fun! vm#augroup()
 
         if has('nvim')
             au TextYankPost * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
+            au TextYankPost * if s:v.yanked     | call <SID>set_reg()                   | endif
         else
-            au CursorMoved   * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
+            au CursorMoved  * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
+            au CursorMoved  * if s:v.yanked     | call <SID>set_reg()                   | endif
         endif
     augroup END
 endfun
@@ -142,7 +145,7 @@ endfun
 
 fun! <SID>VM_cursor_moved()
     if s:v.block_mode
-        if !s:v.block[3] && empty(s:V.Global.is_region_at_pos('.'))
+        if !s:v.block[3]
             call s:V.Block.stop()
             call s:V.Funcs.count_msg(1)
         else
@@ -161,5 +164,11 @@ fun! s:buffer_enter()
     let b:VM_Selection = {}
 endfun
 
+fun! <SID>set_reg()
+    "Replace old default register if yanking in VM outside a region or cursor
+    let s:v.yanked = 0
+    let g:VM.registers['"'] = []
+    let s:v.oldreg = s:V.Funcs.get_reg(v:register)
+endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
