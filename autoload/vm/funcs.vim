@@ -109,6 +109,7 @@ fun! s:Funcs.region_with_id(id) dict
     for r in s:R()
         if r.id == a:id | return r | endif
     endfor
+    return {}
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

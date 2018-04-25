@@ -13,7 +13,7 @@ let s:NVIM = has('gui_running') || has('nvim')
 
 let s:simple   = split('nNqQU*#o[]{}?/:-+uMS', '\zs')
 
-let s:zeta     = ['zz', 'za', 'zA', 'Z', 'zq', 'zQ', 'zv', 'zV', 'z.', 'z@']
+let s:zeta     = ['zz', 'za', 'zA', 'Z', 'zq', 'zQ', 'zv', 'zV', 'z.', 'z@', 'zs']
 let s:ctr_maps = ['h', 'l', 'w', 'c' ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
 let s:alt_maps = ['j', 'k', ']', 'q', 'BS', 'm' ]
@@ -113,6 +113,7 @@ fun! s:Maps.start() dict
     nmap <silent> <nowait> <buffer> +               <Plug>(VM-Motion-Enlarge)
 
     "normal/ex/visual
+    nmap <silent> <nowait> <buffer> zs              <Plug>(VM-Run-Surround)
     nmap          <nowait> <buffer> zz              <Plug>(VM-Run-Normal)
     nmap <silent> <nowait> <buffer> Z               <Plug>(VM-Run-Last-Normal)
     nmap          <nowait> <buffer> zv              <Plug>(VM-Run-Visual)

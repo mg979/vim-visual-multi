@@ -132,10 +132,8 @@ fun! vm#augroup(end)
         au BufEnter     * call s:buffer_enter()
 
         if has('nvim')
-            au TextYankPost * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
             au TextYankPost * if s:v.yanked     | call <SID>set_reg()                   | endif
         else
-            au CursorMoved  * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
             au CursorMoved  * if s:v.yanked     | call <SID>set_reg()                   | endif
         endif
     augroup END

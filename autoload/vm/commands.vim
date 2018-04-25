@@ -44,7 +44,8 @@ fun! vm#commands#select_operator(...)
         let d = nr2char(getchar())
         call s:Edit.run_normal('gs'.c.d, 1)
         for id in ids
-            call s:Funcs.region_with_id(id).remove()
+            let r = s:Funcs.region_with_id(id)
+            if !empty(r) | call r.remove() | endif
         endfor
     endif
     call s:Global.update_regions()
@@ -206,15 +207,16 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_under(visual, whole, inclusive)
-    call s:init(a:whole, 0, 1)
+    call s:init(a:whole, 0, 1) | let selecting = g:VM.selecting | let g:VM.selecting = 0
 
-    if s:is_r() | call vm#commands#find_next(0, 0) | return | endif
+    if s:is_r()
+        if !selecting | call vm#commands#find_next(0, 0)             | return
+        else          | call s:Global.is_region_at_pos('.').remove() | endif | endif
 
     " yank and create region
     if !a:visual | call s:yank(a:inclusive) | endif
 
-    if g:VM.selecting
-        let g:VM.selecting = 0
+    if selecting
         if empty(s:v.search) | let @/ = '' | endif
         nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
         if !has('nvim')

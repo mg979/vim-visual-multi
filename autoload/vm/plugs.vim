@@ -128,7 +128,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-Shift-Left)         :call b:VM_Selection.Edit.shift(0)<cr>
     nnoremap        <Plug>(VM-Edit-Transpose)          :call b:VM_Selection.Edit.transpose()<cr>
 
-    nnoremap        <Plug>(VM-Run-Dot)                :call b:VM_Selection.Edit.run_normal('.', 0)<cr>
+    nnoremap        <Plug>(VM-Run-Dot)                 :call b:VM_Selection.Edit.run_normal('.', 0)<cr>
+    nnoremap        <Plug>(VM-Run-Surround)            :call b:VM_Selection.Edit.surround()<cr>
     nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
     nnoremap        <Plug>(VM-Run-Ex)                  :call b:VM_Selection.Edit.run_ex()<cr>
     nnoremap        <Plug>(VM-Run-Last-Ex)             :call b:VM_Selection.Edit.run_ex(g:VM.last_ex)<cr>

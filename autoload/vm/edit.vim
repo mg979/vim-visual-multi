@@ -514,9 +514,11 @@ endfun
 " Special commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.surround(type) dict
-    if s:X()
-    endif
+fun! s:Edit.surround() dict
+    if !s:X() | exe "normal Siw" | endif
+
+    let c = nr2char(getchar())
+    call self.run_visual('S'.c)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
