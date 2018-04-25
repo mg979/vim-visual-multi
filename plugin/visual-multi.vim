@@ -96,5 +96,6 @@ augroup plugin-visual-multi-start
         au TextYankPost * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
     else
         au CursorMoved  * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
+        au CursorHold   * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
     endif
 augroup END

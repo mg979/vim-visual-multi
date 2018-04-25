@@ -6,7 +6,7 @@ fun! vm#plugs#init()
     if has('nvim')
         nmap            <Plug>(VM-Select-Operator)     :let g:VM.selecting = 1<cr>:silent! nunmap <buffer> y<cr>y
     else
-        nmap            <Plug>(VM-Select-Operator)     :let g:VM.selecting = 1<cr>:silent! nunmap <buffer> y<cr>y
+        nmap            <Plug>(VM-Select-Operator)     :set updatetime=10<cr>:let g:VM.selecting = 1<cr>:silent! nunmap <buffer> y<cr>y
     endif
     nnoremap        <Plug>(VM-Select-All-Operator)     :call vm#commands#select_operator()<cr>
     nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0, 0)<cr>
