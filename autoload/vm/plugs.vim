@@ -67,11 +67,6 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Remove-Last-Region)      :call b:VM_Selection.Global.remove_last_region()<cr>
     nnoremap        <Plug>(VM-Undo-Visual)             :call vm#commands#undo()<cr>
 
-    nnoremap        <Plug>(VM-Select-One-Inside)       :call vm#commands#select_motion(0, 1)<cr>
-    nnoremap        <Plug>(VM-Select-One-Around)       :call vm#commands#select_motion(1, 1)<cr>
-    nnoremap        <Plug>(VM-Select-All-Inside)       :call vm#commands#select_motion(0, 0)<cr>
-    nnoremap        <Plug>(VM-Select-All-Around)       :call vm#commands#select_motion(1, 0)<cr>
-
     for m in g:VM.motions
         exe "nnoremap <Plug>(VM-Motion-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 0, 0)\<cr>"
         exe "nnoremap <Plug>(VM-This-Motion-".m.") :\<C-u>call vm#commands#motion('".m."',v:count1, 0, 1)\<cr>"

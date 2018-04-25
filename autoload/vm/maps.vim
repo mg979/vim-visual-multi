@@ -11,9 +11,9 @@ endfun
 
 let s:NVIM = has('gui_running') || has('nvim')
 
-let s:simple   = split('nNqQU*#o[]{}?/:-+uMS', '\zs')
+let s:simple   = split('nNqQU*#o[]{}?/:uMS', '\zs')
 
-let s:zeta     = ['zz', 'za', 'zA', 'Z', 'zq', 'zQ', 'zv', 'zV', 'z.', 'z@']
+let s:zeta     = ['zz', "z-", "z+", 'Z', 'zq', 'zQ', 'zv', 'zV', 'z.', 'z@']
 let s:ctr_maps = ['h', 'l', 'w', 'c' ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
 let s:alt_maps = ['j', 'k', ']', 'q', 'BS', 'm' ]
@@ -104,12 +104,9 @@ fun! s:Maps.start() dict
     "select
     nmap <silent>          <buffer> s               <Plug>(VM-Select-All-Operator)
 
-    nmap <silent> <nowait> <buffer> za              <Plug>(VM-Select-All-Inside)
-    nmap <silent> <nowait> <buffer> zA              <Plug>(VM-Select-All-Around)
-
     "shrink/enlarge
-    nmap <silent> <nowait> <buffer> -               <Plug>(VM-Motion-Shrink)
-    nmap <silent> <nowait> <buffer> +               <Plug>(VM-Motion-Enlarge)
+    nmap <silent> <nowait> <buffer> z-              <Plug>(VM-Motion-Shrink)
+    nmap <silent> <nowait> <buffer> z+              <Plug>(VM-Motion-Enlarge)
 
     "normal/ex/visual
     nmap <silent> <nowait> <buffer> S               <Plug>(VM-Run-Surround)

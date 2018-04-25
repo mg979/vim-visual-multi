@@ -497,42 +497,6 @@ fun! vm#commands#shrink_or_enlarge(shrink, this)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#commands#select_motion(inclusive, this)
-    if s:no_regions() | return                          | endif
-    if !s:X()         | call s:Global.change_mode(0) | endif
-    if a:this         | call s:Global.new_cursor()      | endif
-
-    let c = nr2char(getchar())
-    let a = a:inclusive ? 'F' : 'T'
-
-    if index(['"', "'", '`', '_', '|'], c) != -1
-        let d = c
-
-    elseif a:inclusive
-        let x = s:inclusive(c) | let c = x[0] | let d = x[1]
-
-    elseif c == '[' | let a = 'T' | let c = '[' | let d = ']'
-    elseif c == ']' | let a = 'F' | let c = '[' | let d = ']'
-    elseif c == '{' | let a = 'T' | let c = '{' | let d = '}'
-    elseif c == '}' | let a = 'F' | let c = '{' | let d = '}'
-    elseif c == '(' | let a = 'T' | let c = '(' | let d = ')'
-    elseif c == ')' | let a = 'F' | let c = '(' | let d = ')'
-    elseif c == '<' | let a = 'T' | let c = '<' | let d = '>'
-    elseif c == '>' | let a = 'F' | let c = '<' | let d = '>'
-
-    else
-        let d = nr2char(getchar())
-    endif
-
-    let b = a==#'F' ? 'f' : 't'
-
-    call vm#commands#motion(a.c, 1, a:this)
-    call vm#commands#invert_direction()
-    call vm#commands#motion(b.d, 1, a:this)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Motion event
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
