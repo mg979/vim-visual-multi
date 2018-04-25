@@ -515,7 +515,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.surround() dict
-    if !s:X() | exe "normal Siw" | endif
+    if !s:X() | exe "normal siw" | endif
 
     let s:W = s:store_widths()
     let c = nr2char(getchar())
