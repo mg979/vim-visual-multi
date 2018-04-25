@@ -35,12 +35,18 @@ endfun
 fun! s:Edit._process(cmd, ...)
     let size = s:size() | let change = 0 | let cmd = a:cmd
 
+    "cursors on empty lines still give problems, remove them
+    let fix = map(copy(s:R()), '[len(getline(v:val.l)), v:val.id]')
+    for r in fix
+        if !r[0]
+            call s:Funcs.region_with_id(r[1]).remove()
+        endif
+    endfor
+
     for r in s:R()
         if !s:v.auto && r.index == self.skip_index | continue | endif
 
         call r.bytes([change, change])
-        "cursors on empty lines still give problems, remove them
-        if !r.a && !len(getline(r.l)) | call r.remove() | continue | endif
         call cursor(r.l, r.a)
 
         "execute command, but also take special cases into account

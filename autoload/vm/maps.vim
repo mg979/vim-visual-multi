@@ -14,9 +14,9 @@ let s:NVIM = has('gui_running') || has('nvim')
 let s:simple   = split('nNqQU*#o[]{}?/:-+uMS', '\zs')
 
 let s:zeta     = ['zz', 'za', 'zA', 'Z', 'zq', 'zQ', 'zv', 'zV', 'z.', 'z@']
-let s:ctr_maps = ['h', 'l', 'w', 'c', 't' ]
+let s:ctr_maps = ['h', 'l', 'w', 'c' ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
-let s:alt_maps = ['j', 'k', ']', 'q', 'o', 'BS', 'm' ]
+let s:alt_maps = ['j', 'k', ']', 'q', 'BS', 'm' ]
 let s:leader   = []
 let s:leader2  = []
 let s:fkeys    = ['1', '2']

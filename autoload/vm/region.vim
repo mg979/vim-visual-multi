@@ -301,7 +301,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_cursor(...) dict
-    """Update cursor vars from position [line, col] or offset shift."""
+    """Update cursor vars from position [line, col] or offset."""
     let r = self
 
     if a:0 && !type(a:1) | let r.l = byte2line(a:1)    | let r.a = a:1 - line2byte(r.l)
@@ -452,8 +452,8 @@ fun! s:fix_pos(r)
     let nl = col([r.l, '$']) - 1
     let nL = col([r.L, '$']) - 1
 
-    if !r.a && !nl      | let r.a = 1          | endif
-    if !r.b && !nL      | let r.b = 1          | endif
+    if !r.a             | let r.a = 1          | endif
+    if !r.b             | let r.b = 1          | endif
     if r.a > nl         | let r.a = nl? nl : 1 | endif
     if r.b > nL         | let r.b = nL? nL : 1 | endif
 endfun
