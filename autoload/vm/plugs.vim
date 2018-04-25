@@ -32,12 +32,13 @@ fun! vm#plugs#init()
     xnoremap        <Plug>(VM-Star)                    y:call vm#commands#find_under(1, 0, 0)<cr>`]
     xnoremap        <Plug>(VM-Hash)                    y:call vm#commands#find_under(1, 1, 0)<cr>`]
 
-    nnoremap        <Plug>(VM-Toggle-Motions)          :call vm#maps#motions_toggle()<cr>
+    nnoremap        <Plug>(VM-Toggle-Motions)          :call b:VM_Selection.Maps.motions_toggle()<cr>
     nnoremap        <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline')<cr>
     nnoremap        <Plug>(VM-Toggle-Block)            :call b:VM_Selection.Funcs.toggle_option('block_mode')<cr>
     nnoremap        <Plug>(VM-Toggle-Debug)            :let g:VM_debug = !g:VM_debug<cr>
     nnoremap        <Plug>(VM-Toggle-Whole-Word)       :call b:VM_Selection.Funcs.toggle_option('whole_word')<cr>
     nnoremap        <Plug>(VM-Toggle-Only-This-Region) :call b:VM_Selection.Funcs.toggle_option('only_this_always')<cr>
+    nnoremap        <Plug>(VM-Toggle-Edit)             :call b:VM_Selection.Funcs.toggle_option('edit_enabled')<cr>
     nnoremap        <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
     nnoremap        <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
     nnoremap        <Plug>(VM-Rewrite-Last-Search)     :call b:VM_Selection.Search.rewrite(1)<cr>
@@ -127,6 +128,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-Shift-Left)         :call b:VM_Selection.Edit.shift(0)<cr>
     nnoremap        <Plug>(VM-Edit-Transpose)          :call b:VM_Selection.Edit.transpose()<cr>
 
+    nnoremap        <Plug>(VM-Run-Dot)                :call b:VM_Selection.Edit.run_normal('.', 0)<cr>
     nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
     nnoremap        <Plug>(VM-Run-Ex)                  :call b:VM_Selection.Edit.run_ex()<cr>
     nnoremap        <Plug>(VM-Run-Last-Ex)             :call b:VM_Selection.Edit.run_ex(g:VM.last_ex)<cr>

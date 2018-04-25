@@ -63,6 +63,7 @@ fun! <SID>VM_Init()
         nmap <silent> <C-S-Up>    <Plug>(VM-Select-Line-Up)
         nmap <silent> <M-C-Right> <Plug>(VM-Select-E)
         nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
+        nmap <silent> <C-d>       <Plug>(VM-Find-I-Word)
     endif
 
     if g:VM_default_mappings
@@ -85,11 +86,10 @@ fun! <SID>VM_Init()
         xmap <silent> s]         <Plug>(VM-Find-A-Subword)
         xmap <silent> s[         <Plug>(VM-Find-A-Whole-Subword)
     endif
-
-    call vm#augroup()
 endfun
 
 augroup plugin-visual-multi-start
     au!
     au VimEnter     * call <SID>VM_Init()
+    au BufEnter     * let b:VM_Selection = {}
 augroup END

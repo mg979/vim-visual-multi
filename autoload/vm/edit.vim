@@ -48,7 +48,9 @@ fun! s:Edit._process(cmd, ...)
 
         "update changed size
         let change = s:size() - size
-        doautocmd CursorMoved
+        if !has('nvim')
+            doautocmd CursorMoved
+        endif
     endfor
 
     "reset index to skip
@@ -582,8 +584,8 @@ fun! s:before_macro()
     let s:old_multiline = s:v.multiline
     let s:old_motions = g:VM.motions_enabled
     let s:v.multiline = 1
-    call vm#maps#end()
-    if g:VM.motions_enabled | call vm#maps#motions(0, 1) | endif
+    call s:V.Maps.end()
+    if g:VM.motions_enabled | call s:V.Maps.motions(0, 1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -592,8 +594,8 @@ fun! s:after_macro()
     let s:v.silence = 0
     let s:v.multiline = s:old_multiline
 
-    call vm#maps#start()
-    if s:old_motions | call vm#maps#motions(1) | endif
+    call s:V.Maps.start()
+    if s:old_motions | call s:V.Maps.motions(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

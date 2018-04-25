@@ -145,13 +145,14 @@ fun! s:Funcs.count_msg(force, ...) dict
     let i1 = [' '  , hl] | let m1 = g:VM.motions_enabled? ["M\+", H1] : ["m\-", H2]
     let i2 = [' / ', hl] | let m2 = s:v.multiline?        ["V\+", H1] : ["v\-", H2]
     let i3 = [' / ', hl] | let m3 = s:v.block_mode?       ["B\+", H1] : ["b\-", H2]
-    let i4 = [' / ', hl] | let m4 = s:v.only_this_always? ["O\+", H1] : ["o\-", H2]
+    let i4 = [' / ', hl] | let m4 = s:v.edit_enabled?     ["E\+", H1] : ["e\-", H2]
+    let i5 = [' / ', hl] | let m5 = s:v.only_this_always? ["O\+", H1] : ["o\-", H2]
 
     let t = g:VM.extend_mode? ' region' : ' cursor'
     let s = len(s:R())>1 ? 's.' : '.'
     let t1 = [len(s:R()).t.s.'   Current patterns: ', hl]
     let t2 = [self.pad(string(s:v.search), 120), H1]
-    let msg = [i1, m1, i2, m2, i3, m3, i4, m4, ix, t1, t2]
+    let msg = [i1, m1, i2, m2, i3, m3, i4, m4, i5, m5, ix, t1, t2]
     if a:0 | call insert(msg, a:1, 0) | endif | call self.msg(msg, a:force)
 endfun
 
@@ -218,6 +219,12 @@ fun! s:Funcs.toggle_option(option, ...) dict
             call s:V.Global.split_lines()
         elseif s:v.block_mode
             call s:V.Block.stop(1) | return   | endif
+
+    elseif a:option == 'edit_enabled'
+        if s:v.edit_enabled
+            call s:V.Maps.edit_start()
+        else
+            call s:V.Maps.edit_stop() | endif
 
     elseif a:option == 'block_mode'
         if s:v.block_mode

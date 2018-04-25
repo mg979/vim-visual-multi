@@ -13,7 +13,7 @@ fun! vm#init_buffer(empty, ...)
     if !empty(b:VM_Selection) | return s:V | endif
 
     let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Funcs':  {}, 'Block': {},
-                        \ 'Edit': {}, 'Global':  {}, 'Search': {},
+                        \ 'Edit': {}, 'Global':  {}, 'Search': {}, 'Maps':  {},
                         \}
 
     let s:V            = b:VM_Selection
@@ -22,6 +22,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v            = s:V.Vars
     let s:Regions      = s:V.Regions
 
+    let s:V.Maps       = vm#maps#init()
     let s:V.Funcs      = vm#funcs#init()
 
     "init search
@@ -52,6 +53,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.moving           = 0
     let s:v.only_this        = 0
     let s:v.only_this_always = 0
+    let s:v.edit_enabled     = 1
     let s:v.using_regex      = 0
     let s:v.multiline        = 0
     let s:v.block_mode       = 0
@@ -64,8 +66,10 @@ fun! vm#init_buffer(empty, ...)
     let s:V.Insert     = vm#insert#init()
     let s:V.Block      = vm#block#init()
 
-    call vm#maps#start()
+    call s:V.Maps.start()
     call vm#region#init()
+
+    call vm#augroup(0)
     call vm#au_cursor(0)
 
     set virtualedit=onemore
@@ -87,12 +91,14 @@ endfun
 
 fun! vm#reset(...)
     let &virtualedit = s:v.oldvirtual
-    let &whichwrap = s:v.oldwhichwrap
-    let &smartcase = s:v.oldcase[0]
-    let &ignorecase = s:v.oldcase[1]
+    let &whichwrap   = s:v.oldwhichwrap
+    let &smartcase   = s:v.oldcase[0]
+    let &ignorecase  = s:v.oldcase[1]
+    let &lz          = s:v.oldlz
     call s:V.Funcs.restore_regs()
-    call vm#maps#end()
-    call vm#maps#motions(0, 1)
+    call s:V.Maps.end()
+    call s:V.Maps.motions(0, 1)
+    call vm#augroup(1)
     call vm#au_cursor(1)
     let b:VM_Selection = {}
     let g:VM.is_active = 0
@@ -112,7 +118,13 @@ endfun
 " Autocommands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#augroup()
+fun! vm#augroup(end)
+    if a:end
+        augroup plugin-visual-multi-global
+            au!
+        augroup END
+        return
+    endif
 
     augroup plugin-visual-multi-global
         au!

@@ -12,9 +12,10 @@ fun! s:init(whole, cursor, extend_mode)
         let s:v.whole_word = a:whole
         return 1 | endif
 
-    if g:VM_motions_at_start | call vm#maps#motions(1) | endif
-
     let s:V       = vm#init_buffer(a:cursor)
+
+    if g:VM_motions_at_start | call s:V.Maps.motions(1) | endif
+
     let s:v       = s:V.Vars
     let s:Global  = s:V.Global
     let s:Funcs   = s:V.Funcs
@@ -206,6 +207,8 @@ endfun
 
 fun! vm#commands#find_under(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
+
+    if s:is_r() | call vm#commands#find_next(0, 0) | return | endif
 
     " yank and create region
     if !a:visual | call s:yank(a:inclusive) | endif
