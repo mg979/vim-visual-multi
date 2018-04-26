@@ -511,6 +511,82 @@ fun! s:Edit.run_macro(replace) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Insert numbers
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit._numbers(start, stop, step, sep, app) dict
+    let a = a:start | let b = a:stop | let s = a:step | let x = a:sep | let text = []
+
+    "reverse order if start>stop
+    if b >= a
+        let r = range(b-a+1)
+        if a:app  | let text = map(r , '( x.string(a + v:key * s) )')
+        else      | let text = map(r , '( string(a + v:key * s).x )') | endif
+    else
+        let r = range(a-b+1)
+        if a:app  | let text = map(r , '( x.string(a - v:key * s) )')
+        else      | let text = map(r , '( string(a - v:key * s).x )') | endif
+    endif
+
+    "ensure there is enough text
+    if len(text) < len(s:R()) | let text += map(range(len(s:R()) - len(text)), '""') | endif
+
+    if s:X() && a:app
+        let g:VM.registers['"'] = map(copy(s:R()), '(v:val.txt).text[v:key]')
+        call self.paste(1, 1, 1)
+    elseif s:X()
+        let g:VM.registers['"'] = map(copy(s:R()), 'text[v:key].(v:val.txt)')
+        call self.paste(1, 1, 1)
+    else
+        let g:VM.registers['"'] = text
+        call self.paste(1, 1, 0)
+    endif
+endfun
+
+fun! s:Edit.numbers(start, app) dict
+    let text = []
+
+    let l:Invalid = { -> s:Funcs.msg('Invalid expression', 1) }
+    let l:N =       { x -> match(x, '\D')? 1 : 0 }
+
+    let S = a:start
+    let x = S.'/'.( S-1+len(s:R()) ).'/1/'
+    let x = input('Expression > ', x)
+
+    "first char must be a digit
+    if match(x, '^\d') < 0 | call l:Invalid() | return | endif
+
+    "match an expression separator
+    let char = match(x, '\D')
+    if char < 0  | let x = [x]
+    else         | let x = split(x, x[char]) | endif
+
+    let n = len(x)
+
+    "invalid expressions
+    if ( n == 3 && !l:N(x[1]) ) || 
+      \( n == 4 && (!l:N(x[1]) || !l:N(x[2])) ) || 
+      \( n > 4 )
+        call l:Invalid() | return | endif
+
+    "                                         start    stop     step   separ.   append? 
+    if     n == 1        | call self._numbers(S,     S-1+x[0],   1,     '',     a:app)
+
+    elseif n == 2
+
+        if l:N(x[1])     | call self._numbers(S,     S-1+x[0],   x[1],  '',     a:app)
+        else             | call self._numbers(S,     S-1+x[0],   1,     x[1],   a:app) | endif
+
+    elseif n == 3
+
+        if l:N(x[2])     | call self._numbers(x[0],  x[1],       x[2],  '',     a:app)
+        else             | call self._numbers(S,     S-1+x[0],   x[1],  x[2],   a:app) | endif
+
+    elseif n == 4        | call self._numbers(x[0],  x[1],       x[2],  x[3],   a:app) | endif
+
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Special commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

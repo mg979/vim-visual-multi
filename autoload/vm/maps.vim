@@ -13,7 +13,7 @@ let s:NVIM = has('gui_running') || has('nvim')
 
 let s:simple   = split('nNqQU*#o[]{}?/:uMS', '\zs')
 
-let s:zeta     = ['zz', "z-", "z+", 'Z', 'zq', 'zQ', 'zv', 'zV', 'z.', 'z@']
+let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qQvVnN@.', '\zs'), '"z".v:val')
 let s:ctr_maps = ['h', 'l', 'w', 'c' ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
 let s:alt_maps = ['j', 'k', ']', 'q', 'BS', 'm' ]
@@ -118,6 +118,10 @@ fun! s:Maps.start() dict
     nmap <silent> <nowait> <buffer> zQ              <Plug>(VM-Run-Last-Ex)
     nmap <silent> <nowait> <buffer> z@              <Plug>(VM-Run-Macro)
     nmap <silent> <nowait> <buffer> z.              <Plug>(VM-Run-Dot)
+    nmap          <nowait> <buffer> zn              <Plug>(VM-Numbers)
+    nmap <silent> <nowait> <buffer> zN              <Plug>(VM-Numbers-Append)
+    nmap          <nowait> <buffer> z0n             <Plug>(VM-Zero-Numbers)
+    nmap <silent> <nowait> <buffer> z0N             <Plug>(VM-Zero-Numbers-Append)
 
     "edit
     call self.edit_start()

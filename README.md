@@ -7,6 +7,11 @@ Edit test: join lines(J), change motion at cursors, append(a), visual command at
 
 ![Imgur](https://i.imgur.com/2QKCaYv.gif)
 
+-------
+Add numbering with expression
+
+![Imgur](https://i.imgur.com/K3MDnVH.gif)
+
 ---------
 Place cursors at words:
 
