@@ -311,12 +311,14 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav)
-    if ( a:nav || a:skip ) && s:no_regions() | return | endif
+    if ( a:nav || a:skip ) && s:no_regions()                            | return | endif
+    if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
 
     "write search pattern if not navigating and no search set
     if s:X() && !a:nav && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
 
     call s:Search.validate()
+
 
     "just navigate to next
     if s:navigate(a:nav, 1) | return
@@ -330,12 +332,18 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(skip, nav)
-    if ( a:nav || a:skip ) && s:no_regions() | return | endif
+    if ( a:nav || a:skip ) && s:no_regions()                            | return | endif
+    if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
 
     "write search pattern if not navigating and no search set
     if s:X() && !a:nav && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
 
-    call s:Search.validate() | let r = s:G.is_region_at_pos('.')
+    call s:Search.validate()
+    
+    let r = s:G.is_region_at_pos('.')
+    if empty(r)  | let r = s:G.select_region(s:v.index) | endif
+    if !empty(r) | let pos = [r.l, r.a]
+    else         | let pos = getpos('.')[1:2] | endif
 
     "just navigate to previous
     if s:navigate(a:nav, 0) | return
@@ -344,9 +352,7 @@ fun! vm#commands#find_prev(skip, nav)
     "skip current match
 
     "move to the beginning of the current match
-    if s:X() && s:v.index >= 0 | call cursor(r.l, r.a)
-    else | exe "normal! h" | endif
-
+    call cursor(pos)
     return s:get_next('N')
 endfun
 
