@@ -146,6 +146,9 @@ endfun
 fun! s:Global.collapse_regions() dict
     """Collapse regions to cursors and turn off extend mode."""
 
+    "reset the bytes map
+    let s:V.Bytes = map(range(line2byte(line('$') + 1)), 0)
+
     for r in s:R() | call r.update_cursor([r.l, (r.dir? r.a : r.b)]) | endfor
     let g:VM.extend_mode = 0
     call self.update_highlight()
@@ -188,6 +191,14 @@ fun! s:Global.is_region_at_pos(pos) dict
         if pos >= r.A && pos <= r.B
             return r | endif | endfor
     return {}
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.overlapping_regions(R) dict
+    """Check if two regions are overlapping."""
+    let B = s:V.Bytes[a:R.A:a:R.B]
+    for b in B | if b > 1 | return 1 | endif | endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -339,39 +350,25 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.merge_regions(...) dict
-    """MUST BE IMPROVED: Merge overlapping regions."""
+    ""Merge overlapping regions."""
 
-    let storepos = getpos('.')
-    let lines = self.lines_with_regions(0)
+    let storepos = getpos('.') | let s:v.eco = 1
+    let B = copy(s:V.Bytes)    | let a = 0
 
-    "remove lines and indices without multiple regions
-    let lines = filter(lines, 'len(v:val) > 1')
-    let to_remove = []
+    call self.erase_regions()
 
-    "find overlapping regions for each line with multiple regions
-    for indices in values(lines)
-        let n = 0 | let max = len(indices) - 1
+    for i in range(len(B))
+        if B[i] && !a     | let a = i
+        elseif a && !B[i] | call vm#region#new(0, a, i-1) | let a = 0 | endif
+    endfor
 
-        for i in indices
-            while (n < max)
-                let i1 = indices[n] | let i2 = indices[n+1] | let n += 1
-                let this = s:R()[i1] | let next = s:R()[i2]
-
-                let overlap = ( this.B >= next.A ) && ( this.A <= next.A ) ||
-                            \ ( next.B >= this.A ) && ( next.A <= this.A )
-
-                "merge regions if there is overlap with next one
-                if overlap
-                    call next.update_region(this.l, this.L, min([this.a, next.a]), max([this.b, next.b]))
-                    call add(to_remove, this)
-                endif | endwhile | endfor | endfor
-
-    " remove old regions and update highlight
-    for r in to_remove | call r.remove() | endfor
-    call self.update_highlight()
-
-    "restore cursor position
-    call self.select_region_at_pos(storepos)
+    call setpos('.', storepos)
+    let s:v.eco = 0
+    call self.update_regions()
+    let R = self.select_region_at_pos('.')
+    call s:Funcs.restore_reg()
+    call s:Funcs.count_msg(1)
+    return R
 endfun
 
 

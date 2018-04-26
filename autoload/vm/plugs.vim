@@ -104,12 +104,12 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-X)                  :call b:VM_Selection.Edit.run_normal('X', 0)<cr>
     nnoremap        <Plug>(VM-Edit-J)                  :call b:VM_Selection.Edit.run_normal('J', 0)<cr>
     nnoremap        <Plug>(VM-Edit-Del)                :call b:VM_Selection.Edit.del_key()<cr>
-    nnoremap        <Plug>(VM-Edit-a-Append)           :<C-u>call b:VM_Selection.Edit.insert('a')<cr>
-    nnoremap        <Plug>(VM-Edit-A-Append)           :<C-u>call b:VM_Selection.Edit.insert('A')<cr>
-    nnoremap        <Plug>(VM-Edit-i-Insert)           :<C-u>call b:VM_Selection.Edit.insert('i')<cr>
-    nnoremap        <Plug>(VM-Edit-I-Insert)           :<C-u>call b:VM_Selection.Edit.insert('I')<cr>
-    nnoremap        <Plug>(VM-Edit-o-New-Line)         :<C-u>call b:VM_Selection.Edit.insert('o')<cr>
-    nnoremap        <Plug>(VM-Edit-O-New-Line)         :<C-u>call b:VM_Selection.Edit.insert('O')<cr>
+    nnoremap        <Plug>(VM-Edit-a-Append)           :<C-u>call b:VM_Selection.Insert.key('a')<cr>
+    nnoremap        <Plug>(VM-Edit-A-Append)           :<C-u>call b:VM_Selection.Insert.key('A')<cr>
+    nnoremap        <Plug>(VM-Edit-i-Insert)           :<C-u>call b:VM_Selection.Insert.key('i')<cr>
+    nnoremap        <Plug>(VM-Edit-I-Insert)           :<C-u>call b:VM_Selection.Insert.key('I')<cr>
+    nnoremap        <Plug>(VM-Edit-o-New-Line)         :<C-u>call b:VM_Selection.Insert.key('o')<cr>
+    nnoremap        <Plug>(VM-Edit-O-New-Line)         :<C-u>call b:VM_Selection.Insert.key('O')<cr>
     nnoremap        <Plug>(VM-Edit-Delete)             :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, 1, v:count1)<cr>
     nnoremap        <Plug>(VM-Edit-Change)             :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1)<cr>
     nnoremap        <Plug>(VM-Edit-Replace)            :<C-u>call b:VM_Selection.Edit.replace()<cr>

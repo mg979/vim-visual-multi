@@ -34,8 +34,8 @@ fun! vm#region#new(cursor, ...)
 
     if a:0
         if a:0 == 2             "making a new region from offsets
-            let a = byte2line(a:1) | let c = a:1 - a
-            let b = byte2line(a:2) | let d = a:2 - b
+            let a = byte2line(a:1) | let c = a:1 - line2byte(a)
+            let b = byte2line(a:2) | let d = a:2 - line2byte(b)
 
         else                    "making a new region from positions
             let a = a:1 | let b = a:2 | let c = a:3 | let d = a:4
@@ -57,7 +57,7 @@ fun! vm#region#new(cursor, ...)
     let s:v.index = R.index | let s:v.ID += 1
 
     "keep regions list ordered
-    if empty(s:R()) || s:v.eco || s:R()[s:v.index-1].A < R.A
+    if s:v.eco || empty(s:R()) || s:R()[s:v.index-1].A < R.A
         call add(s:R(), R)
     else
         let i = 0
@@ -124,6 +124,7 @@ fun! s:Region.new(cursor, ...)
 
     call add(s:v.IDs_list, R.id)
     call R.highlight()
+    if s:X() | let s:V.Bytes[R.A:R.B] = map(s:V.Bytes[R.A:R.B], 'v:val+1') | endif
 
     return R
 endfun
@@ -191,6 +192,8 @@ let s:vertical  = { -> index(['j', 'k'],                                    s:mo
 
 fun! s:Region.move(motion) dict
     let s:motion = a:motion
+
+    if s:X() | let s:V.Bytes[self.A:self.B] = map(s:V.Bytes[self.A:self.B], 'v:val-1') | endif
 
     "set vertical column if motion is j or k
     if s:vertical() && !s:v.vertical_col | let s:v.vertical_col = col('.')
@@ -351,7 +354,7 @@ fun! s:Region.update_vars() dict
         let r.k   = r.a              | let r.K = r.A
         let r.w   = 1                | let r.h = 0
         let r.pat = s:pattern(r)     | let r.txt = ''
-
+        
         "--------- extend mode ----------------------------
 
     else
@@ -360,6 +363,7 @@ fun! s:Region.update_vars() dict
         let r.k   = r.dir? r.a : r.b | let r.K   = r.dir? r.A : r.B
         let r.pat = s:pattern(r)     | let r.txt = getreg(s:v.def_reg)
 
+        let s:V.Bytes[r.A:r.B] = map(s:V.Bytes[r.A:r.B], 'v:val+1')
     endif
 endfun
 

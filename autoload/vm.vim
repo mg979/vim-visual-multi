@@ -12,7 +12,7 @@ fun! vm#init_buffer(empty, ...)
 
     if !empty(b:VM_Selection) | return s:V | endif
 
-    let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Funcs':  {}, 'Block': {},
+    let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Funcs':  {}, 'Block': {}, 'Bytes': '',
                         \ 'Edit': {}, 'Global':  {}, 'Search': {}, 'Maps':  {},
                         \}
 
@@ -71,6 +71,9 @@ fun! vm#init_buffer(empty, ...)
 
     call vm#augroup(0)
     call vm#au_cursor(0)
+
+    "make a bytes map of the file, where 0 is unselected, 1 is selected
+    let s:V.Bytes = map(range(line2byte(line('$') + 1)), 0)
 
     set virtualedit=onemore
     set ww=h,l

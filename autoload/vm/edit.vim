@@ -119,6 +119,7 @@ endfun
 fun! s:Edit.delete(X, keep, count) dict
     """Delete the selected text and change to cursor mode.
     """Remember the lines that have been added an extra space, for later removal
+    if !s:v.direction | call vm#commands#invert_direction() | endif
 
     if a:X
         let size = s:size() | let change = 0 | let s:extra_spaces = []
@@ -126,7 +127,7 @@ fun! s:Edit.delete(X, keep, count) dict
             call r.bytes([change, change])
             call cursor(r.l, r.a)
             let L = getline(r.L)
-            if s:v.auto || r.b == len(L)
+            if r.b == len(L)
                 call setline(r.L, L.' ')
                 call add(s:extra_spaces, r.L)
             endif
@@ -154,50 +155,13 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.change(X, count) dict
+    if !s:v.direction | call vm#commands#invert_direction() | endif
     if a:X
         "delete existing region contents and leave the cursors
         call self.delete(1, 0, 1)
         call s:V.Insert.start('c')
     else
         call self.get_motion('c', a:count)
-    endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Insert
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Edit.insert(type) dict
-
-    if a:type ==# 'I'
-        call vm#commands#merge_to_beol(0, 0)
-        call s:V.Insert.start('i')
-
-    elseif a:type ==# 'A'
-        call vm#commands#merge_to_beol(1, 0)
-        call s:V.Insert.start('a')
-
-    elseif a:type ==# 'o'
-        call vm#commands#merge_to_beol(1, 0)
-        call s:V.Insert.start('o')
-
-    elseif a:type ==# 'O'
-        call vm#commands#merge_to_beol(0, 0)
-        call s:V.Insert.start('O')
-
-    elseif a:type ==# 'a'
-        if s:X()
-            if s:v.direction | call vm#commands#invert_direction() | endif
-            call s:Global.change_mode(1)
-        endif
-        call s:V.Insert.start('a')
-
-    else
-        if s:X()
-            if !s:v.direction | call vm#commands#invert_direction() | endif
-            call s:Global.change_mode(1)
-        endif
-        call s:V.Insert.start('i')
     endif
 endfun
 

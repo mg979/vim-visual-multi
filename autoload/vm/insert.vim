@@ -69,7 +69,41 @@ fun! s:Cursor.update(byte, txt) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Live insert mode
+" Insert mode
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Insert.key(type) dict
+
+    if a:type ==# 'I'
+        call vm#commands#merge_to_beol(0, 0)
+        call self.start('i')
+
+    elseif a:type ==# 'A'
+        call vm#commands#merge_to_beol(1, 0)
+        call self.start('a')
+
+    elseif a:type ==# 'o'
+        call vm#commands#merge_to_beol(1, 0)
+        call self.start('o')
+
+    elseif a:type ==# 'O'
+        call vm#commands#merge_to_beol(0, 0)
+        call self.start('O')
+
+    elseif a:type ==# 'a'
+        if s:X()
+            if s:v.direction | call vm#commands#invert_direction() | endif
+            call s:Global.change_mode(1) | endif
+        call self.start('a')
+
+    else
+        if s:X()
+            if !s:v.direction | call vm#commands#invert_direction() | endif
+            call s:Global.change_mode(1) | endif
+        call self.start('i')
+    endif
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.start(mode, ...) dict
@@ -120,6 +154,8 @@ fun! s:get_inserted_text(a, b)
     return getreg(s:v.def_reg)
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Live insert mode
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.live_insert() dict
