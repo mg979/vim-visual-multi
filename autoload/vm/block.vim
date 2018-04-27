@@ -96,10 +96,6 @@ fun! s:Block.start() dict
     let s:v.block_mode = 1
     if s:v.only_this_always | call s:V.Funcs.toggle_option('only_this_always') | endif
     if s:v.index != -1
-        if s:v.multiline
-            let s:v.multiline = 0
-            call s:V.Global.split_lines()
-        endif
         let r = s:V.Global.is_region_at_pos('.')
         if empty(r) | let r = s:R()[-1] | endif
         let s:v.block[0] = r.a
@@ -109,10 +105,9 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Block.stop(...) dict
+fun! s:Block.stop() dict
     if s:v.eco | return | endif
 
     let s:v.block_mode = 0
     let s:v.block = [0,0,0,0]
-    if a:0 | let s:v.multiline = 1 | endif
 endfun

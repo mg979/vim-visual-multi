@@ -136,7 +136,6 @@ fun! s:Maps.start() dict
     nmap     <silent> <nowait> <buffer> Q          <Plug>(VM-Remove-Region)
     nmap     <silent> <nowait> <buffer> <M-q>      <Plug>(VM-Remove-Last-Region)
     nmap     <silent> <nowait> <buffer> <M-m>      <Plug>(VM-Merge-Regions)
-    nmap     <silent> <nowait> <buffer> <F1>       <Plug>(VM-Toggle-Edit)
     nmap     <silent> <nowait> <buffer> M          <Plug>(VM-Toggle-Multiline)
     nmap     <silent> <nowait> <buffer> u          <Plug>(VM-Undo)
     nmap     <silent> <nowait> <buffer> U          <Plug>(VM-Undo-Visual)
@@ -164,6 +163,7 @@ fun! s:Maps.start() dict
     nmap     <silent> <nowait> <buffer> <M-]>      <Plug>(VM-Rewrite-Last-Search)
 
     "utility
+    nmap     <silent> <nowait> <buffer> <F1>       <Plug>(VM-Show-Help)
     nmap              <nowait> <buffer> <C-x>t     <Plug>(VM-Show-Regions-Text)
     nmap              <nowait> <buffer> <C-x>"     <Plug>(VM-Show-Registers)
     nmap     <silent> <nowait> <buffer> <C-x>s     <Plug>(VM-Remove-Search)

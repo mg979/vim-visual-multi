@@ -38,7 +38,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Toggle-Debug)            :let g:VM_debug = !g:VM_debug<cr>
     nnoremap        <Plug>(VM-Toggle-Whole-Word)       :call b:VM_Selection.Funcs.toggle_option('whole_word')<cr>
     nnoremap        <Plug>(VM-Toggle-Only-This-Region) :call b:VM_Selection.Funcs.toggle_option('only_this_always')<cr>
-    nnoremap        <Plug>(VM-Toggle-Edit)             :call b:VM_Selection.Funcs.toggle_option('edit_enabled')<cr>
+    nnoremap        <Plug>(VM-Show-Help)               :call b:VM_Selection.Funcs.show_help()<cr>
     nnoremap        <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
     nnoremap        <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
     nnoremap        <Plug>(VM-Rewrite-Last-Search)     :call b:VM_Selection.Search.rewrite(1)<cr>

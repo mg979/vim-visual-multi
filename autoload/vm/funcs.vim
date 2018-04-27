@@ -215,13 +215,14 @@ fun! s:Funcs.toggle_option(option, ...) dict
     exe "let" s "= !".s
 
     if a:option == 'multiline'
-        if !s:v.multiline
-            call s:V.Global.split_lines()
-        elseif s:v.block_mode
-            call s:V.Block.stop(1) | return   | endif
+        if s:v.multiline
+            call s:V.Block.stop()
+        else
+            call s:V.Global.split_lines()   | endif
 
     elseif a:option == 'block_mode'
         if s:v.block_mode
+            if s:v.multiline | let s:v.multiline = 0 | call s:V.Global.split_lines() | endif
             call s:V.Block.start()
         else
             call s:V.Block.stop() | endif
