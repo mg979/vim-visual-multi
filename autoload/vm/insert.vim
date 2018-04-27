@@ -114,7 +114,7 @@ fun! s:Insert.start(mode, ...) dict
 
     "--------------------------------------------------------------------------
 
-    let r = s:Global.select_region(-1)
+    let r              = s:Global.select_region(-1)
     let self.index     = r.index
     let self.begin     = s:Byte('.')
     let self.is_active = 1
@@ -189,7 +189,7 @@ endfun
 fun! s:Insert.stop(mode) dict
     iunmap <buffer> <esc>
     "iunmap <buffer> <space>
-    call self.auto_end()
+    call self.auto_end() | let s:v.eco = 1
 
     let dot = @.
     let dot = substitute(dot, ".\<BS>", '', 'g')
@@ -212,8 +212,6 @@ fun! s:Insert.stop(mode) dict
 
     let self.is_active = 0
     call s:V.Edit.post_process(0,0)
-    call s:Global.update_regions()
-    call s:Funcs.count_msg(1)
     if a:mode != -1 | call self.start(a:mode, 1) | return | endif
 endfun
 

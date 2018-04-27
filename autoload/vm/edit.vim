@@ -244,7 +244,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.block_paste(before) dict
-    let size = s:size() | let change = 0 | let text = copy(s:v.new_text)
+    let size = s:size() | let change = 0 | let text = copy(s:v.new_text) | let s:v.eco = 1
 
     for r in s:R()
         if !empty(text)
@@ -665,7 +665,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:before_macro(maps)
-    let s:v.silence = 1 | let s:v.auto = 1
+    let s:v.silence = 1 | let s:v.auto = 1 | let s:v.eco = 1
     let s:old_multiline = s:v.multiline
     let s:v.multiline = 1
     if a:maps && g:VM.mappings_enabled | call s:V.Maps.mappings(0, 1) | endif
@@ -674,7 +674,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:after_macro()
-    let s:v.silence = 0
+    let s:v.silence = 0 | let s:v.eco = 0
     let s:v.multiline = s:old_multiline
     call s:V.Maps.mappings(1)
 endfun
