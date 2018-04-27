@@ -32,7 +32,7 @@ fun! vm#plugs#init()
     xnoremap        <Plug>(VM-Star)                    y:call vm#commands#find_under(1, 0, 0)<cr>`]
     xnoremap        <Plug>(VM-Hash)                    y:call vm#commands#find_under(1, 1, 0)<cr>`]
 
-    nnoremap        <Plug>(VM-Toggle-Motions)          :call b:VM_Selection.Maps.motions_toggle()<cr>
+    nnoremap        <Plug>(VM-Toggle-Mappings)         :call b:VM_Selection.Maps.mappings_toggle()<cr>
     nnoremap        <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline')<cr>
     nnoremap        <Plug>(VM-Toggle-Block)            :call b:VM_Selection.Funcs.toggle_option('block_mode')<cr>
     nnoremap        <Plug>(VM-Toggle-Debug)            :let g:VM_debug = !g:VM_debug<cr>
@@ -100,9 +100,9 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Merge-To-Bol)            :call vm#commands#merge_to_beol(0, 0)<cr>
 
     "Edit commands
-    nnoremap        <Plug>(VM-Edit-x)                  :call b:VM_Selection.Edit.run_normal('x', 0)<cr>
-    nnoremap        <Plug>(VM-Edit-X)                  :call b:VM_Selection.Edit.run_normal('X', 0)<cr>
-    nnoremap        <Plug>(VM-Edit-J)                  :call b:VM_Selection.Edit.run_normal('J', 0)<cr>
+    nnoremap        <Plug>(VM-Edit-x)                  :call b:VM_Selection.Edit.run_normal('x', 0, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-X)                  :call b:VM_Selection.Edit.run_normal('X', 0, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-J)                  :call b:VM_Selection.Edit.run_normal('J', 0, 0)<cr>
     nnoremap        <Plug>(VM-Edit-Del)                :call b:VM_Selection.Edit.del_key()<cr>
     nnoremap        <Plug>(VM-Edit-a-Append)           :<C-u>call b:VM_Selection.Insert.key('a')<cr>
     nnoremap        <Plug>(VM-Edit-A-Append)           :<C-u>call b:VM_Selection.Insert.key('A')<cr>
@@ -127,13 +127,13 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Numbers-Append)          :<C-u>call b:VM_Selection.Edit.numbers(v:count1, 1)<cr>
     nnoremap        <Plug>(VM-Zero-Numbers)            :<C-u>call b:VM_Selection.Edit.numbers(v:count, 0)<cr>
     nnoremap        <Plug>(VM-Zero-Numbers-Append)     :<C-u>call b:VM_Selection.Edit.numbers(v:count, 1)<cr>
-    nnoremap        <Plug>(VM-Run-Dot)                 :call b:VM_Selection.Edit.run_normal('.', 0)<cr>
+    nnoremap        <Plug>(VM-Run-Dot)                 :call b:VM_Selection.Edit.run_normal('.', 0, 0)<cr>
     nnoremap        <Plug>(VM-Run-Surround)            :call b:VM_Selection.Edit.surround()<cr>
     nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
     nnoremap        <Plug>(VM-Run-Ex)                  :call b:VM_Selection.Edit.run_ex()<cr>
     nnoremap        <Plug>(VM-Run-Last-Ex)             :call b:VM_Selection.Edit.run_ex(g:VM.last_ex)<cr>
-    nnoremap        <Plug>(VM-Run-Normal)              :call b:VM_Selection.Edit.run_normal(-1, 1)<cr>
-    nnoremap        <Plug>(VM-Run-Last-Normal)         :call b:VM_Selection.Edit.run_normal(g:VM.last_normal[0] ,g:VM.last_normal[1])<cr>
+    nnoremap        <Plug>(VM-Run-Normal)              :call b:VM_Selection.Edit.run_normal(-1, 1, 1)<cr>
+    nnoremap        <Plug>(VM-Run-Last-Normal)         :call b:VM_Selection.Edit.run_normal(g:VM.last_normal[0] ,g:VM.last_normal[1], 1)<cr>
     nnoremap        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1)<cr>
     nnoremap        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:VM.last_visual)<cr>
 

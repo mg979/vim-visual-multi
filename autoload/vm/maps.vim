@@ -8,6 +8,49 @@ fun! vm#maps#init()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"Global mappings
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#maps#default()
+    if g:VM_sublime_mappings
+        nmap <silent> <M-C-Down>  <Plug>(VM-Select-Cursor-Down)
+        nmap <silent> <M-C-Up>    <Plug>(VM-Select-Cursor-Up)
+        nmap <silent> <S-Down>    <Plug>(VM-Select-j)
+        nmap <silent> <S-Up>      <Plug>(VM-Select-k)
+        nmap <silent> <S-Right>   <Plug>(VM-Select-l)
+        nmap <silent> <S-Left>    <Plug>(VM-Select-h)
+        nmap <silent> <C-S-Right> <Plug>(VM-Select-w)
+        nmap <silent> <C-S-Left>  <Plug>(VM-Select-b)
+        nmap <silent> <C-S-Down>  <Plug>(VM-Select-Line-Down)
+        nmap <silent> <C-S-Up>    <Plug>(VM-Select-Line-Up)
+        nmap <silent> <M-C-Right> <Plug>(VM-Select-E)
+        nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
+        nmap <silent> <C-d>       <Plug>(VM-Find-I-Word)
+    endif
+
+    if g:VM_default_mappings
+
+        nmap <silent> gs         <Plug>(VM-Select-Operator)
+
+        nmap <silent> g<space>   <Plug>(VM-Add-Cursor-At-Pos)
+        nmap <silent> g<cr>      <Plug>(VM-Add-Cursor-At-Word)
+        nmap <silent> g/         <Plug>(VM-Start-Regex-Search)
+
+        nmap <silent> <M-A>      <Plug>(VM-Select-All)
+        xmap <silent> <M-A>      <Plug>(VM-Select-All)
+        nmap <silent> <M-j>      <Plug>(VM-Add-Cursor-Down)
+        nmap <silent> <M-k>      <Plug>(VM-Add-Cursor-Up)
+
+        nmap <silent> s]         <Plug>(VM-Find-I-Word)
+        nmap <silent> s[         <Plug>(VM-Find-A-Word)
+        nmap <silent> s}         <Plug>(VM-Find-I-Whole-Word)
+        nmap <silent> s{         <Plug>(VM-Find-A-Whole-Word)
+        xmap <silent> s]         <Plug>(VM-Find-A-Subword)
+        xmap <silent> s[         <Plug>(VM-Find-A-Whole-Subword)
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:NVIM = has('gui_running') || has('nvim')
 
@@ -29,6 +72,46 @@ let s:edit     = split('dcpPyxXraAiIOJ', '\zs')
 
 let s:Maps = {}
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Maps.mappings(activate, ...) dict
+    let s:noremaps = g:VM_custom_noremaps
+    let s:remaps   = g:VM_custom_remaps
+
+    if a:activate && !g:VM.mappings_enabled
+        let g:VM.mappings_enabled = 1
+        call self.start()
+        call self.default_stop()
+        for m in (g:VM.motions + g:VM.find_motions)
+            exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".m.")"
+        endfor
+        for m in keys(s:noremaps)
+            exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".s:noremaps[m].")"
+        endfor
+        for m in keys(s:remaps)
+            exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Remap-Motion-".s:remaps[m].")"
+        endfor
+    elseif !a:activate && g:VM.mappings_enabled
+        call self.end()
+        call vm#maps#default()
+        let g:VM.mappings_enabled = 0
+        for m in (g:VM.motions + g:VM.find_motions)
+            exe "nunmap <buffer> ".m
+        endfor
+        for m in ( keys(s:noremaps) + keys(s:remaps) )
+            exe "silent! nunmap <buffer> ".m
+        endfor
+    endif
+endfun
+
+fun! s:Maps.mappings_toggle() dict
+    let activate = !g:VM.mappings_enabled
+    call self.mappings(activate)
+    call s:V.Funcs.count_msg(1)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Maps.start() dict
 
     if g:VM_sublime_mappings
@@ -46,7 +129,6 @@ fun! s:Maps.start() dict
     nmap     <silent> <nowait> <buffer> <Tab>      <Plug>(VM-Switch-Mode)
     nmap     <silent> <nowait> <buffer> <M-BS>     <Plug>(VM-Erase-Regions)
     nmap     <silent> <nowait> <buffer> <BS>       <Plug>(VM-Toggle-Block)
-    nmap     <silent> <nowait> <buffer> <Space>    <Plug>(VM-Toggle-Motions)
     nmap     <silent> <nowait> <buffer> <CR>       <Plug>(VM-Toggle-Only-This-Region)
 
     nmap     <silent> <nowait> <buffer> o          <Plug>(VM-Invert-Direction)
@@ -210,7 +292,6 @@ fun! s:Maps.end() dict
     nunmap <buffer> <esc>
     nunmap <buffer> <BS>
     nunmap <buffer> <CR>
-    nunmap <buffer> <Space>
 
     xunmap <buffer> *
     xunmap <buffer> #
@@ -246,41 +327,6 @@ fun! s:arrows_end()
     nunmap <buffer> <M-S-Right>
     nunmap <buffer> <M-S-Left>
 endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Maps.motions(activate, ...) dict
-    let s:noremaps = g:VM_custom_noremaps
-    let s:remaps   = g:VM_custom_remaps
-
-    if a:activate && !g:VM.motions_enabled
-        let g:VM.motions_enabled = 1
-        for m in (g:VM.motions + g:VM.find_motions)
-            exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".m.")"
-        endfor
-        for m in keys(s:noremaps)
-            exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".s:noremaps[m].")"
-        endfor
-        for m in keys(s:remaps)
-            exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Remap-Motion-".s:remaps[m].")"
-        endfor
-    elseif !a:activate && g:VM.motions_enabled
-        let g:VM.motions_enabled = 0
-        for m in (g:VM.motions + g:VM.find_motions)
-            exe "nunmap <buffer> ".m
-        endfor
-        for m in ( keys(s:noremaps) + keys(s:remaps) )
-            exe "silent! nunmap <buffer> ".m
-        endfor
-    endif
-endfun
-
-fun! s:Maps.motions_toggle() dict
-    let activate = !g:VM.motions_enabled
-    call self.motions(activate)
-    call s:V.Funcs.count_msg(1)
-endfun
-
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -320,4 +366,45 @@ fun! s:Maps.edit_stop() dict
     silent! nunmap <buffer> <C-t>
     silent! nunmap <buffer> <leader>p
     silent! nunmap <buffer> <leader>P
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Maps.default_stop() dict
+    if g:VM_sublime_mappings
+        nunmap <M-C-Down>
+        nunmap <M-C-Up>
+        nunmap <S-Down>
+        nunmap <S-Up>
+        nunmap <S-Right>
+        nunmap <S-Left>
+        nunmap <C-S-Right>
+        nunmap <C-S-Left>
+        nunmap <C-S-Down>
+        nunmap <C-S-Up>
+        nunmap <M-C-Right>
+        nunmap <M-C-Left>
+        nunmap <C-d>
+    endif
+
+    if g:VM_default_mappings
+
+        nunmap gs
+
+        nunmap g<space>
+        nunmap g<cr>
+        nunmap g/
+
+        nunmap <M-A>
+        xunmap <M-A>
+        nunmap <M-j>
+        nunmap <M-k>
+
+        nunmap s]
+        nunmap s[
+        nunmap s}
+        nunmap s{
+        xunmap s]
+        xunmap s[
+    endif
 endfun

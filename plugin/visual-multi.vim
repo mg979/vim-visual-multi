@@ -11,15 +11,15 @@ fun! <SID>VM_Init()
 
     let g:VM = {}
 
-    let g:VM.is_active       = 0
-    let g:VM.extend_mode     = 0
-    let g:VM.selecting       = 0
-    let g:VM.motions_enabled = 0
-    let g:VM.last_ex         = ''
-    let g:VM.last_normal     = ''
-    let g:VM.last_visual     = ''
-    let g:VM.oldupdate       = &updatetime
-    let g:VM.registers       = {'"': []}
+    let g:VM.is_active        = 0
+    let g:VM.extend_mode      = 0
+    let g:VM.selecting        = 0
+    let g:VM.mappings_enabled = 0
+    let g:VM.last_ex          = ''
+    let g:VM.last_normal      = ''
+    let g:VM.last_visual      = ''
+    let g:VM.oldupdate        = &updatetime
+    let g:VM.registers        = {'"': []}
 
     let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
     let g:VM_motions_at_start                 = get(g:, 'VM_motions_at_start', 1)
@@ -50,43 +50,7 @@ fun! <SID>VM_Init()
     "Global mappings
 
     call vm#plugs#init()
-
-    if g:VM_sublime_mappings
-        nmap <silent> <M-C-Down>  <Plug>(VM-Select-Cursor-Down)
-        nmap <silent> <M-C-Up>    <Plug>(VM-Select-Cursor-Up)
-        nmap <silent> <S-Down>    <Plug>(VM-Select-j)
-        nmap <silent> <S-Up>      <Plug>(VM-Select-k)
-        nmap <silent> <S-Right>   <Plug>(VM-Select-l)
-        nmap <silent> <S-Left>    <Plug>(VM-Select-h)
-        nmap <silent> <C-S-Right> <Plug>(VM-Select-w)
-        nmap <silent> <C-S-Left>  <Plug>(VM-Select-b)
-        nmap <silent> <C-S-Down>  <Plug>(VM-Select-Line-Down)
-        nmap <silent> <C-S-Up>    <Plug>(VM-Select-Line-Up)
-        nmap <silent> <M-C-Right> <Plug>(VM-Select-E)
-        nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
-        nmap <silent> <C-d>       <Plug>(VM-Find-I-Word)
-    endif
-
-    if g:VM_default_mappings
-
-        nmap <silent> gs         <Plug>(VM-Select-Operator)
-
-        nmap <silent> g<space>   <Plug>(VM-Add-Cursor-At-Pos)
-        nmap <silent> g<cr>      <Plug>(VM-Add-Cursor-At-Word)
-        nmap <silent> g/         <Plug>(VM-Start-Regex-Search)
-
-        nmap <silent> <M-A>      <Plug>(VM-Select-All)
-        xmap <silent> <M-A>      <Plug>(VM-Select-All)
-        nmap <silent> <M-j>      <Plug>(VM-Add-Cursor-Down)
-        nmap <silent> <M-k>      <Plug>(VM-Add-Cursor-Up)
-
-        nmap <silent> s]         <Plug>(VM-Find-I-Word)
-        nmap <silent> s[         <Plug>(VM-Find-A-Word)
-        nmap <silent> s}         <Plug>(VM-Find-I-Whole-Word)
-        nmap <silent> s{         <Plug>(VM-Find-A-Whole-Word)
-        xmap <silent> s]         <Plug>(VM-Find-A-Subword)
-        xmap <silent> s[         <Plug>(VM-Find-A-Whole-Subword)
-    endif
+    call vm#maps#default()
 endfun
 
 augroup plugin-visual-multi-start

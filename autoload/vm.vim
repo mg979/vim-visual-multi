@@ -59,6 +59,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.block_mode       = 0
     let s:v.vertical_col     = 0
     let s:v.yanked           = 0
+    let s:v.multiline        = 0
 
     let s:V.Search     = vm#search#init()
     let s:V.Global     = vm#global#init()
@@ -66,7 +67,7 @@ fun! vm#init_buffer(empty, ...)
     let s:V.Insert     = vm#insert#init()
     let s:V.Block      = vm#block#init()
 
-    call s:V.Maps.start()
+    call s:V.Maps.mappings(1)
     call vm#region#init()
 
     call vm#augroup(0)
@@ -76,11 +77,11 @@ fun! vm#init_buffer(empty, ...)
     set ww=h,l,<,>
     set lz
 
-    let g:VM.is_active = 1
-    let s:v.multiline = 0
+    nmap     <silent> <nowait> <buffer> <Space>    <Plug>(VM-Toggle-Mappings)
 
     call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.\n", 0)
 
+    let g:VM.is_active = 1
     return s:V
 endfun
 
@@ -96,14 +97,15 @@ fun! vm#reset(...)
     let &ignorecase  = s:v.oldcase[1]
     let &lz          = s:v.oldlz
     call s:V.Funcs.restore_regs()
-    call s:V.Maps.end()
-    call s:V.Maps.motions(0, 1)
+    call s:V.Maps.mappings(0, 1)
     call vm#augroup(1)
     call vm#au_cursor(1)
     let b:VM_Selection = {}
     let g:VM.is_active = 0
     let g:VM.extend_mode = 0
     let s:v.silence = 0
+
+    nunmap <buffer> <Space>
 
     "exiting manually
     if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif

@@ -14,8 +14,6 @@ fun! s:init(whole, cursor, extend_mode)
 
     let s:V       = vm#init_buffer(a:cursor)
 
-    if g:VM_motions_at_start | call s:V.Maps.motions(1) | endif
-
     let s:v       = s:V.Vars
     let s:G       = s:V.Global
     let s:Funcs   = s:V.Funcs
@@ -39,10 +37,10 @@ fun! vm#commands#select_operator(...)
     let ids = map(copy(s:R()), 'v:val.id')
     let c = nr2char(getchar())
     if index(split('webWEB$0^', '\zs'), c) >= 0
-        call s:Edit.run_normal('gs'.c, 1)
+        call s:Edit.run_normal('gs'.c, 1, 0)
     elseif index(['i', 'a'], c) >= 0
         let d = nr2char(getchar())
-        call s:Edit.run_normal('gs'.c.d, 1)
+        call s:Edit.run_normal('gs'.c.d, 1, 0)
         for id in ids
             let r = s:Funcs.region_with_id(id)
             if !empty(r) | call r.remove() | endif

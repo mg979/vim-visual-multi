@@ -209,7 +209,7 @@ fun! s:Edit.replace() dict
         call s:Funcs.msg('Replace char... ', 1)
         let char = nr2char(getchar())
         if char ==? "\<esc>" | call s:Funcs.msg('Canceled.', 1) | return | endif
-        call self.run_normal('r'.char, 0)
+        call self.run_normal('r'.char, 0, 0)
         call s:Funcs.count_msg(1)
     endif
 endfun
@@ -364,7 +364,7 @@ endfun
 " Ex commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_normal(cmd, recursive, ...) dict
+fun! s:Edit.run_normal(cmd, recursive, maps, ...) dict
 
     "-----------------------------------------------------------------------
 
@@ -386,7 +386,7 @@ fun! s:Edit.run_normal(cmd, recursive, ...) dict
     let s:cmd = a:recursive? ("normal ".cmd) : ("normal! ".cmd)
     if s:X() | call s:Global.change_mode(1) | endif
 
-    call s:before_macro()
+    call s:before_macro(a:maps)
     call self._process(s:cmd)
 
     if a:cmd ==# 'X'
@@ -422,7 +422,7 @@ fun! s:Edit.run_visual(cmd, ...) dict
 
     "-----------------------------------------------------------------------
 
-    call s:before_macro()
+    call s:before_macro(a:maps)
     call self.process_visual(cmd)
 
     let g:VM.last_visual = cmd
@@ -451,7 +451,7 @@ fun! s:Edit.run_ex(...) dict
     let g:VM.last_ex = cmd
     if s:X() | call s:Global.change_mode(1) | endif
 
-    call s:before_macro()
+    call s:before_macro(1)
     call self._process(cmd)
     call self.post_process(0)
     call s:after_macro()
@@ -471,7 +471,7 @@ fun! s:Edit.run_macro(replace) dict
         return | endif
 
     let s:cmd = "@".reg
-    call s:before_macro()
+    call s:before_macro(1)
 
     if s:X() | call s:Global.change_mode(1) | endif
 
@@ -585,7 +585,7 @@ endfun
 fun! s:Edit.del_key() dict
     "if !s:min(1) | return | endif
 
-    call s:before_macro()
+    call s:before_macro(0)
     call self._process(0, 'del')
     call self.post_process(0)
     call s:after_macro()
@@ -646,13 +646,11 @@ endfun
 " Misc functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:before_macro()
+fun! s:before_macro(maps)
     let s:v.silence = 1 | let s:v.auto = 1
     let s:old_multiline = s:v.multiline
-    let s:old_motions = g:VM.motions_enabled
     let s:v.multiline = 1
-    call s:V.Maps.end()
-    if g:VM.motions_enabled | call s:V.Maps.motions(0, 1) | endif
+    if a:maps && g:VM.mappings_enabled | call s:V.Maps.mappings(0, 1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -660,9 +658,7 @@ endfun
 fun! s:after_macro()
     let s:v.silence = 0
     let s:v.multiline = s:old_multiline
-
-    call s:V.Maps.start()
-    if s:old_motions | call s:V.Maps.motions(1) | endif
+    call s:V.Maps.mappings(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
