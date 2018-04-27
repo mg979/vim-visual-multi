@@ -33,7 +33,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit._process(cmd, ...) dict
-    let size = s:size() | let change = 0 | let cmd = a:cmd
+    let size = s:size()          | let change = 0 | let cmd = a:cmd
+    let s:storepos = getpos('.') | let s:v.eco = 1
 
     "cursors on empty lines still give problems, remove them
     let fix = map(copy(s:R()), '[len(getline(v:val.l)), v:val.id]')
@@ -64,7 +65,8 @@ fun! s:Edit._process(cmd, ...) dict
 endfun
 
 fun! s:Edit.process_visual(cmd) dict
-    let size = s:size() | let change = 0
+    let size = s:size()          | let change = 0
+    let s:storepos = getpos('.') | let s:v.eco = 1
 
     for r in s:R()
         call r.bytes([change, change])
@@ -90,6 +92,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.post_process(reselect, ...) dict
+    call s:Global.reset_byte_map()
+
     if a:reselect
         if !s:X()      | call s:Global.change_mode(1) |  endif
         for r in s:R()
@@ -108,8 +112,10 @@ fun! s:Edit.post_process(reselect, ...) dict
 
     "clear highlight now to prevent weirdinesses, then update regions
     call clearmatches()
+    call setpos('.', s:storepos)    | let s:v.eco = 0
     call s:Global.update_regions()
-    call s:Global.select_region(-1)
+    call s:Global.select_region_at_pos('.')
+    call s:Funcs.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -120,6 +126,7 @@ fun! s:Edit.delete(X, register, count) dict
     """Delete the selected text and change to cursor mode.
     """Remember the lines that have been added an extra space, for later removal
     if !s:v.direction | call vm#commands#invert_direction() | endif
+    let s:storepos = getpos('.')
 
     if a:X
         let size = s:size() | let change = 0 | let s:extra_spaces = []
@@ -302,9 +309,11 @@ endfun
 " Get motion
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:delchars = { c -> index(split('dwlebWEB$^0', '\zs'), c) >= 0 }
-let s:chgchars = { c -> index(split('cwlebWEB$^0s', '\zs'), c) >= 0 }
-let s:ynkchars = { c -> index(split('welbWEB$^0', '\zs'), c) >= 0 }
+let s:del  = { c -> index(['d'], c) >= 0                     }
+let s:chg  = { c -> index(['s'], c) >= 0                     }
+let s:ynk  = { c -> index([], c) >= 0                        }
+let s:all  = { c -> index(split('webWEB$^0', '\zs'), c) >= 0 }
+let s:find = { c -> index(split('fFtT', '\zs'), c) >= 0      }
 
 fun! s:Edit.get_motion(op, n) dict
 
@@ -312,8 +321,8 @@ fun! s:Edit.get_motion(op, n) dict
     let hl1 = 'WarningMsg' | let hl2 = 'Label'
 
     let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
-                \ a:op==#'c'? [['Change ', hl1], ['([n] c/s/w/e/b/$...) ?  ', hl2]] :
-                \ a:op==#'y'? [['Yank   ', hl1], ['([n] w/e/b/$...) ?  ',   hl2]] : 'Aborted.'
+                \ a:op==#'c'? [['Change ', hl1], ['([n] s/w/e/b/$...) ?  ',   hl2]] :
+                \ a:op==#'y'? [['Yank   ', hl1], ['([n] w/e/b/$...) ?  ',     hl2]] : 'Aborted.'
 
     call s:Funcs.msg(s, 1)
 
@@ -330,9 +339,16 @@ fun! s:Edit.get_motion(op, n) dict
     while 1
         let c = nr2char(getchar())
         if str2nr(c) > 0                     | echon c | let M .= c | let m .= c
-        elseif a:op ==# 'd' && s:delchars(c) | echon c | let M .= c | let m .= c | break
-        elseif a:op ==# 'c' && s:chgchars(c) | echon c | let M .= c | let m .= c | break
-        elseif a:op ==# 'y' && s:ynkchars(c) | echon c | let M .= c | let m .= c | break
+        elseif s:find(c)                     | echon c | let M .= c | let m .= c
+            let c = nr2char(getchar())       | echon c | let M .= c | let m .= c | break
+
+        elseif a:op ==# 'c' && c==#'s'       | echon c | let M .= c | let m .= c
+            let c = nr2char(getchar())       | echon c | let M .= c | let m .= c
+            let c = nr2char(getchar())       | echon c | let M .= c | let m .= c | break
+
+        elseif a:op ==# 'd' && (s:del(c) || s:all(c)) | echon c | let M .= c | let m .= c | break
+        elseif a:op ==# 'c' && (s:chg(c) || s:all(c)) | echon c | let M .= c | let m .= c | break
+        elseif a:op ==# 'y' && (s:ynk(c) || s:all(c)) | echon c | let M .= c | let m .= c | break
 
         else | let M = '' | break | endif
     endwhile
@@ -354,6 +370,7 @@ fun! s:Edit.get_motion(op, n) dict
         call feedkeys(cmd)
 
     elseif a:op ==# 'c'
+        if m[:1] ==# 'cs' | call self.run_normal(m, 1, 0) | return | endif
         let s:cmd = M
         call self.process()
         call s:V.Insert.start('c')
@@ -403,7 +420,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_visual(cmd, ...) dict
+fun! s:Edit.run_visual(cmd, maps, ...) dict
 
     "-----------------------------------------------------------------------
 
@@ -415,10 +432,7 @@ fun! s:Edit.run_visual(cmd, ...) dict
         call s:Funcs.msg('Command not found.', 1) | return
 
     elseif !a:0
-        let cmd = a:cmd
-
-    elseif !empty(a:1)
-        call self.run_visual(a:1[0], a:1[1]) | return | endif
+        let cmd = a:cmd | endif
 
     "-----------------------------------------------------------------------
 
@@ -571,13 +585,17 @@ fun! s:Edit.surround() dict
     if c == '<' | call s:Funcs.msg('Not possible. Use visual command (zv) instead. ', 1)
         return | endif
 
-    call self.run_visual('S'.c)
+    nunmap <buffer> S
+
+    call self.run_visual('S'.c, 0)
     if index(['[', '{', '('], c) >= 0
         call map(s:W, 'v:val + 3')
     else
         call map(s:W, 'v:val + 1')
     endif
     call self.post_process(1, 0)
+
+    nmap <silent> <nowait> <buffer> S <Plug>(VM-Run-Surround)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

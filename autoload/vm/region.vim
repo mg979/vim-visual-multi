@@ -149,7 +149,7 @@ fun! s:Region.bytes(...) dict
     let r.a = r.A - line2byte(r.l)
     let r.L = byte2line(r.B)
     let r.b = r.B - line2byte(r.L)
-    call r.update()
+    "call r.update()
     return [r.l, r.L, r.a, r.b]
 endfun
 
