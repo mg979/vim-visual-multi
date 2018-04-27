@@ -354,12 +354,17 @@ fun! s:Global.merge_cursors()
         if !c | call s:Funcs.region_with_id(cursors_ids[i]).remove() | endif
         let i += 1
     endfor
+    call self.update_regions()
+    let R = self.select_region_at_pos('.')
+    call s:Funcs.count_msg(1, ["\n", 'None'])
+    return R
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.merge_regions(...) dict
     ""Merge overlapping regions."""
+    if !s:X() | call self.merge_cursors() | return | endif
 
     let storepos = getpos('.')    | let s:v.eco = 1
     let A = self.A                | let B = self.B+1

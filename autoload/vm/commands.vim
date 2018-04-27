@@ -466,7 +466,6 @@ fun! vm#commands#merge_to_beol(eol, this)
     if s:X() | call s:G.change_mode(1) | endif
     call s:call_motion(a:this)
     call s:G.merge_cursors()
-    call s:Funcs.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
