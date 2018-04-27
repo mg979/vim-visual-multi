@@ -195,15 +195,15 @@ fun! s:Edit.replace() dict
 
         let s:W = s:store_widths() | let s:v.new_text = []
 
-        for i in s:W
+        for i in range(len(s:W))
             let r = ''
-            while len(r) < i | let r .= char | endwhile
+            while len(r) < s:W[i] | let r .= char | endwhile
+            let s:W[i] -= 1
             call add(s:v.new_text, r)
         endfor
 
         call self.delete(1, "_", 1)
         call self.block_paste(1)
-        for r in s:R() | call r.bytes([0,-1]) | endfor
         call self.post_process(1, 0)
     else
         call s:Funcs.msg('Replace char... ', 1)

@@ -349,11 +349,15 @@ fun! s:Global.merge_cursors()
     let cursors_pos = map(cursors_pos, 'count(cursors_pos, v:val) == 1')
     let cursors_ids = map(copy(s:R()), 'v:val.id')
 
-    let i = 0
+    let storepos = getpos('.') | let s:v.eco = 1 | let i = 0
+
     for c in cursors_pos
         if !c | call s:Funcs.region_with_id(cursors_ids[i]).remove() | endif
         let i += 1
     endfor
+
+    call setpos('.', storepos)
+    let s:v.eco = 0
     call self.update_regions()
     let R = self.select_region_at_pos('.')
     call s:Funcs.count_msg(1, ["\n", 'None'])
