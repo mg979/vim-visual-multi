@@ -88,7 +88,11 @@ fun! s:skip_shorter_lines(where)
     "   col      = 1
     "   endline  = 1
     "and the line would be skipped. 'Push' endline, so that the cursor is added
-    let endline = (col('$') > 1)? col('$') : 2
+    if g:VM_skip_empty_lines
+        let endline = col('$')
+    else
+        let endline = (col('$') > 1)? col('$') : 2
+    endif
 
     "when adding cursors below or above, don't add on shorter lines
     if ( col < vcol || col == endline )
@@ -132,15 +136,19 @@ fun! vm#commands#expand_line(down)
 
     let R = s:G.is_region_at_pos('.')
     if empty(R)
-        call vm#region#new(0, line('.'), line('.'), 1, (col('$')>1? col('$')-1 : 1))
+        let eol = col('$') | let ln = line('.')
+        let l = eol>1? ln : a:down? ln   : ln-1
+        let L = eol>1? ln : a:down? ln+1 : ln
+        call vm#region#new(0, l, L, 1, col([L, '$'])-1)
+        if !a:down | call vm#commands#invert_direction() | endif
     elseif a:down
         call vm#commands#motion('j', 1, 1, 1)
         let b = len(getline(R.L))
-        call R.update_region(R.l, R.L, 1, (b? b : b+1))
+        call R.update_region(R.l, R.L, 1, (b? b : 1))
     elseif !a:down
         call vm#commands#motion('k', 1, 1, 1)
         let b = len(getline(R.L))
-        call R.update_region(R.l, R.L, 1, (b? b : b+1))
+        call R.update_region(R.l, R.L, 1, (b? b : 1))
     endif
     call s:G.select_region_at_pos('.')
     call s:G.update_highlight()
@@ -220,7 +228,7 @@ fun! vm#commands#find_under(visual, whole, inclusive)
 
     if s:is_r()
         if !selecting | return s:check_overlap(vm#commands#find_next(0, 0))
-        else          | call s:Global.is_region_at_pos('.').remove() | endif | endif
+        else          | call s:G.is_region_at_pos('.').remove() | endif | endif
 
     " yank and create region
     if !a:visual | call s:yank(a:inclusive) | endif
@@ -342,7 +350,7 @@ fun! vm#commands#find_prev(skip, nav)
     if s:X() && !a:nav && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
 
     call s:Search.validate()
-    
+
     let r = s:G.is_region_at_pos('.')
     if empty(r)  | let r = s:G.select_region(s:v.index) | endif
     if !empty(r) | let pos = [r.l, r.a]

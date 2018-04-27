@@ -110,7 +110,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-I-Insert)           :<C-u>call b:VM_Selection.Insert.key('I')<cr>
     nnoremap        <Plug>(VM-Edit-o-New-Line)         :<C-u>call b:VM_Selection.Insert.key('o')<cr>
     nnoremap        <Plug>(VM-Edit-O-New-Line)         :<C-u>call b:VM_Selection.Insert.key('O')<cr>
-    nnoremap        <Plug>(VM-Edit-Delete)             :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, 1, v:count1)<cr>
+    nnoremap        <Plug>(VM-Edit-Delete)             :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, v:register, v:count1)<cr>
     nnoremap        <Plug>(VM-Edit-Change)             :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1)<cr>
     nnoremap        <Plug>(VM-Edit-Replace)            :<C-u>call b:VM_Selection.Edit.replace()<cr>
     nnoremap        <Plug>(VM-Edit-p-Paste)            :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 1, g:VM.extend_mode)<cr>

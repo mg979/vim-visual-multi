@@ -149,6 +149,7 @@ fun! s:Region.bytes(...) dict
     let r.a = r.A - line2byte(r.l)
     let r.L = byte2line(r.B)
     let r.b = r.B - line2byte(r.L)
+    call r.update()
     return [r.l, r.L, r.a, r.b]
 endfun
 
@@ -301,6 +302,13 @@ endfun
 " Update functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Region.update() dict
+    if s:X() | call self.update_region()
+    else     | call self.update_cursor() | endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Region.update_cursor(...) dict
     """Update cursor vars from position [line, col] or offset."""
     let r = self
@@ -352,7 +360,7 @@ fun! s:Region.update_vars() dict
         let r.k   = r.a              | let r.K = r.A
         let r.w   = 1                | let r.h = 0
         let r.pat = s:pattern(r)     | let r.txt = ''
-        
+
         "--------- extend mode ----------------------------
 
     else
@@ -461,13 +469,15 @@ endfun
 fun! s:fix_pos(r)
     "fix positions in empty lines or endline
     let r = a:r
-    let nl = col([r.l, '$']) - 1
-    let nL = col([r.L, '$']) - 1
+    let eol = col([r.l, '$']) - 1
+    let eoL = col([r.L, '$']) - 1
 
-    if !r.a             | let r.a = 1          | endif
-    if !r.b             | let r.b = 1          | endif
-    if r.a > nl         | let r.a = nl? nl : 1 | endif
-    if r.b > nL         | let r.b = nL? nL : 1 | endif
+    if !r.a             | let r.a = 1            | endif
+    if !r.b             | let r.b = 1            | endif
+    if !s:v.multiline
+        if r.a > eol    | let r.a = eol? eol : 1 | endif
+        if r.b > eoL    | let r.b = eoL? eoL : 1 | endif
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

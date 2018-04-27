@@ -116,7 +116,7 @@ endfun
 " Delete
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.delete(X, keep, count) dict
+fun! s:Edit.delete(X, register, count) dict
     """Delete the selected text and change to cursor mode.
     """Remember the lines that have been added an extra space, for later removal
     if !s:v.direction | call vm#commands#invert_direction() | endif
@@ -126,23 +126,30 @@ fun! s:Edit.delete(X, keep, count) dict
         for r in s:R()
             call r.bytes([change, change])
             call cursor(r.l, r.a)
+            normal! m[
+            call cursor(r.L, r.b>1? r.b+1 : 1)
+            normal! m]
+
             let L = getline(r.L)
             if r.b == len(L)
                 call setline(r.L, L.' ')
                 call add(s:extra_spaces, r.L)
             endif
-            if a:keep && v:register != "_"
-                let s:v.use_register = v:register
+
+            if a:register != "_"
+                let s:v.use_register = a:register
                 call self.yank(1, 1, 1)
             endif
-            let reg = a:keep? '' : "\"_"
-            exe "normal! ".reg."d".r.w."l"
+            exe "normal! `[d`]"
 
             "update changed size
             let change = s:size() - size
         endfor
+
         call s:Global.change_mode(1)
-        if a:keep | call self.post_process(0) | endif
+
+        if a:register != "_" | call self.post_process(0)
+        else                 | call s:Funcs.restore_reg() | endif
 
     elseif a:count
         "ask for motion
@@ -158,7 +165,7 @@ fun! s:Edit.change(X, count) dict
     if !s:v.direction | call vm#commands#invert_direction() | endif
     if a:X
         "delete existing region contents and leave the cursors
-        call self.delete(1, 0, 1)
+        call self.delete(1, "_", 1)
         call s:V.Insert.start('c')
     else
         call self.get_motion('c', a:count)
@@ -194,7 +201,7 @@ fun! s:Edit.replace() dict
             call add(s:v.new_text, r)
         endfor
 
-        call self.delete(1, 0, 1)
+        call self.delete(1, "_", 1)
         call self.block_paste(1)
         for r in s:R() | call r.bytes([0,-1]) | endfor
         call self.post_process(1, 0)
@@ -214,7 +221,7 @@ endfun
 fun! s:Edit.paste(before, block, reselect) dict
     let reg = v:register | let X = s:X()
 
-    if X | call self.delete(1, 0, 1) | endif
+    if X | call self.delete(1, "_", 1) | endif
 
     if !a:block || !has_key(g:VM.registers, reg) || empty(g:VM.registers[reg])
         let s:v.new_text = s:default_text()
@@ -528,12 +535,12 @@ fun! s:Edit.numbers(start, app) dict
     let n = len(x)
 
     "invalid expressions
-    if ( n == 3 && !l:N(x[1]) ) || 
-      \( n == 4 && (!l:N(x[1]) || !l:N(x[2])) ) || 
+    if ( n == 3 && !l:N(x[1]) ) ||
+      \( n == 4 && (!l:N(x[1]) || !l:N(x[2])) ) ||
       \( n > 4 )
         call l:Invalid() | return | endif
 
-    "                                         start    stop     step   separ.   append? 
+    "                                         start    stop     step   separ.   append?
     if     n == 1        | call self._numbers(S,     S-1+x[0],   1,     '',     a:app)
 
     elseif n == 2
@@ -629,7 +636,7 @@ fun! s:Edit.shift(dir) dict
     if a:dir
         call self.paste(0, 1, 1)
     else
-        call self.delete(1, 0, 0)
+        call self.delete(1, "_", 0)
         call vm#commands#motion('h', 1, 0, 0)
         call self.paste(1, 1, 1)
     endif

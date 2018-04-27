@@ -33,6 +33,7 @@ fun! <SID>VM_Init()
     let g:VM_invert_paste_behaviour           = get(g:, 'VM_invert_paste_behaviour', 0)
     let g:VM_keep_collapsed_while_moving_back = get(g:, 'VM_keep_collapsed_while_moving_back', 1)
     let g:VM_live_editing                     = get(g:, 'VM_live_editing', 0)
+    let g:VM_skip_empty_lines                 = get(g:, 'VM_skip_empty_lines', 1)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Set up highlighting
