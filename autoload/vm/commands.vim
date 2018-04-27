@@ -104,8 +104,11 @@ fun! vm#commands#add_cursor_at_pos(where, extend, ...)
 
     call s:check_extend_default(a:extend)
 
-    if a:where | let s:v.vertical_col = col('.')
-    else       | call s:Block.stop() | endif
+    if a:where
+        if (!s:v.vertical_col || (col('.') > 1 && s:v.vertical_col > 1))
+            let s:v.vertical_col = col('.') | endif
+
+    else | call s:Block.stop() | endif
 
     "add one cursor at pos, if not adding vertically from callback function
     if !a:0 | call s:G.new_cursor() | endif
