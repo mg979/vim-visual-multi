@@ -22,6 +22,7 @@ fun! <SID>VM_Init()
     let g:VM.registers        = {'"': []}
 
     let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
+    let g:VM_s_mappings                       = get(g:, 'VM_s_mappings', 0)
     let g:VM_motions_at_start                 = get(g:, 'VM_motions_at_start', 1)
     let g:VM_cursors_skip_shorter_lines       = get(g:, 'VM_cursors_skip_shorter_lines', 1)
 

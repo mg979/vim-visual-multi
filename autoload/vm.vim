@@ -77,6 +77,7 @@ fun! vm#init_buffer(empty, ...)
     set ww=h,l,<,>
     set lz
 
+    nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
     nmap     <silent> <nowait> <buffer> <Space>    <Plug>(VM-Toggle-Mappings)
 
     call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.\n", 0)
@@ -98,6 +99,7 @@ fun! vm#reset(...)
     let &lz          = s:v.oldlz
     call s:V.Funcs.restore_regs()
     call s:V.Maps.mappings(0, 1)
+    call vm#maps#default()
     call vm#augroup(1)
     call vm#au_cursor(1)
     let b:VM_Selection = {}
@@ -106,6 +108,7 @@ fun! vm#reset(...)
     let s:v.silence = 0
 
     nunmap <buffer> <Space>
+    nunmap <buffer> <esc>
 
     "exiting manually
     if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif

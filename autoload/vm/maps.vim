@@ -40,7 +40,9 @@ fun! vm#maps#default()
         xmap <silent> <M-A>      <Plug>(VM-Select-All)
         nmap <silent> <M-j>      <Plug>(VM-Add-Cursor-Down)
         nmap <silent> <M-k>      <Plug>(VM-Add-Cursor-Up)
+    endif
 
+    if g:VM_s_mappings
         nmap <silent> s]         <Plug>(VM-Find-I-Word)
         nmap <silent> s[         <Plug>(VM-Find-A-Word)
         nmap <silent> s}         <Plug>(VM-Find-I-Whole-Word)
@@ -81,7 +83,7 @@ fun! s:Maps.mappings(activate, ...) dict
     if a:activate && !g:VM.mappings_enabled
         let g:VM.mappings_enabled = 1
         call self.start()
-        call self.default_stop()
+        call vm#maps#default()
         for m in (g:VM.motions + g:VM.find_motions)
             exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".m.")"
         endfor
@@ -93,7 +95,7 @@ fun! s:Maps.mappings(activate, ...) dict
         endfor
     elseif !a:activate && g:VM.mappings_enabled
         call self.end()
-        call vm#maps#default()
+        call self.default_stop()
         let g:VM.mappings_enabled = 0
         for m in (g:VM.motions + g:VM.find_motions)
             exe "nunmap <buffer> ".m
@@ -125,7 +127,6 @@ fun! s:Maps.start() dict
     nmap              <nowait> <buffer> ?          <Plug>(VM-?)
 
     "basic mappings
-    nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
     nmap     <silent> <nowait> <buffer> <Tab>      <Plug>(VM-Switch-Mode)
     nmap     <silent> <nowait> <buffer> <M-BS>     <Plug>(VM-Erase-Regions)
     nmap     <silent> <nowait> <buffer> <BS>       <Plug>(VM-Toggle-Block)
@@ -143,6 +144,16 @@ fun! s:Maps.start() dict
     nnoremap <silent> <nowait> <buffer> N          N
 
     "movement / selection
+
+    if !g:VM_s_mappings
+        nmap     <silent> <nowait> <buffer> s]         <Plug>(VM-Find-I-Word)
+        nmap     <silent> <nowait> <buffer> s[         <Plug>(VM-Find-A-Word)
+        nmap     <silent> <nowait> <buffer> s}         <Plug>(VM-Find-I-Whole-Word)
+        nmap     <silent> <nowait> <buffer> s{         <Plug>(VM-Find-A-Whole-Word)
+        xmap     <silent> <nowait> <buffer> s]         <Plug>(VM-Find-A-Subword)
+        xmap     <silent> <nowait> <buffer> s[         <Plug>(VM-Find-A-Whole-Subword)
+    endif
+
     nmap     <silent> <nowait> <buffer> ]          <Plug>(VM-Find-Next)
     nmap     <silent> <nowait> <buffer> [          <Plug>(VM-Find-Prev)
     nmap     <silent> <nowait> <buffer> }          <Plug>(VM-Goto-Next)
@@ -288,8 +299,16 @@ fun! s:Maps.end() dict
 
     nunmap <buffer> s
 
+    if !g:VM_s_mappings
+        nunmap <buffer> s]
+        nunmap <buffer> s[
+        nunmap <buffer> s}
+        nunmap <buffer> s{
+        xunmap <buffer> s]
+        xunmap <buffer> s[
+    endif
+
     nunmap <buffer> <Tab>
-    nunmap <buffer> <esc>
     nunmap <buffer> <BS>
     nunmap <buffer> <CR>
 
@@ -399,6 +418,9 @@ fun! s:Maps.default_stop() dict
         xunmap <M-A>
         nunmap <M-j>
         nunmap <M-k>
+    endif
+
+    if g:VM_s_mappings
 
         nunmap s]
         nunmap s[
