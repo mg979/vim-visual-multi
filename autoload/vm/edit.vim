@@ -32,7 +32,7 @@ endfun
 " Region processing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit._process(cmd, ...)
+fun! s:Edit._process(cmd, ...) dict
     let size = s:size() | let change = 0 | let cmd = a:cmd
 
     "cursors on empty lines still give problems, remove them
@@ -63,7 +63,7 @@ fun! s:Edit._process(cmd, ...)
     let self.skip_index = -1
 endfun
 
-fun! s:Edit.process_visual(cmd)
+fun! s:Edit.process_visual(cmd) dict
     let size = s:size() | let change = 0
 
     for r in s:R()

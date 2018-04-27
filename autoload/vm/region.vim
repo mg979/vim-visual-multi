@@ -124,7 +124,7 @@ fun! s:Region.new(cursor, ...)
 
     call add(s:v.IDs_list, R.id)
     call R.highlight()
-    if s:X() | let s:V.Bytes[R.A:R.B] = map(s:V.Bytes[R.A:R.B], 'v:val+1') | endif
+    call s:update_bytes_map(R)
 
     return R
 endfun
@@ -192,8 +192,6 @@ let s:vertical  = { -> index(['j', 'k'],                                    s:mo
 
 fun! s:Region.move(motion) dict
     let s:motion = a:motion
-
-    if s:X() | let s:V.Bytes[self.A:self.B] = map(s:V.Bytes[self.A:self.B], 'v:val-1') | endif
 
     "set vertical column if motion is j or k
     if s:vertical() && !s:v.vertical_col | let s:v.vertical_col = col('.')
@@ -363,7 +361,7 @@ fun! s:Region.update_vars() dict
         let r.k   = r.dir? r.a : r.b | let r.K   = r.dir? r.A : r.B
         let r.pat = s:pattern(r)     | let r.txt = getreg(s:v.def_reg)
 
-        let s:V.Bytes[r.A:r.B] = map(s:V.Bytes[r.A:r.B], 'v:val+1')
+        call s:update_bytes_map(r)
     endif
 endfun
 
@@ -446,6 +444,16 @@ fun! s:pattern(r)
 
     "return current pattern if one is present (in cursor mode text is empty)
     return empty(a:r.pat)? '' : a:r.pat
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:update_bytes_map(r)
+    if !s:X() | return | endif | let r = a:r
+
+    let s:V.Bytes[r.A:r.B] = map(s:V.Bytes[r.A:r.B], 'v:val+1')
+    if r.A < s:Global.A | let s:Global.A = r.A | endif
+    if r.B > s:Global.B | let s:Global.B = r.B | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -17,6 +17,8 @@ fun! vm#global#init()
     let s:R       = { -> s:V.Regions      }
     let s:B       = { -> s:v.block_mode && g:VM.extend_mode }
 
+    "make a bytes map of the file, where 0 is unselected, 1 is selected
+    call s:Global.reset_byte_map()
     return s:Global
 endfun
 
@@ -146,8 +148,7 @@ endfun
 fun! s:Global.collapse_regions() dict
     """Collapse regions to cursors and turn off extend mode."""
 
-    "reset the bytes map
-    let s:V.Bytes = map(range(line2byte(line('$') + 1)), 0)
+    call self.reset_byte_map()
 
     for r in s:R() | call r.update_cursor([r.l, (r.dir? r.a : r.b)]) | endfor
     let g:VM.extend_mode = 0
@@ -199,6 +200,14 @@ fun! s:Global.overlapping_regions(R) dict
     """Check if two regions are overlapping."""
     let B = s:V.Bytes[a:R.A:a:R.B]
     for b in B | if b > 1 | return 1 | endif | endfor
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.reset_byte_map() dict
+    let self.A = line2byte(line('$') + 1) + 1
+    let self.B = 0
+    let s:V.Bytes = map(range(self.A), 0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -352,14 +361,15 @@ endfun
 fun! s:Global.merge_regions(...) dict
     ""Merge overlapping regions."""
 
-    let storepos = getpos('.') | let s:v.eco = 1
-    let B = copy(s:V.Bytes)    | let a = 0
+    let storepos = getpos('.')    | let s:v.eco = 1
+    let A = self.A                | let B = self.B+1
+    let By = copy(s:V.Bytes[A:B]) | let a = 0
 
     call self.erase_regions()
 
-    for i in range(len(B))
-        if B[i] && !a     | let a = i
-        elseif a && !B[i] | call vm#region#new(0, a, i-1) | let a = 0 | endif
+    for i in range(len(By))
+        if By[i] && !a     | let a = i+A
+        elseif a && !By[i] | call vm#region#new(0, a, i+A-1) | let a = 0 | endif
     endfor
 
     call setpos('.', storepos)

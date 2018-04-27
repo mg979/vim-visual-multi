@@ -532,7 +532,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#move(...)
-    if !s:v.moving || s:no_regions() | return | endif | let s:v.moving -= 1
+    if !s:v.moving || s:no_regions() | return | endif
+    let s:v.moving -= 1 | call s:G.reset_byte_map()
     let R = s:R()[ s:v.index ]
 
     if s:X() | call s:before_move() | endif
