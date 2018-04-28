@@ -10,18 +10,12 @@ fun! vm#insert#init()
     let s:V       = b:VM_Selection
 
     let s:v       = s:V.Vars
+    let s:G       = s:V.Global
 
-    let s:Global  = s:V.Global
-    let s:Funcs   = s:V.Funcs
-    let s:Search  = s:V.Search
-
-    let s:R       = {      -> s:V.Regions              }
-    let s:X       = {      -> g:VM.extend_mode         }
-    let s:size    = {      -> line2byte(line('$') + 1) }
-    let s:Byte    = { pos  -> s:Funcs.pos2byte(pos)    }
-    let s:Pos     = { byte -> s:Funcs.byte2pos(byte)   }
-    let s:append  = { m    -> index(['a', 'A'], m) >= 0  }
-    let s:newline = { m    -> index(['o', 'O'], m) >= 0  }
+    let s:R       = {      -> s:V.Regions               }
+    let s:X       = {      -> g:VM.extend_mode          }
+    let s:Byte    = { pos  -> s:V.Funcs.pos2byte(pos)   }
+    let s:append  = { m    -> index(['a', 'A'], m) >= 0 }
 
     return s:Insert
 endfun
@@ -45,27 +39,8 @@ fun! s:Cursor.new(byte) dict
     let C       = copy(self)
     let C.index = len(s:Insert.cursors)
     let C.A     = a:byte
-    let C.txt   = ''
-
-    if g:VM_live_editing
-        let C.hl    = matchaddpos('MultiCursor', [s:Pos(a:byte)], 40)
-    endif
 
     return C
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Cursor.update(byte, txt) dict
-    "Update cursors positions and highlight.
-    call matchdelete(self.hl)
-
-    let self.A   = a:byte
-    let self.txt = a:txt
-
-    if g:VM_live_editing
-        let self.hl  = matchaddpos('MultiCursor', [s:Pos(a:byte)], 40)
-    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -93,20 +68,21 @@ fun! s:Insert.key(type) dict
     elseif a:type ==# 'a'
         if s:X()
             if s:v.direction | call vm#commands#invert_direction() | endif
-            call s:Global.change_mode(1) | endif
+            call s:G.change_mode(1) | endif
         call self.start('a')
 
     else
         if s:X()
             if !s:v.direction | call vm#commands#invert_direction() | endif
-            call s:Global.change_mode(1) | endif
+            call s:G.change_mode(1) | endif
         call self.start('i')
     endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.start(mode, ...) dict
+fun! s:Insert.start(mode) dict
+    if g:VM_live_editing | call s:V.Live.start(a:mode) | return | endif
     "--------------------------------------------------------------------------
 
     "Initialize Insert Mode dict. 'begin' is the initial offset, and will be
@@ -114,7 +90,7 @@ fun! s:Insert.start(mode, ...) dict
 
     "--------------------------------------------------------------------------
 
-    let r              = s:Global.select_region(-1)
+    let r              = s:G.select_region(-1)
     let self.index     = r.index
     let self.begin     = s:Byte('.')
     let self.is_active = 1
@@ -124,64 +100,18 @@ fun! s:Insert.start(mode, ...) dict
         "remove the regular cursor highlight, add new cursor
         let A = s:append(a:mode)? r.A+1 : r.A
         call add(self.cursors, s:Cursor.new(A))
-        if g:VM_live_editing || r.index == self.index
-            call r.remove_highlight() | endif | endfor
+        if r.index == self.index | call r.remove_highlight() | endif
+    endfor
 
     "start tracking text changes
     call self.auto_start()
 
     inoremap <silent> <buffer> <esc>   <esc>:call b:VM_Selection.Insert.stop(-1)<cr>
-    "inoremap <buffer> <space> <esc>:call b:VM_Selection.Insert.stop(b:VM_Selection.Insert.mode)<cr>
-    call s:Global.update_cursor_highlight()
+    call s:G.update_cursor_highlight()
 
     "start insert mode and break the undo point
     let keys = (a:mode=='c'? 'i': a:mode)."\<c-g>u"
-    if a:0 | let keys .= "\<space>" | endif
     call feedkeys(keys, 'n')
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:get_inserted_text(a, b)
-    "Yank between the offsets and return the yanked text
-
-    let pos = s:Pos(a:a)
-    call cursor(pos[0], pos[1])
-    normal! `[
-    let pos = s:Pos(a:b)
-    call cursor(pos[0], pos[1]+1)
-    normal! `]`[y`]`]
-    return getreg(s:v.def_reg)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Live insert mode
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Insert.live_insert() dict
-    "TextChangedI
-    call feedkeys("\<esc>", 'n')
-    let current = s:Byte('.') + 1
-    let begin = self.begin
-
-    "if current < s:Insert.begin | let s:Insert.begin = current | endif
-
-    let size = s:size()
-    let change = current - begin
-    let text = s:get_inserted_text(begin, current)
-
-    "update cursors
-    for c in self.cursors
-        call c.update(c.A + change, text)
-    endfor
-
-    "update main cursor
-    let self.begin = current
-
-    call s:Global.update_cursor_highlight()
-    let pos = s:Pos(current)
-    call cursor(pos[0], pos[1]+1)
-    call feedkeys("i", 'n')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -192,18 +122,24 @@ fun! s:Insert.stop(mode) dict
     call self.auto_end() | let s:v.eco = 1
 
     let dot = @.
-    let dot = substitute(dot, ".\<BS>", '', 'g')
+    let n = 0
+
+    "replace backspaces
+    while 1
+        if match(dot, "\<BS>") > 0
+            let dot = substitute(dot, "\<BS>", '', '')
+            let n += 1
+        else | break | endif | endwhile
+
+    let Len = len(dot) - n
 
     let i = 0
     for r in s:R()
         let s = s:append(self.mode)? 0 : 1
-        if g:VM_live_editing
-            let A = self.cursors[i].A
-            call r.bytes(A, A)
-        elseif r.A == self.begin
-            call r.bytes([len(s:R())*len(dot) - s, 0])
+        if r.A == self.begin
+            call r.bytes([len(s:R())*Len - s, 0])
         else
-            call r.bytes([len(dot) - s, 0])
+            call r.bytes([Len - s, 0])
         endif
         let i += 1
     endfor
@@ -211,6 +147,7 @@ fun! s:Insert.stop(mode) dict
     let self.mode = ''
 
     let self.is_active = 0
+    let s:v.storepos = getpos('.')
     call s:V.Edit.post_process(0,0)
     if a:mode != -1 | call self.start(a:mode, 1) | return | endif
 endfun
@@ -222,11 +159,7 @@ endfun
 fun! s:Insert.auto_start() dict
     augroup plugin-vm-insert
         au!
-        if g:VM_live_editing
-            au TextChangedI * silent call b:VM_Selection.Insert.live_insert()
-        else
-            au InsertLeave * silent call b:VM_Selection.Edit.apply_change()
-        endif
+        au InsertLeave * silent call b:VM_Selection.Edit.apply_change()
     augroup END
 endfun
 

@@ -65,6 +65,7 @@ fun! vm#init_buffer(empty, ...)
     let s:V.Global     = vm#global#init()
     let s:V.Edit       = vm#edit#init()
     let s:V.Insert     = vm#insert#init()
+    let s:V.Live       = vm#live#init()
     let s:V.Block      = vm#block#init()
 
     call s:V.Maps.mappings(1)

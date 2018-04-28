@@ -24,6 +24,7 @@ fun! vm#edit#init()
     let s:v.new_text     = ''
     let s:extra_spaces   = []
     let s:W              = []
+    let s:v.storepos     = getpos('.')
 
     return s:Edit
 endfun
@@ -34,7 +35,7 @@ endfun
 
 fun! s:Edit._process(cmd, ...) dict
     let size = s:size()          | let change = 0 | let cmd = a:cmd
-    let s:storepos = getpos('.') | let s:v.eco = 1
+    let s:v.storepos = getpos('.') | let s:v.eco = 1
 
     "cursors on empty lines still give problems, remove them
     let fix = map(copy(s:R()), '[len(getline(v:val.l)), v:val.id]')
@@ -66,7 +67,7 @@ endfun
 
 fun! s:Edit.process_visual(cmd) dict
     let size = s:size()          | let change = 0
-    let s:storepos = getpos('.') | let s:v.eco = 1
+    let s:v.storepos = getpos('.') | let s:v.eco = 1
 
     for r in s:R()
         call r.bytes([change, change])
@@ -112,7 +113,7 @@ fun! s:Edit.post_process(reselect, ...) dict
 
     "clear highlight now to prevent weirdinesses, then update regions
     call clearmatches()
-    call setpos('.', s:storepos)    | let s:v.eco = 0
+    call setpos('.', s:v.storepos)    | let s:v.eco = 0
     call s:Global.update_regions()
     call s:Global.select_region_at_pos('.')
     call s:Funcs.count_msg(1)
@@ -126,7 +127,7 @@ fun! s:Edit.delete(X, register, count) dict
     """Delete the selected text and change to cursor mode.
     """Remember the lines that have been added an extra space, for later removal
     if !s:v.direction | call vm#commands#invert_direction() | endif
-    let s:storepos = getpos('.')
+    let s:v.storepos = getpos('.')
 
     if a:X
         let size = s:size() | let change = 0 | let s:extra_spaces = []
