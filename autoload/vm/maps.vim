@@ -235,6 +235,33 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Maps.edit_start() dict
+    nmap <silent> <nowait> <buffer> i               <Plug>(VM-Edit-i-Insert)
+    nmap <silent> <nowait> <buffer> I               <Plug>(VM-Edit-I-Insert)
+    nmap <silent> <nowait> <buffer> a               <Plug>(VM-Edit-a-Append)
+    nmap <silent> <nowait> <buffer> A               <Plug>(VM-Edit-A-Append)
+    nmap <silent> <nowait> <buffer> O               <Plug>(VM-Edit-o-New-Line)
+    nmap <silent> <nowait> <buffer> <M-o>           <Plug>(VM-Edit-O-New-Line)
+    nmap <silent> <nowait> <buffer> x               <Plug>(VM-Edit-x)
+    nmap <silent> <nowait> <buffer> X               <Plug>(VM-Edit-X)
+    nmap <silent> <nowait> <buffer> J               <Plug>(VM-Edit-J)
+    nmap <silent> <nowait> <buffer> <del>           <Plug>(VM-Edit-Del)
+    nmap <silent> <nowait> <buffer> r               <Plug>(VM-Edit-Replace)
+    nmap <silent> <nowait> <buffer> c               <Plug>(VM-Edit-Change)
+    nmap <silent> <nowait> <buffer> d               <Plug>(VM-Edit-Delete)
+    nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
+    nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
+    nmap <silent> <nowait> <buffer> <C-t>           <Plug>(VM-Edit-Transpose)
+    nmap <silent> <nowait> <buffer> <M-d>           <Plug>(VM-Edit-Duplicate)
+
+    nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-p-Paste-Regions)
+    nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-P-Paste-Regions)
+    nmap <silent> <nowait> <buffer> <leader>p       <Plug>(VM-Edit-p-Paste-Normal)
+    nmap <silent> <nowait> <buffer> <leader>P       <Plug>(VM-Edit-P-Paste-Normal)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:arrows()
     nmap     <silent> <nowait> <buffer> <M-C-Down>  <Plug>(VM-Select-Cursor-Down)
     nmap     <silent> <nowait> <buffer> <M-C-Up>    <Plug>(VM-Select-Cursor-Up)
@@ -354,33 +381,6 @@ fun! s:arrows_end()
     nunmap <buffer> <M-C-Left>
     nunmap <buffer> <M-S-Right>
     nunmap <buffer> <M-S-Left>
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Maps.edit_start() dict
-    nmap <silent> <nowait> <buffer> i               <Plug>(VM-Edit-i-Insert)
-    nmap <silent> <nowait> <buffer> I               <Plug>(VM-Edit-I-Insert)
-    nmap <silent> <nowait> <buffer> a               <Plug>(VM-Edit-a-Append)
-    nmap <silent> <nowait> <buffer> A               <Plug>(VM-Edit-A-Append)
-    nmap <silent> <nowait> <buffer> O               <Plug>(VM-Edit-o-New-Line)
-    nmap <silent> <nowait> <buffer> <M-o>           <Plug>(VM-Edit-O-New-Line)
-    nmap <silent> <nowait> <buffer> x               <Plug>(VM-Edit-x)
-    nmap <silent> <nowait> <buffer> X               <Plug>(VM-Edit-X)
-    nmap <silent> <nowait> <buffer> J               <Plug>(VM-Edit-J)
-    nmap <silent> <nowait> <buffer> <del>           <Plug>(VM-Edit-Del)
-    nmap <silent> <nowait> <buffer> r               <Plug>(VM-Edit-Replace)
-    nmap <silent> <nowait> <buffer> c               <Plug>(VM-Edit-Change)
-    nmap <silent> <nowait> <buffer> d               <Plug>(VM-Edit-Delete)
-    nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
-    nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
-    nmap <silent> <nowait> <buffer> <C-t>           <Plug>(VM-Edit-Transpose)
-    nmap <silent> <nowait> <buffer> <M-d>           <Plug>(VM-Edit-Duplicate)
-
-    nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-p-Paste)
-    nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-P-Paste)
-    nmap <silent> <nowait> <buffer> <leader>p       <Plug>(VM-Edit-p-Paste-Block)
-    nmap <silent> <nowait> <buffer> <leader>P       <Plug>(VM-Edit-P-Paste-Block)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

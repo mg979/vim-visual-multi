@@ -21,20 +21,16 @@ fun! <SID>VM_Init()
     let g:VM.oldupdate        = &updatetime
     let g:VM.registers        = {'"': []}
 
+    let g:VM_live_editing                     = get(g:, 'VM_live_editing', 1)
     let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
-    let g:VM_permanent_mappings               = get(g:, 'VM_permanent_mappings', 0)
+    let g:VM_sublime_mappings                 = get(g:, 'VM_sublime_mappings', 1)
+    let g:VM_permanent_mappings               = get(g:, 'VM_permanent_mappings', 1)
     let g:VM_s_mappings                       = get(g:, 'VM_s_mappings', 0)
-    let g:VM_motions_at_start                 = get(g:, 'VM_motions_at_start', 1)
-    let g:VM_cursors_skip_shorter_lines       = get(g:, 'VM_cursors_skip_shorter_lines', 1)
+    let g:VM_custom_mappings                  = get(g:, 'VM_custom_mappings', 0)
 
     let g:VM_custom_noremaps                  = get(g:, 'VM_custom_noremaps', {})
     let g:VM_custom_remaps                    = get(g:, 'VM_custom_remaps', {})
     let g:VM_extend_by_default                = get(g:, 'VM_extend_by_default', 0)
-    let g:VM_sublime_mappings                 = get(g:, 'VM_sublime_mappings', 1)
-    let g:VM_custom_mappings                  = get(g:, 'VM_custom_mappings', 0)
-    let g:VM_invert_paste_behaviour           = get(g:, 'VM_invert_paste_behaviour', 0)
-    let g:VM_keep_collapsed_while_moving_back = get(g:, 'VM_keep_collapsed_while_moving_back', 1)
-    let g:VM_live_editing                     = get(g:, 'VM_live_editing', 1)
     let g:VM_skip_empty_lines                 = get(g:, 'VM_skip_empty_lines', 0)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

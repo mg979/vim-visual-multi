@@ -238,13 +238,13 @@ endfun
 " Paste
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.paste(before, block, reselect) dict
+fun! s:Edit.paste(before, regions, reselect) dict
     let reg = v:register | let X = s:X()
 
     if X | call self.delete(1, "_", 1) | endif
 
-    if !a:block || !has_key(g:VM.registers, reg) || empty(g:VM.registers[reg])
-        let s:v.new_text = s:default_text()
+    if !a:regions || !has_key(g:VM.registers, reg) || empty(g:VM.registers[reg])
+        let s:v.new_text = s:default_text(a:regions)
     else
         let s:v.new_text = g:VM.registers[reg]
     endif
@@ -717,12 +717,12 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:default_text()
+fun! s:default_text(regions)
     "fill the content to past with the default register
     let text = []
     let block = char2nr(getregtype(s:v.def_reg)[0]) == 22
 
-    if block
+    if block && a:regions
         "default register is of block type, assign a line to each region
         let width = getregtype(s:v.def_reg)[1:]
         let reg = split(getreg(s:v.def_reg), "\n")
