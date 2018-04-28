@@ -12,6 +12,24 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#maps#default()
+
+    if g:VM_s_mappings
+        nmap <silent> s]         <Plug>(VM-Find-I-Word)
+        nmap <silent> s[         <Plug>(VM-Find-A-Word)
+        nmap <silent> s}         <Plug>(VM-Find-I-Whole-Word)
+        nmap <silent> s{         <Plug>(VM-Find-A-Whole-Word)
+        xmap <silent> s]         <Plug>(VM-Find-A-Subword)
+        xmap <silent> s[         <Plug>(VM-Find-A-Whole-Subword)
+    endif
+
+    if !g:VM_permanent_mappings
+        call vm#maps#permanent()
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#maps#permanent()
     if g:VM_sublime_mappings
         nmap <silent> <M-C-Down>  <Plug>(VM-Select-Cursor-Down)
         nmap <silent> <M-C-Up>    <Plug>(VM-Select-Cursor-Up)
@@ -41,15 +59,6 @@ fun! vm#maps#default()
         nmap <silent> <M-j>      <Plug>(VM-Add-Cursor-Down)
         nmap <silent> <M-k>      <Plug>(VM-Add-Cursor-Up)
     endif
-
-    if g:VM_s_mappings
-        nmap <silent> s]         <Plug>(VM-Find-I-Word)
-        nmap <silent> s[         <Plug>(VM-Find-A-Word)
-        nmap <silent> s}         <Plug>(VM-Find-I-Whole-Word)
-        nmap <silent> s{         <Plug>(VM-Find-A-Whole-Word)
-        xmap <silent> s]         <Plug>(VM-Find-A-Subword)
-        xmap <silent> s[         <Plug>(VM-Find-A-Whole-Subword)
-    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -61,7 +70,7 @@ let s:simple   = split('nNqQU*#o[]{}?/:uMS', '\zs')
 let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qQvVnN@.', '\zs'), '"z".v:val')
 let s:ctr_maps = ['h', 'l', 'w', 'c' ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
-let s:alt_maps = ['j', 'k', ']', 'q', 'BS', 'm' ]
+let s:alt_maps = ['j', 'k', ']', 'q', 'BS', 'm', 'd' ]
 let s:leader   = []
 let s:leader2  = []
 let s:fkeys    = ['1', '2']
@@ -366,6 +375,7 @@ fun! s:Maps.edit_start() dict
     nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
     nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
     nmap <silent> <nowait> <buffer> <C-t>           <Plug>(VM-Edit-Transpose)
+    nmap <silent> <nowait> <buffer> <M-d>           <Plug>(VM-Edit-Duplicate)
 
     nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-p-Paste)
     nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-P-Paste)
@@ -390,6 +400,19 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Maps.default_stop() dict
+
+    if g:VM_s_mappings
+
+        nunmap s]
+        nunmap s[
+        nunmap s}
+        nunmap s{
+        xunmap s]
+        xunmap s[
+    endif
+
+    if g:VM_permanent_mappings | return | endif
+
     if g:VM_sublime_mappings
         nunmap <M-C-Down>
         nunmap <M-C-Up>
@@ -418,15 +441,5 @@ fun! s:Maps.default_stop() dict
         xunmap <M-A>
         nunmap <M-j>
         nunmap <M-k>
-    endif
-
-    if g:VM_s_mappings
-
-        nunmap s]
-        nunmap s[
-        nunmap s}
-        nunmap s{
-        xunmap s]
-        xunmap s[
     endif
 endfun

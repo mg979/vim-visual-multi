@@ -22,6 +22,7 @@ fun! <SID>VM_Init()
     let g:VM.registers        = {'"': []}
 
     let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
+    let g:VM_permanent_mappings               = get(g:, 'VM_permanent_mappings', 0)
     let g:VM_s_mappings                       = get(g:, 'VM_s_mappings', 0)
     let g:VM_motions_at_start                 = get(g:, 'VM_motions_at_start', 1)
     let g:VM_cursors_skip_shorter_lines       = get(g:, 'VM_cursors_skip_shorter_lines', 1)
@@ -33,8 +34,8 @@ fun! <SID>VM_Init()
     let g:VM_custom_mappings                  = get(g:, 'VM_custom_mappings', 0)
     let g:VM_invert_paste_behaviour           = get(g:, 'VM_invert_paste_behaviour', 0)
     let g:VM_keep_collapsed_while_moving_back = get(g:, 'VM_keep_collapsed_while_moving_back', 1)
-    let g:VM_live_editing                     = get(g:, 'VM_live_editing', 0)
-    let g:VM_skip_empty_lines                 = get(g:, 'VM_skip_empty_lines', 1)
+    let g:VM_live_editing                     = get(g:, 'VM_live_editing', 1)
+    let g:VM_skip_empty_lines                 = get(g:, 'VM_skip_empty_lines', 0)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Set up highlighting
@@ -52,6 +53,9 @@ fun! <SID>VM_Init()
 
     call vm#plugs#init()
     call vm#maps#default()
+    if g:VM_permanent_mappings
+        call vm#maps#permanent()
+    endif
 endfun
 
 augroup plugin-visual-multi-start

@@ -138,16 +138,15 @@ fun! vm#commands#expand_line(down)
         let eol = col('$') | let ln = line('.')
         let l = eol>1? ln : a:down? ln   : ln-1
         let L = eol>1? ln : a:down? ln+1 : ln
-        call vm#region#new(0, l, L, 1, col([L, '$'])-1)
+        call vm#region#new(0, l, L, 1, col([L, '$']))
         if !a:down | call vm#commands#invert_direction() | endif
     elseif a:down
         call vm#commands#motion('j', 1, 1, 1)
-        let b = len(getline(R.L))
-        call R.update_region(R.l, R.L, 1, (b? b : 1))
+        call R.update_region(R.l, R.L, 1, col([R.L, '$']))
     elseif !a:down
         call vm#commands#motion('k', 1, 1, 1)
         let b = len(getline(R.L))
-        call R.update_region(R.l, R.L, 1, (b? b : 1))
+        call R.update_region(R.l, R.L, 1, col([R.L, '$']))
     endif
     call s:G.select_region_at_pos('.')
     call s:G.update_highlight()

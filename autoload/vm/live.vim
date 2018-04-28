@@ -56,6 +56,11 @@ fun! s:Live.start(mode) dict
         let C = s:Cursor.new(A, r.l, s:append(a:mode)? r.a+1 : r.a)
         call add(I.cursors, C)
 
+        if r.b == col([r.L, '$'])
+            call setline(r.L, ' ')
+            call add(s:v.extra_spaces, r.L)
+        endif
+
         if !has_key(I.lines, r.l)
             let I.lines[r.l] = s:Line.new(r.l, C)
             let first_a = C.a
@@ -208,9 +213,12 @@ fun! s:Line.update(change, text) dict
     let change = 0
     let text = self.txt
     for c in self.cursors
-        let t1   = text[:c.a-2+change]
-        let t2   = text[c.a-1+change:]
+        let a = c.a>1? c.a-2 : c.a-1
+        let b = c.a-1
+        let t1   = text[:a+change]
+        let t2   = text[b+change:]
         let text = t1 . a:text . t2
+        if c.a==1 | let text = text[1:] | endif
         "echom t1 "|||" t2 "///" text
         let change += a:change
         call c.update(self.l, c.a+change)

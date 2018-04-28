@@ -9,20 +9,20 @@ fun! vm#edit#init()
 
     let s:v       = s:V.Vars
 
-    let s:Global  = s:V.Global
-    let s:Funcs   = s:V.Funcs
+    let s:G       = s:V.Global
+    let s:F       = s:V.Funcs
     let s:Search  = s:V.Search
 
-    let s:R         = {      -> s:V.Regions                            }
-    let s:X         = {      -> g:VM.extend_mode                       }
-    let s:size      = {      -> line2byte(line('$') + 1)               }
-    let s:Byte      = { pos  -> s:Funcs.pos2byte(pos)                  }
-    let s:Pos       = { byte -> s:Funcs.byte2pos(byte)                 }
-    let s:Is_Region = {      -> !empty(s:Global.is_region_at_pos('.')) }
+    let s:R         = {      -> s:V.Regions                       }
+    let s:X         = {      -> g:VM.extend_mode                  }
+    let s:size      = {      -> line2byte(line('$') + 1)          }
+    let s:Byte      = { pos  -> s:F.pos2byte(pos)                 }
+    let s:Pos       = { byte -> s:F.byte2pos(byte)                }
+    let s:Is_Region = {      -> !empty(s:G.is_region_at_pos('.')) }
 
     let s:v.use_register = s:v.def_reg
     let s:v.new_text     = ''
-    let s:extra_spaces   = []
+    let s:v.extra_spaces = []
     let s:W              = []
     let s:v.storepos     = getpos('.')
 
@@ -41,7 +41,7 @@ fun! s:Edit._process(cmd, ...) dict
     let fix = map(copy(s:R()), '[len(getline(v:val.l)), v:val.id]')
     for r in fix
         if !r[0]
-            call s:Funcs.region_with_id(r[1]).remove()
+            call s:F.region_with_id(r[1]).remove()
         endif
     endfor
 
@@ -93,30 +93,30 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.post_process(reselect, ...) dict
-    call s:Global.reset_byte_map()
+    call s:G.reset_byte_map()
 
     if a:reselect
-        if !s:X()      | call s:Global.change_mode(1) |  endif
+        if !s:X()      | call s:G.change_mode(1) |  endif
         for r in s:R()
             call r.bytes([a:1, a:1 + s:W[r.index]])
         endfor
     endif
 
     "remove extra spaces that may have been added
-    for line in s:extra_spaces
+    for line in s:v.extra_spaces
         let l = getline(line)
         if l[-1:] ==# ' ' | call setline(line, l[:-2]) | endif
     endfor
 
     let s:v.auto = 0
-    let s:extra_spaces = []
+    let s:v.extra_spaces = []
 
     "clear highlight now to prevent weirdinesses, then update regions
     call clearmatches()
     call setpos('.', s:v.storepos)    | let s:v.eco = 0
-    call s:Global.update_regions()
-    call s:Global.select_region_at_pos('.')
-    call s:Funcs.count_msg(1)
+    call s:G.update_regions()
+    call s:G.select_region_at_pos('.')
+    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -130,7 +130,7 @@ fun! s:Edit.delete(X, register, count) dict
     let s:v.storepos = getpos('.')
 
     if a:X
-        let size = s:size() | let change = 0 | let s:extra_spaces = []
+        let size = s:size() | let change = 0 | let s:v.extra_spaces = []
         for r in s:R()
             call r.bytes([change, change])
             call cursor(r.l, r.a)
@@ -141,7 +141,7 @@ fun! s:Edit.delete(X, register, count) dict
             let L = getline(r.L)
             if r.b == len(L)
                 call setline(r.L, L.' ')
-                call add(s:extra_spaces, r.L)
+                call add(s:v.extra_spaces, r.L)
             endif
 
             if a:register != "_"
@@ -154,15 +154,27 @@ fun! s:Edit.delete(X, register, count) dict
             let change = s:size() - size
         endfor
 
-        call s:Global.change_mode(1)
+        call s:G.change_mode(1)
 
         if a:register != "_" | call self.post_process(0)
-        else                 | call s:Funcs.restore_reg() | endif
+        else                 | call s:F.restore_reg() | endif
 
     elseif a:count
         "ask for motion
         call self.get_motion('d', a:count)
     endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Duplicate
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.duplicate() dict
+    if !s:X() | return | endif
+
+    call self.yank(0, 1, 1)
+    call s:G.change_mode(1)
+    call self.paste(1, 1, 1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -214,11 +226,11 @@ fun! s:Edit.replace() dict
         call self.block_paste(1)
         call self.post_process(1, 0)
     else
-        call s:Funcs.msg('Replace char... ', 1)
+        call s:F.msg('Replace char... ', 1)
         let char = nr2char(getchar())
-        if char ==? "\<esc>" | call s:Funcs.msg('Canceled.', 1) | return | endif
+        if char ==? "\<esc>" | call s:F.msg('Canceled.', 1) | return | endif
         call self.run_normal('r'.char, 0, 0)
-        call s:Funcs.count_msg(1)
+        call s:F.count_msg(1)
     endif
 endfun
 
@@ -252,7 +264,7 @@ fun! s:Edit.block_paste(before) dict
             call r.bytes([change, change])
             call cursor(r.l, r.a)
             let s = remove(text, 0)
-            call s:Funcs.set_reg(s)
+            call s:F.set_reg(s)
 
             if a:before | normal! P
             else        | normal! p
@@ -262,7 +274,7 @@ fun! s:Edit.block_paste(before) dict
             let change = s:size() - size
         else | break | endif
     endfor
-    call s:Funcs.restore_reg()
+    call s:F.restore_reg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -271,7 +283,7 @@ endfun
 
 fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     if !s:X()         | call self.get_motion('y', v:count)          | return | endif
-    if !s:min(1)      | call s:Funcs.msg('No regions selected.', 0) | return | endif
+    if !s:min(1)      | call s:F.msg('No regions selected.', 0) | return | endif
 
     let register = (s:v.use_register != s:v.def_reg)? s:v.use_register :
                 \  a:def_reg?                         s:v.def_reg : v:register
@@ -281,6 +293,10 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     for r in s:R()
         if len(r.txt) > maxw | let maxw = len(r.txt) | endif
         call add(text, r.txt)
+        "add last newline in multiline
+        if s:v.multiline && r.b == col([r.L, '$'])
+            let text[-1] = text[-1]."\n"
+        endif
     endfor
 
     "write custom and vim registers
@@ -289,7 +305,7 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     call setreg(register, join(text, "\n"), type)
 
     "restore default register if a different register was provided
-    if register !=# s:v.def_reg | call s:Funcs.restore_reg() | endif
+    if register !=# s:v.def_reg | call s:F.restore_reg() | endif
 
     "reset temp register
     let s:v.use_register = s:v.def_reg
@@ -301,8 +317,8 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
         call setreg(register, join(text, "\n"), type) | endif
 
     if !a:silent
-        call s:Funcs.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
-    if a:0 | call s:Global.change_mode(1) | endif
+        call s:F.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
+    if a:0 | call s:G.change_mode(1) | endif
 endfun
 
 
@@ -325,7 +341,7 @@ fun! s:Edit.get_motion(op, n) dict
                 \ a:op==#'c'? [['Change ', hl1], ['([n] s/w/e/b/$...) ?  ',   hl2]] :
                 \ a:op==#'y'? [['Yank   ', hl1], ['([n] w/e/b/$...) ?  ',     hl2]] : 'Aborted.'
 
-    call s:Funcs.msg(s, 1)
+    call s:F.msg(s, 1)
 
     if index(['y', 'd'], a:op) >= 0
         let m = (a:n>1? a:n : '').( reg == s:v.def_reg? '' : '"'.reg ).a:op
@@ -366,7 +382,7 @@ fun! s:Edit.get_motion(op, n) dict
         let g:VM.registers[reg] = s:deleted_text
 
     elseif a:op ==# 'y'
-        call s:Global.change_mode(1)
+        call s:G.change_mode(1)
         let cmd = substitute(M, "^.*y", "", "")."\"".reg.'y'
         call feedkeys(cmd)
 
@@ -388,10 +404,10 @@ fun! s:Edit.run_normal(cmd, recursive, maps, ...) dict
 
     if !a:0 && a:cmd == -1
         let cmd = input('Normal command? ')
-        if empty(cmd) | call s:Funcs.msg('Command aborted.', 1) | return | endif
+        if empty(cmd) | call s:F.msg('Command aborted.', 1) | return | endif
 
     elseif empty(a:cmd)
-        call s:Funcs.msg('Command not found.', 1) | return
+        call s:F.msg('Command not found.', 1) | return
 
     elseif !a:0
         let cmd = a:cmd
@@ -402,7 +418,7 @@ fun! s:Edit.run_normal(cmd, recursive, maps, ...) dict
     "-----------------------------------------------------------------------
 
     let s:cmd = a:recursive? ("normal ".cmd) : ("normal! ".cmd)
-    if s:X() | call s:Global.change_mode(1) | endif
+    if s:X() | call s:G.change_mode(1) | endif
 
     call s:before_macro(a:maps)
     call self._process(s:cmd)
@@ -427,10 +443,10 @@ fun! s:Edit.run_visual(cmd, maps, ...) dict
 
     if !a:0 && a:cmd == -1
         let cmd = input('Visual command? ')
-        if empty(cmd) | call s:Funcs.msg('Command aborted.', 1) | return | endif
+        if empty(cmd) | call s:F.msg('Command aborted.', 1) | return | endif
 
     elseif empty(a:cmd)
-        call s:Funcs.msg('Command not found.', 1) | return
+        call s:F.msg('Command not found.', 1) | return
 
     elseif !a:0
         let cmd = a:cmd | endif
@@ -443,7 +459,7 @@ fun! s:Edit.run_visual(cmd, maps, ...) dict
     let g:VM.last_visual = cmd
     call self.post_process(0)
     call s:after_macro()
-    if s:X() | call s:Global.change_mode(1) | endif
+    if s:X() | call s:G.change_mode(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -454,17 +470,17 @@ fun! s:Edit.run_ex(...) dict
 
     if !a:0
         let cmd = input('Ex command? ', '', 'command')
-        if empty(cmd) | call s:Funcs.msg('Command aborted.', 1) | return | endif
+        if empty(cmd) | call s:F.msg('Command aborted.', 1) | return | endif
 
     elseif !empty(a:1)
         let cmd = a:1
     else
-        call s:Funcs.msg('Command not found.', 1) | return | endif
+        call s:F.msg('Command not found.', 1) | return | endif
 
     "-----------------------------------------------------------------------
 
     let g:VM.last_ex = cmd
-    if s:X() | call s:Global.change_mode(1) | endif
+    if s:X() | call s:G.change_mode(1) | endif
 
     call s:before_macro(1)
     call self._process(cmd)
@@ -479,16 +495,16 @@ endfun
 fun! s:Edit.run_macro(replace) dict
     if s:count(v:count) | return | endif
 
-    call s:Funcs.msg('Macro register? ', 1)
+    call s:F.msg('Macro register? ', 1)
     let reg = nr2char(getchar())
     if reg == "\<esc>"
-        call s:Funcs.msg('Macro aborted.', 0)
+        call s:F.msg('Macro aborted.', 0)
         return | endif
 
     let s:cmd = "@".reg
     call s:before_macro(1)
 
-    if s:X() | call s:Global.change_mode(1) | endif
+    if s:X() | call s:G.change_mode(1) | endif
 
     call self.process()
     call self.post_process(0)
@@ -532,7 +548,7 @@ endfun
 fun! s:Edit.numbers(start, app) dict
     let text = []
 
-    let l:Invalid = { -> s:Funcs.msg('Invalid expression', 1) }
+    let l:Invalid = { -> s:F.msg('Invalid expression', 1) }
     let l:N =       { x -> match(x, '\D')? 1 : 0 }
 
     let S = a:start
@@ -583,7 +599,7 @@ fun! s:Edit.surround() dict
     let c = nr2char(getchar())
 
     "not possible
-    if c == '<' | call s:Funcs.msg('Not possible. Use visual command (zv) instead. ', 1)
+    if c == '<' | call s:F.msg('Not possible. Use visual command (zv) instead. ', 1)
         return | endif
 
     nunmap <buffer> S
@@ -614,7 +630,7 @@ endfun
 
 fun! s:Edit.transpose() dict
     if !s:min(2)                                 | return         | endif
-    let rlines = s:Global.lines_with_regions(0)  | let inline = 1 | let l = 0
+    let rlines = s:G.lines_with_regions(0)  | let inline = 1 | let l = 0
 
     "check if there is the same nr of regions in each line
     if len(keys(rlines)) == 1 | let inline = 0
@@ -686,7 +702,7 @@ fun! s:count(c)
     "forbid count
     if a:c > 1
         if !g:VM.is_active | return 1 | endif
-        call s:Funcs.msg('Count not allowed.', 0)
+        call s:F.msg('Count not allowed.', 0)
         call vm#reset()
         return 1
     endif
