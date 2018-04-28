@@ -36,7 +36,7 @@ fun! s:Funcs.pos2byte(...) dict
     "pos can be a string, a list or a (line, col) couple, or the offset itself
 
     if a:0 > 1                          "a (line, col) couple
-        return line2byte(a:1) + a:2
+        return (line2byte(a:1) + a:2)
 
     elseif type(a:1) == v:t_number      "an offset
         return a:1
@@ -59,6 +59,20 @@ fun! s:Funcs.byte2pos(byte) dict
     let lnbyte = line2byte(line)
     let col    = line + ( a:byte - lnbyte )
     return [line, col]
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.Cursor(A) dict
+    let ln = byte2line(a:A) | let cl = a:A - line2byte(ln)
+    call cursor(ln, cl)
+    return [ln, cl]
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.no_regions() dict
+    if s:v.index == -1 | call self.msg('No selected regions.', 0) | return 1 | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

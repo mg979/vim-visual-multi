@@ -16,7 +16,7 @@ fun! s:init(whole, cursor, extend_mode)
 
     let s:v       = s:V.Vars
     let s:G       = s:V.Global
-    let s:Funcs   = s:V.Funcs
+    let s:F       = s:V.Funcs
     let s:Search  = s:V.Search
     let s:Edit    = s:V.Edit
     let s:Block   = s:V.Block
@@ -42,7 +42,7 @@ fun! vm#commands#select_operator(...)
         let d = nr2char(getchar())
         call s:Edit.run_normal('gs'.c.d, 1, 0)
         for id in ids
-            let r = s:Funcs.region_with_id(id)
+            let r = s:F.region_with_id(id)
             if !empty(r) | call r.remove() | endif
         endfor
     endif
@@ -71,8 +71,8 @@ fun! vm#commands#add_cursor_at_word(yank, search)
     if a:search | call s:Search.add() | endif
 
     let R = s:G.new_cursor() | let R.pat = s:v.search[0]
-    call s:Funcs.restore_reg()
-    call s:Funcs.count_msg(1)
+    call s:F.restore_reg()
+    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -102,7 +102,8 @@ endfun
 
 fun! vm#commands#add_cursor_at_pos(where, extend, ...)
     "stop at first and last line if adding cursors vertically
-    if a:where && ( line('.') == 1 || line('.') == line('$') ) | return | endif
+    if     a:where == 2 && line('.') == 1         | return
+    elseif a:where == 1 && line('.') == line('$') | return | endif
 
     call s:check_extend_default(a:extend)
 
@@ -123,14 +124,14 @@ fun! vm#commands#add_cursor_at_pos(where, extend, ...)
         if s:skip_shorter_lines(a:where) | return | endif
     endif
 
-    call s:Funcs.count_msg(1)
+    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#expand_line(down)
     call s:check_extend_default(1)
-    if !s:v.multiline | call s:Funcs.toggle_option('multiline', 1) | endif
+    if !s:v.multiline | call s:F.toggle_option('multiline', 1) | endif
 
     let R = s:G.is_region_at_pos('.')
     if empty(R)
@@ -150,7 +151,7 @@ fun! vm#commands#expand_line(down)
     endif
     call s:G.select_region_at_pos('.')
     call s:G.update_highlight()
-    call s:Funcs.count_msg(1)
+    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -168,7 +169,7 @@ endfun
 
 fun! vm#commands#regex_abort()
     let @/ = s:regex_reg
-    call s:Funcs.msg('Regex search aborted. ', 0) | call s:Funcs.count_msg(1)
+    call s:F.msg('Regex search aborted. ', 0) | call s:F.count_msg(1)
     call setpos('.', s:regex_pos)
     call vm#commands#regex_reset()
 endfun
@@ -181,7 +182,7 @@ fun! vm#commands#regex_done()
     silent keepjumps normal! gny`]
     call s:Search.get_slash_reg()
 
-    if s:X()      | call s:G.get_region() | call s:Funcs.count_msg(0)
+    if s:X()      | call s:G.get_region() | call s:F.count_msg(0)
     else          | call vm#commands#add_cursor_at_word(0, 0)
     endif
 endfun
@@ -203,7 +204,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find under commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" NOTE: don't call s:Funcs.count_msg() after merging regions, or it will be
+" NOTE: don't call s:F.count_msg() after merging regions, or it will be
 " called twice.
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -241,8 +242,8 @@ fun! vm#commands#find_under(visual, whole, inclusive)
         call s:Search.add()
     endif
     let R = s:G.get_region()
-    if R.h && !s:v.multiline | call s:Funcs.toggle_option('multiline', 1) | endif
-    call s:Funcs.count_msg(1)
+    if R.h && !s:v.multiline | call s:F.toggle_option('multiline', 1) | endif
+    call s:F.count_msg(1)
     return s:check_overlap(R)
 endfun
 
@@ -270,8 +271,8 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     call s:G.reorder_regions()
     call s:G.update_highlight()
     call s:G.select_region_at_pos('.')
-    call s:Funcs.restore_reg()
-    call s:Funcs.count_msg(1)
+    call s:F.restore_reg()
+    call s:F.count_msg(1)
 endfun
 
 
@@ -283,7 +284,7 @@ fun! s:get_next(n)
     if s:X()
         silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
         let R = s:G.get_region()
-        call s:Funcs.count_msg(1)
+        call s:F.count_msg(1)
     else
         silent exe "keepjumps normal! ".a:n."g".a:n."y`["
         let R = vm#commands#add_cursor_at_word(0, 0)
@@ -294,14 +295,14 @@ endfun
 
 fun! s:navigate(force, dir)
     if a:force && s:v.nav_direction != a:dir
-        call s:Funcs.msg('Reversed direction.', 1)
+        call s:F.msg('Reversed direction.', 1)
         let s:v.nav_direction = a:dir
         return 1
     elseif a:force || @/==''
         let i = a:dir? s:v.index+1 : s:v.index-1
         call s:G.select_region(i)
         "redraw!
-        call s:Funcs.count_msg(1)
+        call s:F.count_msg(1)
         return 1
     endif
 endfun
@@ -313,14 +314,10 @@ fun! s:skip()
     endif
 endfun
 
-fun! s:no_regions()
-    if s:v.index == -1 | call s:Funcs.msg('No selected regions.', 0) | return 1 | endif
-endfun
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav)
-    if ( a:nav || a:skip ) && s:no_regions()                            | return | endif
+    if ( a:nav || a:skip ) && s:F.no_regions()                          | return | endif
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
 
     "write search pattern if not navigating and no search set
@@ -341,7 +338,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(skip, nav)
-    if ( a:nav || a:skip ) && s:no_regions()                            | return | endif
+    if ( a:nav || a:skip ) && s:F.no_regions()                          | return | endif
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
 
     "write search pattern if not navigating and no search set
@@ -368,7 +365,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#skip(just_remove)
-    if s:no_regions() | return | endif
+    if s:F.no_regions() | return | endif
 
     if a:just_remove
         let r = s:G.is_region_at_pos('.')
@@ -426,11 +423,11 @@ fun! vm#commands#motion(motion, count, select, this)
 
     "-----------------------------------------------------------------------
 
-    if s:no_regions() | return | endif
+    if s:F.no_regions() | return | endif
 
     if a:select && !s:X()  | let g:VM.extend_mode = 1 | endif
     if a:select && !s:v.multiline && s:vertical()
-        call s:Funcs.toggle_option('multiline', 1) | endif
+        call s:F.toggle_option('multiline', 1) | endif
 
     call s:V.Block.horizontal(1)
     call s:call_motion(a:this)
@@ -440,7 +437,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#remap_motion(motion)
-    if s:no_regions() | return | endif
+    if s:F.no_regions() | return | endif
     let s:motion = a:motion
     call s:call_motion(a:this)
 endfun
@@ -448,9 +445,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#end_back(fast, this, ...)
-    if s:sublime()    | call s:init(0, 1, 1)     | call s:G.new_cursor() | endif
-    if s:no_regions() | return                   | endif
-    if a:0 && !s:X()  | let g:VM.extend_mode = 1 | endif
+    if s:sublime()      | call s:init(0, 1, 1)     | call s:G.new_cursor() | endif
+    if s:F.no_regions() | return                   | endif
+    if a:0 && !s:X()    | let g:VM.extend_mode = 1 | endif
 
     let s:motion = a:fast? 'BBW' : 'bbbe'
     call s:call_motion(a:this)
@@ -459,9 +456,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#merge_to_beol(eol, this)
-    if s:no_regions() | return | endif
+    if s:F.no_regions() | return                  | endif
+    if s:X()            | call s:G.change_mode(1) | endif
+
     let s:motion = a:eol? "\<End>" : '0'
-    if s:X() | call s:G.change_mode(1) | endif
     call s:call_motion(a:this)
     call s:G.merge_cursors()
 endfun
@@ -469,7 +467,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_motion(motion, char, this, ...)
-    if s:no_regions() | return | endif | let merge = 0
+    if s:F.no_regions() | return | endif | let merge = 0
 
     if index(['$', '0', '^', '%'], a:motion) >= 0
         let s:motion = a:motion | let merge = 1
@@ -502,8 +500,8 @@ endfun
 
 fun! vm#commands#shrink_or_enlarge(shrink, this)
     """Reduce/enlarge selection size by 1."""
-    if s:no_regions() | return                  | endif
-    if !s:X()         | call s:G.change_mode(1) | endif
+    if s:F.no_regions() | return                  | endif
+    if !s:X()           | call s:G.change_mode(1) | endif
 
     let dir = s:v.direction
 
@@ -540,7 +538,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#move(...)
-    if !s:v.moving || s:no_regions() | return | endif
+    if !s:v.moving || s:F.no_regions() | return | endif
     let s:v.moving -= 1 | call s:G.reset_byte_map()
     let R = s:R()[ s:v.index ]
 
@@ -558,7 +556,7 @@ fun! vm#commands#move(...)
     call s:G.update_highlight()
     call s:G.select_region(R.index)
 
-    call s:Funcs.count_msg(0)
+    call s:F.count_msg(0)
     let s:v.silence = 1
 endfun
 
@@ -579,7 +577,7 @@ fun! s:after_move()
     if s:always_from_back()
         call vm#commands#invert_direction()
     endif
-    call s:Funcs.restore_reg()
+    call s:F.restore_reg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

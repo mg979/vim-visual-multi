@@ -177,6 +177,8 @@ fun! s:Global.select_region_at_pos(pos) dict
     let r = self.is_region_at_pos(a:pos)
     if !empty(r)
         return self.select_region(r.index)
+    else
+        return self.select_region(s:v.index)
     endif
 endfun
 

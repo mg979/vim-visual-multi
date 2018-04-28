@@ -12,17 +12,17 @@ fun! vm#live#init()
     let s:v       = s:V.Vars
 
     let s:Global  = s:V.Global
-    let s:Funcs   = s:V.Funcs
+    let s:F       = s:V.Funcs
     let s:Search  = s:V.Search
 
-    let s:R       = {      -> s:V.Regions              }
-    let s:X       = {      -> g:VM.extend_mode         }
-    let s:size    = {      -> line2byte(line('$') + 1) }
-    let s:Byte    = { pos  -> s:Funcs.pos2byte(pos)    }
-    let s:Pos     = { byte -> s:Funcs.byte2pos(byte)   }
-    let s:Cur     = { byte -> s:Funcs.Cursor(byte)     }
-    let s:append  = { m    -> index(['a', 'A'], m) >= 0  }
-    let s:newline = { m    -> index(['o', 'O'], m) >= 0  }
+    let s:R       = {      -> s:V.Regions               }
+    let s:X       = {      -> g:VM.extend_mode          }
+    let s:size    = {      -> line2byte(line('$') + 1)  }
+    let s:Byte    = { pos  -> s:F.pos2byte(pos)         }
+    let s:Pos     = { byte -> s:F.byte2pos(byte)        }
+    let s:Cur     = { byte -> s:F.Cursor(byte)          }
+    let s:append  = { m    -> index(['a', 'A'], m) >= 0 }
+    let s:newline = { m    -> index(['o', 'O'], m) >= 0 }
 
     return s:Live
 endfun

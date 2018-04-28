@@ -11,10 +11,11 @@ fun! vm#insert#init()
 
     let s:v       = s:V.Vars
     let s:G       = s:V.Global
+    let s:F       = s:V.Funcs
 
     let s:R       = {      -> s:V.Regions               }
     let s:X       = {      -> g:VM.extend_mode          }
-    let s:Byte    = { pos  -> s:V.Funcs.pos2byte(pos)   }
+    let s:Byte    = { pos  -> s:F.pos2byte(pos)         }
     let s:append  = { m    -> index(['a', 'A'], m) >= 0 }
 
     return s:Insert
@@ -82,6 +83,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.start(mode) dict
+    if s:F.no_regions()  | return | endif
     if g:VM_live_editing | call s:V.Live.start(a:mode) | return | endif
     "--------------------------------------------------------------------------
 
