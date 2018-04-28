@@ -59,7 +59,6 @@ fun! vm#init_buffer(empty, ...)
     let s:v.block_mode       = 0
     let s:v.vertical_col     = 0
     let s:v.yanked           = 0
-    let s:v.multiline        = 0
 
     let s:V.Search     = vm#search#init()
     let s:V.Global     = vm#global#init()

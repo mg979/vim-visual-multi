@@ -48,11 +48,13 @@ fun! s:Edit._process(cmd, ...) dict
     for r in s:R()
         if !s:v.auto && r.index == self.skip_index | continue | endif
 
-        call r.bytes([change, change])
-        call cursor(r.l, r.a)
-
         "execute command, but also take special cases into account
-        if a:0 && s:special(cmd, r, a:000) | else | exe cmd | endif
+        if a:0 && s:special(cmd, r, a:000)
+        else
+            call r.bytes([change, change])
+            call cursor(r.l, r.a)
+            exe cmd
+        endif
 
         "update changed size
         let change = s:size() - size
@@ -628,6 +630,16 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Edit.select_op(cmd) dict
+
+    call s:before_macro(0)
+    call self._process('normal '.a:cmd, 'gs')
+    call self.post_process(0)
+    call s:after_macro()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Edit.transpose() dict
     if !s:min(2)                                 | return         | endif
     let rlines = s:G.lines_with_regions(0)  | let inline = 1 | let l = 0
@@ -749,13 +761,22 @@ fun! s:special(cmd, r, args)
 
     if a:args[0] ==#'del'
         "<del> key deletes \n if executed at eol
+        call a:r.bytes([change, change])
+        call cursor(a:r.l, a:r.a)
         if a:r.a == col([a:r.l, '$']) - 1 | normal! Jx
         else                              | normal! x
         endif
         return 1
 
+    elseif a:args[0] ==# 'gs'
+        call cursor(a:r.l, a:r.a)
+        let g:VM.selecting = 1
+        exe a:cmd
+
     elseif a:args[0] ==# 'd'
         "store deleted text so that it can all be put in the register
+        call a:r.bytes([change, change])
+        call cursor(a:r.l, a:r.a)
         exe a:cmd
         if s:v.use_register != "_"
             call add(s:deleted_text, getreg(s:v.use_register))

@@ -34,20 +34,19 @@ endfun
 fun! vm#commands#select_operator(...)
     """Perform a yank, the autocmd will create the region.
 
+    let s:v.eco = 1
     let ids = map(copy(s:R()), 'v:val.id')
     let c = nr2char(getchar())
     if index(split('webWEB$0^', '\zs'), c) >= 0
-        call s:Edit.run_normal('gs'.c, 1, 0)
+        silent! nunmap <buffer> y
+        call s:Edit.select_op('y'.c)
     elseif index(['i', 'a'], c) >= 0
         let d = nr2char(getchar())
-        call s:Edit.run_normal('gs'.c.d, 1, 0)
-        for id in ids
-            let r = s:F.region_with_id(id)
-            if !empty(r) | call r.remove() | endif
-        endfor
+        silent! nunmap <buffer> y
+        call s:Edit.select_op('y'.c.d)
     endif
-    call s:G.update_regions()
-    call s:G.select_region_at_pos('.')
+    call s:G.merge_regions()
+    nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -224,16 +223,14 @@ endfun
 fun! vm#commands#find_under(visual, whole, inclusive)
     call s:init(a:whole, 0, 1) | let selecting = g:VM.selecting | let g:VM.selecting = 0
 
-    if s:is_r()
-        if !selecting | return s:check_overlap(vm#commands#find_next(0, 0))
-        else          | call s:G.is_region_at_pos('.').remove() | endif | endif
+    if !selecting && s:is_r() | return s:check_overlap(vm#commands#find_next(0, 0)) | endif
 
     " yank and create region
     if !a:visual | call s:yank(a:inclusive) | endif
 
     if selecting
         if empty(s:v.search) | let @/ = '' | endif
-        nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
+        "nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
         if !has('nvim')
             let &updatetime = g:VM.oldupdate
         endif
@@ -243,7 +240,7 @@ fun! vm#commands#find_under(visual, whole, inclusive)
     let R = s:G.get_region()
     if R.h && !s:v.multiline | call s:F.toggle_option('multiline', 1) | endif
     call s:F.count_msg(1)
-    return s:check_overlap(R)
+    if !selecting | return s:check_overlap(R) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

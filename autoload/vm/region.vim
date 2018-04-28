@@ -369,6 +369,9 @@ fun! s:Region.update_vars() dict
         let r.k   = r.dir? r.a : r.b | let r.K   = r.dir? r.A : r.B
         let r.pat = s:pattern(r)     | let r.txt = getreg(s:v.def_reg)
 
+        if g:VM.selecting && r.h && !s:v.multiline
+            call s:Funcs.toggle_option('multiline') | endif
+
         call s:update_bytes_map(r)
     endif
 endfun
@@ -477,6 +480,9 @@ fun! s:fix_pos(r)
     if !s:v.multiline
         if r.a > eol    | let r.a = eol? eol : 1 | endif
         if r.b > eoL    | let r.b = eoL? eoL : 1 | endif
+    else
+        if r.a > eol+1  | let r.a = eol? eol+1 : 1 | endif
+        if r.b > eoL+1  | let r.b = eoL? eoL+1 : 1 | endif
     endif
 endfun
 
