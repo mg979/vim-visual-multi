@@ -1,4 +1,4 @@
-let s:motion = ''
+let s:motion = '' | let merge = 0
 let s:X    = { -> g:VM.extend_mode }
 let s:B    = { -> g:VM.is_active && s:v.block_mode && g:VM.extend_mode }
 let s:is_r = { -> g:VM.is_active && !empty(s:G.is_region_at_pos('.')) }
@@ -31,22 +31,26 @@ endfun
 " Select operator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#select_operator(...)
+fun! vm#commands#select_operator(all)
     """Perform a yank, the autocmd will create the region.
 
-    let s:v.eco = 1
-    let ids = map(copy(s:R()), 'v:val.id')
+    if !a:all
+        if !g:VM.is_active     | call s:init(0, 0, 1)   | endif
+        if !has('nvim')        | let &updatetime = 10   | endif
+        let g:VM.selecting = 1 | let g:VM.extend_mode = 1
+        silent! nunmap <buffer> y
+        return
+    endif
+
     let c = nr2char(getchar())
     if index(split('webWEB$0^', '\zs'), c) >= 0
-        silent! nunmap <buffer> y
-        call s:Edit.select_op('y'.c)
+        call s:Edit.select_op('gs'.c )
     elseif index(['i', 'a'], c) >= 0
         let d = nr2char(getchar())
-        silent! nunmap <buffer> y
-        call s:Edit.select_op('y'.c.d)
+        call s:Edit.select_op('gs'.c.d)
     endif
-    call s:G.merge_regions()
-    nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
+
+    call s:G.update_and_select_region()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -221,27 +225,18 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_under(visual, whole, inclusive)
-    call s:init(a:whole, 0, 1) | let selecting = g:VM.selecting | let g:VM.selecting = 0
+    call s:init(a:whole, 0, 1)
 
-    if s:is_r()
-        if !selecting | return s:check_overlap(vm#commands#find_next(0, 0))
-        else          | call s:G.is_region_at_pos('.').remove() | endif | endif
+    if s:is_r() | return s:check_overlap(vm#commands#find_next(0, 0)) | endif
 
     " yank and create region
     if !a:visual | call s:yank(a:inclusive) | endif
 
-    if selecting
-        if empty(s:v.search) | let @/ = '' | endif
-        if !has('nvim')
-            let &updatetime = g:VM.oldupdate
-        endif
-    else
-        call s:Search.add()
-    endif
+    call s:Search.add()
     let R = s:G.get_region()
     if R.h && !s:v.multiline | call s:F.toggle_option('multiline', 1) | endif
     call s:F.count_msg(1)
-    if !selecting | return s:check_overlap(R) | endif
+    return s:check_overlap(R)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -415,14 +410,14 @@ fun! vm#commands#motion(motion, count, select, this)
 
     "start if sublime mappings are set;
     "reselect region on motion unless a:this (eg M-<> adds a new region)
-    if s:sublime() | call s:init(0, 1, 1) | call s:G.new_cursor()
-    elseif a:this && !s:is_r()            | call s:G.new_cursor() | endif
+    if s:sublime()          | call s:init(0, 1, 1)     | call s:G.new_cursor()
+    elseif s:F.no_regions() || ( a:this && !s:is_r() ) | call s:G.new_cursor() | endif
 
     "-----------------------------------------------------------------------
 
-    if s:F.no_regions() | return | endif
+    if index(['$', '0', '^', '%'], a:motion) >= 0 | let s:merge = 1          | endif
+    if a:select && !s:X()                         | let g:VM.extend_mode = 1 | endif
 
-    if a:select && !s:X()  | let g:VM.extend_mode = 1 | endif
     if a:select && !s:v.multiline && s:vertical()
         call s:F.toggle_option('multiline', 1) | endif
 
@@ -464,18 +459,15 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_motion(motion, char, this, ...)
-    if s:F.no_regions() | return | endif | let merge = 0
+    if s:F.no_regions() | return | endif
 
-    if index(['$', '0', '^', '%'], a:motion) >= 0
-        let s:motion = a:motion | let merge = 1
-    elseif a:char != ''
+    if a:char != ''
         let s:motion = a:motion.a:char
     else
         let s:motion = a:motion.nr2char(getchar())
     endif
 
     call s:call_motion(a:this)
-    if merge | call s:G.merge_regions() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -571,10 +563,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:after_move()
-    if s:always_from_back()
-        call vm#commands#invert_direction()
-    endif
+    if s:always_from_back() | call vm#commands#invert_direction() | endif
+    if s:merge              | call s:G.merge_regions()            | endif
+
     call s:F.restore_reg()
+    let s:merge = 0
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

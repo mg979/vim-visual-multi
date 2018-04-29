@@ -59,9 +59,9 @@ augroup plugin-visual-multi-start
     au VimEnter     * call <SID>VM_Init()
     au BufEnter     * let b:VM_Selection = {}
     if has('nvim')
-        au TextYankPost * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
+        au TextYankPost * if g:VM.selecting | call b:VM_Selection.Global.get_region() | endif
     else
-        au CursorMoved  * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
-        au CursorHold   * if g:VM.selecting | call vm#commands#find_under(1, 0 , 0) | endif
+        au CursorMoved  * if g:VM.selecting | call b:VM_Selection.Global.get_region() | endif
+        au CursorHold   * if g:VM.selecting | call b:VM_Selection.Global.get_region() | endif
     endif
 augroup END

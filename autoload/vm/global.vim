@@ -58,7 +58,7 @@ fun! s:Global.erase_regions() dict
     let s:V.Regions = []
     call clearmatches()
     let s:v.index = -1
-    let s:v.block = [0,0,0]
+    call s:V.Block.stop()
     call s:Funcs.count_msg(1)
 endfun
 
@@ -71,12 +71,12 @@ fun! s:Global.change_mode(silent) dict
     let s:v.silence = a:silent
 
     if s:X()
-        call s:Funcs.count_msg(0, ['Switched to Extend Mode. ', 'WarningMsg'])
         call self.update_regions()
+        call s:Funcs.count_msg(0, ['Switched to Extend Mode. ', 'WarningMsg'])
     else
-        call s:Funcs.count_msg(0, ['Switched to Cursor Mode. ', 'WarningMsg'])
         call self.collapse_regions()
         call self.select_region(s:v.index)
+        call s:Funcs.count_msg(0, ['Switched to Cursor Mode. ', 'WarningMsg'])
     endif
 endfun
 
@@ -87,6 +87,7 @@ endfun
 
 fun! s:Global.update_highlight(...) dict
     """Update highlight for all regions."""
+    if s:v.eco | return | endif
 
     for r in s:R()
         call r.update_highlight()
@@ -100,6 +101,7 @@ endfun
 
 fun! s:Global.update_cursor_highlight(...) dict
     """Set cursor highlight, depending on extending mode."""
+    if s:v.eco | return | endif
 
     highlight clear MultiCursor
 
@@ -133,6 +135,7 @@ endfun
 
 fun! s:Global.update_regions() dict
     """Force regions update."""
+    if s:v.eco | return | endif
 
     if s:X()
         for r in s:R() | call r.update_region() | endfor
@@ -145,10 +148,22 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Global.update_and_select_region() dict
+    """Update regions and select region at cursor position."""
+    call self.update_regions()
+    let R = self.select_region_at_pos('.')
+    call s:Funcs.restore_reg()
+    call s:Funcs.count_msg(1)
+    return R
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Global.collapse_regions() dict
     """Collapse regions to cursors and turn off extend mode."""
 
     call self.reset_byte_map()
+    call s:V.Block.stop()
 
     for r in s:R() | call r.update_cursor([r.l, (r.dir? r.a : r.b)]) | endfor
     let g:VM.extend_mode = 0
@@ -360,10 +375,7 @@ fun! s:Global.merge_cursors()
 
     call setpos('.', storepos)
     let s:v.eco = 0
-    call self.update_regions()
-    let R = self.select_region_at_pos('.')
-    call s:Funcs.count_msg(1, ["\n", 'None'])
-    return R
+    return self.update_and_select_region()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -385,11 +397,7 @@ fun! s:Global.merge_regions(...) dict
 
     call setpos('.', storepos)
     let s:v.eco = 0
-    call self.update_regions()
-    let R = self.select_region_at_pos('.')
-    call s:Funcs.restore_reg()
-    call s:Funcs.count_msg(1)
-    return R
+    return self.update_and_select_region()
 endfun
 
 

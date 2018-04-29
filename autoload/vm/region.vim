@@ -6,10 +6,10 @@ fun! vm#region#init()
     let s:Search  = s:V.Search
     let s:Edit    = s:V.Edit
 
-    let s:X    = {     -> g:VM.extend_mode      }
-    let s:R    = {     -> s:V.Regions           }
-    let s:Byte = { pos -> s:Funcs.pos2byte(pos) }
-    let s:lcol = { ln  -> len(getline(ln))      }
+    let s:X    = {     -> g:VM.extend_mode                   }
+    let s:R    = {     -> s:V.Regions                        }
+    let s:Byte = { pos -> s:Funcs.pos2byte(pos)              }
+    let s:lcol = { ln  -> len(getline(ln))                   }
     let s:B    = {     -> s:v.block_mode && g:VM.extend_mode }
 endfun
 
@@ -73,6 +73,10 @@ fun! vm#region#new(cursor, ...)
     endif
 
     call s:Global.update_cursor_highlight()
+
+    "reset select operator variable
+    let g:VM.selecting = 0
+
     return R
 endfun
 
@@ -123,8 +127,11 @@ fun! s:Region.new(cursor, ...)
     endif
 
     call add(s:v.IDs_list, R.id)
-    call R.highlight()
-    call s:update_bytes_map(R)
+
+    if !s:v.eco
+        call R.highlight()
+        call s:update_bytes_map(R)
+    endif
 
     return R
 endfun
@@ -460,7 +467,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:update_bytes_map(r)
-    if !s:X() | return | endif | let r = a:r
+    if !s:X() || s:v.eco | return | endif | let r = a:r
 
     let s:V.Bytes[r.A:r.B] = map(s:V.Bytes[r.A:r.B], 'v:val+1')
     if r.A < s:Global.A | let s:Global.A = r.A | endif

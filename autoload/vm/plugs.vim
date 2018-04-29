@@ -1,14 +1,11 @@
 let g:VM.select_motions = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E']
-let g:VM.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '~']
-let g:VM.find_motions   = ['f', 'F', 't', 'T', '$', '0', '^', '%']
+let g:VM.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '~', '$', '0', '^', '%']
+let g:VM.find_motions   = ['f', 'F', 't', 'T']
 
 fun! vm#plugs#init()
-    if has('nvim')
-        nmap            <Plug>(VM-Select-Operator)     :let g:VM.selecting = 1<cr>:silent! nunmap <buffer> y<cr>y
-    else
-        nmap            <Plug>(VM-Select-Operator)     :set updatetime=10<cr>:let g:VM.selecting = 1<cr>:silent! nunmap <buffer> y<cr>y
-    endif
-    nnoremap        <Plug>(VM-Select-All-Operator)     :call vm#commands#select_operator()<cr>
+    nmap            <Plug>(VM-Select-Operator)         :call vm#commands#select_operator(0)<cr>y
+    nnoremap        <Plug>(VM-Select-All-Operator)     :call vm#commands#select_operator(1)<cr>
+
     nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0, 0)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-At-Word)      :call vm#commands#add_cursor_at_word(1, 1)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-Down)         :call vm#commands#add_cursor_at_pos(1, 0)<cr>

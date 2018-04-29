@@ -35,7 +35,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit._process(cmd, ...) dict
-    let size = s:size()          | let s:change = 0 | let cmd = a:cmd
+    let size = s:size()            | let s:change = 0 | let cmd = a:cmd
     let s:v.storepos = getpos('.') | let s:v.eco = 1
 
     "cursors on empty lines still give problems, remove them
@@ -96,7 +96,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.post_process(reselect, ...) dict
-    call s:G.reset_byte_map()
 
     if a:reselect
         if !s:X()      | call s:G.change_mode(1) |  endif
@@ -117,9 +116,10 @@ fun! s:Edit.post_process(reselect, ...) dict
     "clear highlight now to prevent weirdinesses, then update regions
     call clearmatches()
     call setpos('.', s:v.storepos)    | let s:v.eco = 0
-    call s:G.update_regions()
-    call s:G.select_region_at_pos('.')
-    call s:F.count_msg(1)
+
+    "byte map must be reset after all editing has been done!
+    call s:G.reset_byte_map()
+    call s:G.update_and_select_region()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -633,10 +633,27 @@ endfun
 
 fun! s:Edit.select_op(cmd) dict
 
-    call s:before_macro(0)
-    call self._process('normal '.a:cmd, 'gs')
+    if !has('nvim')        | let &updatetime = 10   | endif
+
+    call s:before_macro(1)
+
+    "if not using permanent mappings, this will be unmapped but it's needed
+    nmap <silent> gs         <Plug>(VM-Select-Operator)
+
+    for r in s:R()
+        call cursor(r.l, r.a)
+        call r.remove()
+        let g:VM.selecting = 1
+        exe "normal ".a:cmd
+        if !has('nvim')
+            doautocmd CursorMoved
+        endif
+    endfor
     call self.post_process(0)
     call s:after_macro()
+
+    if empty(s:v.search) | let @/ = ''                      | endif
+    if !has('nvim')      | let &updatetime = g:VM.oldupdate | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -768,11 +785,6 @@ fun! s:special(cmd, r, args)
         else                              | normal! x
         endif
         return 1
-
-    elseif a:args[0] ==# 'gs'
-        call cursor(a:r.l, a:r.a)
-        let g:VM.selecting = 1
-        exe a:cmd
 
     elseif a:args[0] ==# 'd'
         "store deleted text so that it can all be put in the register

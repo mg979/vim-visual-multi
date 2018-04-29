@@ -101,7 +101,7 @@ fun! s:Search.remove(also_regions) dict
                 let removed += 1 | endif
             let i -= 1 | endwhile
 
-        if removed | call s:V.Global.update_regions() | endif
+        if removed | call s:V.Global.update_and_select_region() | endif
     endif
     call s:Funcs.count_msg(1)
 endfun

@@ -162,12 +162,13 @@ fun! s:Funcs.count_msg(force, ...) dict
     let i3 = [' / ', hl] | let m3 = s:v.block_mode?        ["B\+", H1] : ["b\-", H2]
     let i4 = [' / ', hl] | let m4 = s:v.only_this_always?  ["O\+", H1] : ["o\-", H2]
 
-    let t = g:VM.extend_mode? ' region' : ' cursor'
     let s = len(s:R())>1 ? 's.' : '.'
-    let t1 = [len(s:R()).t.s.'   Current patterns: ', hl]
-    let t2 = [self.pad(string(s:v.search), 120), H1]
-    let msg = [i1, m1, i2, m2, i3, m3, i4, m4, ix, t1, t2]
-    if a:0 | call insert(msg, a:1, 0) | endif | call self.msg(msg, a:force)
+    let t = g:VM.extend_mode? ' region' : ' cursor'
+    let R = [len(s:R()).t.s, hl]
+    let s1 = ['   Current patterns: ', hl]
+    let s2 = [self.pad(string(s:v.search), 120), H1]
+    let msg = [i1, m1, i2, m2, i3, m3, i4, m4, ix, R, s1, s2]
+    if a:0 | call insert(msg, a:1, 9) | endif | call self.msg(msg, a:force)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -244,15 +245,16 @@ fun! s:Funcs.toggle_option(option, ...) dict
     elseif a:option == 'whole_word'
         let s = s:v.search[0]
         let wm = 'WarningMsg' | let L = 'Label'
-        let pats = self.pad(string(s:v.search), 120)
 
         if s:v.whole_word
             if s[:1] != '\<' | let s:v.search[0] = '\<'.s.'\>' | endif
+            let pats = self.pad(string(s:v.search), 120)
             call self.msg([
                         \['Search ->'               , wm], ['    whole word  ', L],
                         \['  ->  Current patterns: ', wm], [pats              , L]], 0)
         else
             if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
+            let pats = self.pad(string(s:v.search), 120)
             call self.msg([
                         \['Search ->'              , wm], ['  not whole word ', L],
                         \[' ->  Current patterns: ', wm], [pats               , L]], 0)
