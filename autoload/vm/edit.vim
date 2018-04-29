@@ -25,6 +25,7 @@ fun! vm#edit#init()
     let s:v.extra_spaces = []
     let s:W              = []
     let s:v.storepos     = getpos('.')
+    let s:change = 0
 
     return s:Edit
 endfun
@@ -34,7 +35,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit._process(cmd, ...) dict
-    let size = s:size()          | let change = 0 | let cmd = a:cmd
+    let size = s:size()          | let s:change = 0 | let cmd = a:cmd
     let s:v.storepos = getpos('.') | let s:v.eco = 1
 
     "cursors on empty lines still give problems, remove them
@@ -51,13 +52,13 @@ fun! s:Edit._process(cmd, ...) dict
         "execute command, but also take special cases into account
         if a:0 && s:special(cmd, r, a:000)
         else
-            call r.bytes([change, change])
+            call r.bytes([s:change, s:change])
             call cursor(r.l, r.a)
             exe cmd
         endif
 
         "update changed size
-        let change = s:size() - size
+        let s:change = s:size() - size
         if !has('nvim')
             doautocmd CursorMoved
         endif
@@ -761,7 +762,7 @@ fun! s:special(cmd, r, args)
 
     if a:args[0] ==#'del'
         "<del> key deletes \n if executed at eol
-        call a:r.bytes([change, change])
+        call a:r.bytes([s:change, s:change])
         call cursor(a:r.l, a:r.a)
         if a:r.a == col([a:r.l, '$']) - 1 | normal! Jx
         else                              | normal! x
@@ -775,7 +776,7 @@ fun! s:special(cmd, r, args)
 
     elseif a:args[0] ==# 'd'
         "store deleted text so that it can all be put in the register
-        call a:r.bytes([change, change])
+        call a:r.bytes([s:change, s:change])
         call cursor(a:r.l, a:r.a)
         exe a:cmd
         if s:v.use_register != "_"
