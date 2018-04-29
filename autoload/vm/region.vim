@@ -1,14 +1,12 @@
 fun! vm#region#init()
     let s:V       = b:VM_Selection
     let s:v       = s:V.Vars
-    let s:Global  = s:V.Global
-    let s:Funcs   = s:V.Funcs
-    let s:Search  = s:V.Search
-    let s:Edit    = s:V.Edit
+    let s:G       = s:V.Global
+    let s:F       = s:V.Funcs
 
     let s:X    = {     -> g:VM.extend_mode                   }
     let s:R    = {     -> s:V.Regions                        }
-    let s:Byte = { pos -> s:Funcs.pos2byte(pos)              }
+    let s:Byte = { pos -> s:F.pos2byte(pos)                  }
     let s:lcol = { ln  -> len(getline(ln))                   }
     let s:B    = {     -> s:v.block_mode && g:VM.extend_mode }
 endfun
@@ -69,10 +67,10 @@ fun! vm#region#new(cursor, ...)
             let i += 1
         endfor
         let s:v.index = i
-        call s:Global.update_indices()
+        call s:G.update_indices()
     endif
 
-    call s:Global.update_cursor_highlight()
+    call s:G.update_cursor_highlight()
 
     "reset select operator variable
     let g:VM.selecting = 0
@@ -166,7 +164,7 @@ fun! s:Region.remove() dict
     call self.remove_highlight()
     let R = remove(s:R(), self.index)
     call remove(s:v.IDs_list, index(s:v.IDs_list, self.id))
-    call s:Global.update_indices()
+    call s:G.update_indices()
     return R
 endfun
 
@@ -377,7 +375,7 @@ fun! s:Region.update_vars() dict
         let r.pat = s:pattern(r)     | let r.txt = getreg(s:v.def_reg)
 
         if g:VM.selecting && r.h && !s:v.multiline
-            call s:Funcs.toggle_option('multiline') | endif
+            call s:F.toggle_option('multiline') | endif
 
         call s:update_bytes_map(r)
     endif
@@ -470,8 +468,8 @@ fun! s:update_bytes_map(r)
     if !s:X() || s:v.eco | return | endif | let r = a:r
 
     let s:V.Bytes[r.A:r.B] = map(s:V.Bytes[r.A:r.B], 'v:val+1')
-    if r.A < s:Global.A | let s:Global.A = r.A | endif
-    if r.B > s:Global.B | let s:Global.B = r.B | endif
+    if r.A < s:G.A | let s:G.A = r.A | endif
+    if r.B > s:G.B | let s:G.B = r.B | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -563,6 +561,6 @@ fun! s:region_vars(r, cursor, ...)
         let R.K     = R.dir? R.A : R.B      " anchor offset
 
         let R.txt   = R.get_text()
-        let R.pat   = s:Search.escape_pattern(R.txt)
+        let R.pat   = s:V.Search.escape_pattern(R.txt)
     endif
 endfun

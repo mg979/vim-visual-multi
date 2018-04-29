@@ -1,11 +1,12 @@
 fun! vm#block#init()
     let s:V       = b:VM_Selection
     let s:v       = s:V.Vars
+    let s:G       = s:V.Global
 
     let s:X    = { -> g:VM.extend_mode }
     let s:R    = { -> s:V.Regions }
     let s:B    = { -> s:v.block_mode && g:VM.extend_mode }
-    let s:is_r = { -> g:VM.is_active && !empty(s:V.Global.is_region_at_pos('.')) }
+    let s:is_r = { -> g:VM.is_active && !empty(s:G.is_region_at_pos('.')) }
 
     return s:Block
 endfun
@@ -25,9 +26,9 @@ fun! s:Block.vertical() dict
 
     elseif s:v.block[1] >= col('.') | let s:v.block[1] = col('.') | endif
 
-    call s:V.Global.new_cursor()
-    call s:V.Global.update_regions()
-    call s:V.Global.select_region(s:v.index)
+    call s:G.new_cursor()
+    call s:G.update_regions()
+    call s:G.select_region(s:v.index)
     return 1
 endfun
 
@@ -91,12 +92,12 @@ endfun
 fun! s:Block.start() dict
     if s:v.eco | return | endif
 
-    if !s:X() | call s:V.Global.change_mode(1) | endif
+    if !s:X() | call s:G.change_mode(1) | endif
 
     let s:v.block_mode = 1
     if s:v.only_this_always | call s:V.Funcs.toggle_option('only_this_always') | endif
     if s:v.index != -1
-        let r = s:V.Global.is_region_at_pos('.')
+        let r = s:G.is_region_at_pos('.')
         if empty(r) | let r = s:R()[-1] | endif
         let s:v.block[0] = r.a
         let s:v.block[1] = r.b

@@ -8,10 +8,8 @@ let s:Live = {}
 
 fun! vm#live#init()
     let s:V       = b:VM_Selection
-
     let s:v       = s:V.Vars
-
-    let s:Global  = s:V.Global
+    let s:G       = s:V.Global
     let s:F       = s:V.Funcs
     let s:Search  = s:V.Search
 
@@ -39,7 +37,7 @@ fun! s:Live.start(mode) dict
     let I = self
     let s:V.Insert.is_active = 1
 
-    let R           = s:Global.select_region_at_pos('.')
+    let R           = s:G.select_region_at_pos('.')
     let I.index     = R.index
     let I.Begin     = s:append(a:mode)? R.A+1 : R.A
     let I.begin     = [R.l, s:append(a:mode)? R.a+1 : R.a]
@@ -72,7 +70,7 @@ fun! s:Live.start(mode) dict
             if r == R
                 let A = I.lines[r.l].cursors[0].a
                 call cursor(r.l, first_a)
-                call s:Global.select_region_at_pos('.')
+                call s:G.select_region_at_pos('.')
                 call self.start(a:mode)
                 return
             else
@@ -89,7 +87,7 @@ fun! s:Live.start(mode) dict
                 \ "\<esc>:call b:VM_Selection.Live.insert(1)\<cr>:call b:VM_Selection.Live.stop()\<cr>" :
                 \ "\<esc>:call b:VM_Selection.Live.stop()\<cr>"
 
-    call s:Global.update_cursor_highlight()
+    call s:G.update_cursor_highlight()
 
     "start insert mode and break the undo point
     let keys = (a:mode=='c'? 'i': a:mode)."\<c-g>u"
@@ -143,7 +141,7 @@ fun! s:Live.stop() dict
 
     let s:v.storepos = getpos('.')
     call s:V.Edit.post_process(0,0)
-    call s:V.Global.select_region(self.index)
+    call s:G.select_region(self.index)
 endfun
 
 

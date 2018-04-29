@@ -5,9 +5,7 @@
 fun! vm#search#init()
     let s:V        = b:VM_Selection
     let s:v        = s:V.Vars
-
-    let s:Funcs    = s:V.Funcs
-    let s:Edit     = s:V.Edit
+    let s:F        = s:V.Funcs
 
     let s:V.Search = s:Search
 
@@ -61,7 +59,7 @@ endfun
 fun! s:Search.get_slash_reg() dict
     """Get pattern from current "/" register."
     call s:update_search(self.get_pattern('/', 1))
-    call s:Funcs.count_msg(1)
+    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -84,14 +82,14 @@ fun! s:Search.remove(also_regions) dict
     let pats = s:v.search
 
     if !empty(pats)
-        call s:Funcs.count_msg(1)
+        call s:F.count_msg(1)
         let i = input('Which index? ') | let i = str2nr(i)
-        if ( i < 0 || i >= len(pats) ) | call s:Funcs.msg('      Wrong index', 0) | return | endif
+        if ( i < 0 || i >= len(pats) ) | call s:F.msg('      Wrong index', 0) | return | endif
         let pat = pats[i]
         call remove(pats, i)
         call self.update_current()
     else
-        call s:Funcs.msg('No search patters yet.', 0) | return | endif
+        call s:F.msg('No search patters yet.', 0) | return | endif
 
     if a:also_regions
         let i = len(s:R()) - 1 | let removed = 0
@@ -103,7 +101,7 @@ fun! s:Search.remove(also_regions) dict
 
         if removed | call s:V.Global.update_and_select_region() | endif
     endif
-    call s:Funcs.count_msg(1)
+    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -150,16 +148,16 @@ fun! s:Search.case() dict
     if &smartcase              "smartcase        ->  case sensitive
         set nosmartcase
         set noignorecase
-        call s:Funcs.msg([['Search -> ', 'WarningMsg'], ['  case sensitive', 'Label']], 0)
+        call s:F.msg([['Search -> ', 'WarningMsg'], ['  case sensitive', 'Label']], 1)
 
     elseif !&ignorecase        "case sensitive   ->  ignorecase
         set ignorecase
-        call s:Funcs.msg([['Search -> ', 'WarningMsg'], ['  ignore case', 'Label']], 0)
+        call s:F.msg([['Search -> ', 'WarningMsg'], ['  ignore case', 'Label']], 1)
 
     else                       "ignore case      ->  smartcase
         set smartcase
         set ignorecase
-        call s:Funcs.msg([['Search -> ', 'WarningMsg'], ['  smartcase', 'Label']], 0)
+        call s:F.msg([['Search -> ', 'WarningMsg'], ['  smartcase', 'Label']], 1)
     endif
 endfun
 
@@ -180,7 +178,7 @@ fun! s:pattern_found(t, i)
         let s:v.search[a:i] = a:t
         call s:V.Global.update_region_patterns(a:t)
         let wm = 'WarningMsg' | let L = 'Label'
-        call s:Funcs.msg([['Pattern updated:   [', wm ], [old, L],
+        call s:F.msg([['Pattern updated:   [', wm ], [old, L],
                     \     [']  ->  [', wm],              [a:t, L],
                     \     ["]\n", wm]], 1)
         return 1
@@ -201,6 +199,6 @@ fun! s:Search.rewrite(last) dict
             if s:pattern_found(t, i) | break | endif
         endfor
     endif
-    call s:Funcs.count_msg(1)
+    call s:F.count_msg(1)
 endfun
 

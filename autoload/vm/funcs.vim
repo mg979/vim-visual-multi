@@ -9,13 +9,9 @@
 
 fun! vm#funcs#init()
     let s:V       = b:VM_Selection
-
     let s:v       = s:V.Vars
-    let s:Global  = s:V.Global
-    let s:Search  = s:V.Search
-    let s:Edit    = s:V.Edit
 
-    let s:R    = {     -> s:V.Regions           }
+    let s:R       = { -> s:V.Regions }
 
     return s:Funcs
 endfun
@@ -243,6 +239,7 @@ fun! s:Funcs.toggle_option(option, ...) dict
             call s:V.Block.stop() | endif
 
     elseif a:option == 'whole_word'
+        if empty(s:v.search) | call self.msg('No search patterns.', 1) | return | endif
         let s = s:v.search[0]
         let wm = 'WarningMsg' | let L = 'Label'
 
@@ -251,13 +248,13 @@ fun! s:Funcs.toggle_option(option, ...) dict
             let pats = self.pad(string(s:v.search), 120)
             call self.msg([
                         \['Search ->'               , wm], ['    whole word  ', L],
-                        \['  ->  Current patterns: ', wm], [pats              , L]], 0)
+                        \['  ->  Current patterns: ', wm], [pats              , L]], 1)
         else
             if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
             let pats = self.pad(string(s:v.search), 120)
             call self.msg([
                         \['Search ->'              , wm], ['  not whole word ', L],
-                        \[' ->  Current patterns: ', wm], [pats               , L]], 0)
+                        \[' ->  Current patterns: ', wm], [pats               , L]], 1)
         endif
         return
     endif

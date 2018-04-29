@@ -1,4 +1,4 @@
-let s:motion = '' | let merge = 0
+let s:motion = '' | let s:merge = 0
 let s:X    = { -> g:VM.extend_mode }
 let s:B    = { -> g:VM.is_active && s:v.block_mode && g:VM.extend_mode }
 let s:is_r = { -> g:VM.is_active && !empty(s:G.is_region_at_pos('.')) }
@@ -18,7 +18,6 @@ fun! s:init(whole, cursor, extend_mode)
     let s:G       = s:V.Global
     let s:F       = s:V.Funcs
     let s:Search  = s:V.Search
-    let s:Edit    = s:V.Edit
     let s:Block   = s:V.Block
 
     let s:R    = { -> s:V.Regions }
@@ -44,10 +43,10 @@ fun! vm#commands#select_operator(all)
 
     let c = nr2char(getchar())
     if index(split('webWEB$0^', '\zs'), c) >= 0
-        call s:Edit.select_op('gs'.c )
+        call s:V.Edit.select_op('gs'.c )
     elseif index(['i', 'a'], c) >= 0
         let d = nr2char(getchar())
-        call s:Edit.select_op('gs'.c.d)
+        call s:V.Edit.select_op('gs'.c.d)
     endif
 
     call s:G.update_and_select_region()

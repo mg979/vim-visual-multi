@@ -6,12 +6,9 @@ let s:Edit = {'skip_index': -1}
 
 fun! vm#edit#init()
     let s:V       = b:VM_Selection
-
     let s:v       = s:V.Vars
-
     let s:G       = s:V.Global
     let s:F       = s:V.Funcs
-    let s:Search  = s:V.Search
 
     let s:R         = {      -> s:V.Regions                       }
     let s:X         = {      -> g:VM.extend_mode                  }

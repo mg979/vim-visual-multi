@@ -6,12 +6,8 @@ let s:Global = {}
 
 fun! vm#global#init()
     let s:V       = b:VM_Selection
-
     let s:v       = s:V.Vars
-
-    let s:Funcs   = s:V.Funcs
-    let s:Search  = s:V.Search
-    let s:Edit    = s:V.Edit
+    let s:F       = s:V.Funcs
 
     let s:X       = { -> g:VM.extend_mode }
     let s:R       = { -> s:V.Regions      }
@@ -33,8 +29,8 @@ fun! s:Global.get_region() dict
     let s:v.matches = getmatches()
     if !s:v.eco
         call self.select_region(R.index)
-        call s:Search.check_pattern()
-        call s:Funcs.restore_reg() | endif
+        call s:V.Search.check_pattern()
+        call s:F.restore_reg() | endif
     return R
 endfun
 
@@ -59,7 +55,7 @@ fun! s:Global.erase_regions() dict
     call clearmatches()
     let s:v.index = -1
     call s:V.Block.stop()
-    call s:Funcs.count_msg(1)
+    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -72,11 +68,11 @@ fun! s:Global.change_mode(silent) dict
 
     if s:X()
         call self.update_regions()
-        call s:Funcs.count_msg(0, ['Switched to Extend Mode. ', 'WarningMsg'])
+        call s:F.count_msg(0, ['Switched to Extend Mode. ', 'WarningMsg'])
     else
         call self.collapse_regions()
         call self.select_region(s:v.index)
-        call s:Funcs.count_msg(0, ['Switched to Cursor Mode. ', 'WarningMsg'])
+        call s:F.count_msg(0, ['Switched to Cursor Mode. ', 'WarningMsg'])
     endif
 endfun
 
@@ -143,7 +139,7 @@ fun! s:Global.update_regions() dict
         for r in s:R() | call r.update_cursor() | endfor
     endif
     call self.update_highlight()
-    call s:Funcs.restore_reg()
+    call s:F.restore_reg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -152,8 +148,8 @@ fun! s:Global.update_and_select_region() dict
     """Update regions and select region at cursor position."""
     call self.update_regions()
     let R = self.select_region_at_pos('.')
-    call s:Funcs.restore_reg()
-    call s:Funcs.count_msg(1)
+    call s:F.restore_reg()
+    call s:F.count_msg(1)
     return R
 endfun
 
@@ -203,7 +199,7 @@ fun! s:Global.is_region_at_pos(pos) dict
     """Find if the cursor is on a highlighted region.
     "Return an empty dict otherwise."""
 
-    let pos = s:Funcs.pos2byte(a:pos)
+    let pos = s:F.pos2byte(a:pos)
 
     for r in s:R()
         if pos >= r.A && pos <= r.B
@@ -239,7 +235,7 @@ fun! s:Global.remove_last_region(...) dict
         endif
     endfor
 
-    if !len(s:R()) | call s:Funcs.count_msg(1) | return | endif
+    if !len(s:R()) | call s:F.count_msg(1) | return | endif
     call self.select_region(s:v.index)
 endfun
 
@@ -352,7 +348,7 @@ fun! s:Global.split_lines() dict
 
     "reorder regions when done
     call self.update_highlight()
-    call s:Funcs.count_msg(1)
+    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -369,7 +365,7 @@ fun! s:Global.merge_cursors()
     let storepos = getpos('.') | let s:v.eco = 1 | let i = 0
 
     for c in cursors_pos
-        if !c | call s:Funcs.region_with_id(cursors_ids[i]).remove() | endif
+        if !c | call s:F.region_with_id(cursors_ids[i]).remove() | endif
         let i += 1
     endfor
 
