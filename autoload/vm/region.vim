@@ -57,7 +57,7 @@ fun! vm#region#new(cursor, ...)
     let s:v.index = R.index | let s:v.ID += 1
 
     "keep regions list ordered
-    if s:v.eco || empty(s:R()) || s:R()[s:v.index-1].A < R.A
+    if empty(s:R()) || s:R()[s:v.index-1].A < R.A
         call add(s:R(), R)
     else
         let i = 0

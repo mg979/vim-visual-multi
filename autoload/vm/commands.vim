@@ -223,14 +223,15 @@ endfun
 fun! vm#commands#find_under(visual, whole, inclusive)
     call s:init(a:whole, 0, 1) | let selecting = g:VM.selecting | let g:VM.selecting = 0
 
-    if !selecting && s:is_r() | return s:check_overlap(vm#commands#find_next(0, 0)) | endif
+    if s:is_r()
+        if !selecting | return s:check_overlap(vm#commands#find_next(0, 0))
+        else          | call s:G.is_region_at_pos('.').remove() | endif | endif
 
     " yank and create region
     if !a:visual | call s:yank(a:inclusive) | endif
 
     if selecting
         if empty(s:v.search) | let @/ = '' | endif
-        "nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
         if !has('nvim')
             let &updatetime = g:VM.oldupdate
         endif
