@@ -1,4 +1,4 @@
-let s:motion = '' | let s:merge = 0
+let s:motion = ''
 let s:X    = { -> g:VM.extend_mode }
 let s:B    = { -> g:VM.is_active && s:v.block_mode && g:VM.extend_mode }
 let s:is_r = { -> g:VM.is_active && !empty(s:G.is_region_at_pos('.')) }
@@ -417,7 +417,7 @@ fun! vm#commands#motion(motion, count, select, this)
 
     "-----------------------------------------------------------------------
 
-    if index(['$', '0', '^', '%'], a:motion) >= 0 | let s:merge = 1          | endif
+    if index(['$', '0', '^', '%'], a:motion) >= 0 | let s:v.merge        = 1 | endif
     if a:select && !s:X()                         | let g:VM.extend_mode = 1 | endif
 
     if a:select && !s:v.multiline && s:vertical()
@@ -454,8 +454,8 @@ fun! vm#commands#merge_to_beol(eol, this)
     if s:X()            | call s:G.change_mode(1) | endif
 
     let s:motion = a:eol? "\<End>" : '0'
+    let s:v.merge = 1
     call s:call_motion(a:this)
-    call s:G.merge_cursors()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -511,12 +511,12 @@ endfun
 " Motion event
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
-let s:can_from_back    = { -> s:motion == '$' && !s:v.direction }
-let s:always_from_back = { -> index(['^', '0', 'F', 'T'],                     s:motion)     >= 0 }
-let s:horizontal       = { -> index(['h', 'l'],                               s:motion)     >= 0 }
-let s:vertical         = { -> index(['j', 'k'],                               s:motion)     >= 0 }
-let s:simple           = { m -> index(split('hlwebWEB', '\zs'),               m)            >= 0 }
+let s:only_this        = {   -> s:v.only_this || s:v.only_this_always               }
+let s:can_from_back    = {   -> s:X() && s:motion == '$' && !s:v.direction          }
+let s:always_from_back = {   -> s:X() && index(['^', '0', 'F', 'T'], s:motion) >= 0 }
+let s:horizontal       = {   -> index(['h', 'l'],                    s:motion) >= 0 }
+let s:vertical         = {   -> index(['j', 'k'],                    s:motion) >= 0 }
+let s:simple           = { m -> index(split('hlwebWEB', '\zs'),      m)        >= 0 }
 
 fun! s:call_motion(this)
     let s:v.moving = 1
@@ -533,7 +533,7 @@ fun! vm#commands#move(...)
     let s:v.moving -= 1 | call s:G.reset_byte_map()
     let R = s:R()[ s:v.index ]
 
-    if s:X() | call s:before_move() | endif
+    call s:before_move()
 
     if s:only_this()
         call s:R()[s:v.index].move(s:motion) | let s:v.only_this = 0
@@ -541,7 +541,7 @@ fun! vm#commands#move(...)
         for r in s:R() | call r.move(s:motion) | endfor | endif
 
     "update variables, facing direction, highlighting
-    if s:X() && s:after_move() | return | endif
+    if s:after_move() | return | endif
 
     let s:v.direction = R.dir
     call s:G.update_highlight()
@@ -566,10 +566,10 @@ endfun
 
 fun! s:after_move()
     if s:always_from_back() | call vm#commands#invert_direction() | endif
-    if s:merge              | call s:G.merge_regions()            | endif
+    if s:v.merge            | call s:G.merge_regions()            | endif
 
     call s:F.restore_reg()
-    let s:merge = 0
+    let s:v.merge = 0
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

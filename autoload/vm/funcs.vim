@@ -29,12 +29,9 @@ let s:Funcs = {}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.pos2byte(...) dict
-    "pos can be a string, a list or a (line, col) couple, or the offset itself
+    "pos can be a string, a list [line, col], or the offset itself
 
-    if a:0 > 1                          "a (line, col) couple
-        return (line2byte(a:1) + a:2)
-
-    elseif type(a:1) == v:t_number      "an offset
+    if type(a:1) == v:t_number          "an offset
         return a:1
 
     elseif type(a:1) == v:t_string      "a string (like '.')

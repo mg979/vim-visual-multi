@@ -56,6 +56,7 @@ fun! s:Insert.key(type) dict
 
     elseif a:type ==# 'A'
         call vm#commands#merge_to_beol(1, 0)
+        for r in s:R() | call s:V.Edit.extra_spaces(r, 0) | endfor
         call self.start('a')
 
     elseif a:type ==# 'o'

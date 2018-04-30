@@ -19,9 +19,8 @@ fun! vm#edit#init()
 
     let s:v.use_register = s:v.def_reg
     let s:v.new_text     = ''
-    let s:v.extra_spaces = []
     let s:W              = []
-    let s:v.storepos     = getpos('.')
+    let s:v.storepos     = []
     let s:change = 0
 
     return s:Edit
@@ -32,8 +31,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit._process(cmd, ...) dict
-    let size = s:size()            | let s:change = 0 | let cmd = a:cmd
-    let s:v.storepos = getpos('.') | let s:v.eco = 1
+    let size = s:size()    | let s:change = 0 | let cmd = a:cmd  | let s:v.eco = 1
+    if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
     "cursors on empty lines still give problems, remove them
     let fix = map(copy(s:R()), '[len(getline(v:val.l)), v:val.id]')
@@ -66,8 +65,8 @@ fun! s:Edit._process(cmd, ...) dict
 endfun
 
 fun! s:Edit.process_visual(cmd) dict
-    let size = s:size()          | let change = 0
-    let s:v.storepos = getpos('.') | let s:v.eco = 1
+    let size = s:size()                 | let change = 0
+    let s:v.storepos = getpos('.')[1:2] | let s:v.eco = 1
 
     for r in s:R()
         call r.bytes([change, change])
@@ -102,21 +101,17 @@ fun! s:Edit.post_process(reselect, ...) dict
     endif
 
     "remove extra spaces that may have been added
-    for line in s:v.extra_spaces
-        let l = getline(line)
-        if l[-1:] ==# ' ' | call setline(line, l[:-2]) | endif
-    endfor
-
-    let s:v.auto = 0
-    let s:v.extra_spaces = []
+    call self.extra_spaces(0, 1)
 
     "clear highlight now to prevent weirdinesses, then update regions
-    call clearmatches()
-    call setpos('.', s:v.storepos)    | let s:v.eco = 0
+    call clearmatches()    | let s:v.eco = 0    | let s:v.auto = 0
 
-    "byte map must be reset after all editing has been done!
+    "byte map must be reset after all editing has been done, and before final update
     call s:G.reset_byte_map()
-    call s:G.update_and_select_region()
+
+    "update, restore position and clear var
+    let pos = empty(s:v.storepos)? '.' : s:v.storepos
+    call s:G.update_and_select_region(pos) | let s:v.storepos = []
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -126,11 +121,11 @@ endfun
 fun! s:Edit.delete(X, register, count) dict
     """Delete the selected text and change to cursor mode.
     """Remember the lines that have been added an extra space, for later removal
-    if !s:v.direction | call vm#commands#invert_direction() | endif
-    let s:v.storepos = getpos('.')
+    if !s:v.direction                     | call vm#commands#invert_direction() | endif
+    let r = s:G.select_region_at_pos('.') | let s:v.storepos = [r.l, r.a]
 
     if a:X
-        let size = s:size() | let change = 0 | let s:v.extra_spaces = []
+        let size = s:size() | let change = 0
         for r in s:R()
             call r.bytes([change, change])
             call cursor(r.l, r.a)
@@ -138,11 +133,7 @@ fun! s:Edit.delete(X, register, count) dict
             call cursor(r.L, r.b>1? r.b+1 : 1)
             normal! m]
 
-            let L = getline(r.L)
-            if r.b == len(L)
-                call setline(r.L, L.' ')
-                call add(s:v.extra_spaces, r.L)
-            endif
+            call self.extra_spaces(r, 0)
 
             if a:register != "_"
                 let s:v.use_register = a:register
@@ -157,7 +148,9 @@ fun! s:Edit.delete(X, register, count) dict
         call s:G.change_mode(1)
 
         if a:register != "_" | call self.post_process(0)
-        else                 | call s:F.restore_reg() | endif
+        else
+            call s:F.restore_reg()
+            call s:G.select_region_at_pos(s:v.storepos) | endif
 
     elseif a:count
         "ask for motion
@@ -706,6 +699,24 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Misc functions
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.extra_spaces(r, remove) dict
+
+    if a:remove
+        "remove the extra space only if it comes after r.b, and it's just before \n
+        for r in s:R()
+            let L = getline(r.L)
+            if len(L) && r.b == len(L)-1 && L[-1:] ==# ' '
+                call setline(r.L, L[:-2]) | endif
+        endfor | return | endif
+
+    let L = getline(a:r.L)
+    if a:r.b == len(L)
+        call setline(a:r.L, L.' ')
+    endif
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:before_macro(maps)

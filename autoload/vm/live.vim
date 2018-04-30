@@ -132,16 +132,16 @@ fun! s:Live.stop() dict
     let i = 0
     for r in s:R()
         let c = self.cursors[i]
-        call r.update_cursor([c.l, c.a + self.change + self.change*c.nth])
+        let a = s:append(self.mode)? c.a-1 : c.a 
+        call r.update_cursor([c.l, a + self.change + self.change*c.nth])
+        if r.index == self.index | let s:v.storepos = [r.l, r.a] | endif
         let i += 1
     endfor
 
     let self.mode = ''
     let s:V.Insert.is_active = 0
 
-    let s:v.storepos = getpos('.')
     call s:V.Edit.post_process(0,0)
-    call s:G.select_region(self.index)
 endfun
 
 

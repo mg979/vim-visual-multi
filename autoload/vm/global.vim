@@ -70,8 +70,9 @@ fun! s:Global.change_mode(silent) dict
         call self.update_regions()
         call s:F.count_msg(0, ['Switched to Extend Mode. ', 'WarningMsg'])
     else
+        let ix = s:v.index
         call self.collapse_regions()
-        call self.select_region(s:v.index)
+        call self.select_region(ix)
         call s:F.count_msg(0, ['Switched to Cursor Mode. ', 'WarningMsg'])
     endif
 endfun
@@ -144,10 +145,10 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.update_and_select_region() dict
+fun! s:Global.update_and_select_region(...) dict
     """Update regions and select region at cursor position."""
     call self.update_regions()
-    let R = self.select_region_at_pos('.')
+    let R = self.select_region_at_pos(a:0? a:1 : '.')
     call s:F.restore_reg()
     call s:F.count_msg(1)
     return R
@@ -380,9 +381,9 @@ fun! s:Global.merge_regions(...) dict
     ""Merge overlapping regions."""
     if !s:X() | call self.merge_cursors() | return | endif
 
-    let storepos = getpos('.')    | let s:v.eco = 1
-    let A = self.A                | let B = self.B+1
-    let By = copy(s:V.Bytes[A:B]) | let a = 0
+    let pos = getpos('.')[1:2]      | let s:v.eco = 1
+    let A = self.A                  | let B = self.B+1
+    let By = copy(s:V.Bytes[A:B])   | let a = 0
 
     call self.erase_regions()
 
@@ -391,9 +392,8 @@ fun! s:Global.merge_regions(...) dict
         elseif a && !By[i] | call vm#region#new(0, a, i+A-1) | let a = 0 | endif
     endfor
 
-    call setpos('.', storepos)
     let s:v.eco = 0
-    return self.update_and_select_region()
+    return self.update_and_select_region(pos)
 endfun
 
 

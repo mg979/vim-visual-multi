@@ -228,11 +228,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:keep_line(r, ln)
-    """Ensure line boundaries aren't crossed."""
+    """Ensure line boundaries aren't crossed. Force cursor merging."""
     let r = a:r
 
-    if     ( a:ln > r.l ) | call cursor ( r.l, col([r.l, '$'])-1 )
-    elseif ( a:ln < r.l ) | call cursor ( r.l, col([r.l, 1]) )
+    if     ( a:ln > r.l ) | call cursor ( r.l, col([r.l, '$'])-1 ) | let s:v.merge = s:X()? s:v.merge : 1
+    elseif ( a:ln < r.l ) | call cursor ( r.l, col([r.l, 1]) )     | let s:v.merge = s:X()? s:v.merge : 1
     else                  | call cursor ( r.l, col('.') )
     endif
 endfun
