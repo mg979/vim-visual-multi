@@ -288,14 +288,13 @@ fun! s:navigate(force, dir)
     if a:force && s:v.nav_direction != a:dir
         call s:F.msg('Reversed direction.', 1)
         let s:v.nav_direction = a:dir
-        return 1
+        return s:keep_block()
     elseif a:force || @/==''
         let i = a:dir? s:v.index+1 : s:v.index-1
         call s:G.select_region(i)
         "redraw!
         call s:F.count_msg(1)
-        return 1
-    endif
+        return s:keep_block() | endif
 endfun
 
 fun! s:skip()
@@ -303,6 +302,10 @@ fun! s:skip()
     if empty(r) | call s:navigate(1, s:v.nav_direction)
     else        | call r.remove()
     endif
+endfun
+
+fun! s:keep_block()
+    if s:v.block_mode | let s:v.block[3] = 1 | endif | return 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -315,7 +318,6 @@ fun! vm#commands#find_next(skip, nav)
     if s:X() && !a:nav && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
 
     call s:Search.validate()
-
 
     "just navigate to next
     if s:navigate(a:nav, 1) | return
@@ -362,6 +364,7 @@ fun! vm#commands#skip(just_remove)
         let r = s:G.is_region_at_pos('.')
         if !empty(r)
             call s:G.remove_last_region(r.id)
+            call s:keep_block()
         endif
 
     elseif s:v.nav_direction
