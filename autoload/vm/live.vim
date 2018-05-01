@@ -129,6 +129,20 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Live.return() dict
+
+    call s:V.Edit.run_normal('s$d', 1, 1, 0)
+    call s:V.Edit.run_ex("call append(line('.'), '')")
+    let old = s:v.multiline
+    let s:v.multiline = 1
+    normal lp
+    call s:V.Edit.run_normal('==', 0, 1, 0)
+    call s:V.Edit.run_normal('^', 1, 1, 0)
+    let s:v.multiline = old
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Live.stop() dict
     iunmap <buffer> <esc>
     call self.auto_end() | let s:v.eco = 1
