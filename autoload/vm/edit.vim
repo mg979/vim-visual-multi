@@ -21,6 +21,7 @@ fun! vm#edit#init()
     let s:v.new_text     = ''
     let s:W              = []
     let s:v.storepos     = []
+    let s:v.insert_marks = {}
     let s:change = 0
 
     return s:Edit
@@ -35,7 +36,7 @@ fun! s:Edit._process(cmd, ...) dict
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
     "cursors on empty lines still give problems, remove them
-    let fix = map(copy(s:R()), '[len(getline(v:val.l)), v:val.id]')
+    let fix = (a:0 && a:1=='cr')? [] : map(copy(s:R()), '[len(getline(v:val.l)), v:val.id]')
     for r in fix
         if !r[0]
             call s:F.region_with_id(r[1]).remove()
@@ -795,6 +796,23 @@ fun! s:special(cmd, r, args)
         if a:r.a == col([a:r.l, '$']) - 1 | normal! Jx
         else                              | normal! x
         endif
+        return 1
+
+    elseif a:args[0] ==# 'cr'
+        let r = a:r           | let r.l += r.index       | let eol = col([r.l, '$'])
+        let ind = indent(r.l) | let end = (r.a == eol-1) | let ok = ind && !end
+
+        call cursor(r.l, r.a)
+
+        let s = ok? '' : '_'
+        call append(line('.'), s)
+        
+        if ok               | exe a:cmd    | normal! d$jp==
+        elseif end && ind   | normal! j==
+        endif
+
+        "remember which lines have been marked
+        let s:v.insert_marks[r.l+1] = indent(r.l+1)
         return 1
 
     elseif a:args[0] ==# 'd'

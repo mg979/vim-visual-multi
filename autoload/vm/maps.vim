@@ -43,7 +43,7 @@ fun! vm#maps#permanent()
         nmap <silent> <C-S-Up>    <Plug>(VM-Select-Line-Up)
         nmap <silent> <M-C-Right> <Plug>(VM-Select-E)
         nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
-        "nmap <silent> <C-d>       <Plug>(VM-Find-I-Word)
+        nmap <silent> <C-d>       <Plug>(VM-Find-I-Word)
     endif
 
     if g:VM_default_mappings

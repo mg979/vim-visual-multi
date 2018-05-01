@@ -35,6 +35,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldvirtual       = &virtualedit
     let s:v.oldwhichwrap     = &whichwrap
     let s:v.oldlz            = &lz
+    let s:v.oldch            = &ch
     let s:v.oldcase          = [&smartcase, &ignorecase]
 
     "init new vars
@@ -53,7 +54,6 @@ fun! vm#init_buffer(empty, ...)
     let s:v.moving           = 0
     let s:v.only_this        = 0
     let s:v.only_this_always = 0
-    let s:v.edit_enabled     = 1
     let s:v.using_regex      = 0
     let s:v.multiline        = 0
     let s:v.block_mode       = 0
@@ -77,6 +77,9 @@ fun! vm#init_buffer(empty, ...)
     set virtualedit=onemore
     set ww=h,l,<,>
     set lz
+    if !has('nvim')
+        set ch=3
+    endif
 
     nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
     nmap     <silent> <nowait> <buffer> <Space>    <Plug>(VM-Toggle-Mappings)
@@ -98,6 +101,7 @@ fun! vm#reset(...)
     let &smartcase   = s:v.oldcase[0]
     let &ignorecase  = s:v.oldcase[1]
     let &lz          = s:v.oldlz
+    let &ch          = s:v.oldch
     call s:V.Funcs.restore_regs()
     call s:V.Maps.mappings(0, 1)
     call vm#maps#default()

@@ -139,22 +139,22 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1, 1)<cr>
     nnoremap        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:VM.last_visual, 1)<cr>
 
-    imap            <Plug>(VM-Insert-Left-Arrow)       <esc>hi
-    imap            <Plug>(VM-Insert-Right-Arrow)      <esc>li
-    imap            <Plug>(VM-Insert-Return)           <esc>l:call b:VM_Selection.Live.return()<cr>i
+    imap            <Plug>(VM-Insert-Left-Arrow)       <esc>:silent! undojoin<cr>hi
+    imap            <Plug>(VM-Insert-Right-Arrow)      <esc>:silent! undojoin<cr>li
+    imap            <Plug>(VM-Insert-Return)           <esc>:call b:VM_Selection.Live.return()<cr>i
     imap            <Plug>(VM-Insert-Del)              <esc>:silent! undojoin<cr><del>i
     imap            <Plug>(VM-Insert-BS)               <esc>:silent! undojoin<cr>Xi
     imap            <Plug>(VM-Insert-Paste)            <esc>:call b:VM_Selection.Live.paste()<cr>oi
     imap            <Plug>(VM-Insert-CtrlW)            <esc>sbdi
-    imap            <Plug>(VM-Insert-CtrlA)            <esc>:silent! undojoin<cr>^i
-    imap            <Plug>(VM-Insert-CtrlE)            <esc>:silent! undojoin<cr>A
+    imap            <Plug>(VM-Insert-CtrlA)            <esc>^:silent! undojoin<cr>i
+    imap            <Plug>(VM-Insert-CtrlE)            <esc>$:silent! undojoin<cr>a
 
-    fun! <SID>Yank(hard)
+    fun! s:Yank(hard)
         if empty(b:VM_Selection.Global.is_region_at_pos('.')) | let b:VM_Selection.Vars.yanked = 1 | return 'y' | endif
         return ":\<C-u>call b:VM_Selection.Edit.yank(".a:hard.", 0, 0, 1)\<cr>"
     endfun
 
-    fun! <SID>Mode()
+    fun! s:Mode()
         let mode = g:VM.extend_mode? ' (extend mode)' : ' (cursor mode)'
         call b:VM_Selection.Funcs.msg([["Enter regex".mode.":", 'WarningMsg'], ["\n/", 'None']], 1)
     endfun

@@ -71,6 +71,7 @@ fun! s:Insert.key(type) dict
         if s:X()
             if s:v.direction | call vm#commands#invert_direction() | endif
             call s:G.change_mode(1) | endif
+        for r in s:R() | call s:V.Edit.extra_spaces(r, 0) | endfor
         call self.start('a')
 
     else

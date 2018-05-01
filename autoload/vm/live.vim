@@ -19,9 +19,9 @@ fun! vm#live#init()
     let s:Byte    = { pos  -> s:F.pos2byte(pos)         }
     let s:Pos     = { byte -> s:F.byte2pos(byte)        }
     let s:Cur     = { byte -> s:F.Cursor(byte)          }
-    let s:append  = { m    -> index(['a', 'A'], m) >= 0 }
     let s:newline = { m    -> index(['o', 'O'], m) >= 0 }
 
+    let s:CR = 0
     return s:Live
 endfun
 
@@ -37,12 +37,14 @@ fun! s:Live.start(mode) dict
     let I = self
     let s:V.Insert.is_active = 1
 
+    let I.mode      = a:mode
+    let I.append    = index(['a', 'A'], I.mode) >= 0
+
     let R           = s:G.select_region_at_pos('.')
     let I.index     = R.index
-    let I.Begin     = s:append(a:mode)? R.A+1 : R.A
-    let I.begin     = [R.l, s:append(a:mode)? R.a+1 : R.a]
+    let I.Begin     = I.append? R.A+1 : R.A
+    let I.begin     = [R.l, I.append? R.a+1 : R.a]
     let I.size      = s:size()
-    let I.mode      = a:mode
     let I.cursors   = []
     let I.lines     = {}
     let I.change    = 0
@@ -50,8 +52,8 @@ fun! s:Live.start(mode) dict
     call clearmatches()
 
     for r in s:R()
-        let A = s:append(a:mode)? r.A+1 : r.A
-        let C = s:Cursor.new(A, r.l, s:append(a:mode)? r.a+1 : r.a)
+        let A = I.append? r.A+1 : r.A
+        let C = s:Cursor.new(A, r.l, I.append? r.a+1 : r.a)
         call add(I.cursors, C)
 
         call s:V.Edit.extra_spaces(r, 0)
@@ -67,7 +69,7 @@ fun! s:Live.start(mode) dict
                 let A = I.lines[r.l].cursors[0].a
                 call cursor(r.l, first_a)
                 call s:G.select_region_at_pos('.')
-                call self.start(a:mode)
+                call I.start(I.mode)
                 return
             else
                 call add(I.lines[r.l].cursors, C)
@@ -85,8 +87,16 @@ fun! s:Live.start(mode) dict
     call s:G.update_cursor_highlight()
 
     "start insert mode and break the undo point
-    let keys = (a:mode=='c'? 'i': a:mode)."\<c-g>u"
+    let keys = (I.mode=='c'? 'i': I.mode)."\<c-g>u"
     call feedkeys(keys, 'n')
+
+    "check if there are insert marks that must be cleared
+    if !empty(s:v.insert_marks)
+        for l in keys(s:v.insert_marks)
+            call setline(l, substitute(getline(l), '_', '', ''))
+            call remove(s:v.insert_marks, l)
+        endfor
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -131,32 +141,32 @@ endfun
 
 fun! s:Live.return() dict
 
-    call s:V.Edit.run_normal('s$d', 1, 1, 0)
-    call s:V.Edit.run_ex("call append(line('.'), '')")
-    let old = s:v.multiline
-    let s:v.multiline = 1
-    normal lp
-    call s:V.Edit.run_normal('==', 0, 1, 0)
-    call s:V.Edit.run_normal('^', 1, 1, 0)
-    let s:v.multiline = old
+    call s:V.Edit._process(self.append? 'normal! l' : '', 'cr')
+    normal j^
+    silent! undojoin
+
+    "after cr mode will be set to 'i', but we must remeber if current mode is 'a'
+    let s:CR = self.mode==?'a'
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Live.stop() dict
     iunmap <buffer> <esc>
-    call self.auto_end() | let s:v.eco = 1
+    call self.auto_end() | let s:v.eco = 1 | let i = 0
 
-    let i = 0
+    "should the cursor step back when exiting insert mode?
+    let back = self.append || s:CR
+
     for r in s:R()
         let c = self.cursors[i]
-        let a = s:append(self.mode)? c.a-1 : c.a 
+        let a = back? c.a-1 : c.a
         call r.update_cursor([c.l, a + self.change + self.change*c.nth])
         if r.index == self.index | let s:v.storepos = [r.l, r.a] | endif
         let i += 1
     endfor
 
-    let self.mode = ''
+    let s:CR = 0
     let s:V.Insert.is_active = 0
 
     call s:V.Edit.post_process(0,0)
@@ -184,7 +194,9 @@ fun! s:Cursor.new(byte, ln, col) dict
     let C.A      = a:byte
     let C.txt    = ''
     let C.l      = a:ln
+    let C.L      = a:ln
     let C.a      = a:col
+    let C.b      = C.a
     let C.active = ( C.index == s:Live.index )
     let C.hl  = matchaddpos('MultiCursor', [[C.l, C.a]], 40)
 
@@ -201,6 +213,7 @@ fun! s:Cursor.update(l, c) dict
         let C.a = a:c
     endif
     let C.A = s:Byte([C.l, a:c])
+    let C.b = a:c
 
     call matchdelete(C.hl)
     let C.hl  = matchaddpos('MultiCursor', [[C.l, a:c]], 40)
@@ -220,6 +233,11 @@ fun! s:Line.new(line, cursor) dict
     let L.txt     = getline(a:line)
     let L.cursors = [a:cursor]
 
+    "check if there are insert marks that must be cleared
+    if has_key(s:v.insert_marks, L.l)
+        let L.txt = substitute(L.txt, '_', '', '')
+    endif
+
     return L
 endfun
 
@@ -228,6 +246,7 @@ endfun
 fun! s:Line.update(change, text) dict
     let change = 0
     let text = self.txt
+
     for c in self.cursors
         let a = c.a>1? c.a-2 : c.a-1
         let b = c.a-1

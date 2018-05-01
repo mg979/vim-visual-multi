@@ -99,7 +99,7 @@ fun! s:skip_shorter_lines(where)
         call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return 1
     endif
 
-    if !s:V.Block.vertical() | call s:G.new_cursor() | endif
+    if !s:V.Block.vertical() | call s:G.new_cursor() | else | return 1 | endif
 endfun
 
 fun! vm#commands#add_cursor_at_pos(where, extend, ...)
