@@ -54,18 +54,14 @@ fun! s:Live.start(mode) dict
         let C = s:Cursor.new(A, r.l, s:append(a:mode)? r.a+1 : r.a)
         call add(I.cursors, C)
 
-        if r.b == col([r.L, '$'])
-            call setline(r.L, ' ')
-            call add(s:v.extra_spaces, r.L)
-        endif
+        call s:V.Edit.extra_spaces(r, 0)
 
         if !has_key(I.lines, r.l)
             let I.lines[r.l] = s:Line.new(r.l, C)
-            let first_a = C.a
-            let nth = 0
-            let C.nth = 0
+            let first_a = r.a | let nth = 0 | let C.nth = 0
         else
             let nth += 1
+            let C.nth = nth
             "not the first cursor in its line? change main cursor and restart
             if r == R
                 let A = I.lines[r.l].cursors[0].a
@@ -75,7 +71,6 @@ fun! s:Live.start(mode) dict
                 return
             else
                 call add(I.lines[r.l].cursors, C)
-                let C.nth = nth
             endif
         endif
     endfor
@@ -114,6 +109,7 @@ fun! s:Live.insert(...) dict
     endif
 
     let pos      = I.begin[1]
+    "popup eats one char on esc, give one more space
     let cur      = a:0? getpos('.')[2]+1 : getpos('.')[2]
     let I.change = cur - pos
     let text     = getline(ln)[(pos-1):(cur-2)]
@@ -121,6 +117,14 @@ fun! s:Live.insert(...) dict
     for l in keys(L)
         call L[l].update(I.change, text)
     endfor
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Live.paste() dict
+    call s:G.select_region(-1)
+    call s:V.Edit.paste(1, 1, 1)
+    call s:G.select_region(self.index)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -43,7 +43,7 @@ fun! vm#maps#permanent()
         nmap <silent> <C-S-Up>    <Plug>(VM-Select-Line-Up)
         nmap <silent> <M-C-Right> <Plug>(VM-Select-E)
         nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
-        nmap <silent> <C-d>       <Plug>(VM-Find-I-Word)
+        "nmap <silent> <C-d>       <Plug>(VM-Find-I-Word)
     endif
 
     if g:VM_default_mappings
@@ -67,8 +67,9 @@ let s:NVIM = has('gui_running') || has('nvim')
 
 let s:simple   = split('nNqQU*#o[]{}?/:uMS', '\zs')
 
-let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qQvVnN@.', '\zs'), '"z".v:val')
-let s:ctr_maps = ['h', 'l', 'w', 'c' ]
+let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.', '\zs'), '"z".v:val')
+let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
+let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
 let s:alt_maps = ['j', 'k', ']', 'q', 'BS', 'm', 'd' ]
 let s:leader   = []
@@ -217,7 +218,7 @@ fun! s:Maps.start() dict
     nmap          <nowait> <buffer> zv              <Plug>(VM-Run-Visual)
     nmap <silent> <nowait> <buffer> zV              <Plug>(VM-Run-Last-Visual)
     nmap          <nowait> <buffer> zq              <Plug>(VM-Run-Ex)
-    nmap <silent> <nowait> <buffer> zQ              <Plug>(VM-Run-Last-Ex)
+    nmap <silent> <nowait> <buffer> <C-z>           <Plug>(VM-Run-Last-Ex)
     nmap <silent> <nowait> <buffer> z@              <Plug>(VM-Run-Macro)
     nmap <silent> <nowait> <buffer> z.              <Plug>(VM-Run-Dot)
     nmap          <nowait> <buffer> zn              <Plug>(VM-Numbers)
@@ -228,6 +229,12 @@ fun! s:Maps.start() dict
     "edit
     call self.edit_start()
 
+    "custom commands
+    let cm = g:VM_custom_commands
+    for m in keys(cm)
+        exe "nmap <silent> <nowait> <buffer> ".cm[m][0]." <Plug>(VM-".m.")"
+    endfor
+
     "double leader
     "nmap     <silent> <nowait> <buffer> <leader><leader>@ <Plug>(VM-Run-Macro-Replace)
 
@@ -236,6 +243,19 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Maps.edit_start() dict
+    imap <silent> <nowait> <buffer> <Left>          <Plug>(VM-Insert-Left-Arrow)
+    imap <silent> <nowait> <buffer> <Right>         <Plug>(VM-Insert-Right-Arrow)
+    "imap <silent> <nowait> <buffer> <CR>            <Plug>(VM-Insert-Return)
+    imap <silent> <nowait> <buffer> <BS>            <Plug>(VM-Insert-BS)
+    imap <silent> <nowait> <buffer> <Del>           <Plug>(VM-Insert-Del)
+    imap <silent> <nowait> <buffer> <C-v>           <Plug>(VM-Insert-Paste)
+    imap <silent> <nowait> <buffer> <C-w>           <Plug>(VM-Insert-CtrlW)
+    imap <silent> <nowait> <buffer> <C-d>           <Plug>(VM-Insert-Del)
+    imap <silent> <nowait> <buffer> <C-a>           <Plug>(VM-Insert-CtrlA)
+    imap <silent> <nowait> <buffer> <C-e>           <Plug>(VM-Insert-CtrlE)
+    imap <silent> <nowait> <buffer> <C-b>           <Plug>(VM-Insert-Left-Arrow)
+    imap <silent> <nowait> <buffer> <C-f>           <Plug>(VM-Insert-Right-Arrow)
+
     nmap <silent> <nowait> <buffer> i               <Plug>(VM-Edit-i-Insert)
     nmap <silent> <nowait> <buffer> I               <Plug>(VM-Edit-I-Insert)
     nmap <silent> <nowait> <buffer> a               <Plug>(VM-Edit-a-Append)
@@ -279,7 +299,6 @@ fun! s:arrows()
     nmap     <silent> <nowait> <buffer> <S-Left>    <Plug>(VM-Select-h)
     nmap     <silent> <nowait> <buffer> <M-Right>   <Plug>(VM-This-Select-l)
     nmap     <silent> <nowait> <buffer> <M-Left>    <Plug>(VM-This-Select-h)
-
 
     nmap     <silent> <nowait> <buffer> <C-Right>   <Plug>(VM-Select-e)
     nmap     <silent> <nowait> <buffer> <C-Left>    <Plug>(VM-End-Back)
@@ -325,6 +344,11 @@ fun! s:Maps.end() dict
 
     for m in (s:leader2)
         exe "nunmap <buffer> <leader><leader>".m
+    endfor
+
+    let cm = g:VM_custom_commands
+    for m in keys(cm)
+        exe "silent! nunmap <buffer>".cm[m][0]
     endfor
 
     if g:VM_sublime_mappings
@@ -389,6 +413,14 @@ fun! s:Maps.edit_stop() dict
     for m in (s:edit)
         exe "silent! nunmap <buffer> ".m
     endfor
+    for m in (s:ctr_i)
+        exe "iunmap <buffer> <C-".m.">"
+    endfor
+    iunmap <buffer> <Right>
+    iunmap <buffer> <Left>
+    iunmap <buffer> <Del>
+    "iunmap <buffer> <CR>
+    iunmap <buffer> <BS>
     silent! nunmap <buffer> <M-o>
     silent! nunmap <buffer> <del>
     silent! nunmap <buffer> <leader>y

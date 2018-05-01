@@ -14,23 +14,40 @@ fun! vm#global#init()
     let s:B       = { -> s:v.block_mode && g:VM.extend_mode }
 
     "make a bytes map of the file, where 0 is unselected, 1 is selected
-    call s:Global.reset_byte_map()
+    call s:Global.reset_byte_map(0)
     return s:Global
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.get_region() dict
+fun! s:Global.new_region() dict
     """Get the region under cursor, or create a new one if there is none."""
 
     let R = self.is_region_at_pos('.')
     if empty(R) | let R = vm#region#new(0) | endif
 
-    let s:v.matches = getmatches()
     if !s:v.eco
+        let s:v.matches = getmatches()
         call self.select_region(R.index)
         call s:V.Search.check_pattern()
         call s:F.restore_reg() | endif
+    return R
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.get_region() dict
+    """Used by select operator."""
+
+    let R = self.is_region_at_pos('.')
+
+    if !empty(R) | return R                | endif
+    if s:v.eco   | return vm#region#new(0) | endif
+
+    call s:V.Search.add()
+    let R = vm#region#new(0)
+    let s:v.matches = getmatches()
+    call s:F.restore_reg()
     return R
 endfun
 
@@ -90,7 +107,7 @@ fun! s:Global.update_highlight(...) dict
         call r.update_highlight()
     endfor
 
-    call setmatches(s:v.matches)
+    let s:v.matches = getmatches()
     call self.update_cursor_highlight()
 endfun
 
@@ -159,7 +176,7 @@ endfun
 fun! s:Global.collapse_regions() dict
     """Collapse regions to cursors and turn off extend mode."""
 
-    call self.reset_byte_map()
+    call self.reset_byte_map(0)
     call s:V.Block.stop()
 
     for r in s:R() | call r.update_cursor([r.l, (r.dir? r.a : r.b)]) | endfor
@@ -218,10 +235,24 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.reset_byte_map() dict
+fun! s:Global.reset_byte_map(update) dict
     let self.A = line2byte(line('$') + 1) + 1
     let self.B = 0
     let s:V.Bytes = map(range(self.A), 0)
+
+    if a:update
+        for r in s:R() | call r.update_bytes_map() | endfor
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.eco_off() dict
+    """Common operations when eco/auto modes end.
+    if !( s:v.eco || s:v.auto ) | return | endif
+
+    let s:v.silence = 0 | let s:v.auto = 0 | let s:v.eco = 0
+    call s:F.restore_reg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

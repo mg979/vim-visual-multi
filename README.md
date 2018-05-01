@@ -8,6 +8,11 @@ Live edit test with autocomplete
 ![Imgur](https://i.imgur.com/XmsozQ4.gif)
 
 -------
+Select operator, here shown with 'wellle/targets.vim' plugin: sib, sia, saa + selection shift
+
+![Imgur](https://i.imgur.com/yM3Fele.gif)
+
+-------
 Edit test: join lines(J), change motion at cursors, append(a), visual command at cursors 
 
 ![Imgur](https://i.imgur.com/2QKCaYv.gif)

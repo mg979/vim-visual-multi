@@ -183,7 +183,7 @@ fun! vm#commands#regex_done()
     silent keepjumps normal! gny`]
     call s:Search.get_slash_reg()
 
-    if s:X()      | call s:G.get_region() | call s:F.count_msg(0)
+    if s:X()      | call s:G.new_region() | call s:F.count_msg(0)
     else          | call vm#commands#add_cursor_at_word(0, 0)
     endif
 endfun
@@ -232,7 +232,7 @@ fun! vm#commands#find_under(visual, whole, inclusive)
     if !a:visual | call s:yank(a:inclusive) | endif
 
     call s:Search.add()
-    let R = s:G.get_region()
+    let R = s:G.new_region()
     if R.h && !s:v.multiline | call s:F.toggle_option('multiline', 1) | endif
     call s:F.count_msg(1)
     return s:check_overlap(R)
@@ -258,11 +258,10 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     endwhile
 
     call setpos('.', storepos)
-    let s:v.eco = 0
-    call s:G.reorder_regions()
+    call s:G.eco_off()
+    call s:G.reset_byte_map(1)
     call s:G.update_highlight()
     call s:G.select_region_at_pos('.')
-    call s:F.restore_reg()
     call s:F.count_msg(1)
 endfun
 
@@ -274,7 +273,7 @@ endfun
 fun! s:get_next(n)
     if s:X()
         silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
-        let R = s:G.get_region()
+        let R = s:G.new_region()
         call s:F.count_msg(1)
     else
         silent exe "keepjumps normal! ".a:n."g".a:n."y`["
@@ -417,8 +416,8 @@ fun! vm#commands#motion(motion, count, select, this)
 
     "-----------------------------------------------------------------------
 
-    if index(['$', '0', '^', '%'], a:motion) >= 0 | let s:v.merge        = 1 | endif
-    if a:select && !s:X()                         | let g:VM.extend_mode = 1 | endif
+    if s:symbol()          | let s:v.merge = 1          | endif
+    if a:select && !s:X()  | let g:VM.extend_mode = 1   | endif
 
     if a:select && !s:v.multiline && s:vertical()
         call s:F.toggle_option('multiline', 1) | endif
@@ -514,6 +513,7 @@ endfun
 let s:only_this        = {   -> s:v.only_this || s:v.only_this_always               }
 let s:can_from_back    = {   -> s:X() && s:motion == '$' && !s:v.direction          }
 let s:always_from_back = {   -> s:X() && index(['^', '0', 'F', 'T'], s:motion) >= 0 }
+let s:symbol           = {   -> index(['^', '0', '%', '$'],          s:motion) >= 0 }
 let s:horizontal       = {   -> index(['h', 'l'],                    s:motion) >= 0 }
 let s:vertical         = {   -> index(['j', 'k'],                    s:motion) >= 0 }
 let s:simple           = { m -> index(split('hlwebWEB', '\zs'),      m)        >= 0 }
@@ -530,7 +530,7 @@ endfun
 
 fun! vm#commands#move(...)
     if !s:v.moving || s:F.no_regions() | return | endif
-    let s:v.moving -= 1 | call s:G.reset_byte_map()
+    let s:v.moving -= 1 | call s:G.reset_byte_map(0)
     let R = s:R()[ s:v.index ]
 
     call s:before_move()

@@ -49,8 +49,7 @@ fun! s:Funcs.byte2pos(byte) dict
     """Return the (line, col) position of a byte offset.
 
     let line   = byte2line(a:byte)
-    let lnbyte = line2byte(line)
-    let col    = line + ( a:byte - lnbyte )
+    let col    = a:byte - line2byte(line)
     return [line, col]
 endfun
 

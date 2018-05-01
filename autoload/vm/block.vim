@@ -27,8 +27,7 @@ fun! s:Block.vertical() dict
     elseif s:v.block[1] >= col('.') | let s:v.block[1] = col('.') | endif
 
     call s:G.new_cursor()
-    call s:G.update_regions()
-    call s:G.select_region(s:v.index)
+    call s:G.update_and_select_region()
     return 1
 endfun
 

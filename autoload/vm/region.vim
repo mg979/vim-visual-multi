@@ -128,7 +128,7 @@ fun! s:Region.new(cursor, ...)
 
     if !s:v.eco
         call R.highlight()
-        call s:update_bytes_map(R)
+        call R.update_bytes_map()
     endif
 
     return R
@@ -377,7 +377,7 @@ fun! s:Region.update_vars() dict
         if g:VM.selecting && r.h && !s:v.multiline
             call s:F.toggle_option('multiline') | endif
 
-        call s:update_bytes_map(r)
+        call r.update_bytes_map()
     endif
 endfun
 
@@ -440,7 +440,16 @@ fun! s:Region.update_highlight() dict
 
     call self.remove_highlight()
     call self.highlight()
-    let s:v.matches = getmatches()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region.update_bytes_map() dict
+    if !s:X() || s:v.eco | return | endif | let r = self
+
+    let s:V.Bytes[r.A:r.B] = map(s:V.Bytes[r.A:r.B], 'v:val+1')
+    if r.A < s:G.A | let s:G.A = r.A | endif
+    if r.B > s:G.B | let s:G.B = r.B | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -460,16 +469,6 @@ fun! s:pattern(r)
 
     "return current pattern if one is present (in cursor mode text is empty)
     return empty(a:r.pat)? '' : a:r.pat
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:update_bytes_map(r)
-    if !s:X() || s:v.eco | return | endif | let r = a:r
-
-    let s:V.Bytes[r.A:r.B] = map(s:V.Bytes[r.A:r.B], 'v:val+1')
-    if r.A < s:G.A | let s:G.A = r.A | endif
-    if r.B > s:G.B | let s:G.B = r.B | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

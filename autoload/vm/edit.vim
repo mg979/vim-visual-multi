@@ -104,10 +104,10 @@ fun! s:Edit.post_process(reselect, ...) dict
     call self.extra_spaces(0, 1)
 
     "clear highlight now to prevent weirdinesses, then update regions
-    call clearmatches()    | let s:v.eco = 0    | let s:v.auto = 0
+    call clearmatches()    | call s:G.eco_off()
 
     "byte map must be reset after all editing has been done, and before final update
-    call s:G.reset_byte_map()
+    call s:G.reset_byte_map(0)
 
     "update, restore position and clear var
     let pos = empty(s:v.storepos)? '.' : s:v.storepos
@@ -222,7 +222,7 @@ fun! s:Edit.replace() dict
         call s:F.msg('Replace char... ', 1)
         let char = nr2char(getchar())
         if char ==? "\<esc>" | call s:F.msg('Canceled.', 1) | return | endif
-        call self.run_normal('r'.char, 0, 0)
+        call self.run_normal('r'.char, 0, '', 0)
         call s:F.count_msg(1)
     endif
 endfun
@@ -231,8 +231,8 @@ endfun
 " Paste
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.paste(before, regions, reselect) dict
-    let reg = v:register | let X = s:X()
+fun! s:Edit.paste(before, regions, reselect, ...) dict
+    let reg = a:0? a:1 : v:register | let X = s:X()
 
     if X | call self.delete(1, "_", 1) | endif
 
@@ -380,10 +380,10 @@ fun! s:Edit.get_motion(op, n) dict
         call feedkeys(cmd)
 
     elseif a:op ==# 'c'
-        if m[:1] ==# 'cs' | call self.run_normal(m, 1, 0) | return | endif
-        let s:cmd = M
+        if m[:1] ==# 'cs' | call self.run_normal(m, 1, '', 0) | return | endif
+        let s:cmd = substitute(M, '^(\d{-})c', '\1d', '')
         call self.process()
-        call s:V.Insert.start('c')
+        call s:V.Insert.start('i')
     endif
 endfun
 
@@ -391,11 +391,11 @@ endfun
 " Ex commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_normal(cmd, recursive, maps, ...) dict
+fun! s:Edit.run_normal(cmd, recursive, count, maps) dict
 
     "-----------------------------------------------------------------------
 
-    if !a:0 && a:cmd == -1
+    if a:cmd == -1
         let cmd = input('Normal command? ')
         if empty(cmd) | call s:F.msg('Command aborted.', 1) | return | endif
 
@@ -410,7 +410,7 @@ fun! s:Edit.run_normal(cmd, recursive, maps, ...) dict
 
     "-----------------------------------------------------------------------
 
-    let s:cmd = a:recursive? ("normal ".cmd) : ("normal! ".cmd)
+    let s:cmd = a:recursive? ("normal ".a:count.cmd) : ("normal! ".a:count.cmd)
     if s:X() | call s:G.change_mode(1) | endif
 
     call s:before_macro(a:maps)
@@ -472,6 +472,10 @@ fun! s:Edit.run_ex(...) dict
 
     "-----------------------------------------------------------------------
 
+    if has_key(g:VM_commands_aliases, cmd)
+        let cmd = g:VM_commands_aliases[cmd]
+    endif
+
     let g:VM.last_ex = cmd
     if s:X() | call s:G.change_mode(1) | endif
 
@@ -510,7 +514,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit._numbers(start, stop, step, sep, app) dict
-    let a = a:start | let b = a:stop | let s = a:step | let x = a:sep | let text = []
+    let a = str2nr(a:start) | let b = str2nr(a:stop) | let s = str2nr(a:step) | let x = a:sep | let text = []
 
     "reverse order if start>stop
     if b >= a
@@ -542,7 +546,7 @@ fun! s:Edit.numbers(start, app) dict
     let text = []
 
     let l:Invalid = { -> s:F.msg('Invalid expression', 1) }
-    let l:N =       { x -> match(x, '\D')? 1 : 0 }
+    let l:N =       { x -> match(x, '\D')<0? 1 : 0 }
 
     let S = a:start
     let x = S.'/'.( S-1+len(s:R()) ).'/1/'
@@ -729,7 +733,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:after_macro()
-    let s:v.silence = 0 | let s:v.eco = 0
     let s:v.multiline = s:old_multiline
     call s:V.Maps.mappings(1)
 endfun

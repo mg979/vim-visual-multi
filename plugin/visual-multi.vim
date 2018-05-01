@@ -32,6 +32,8 @@ fun! <SID>VM_Init()
     let g:VM_custom_remaps                    = get(g:, 'VM_custom_remaps', {})
     let g:VM_extend_by_default                = get(g:, 'VM_extend_by_default', 0)
     let g:VM_skip_empty_lines                 = get(g:, 'VM_skip_empty_lines', 0)
+    let g:VM_custom_commands                  = get(g:, 'VM_custom_commands', {})
+    let g:VM_commands_aliases                 = get(g:, 'VM_commands_aliases', {})
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Set up highlighting
