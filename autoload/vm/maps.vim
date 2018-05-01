@@ -243,8 +243,14 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Maps.edit_start() dict
+    imap <silent> <nowait> <buffer> <Up>            <Plug>(VM-Insert-Up-Arrow)
+    imap <silent> <nowait> <buffer> <Down>          <Plug>(VM-Insert-Down-Arrow)
     imap <silent> <nowait> <buffer> <Left>          <Plug>(VM-Insert-Left-Arrow)
     imap <silent> <nowait> <buffer> <Right>         <Plug>(VM-Insert-Right-Arrow)
+    imap <silent> <nowait> <buffer> <C-h>           <Plug>(VM-Insert-Left-Arrow)
+    imap <silent> <nowait> <buffer> <C-j>           <Plug>(VM-Insert-Down-Arrow)
+    imap <silent> <nowait> <buffer> <C-k>           <Plug>(VM-Insert-Up-Arrow)
+    imap <silent> <nowait> <buffer> <C-l>           <Plug>(VM-Insert-Right-Arrow)
     imap <silent> <nowait> <buffer> <CR>            <Plug>(VM-Insert-Return)
     imap <silent> <nowait> <buffer> <BS>            <Plug>(VM-Insert-BS)
     imap <silent> <nowait> <buffer> <Del>           <Plug>(VM-Insert-Del)
@@ -416,6 +422,12 @@ fun! s:Maps.edit_stop() dict
     for m in (s:ctr_i)
         exe "iunmap <buffer> <C-".m.">"
     endfor
+    iunmap <buffer> <C-j>
+    iunmap <buffer> <C-k>
+    iunmap <buffer> <Up>
+    iunmap <buffer> <Down>
+    iunmap <buffer> <C-h>
+    iunmap <buffer> <C-l>
     iunmap <buffer> <Right>
     iunmap <buffer> <Left>
     iunmap <buffer> <Del>

@@ -140,6 +140,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:VM.last_visual, 1)<cr>
 
     imap            <Plug>(VM-Insert-Left-Arrow)       <esc>:silent! undojoin<cr>hi
+    imap            <Plug>(VM-Insert-Down-Arrow)       <esc>:silent! undojoin<cr>ji
+    imap            <Plug>(VM-Insert-Up-Arrow)         <esc>:silent! undojoin<cr>ki
     imap            <Plug>(VM-Insert-Right-Arrow)      <esc>:silent! undojoin<cr>li
     imap            <Plug>(VM-Insert-Return)           <esc>:call b:VM_Selection.Live.return()<cr>i
     imap            <Plug>(VM-Insert-Del)              <esc>:silent! undojoin<cr><del>i
