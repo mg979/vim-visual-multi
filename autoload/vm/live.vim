@@ -66,7 +66,7 @@ fun! s:Live.start(mode) dict
             let C.nth = nth
             "not the first cursor in its line? change main cursor and restart
             if r == R
-                let A = I.lines[r.l].cursors[0].a
+                call I.stop()
                 call cursor(r.l, first_a)
                 call s:G.select_region_at_pos('.')
                 call I.start(I.mode)

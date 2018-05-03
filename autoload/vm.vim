@@ -78,13 +78,13 @@ fun! vm#init_buffer(empty, ...)
     set ww=h,l,<,>
     set lz
     if !has('nvim')
-        set ch=3
+        set ch=2
     endif
 
     nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
     nmap     <silent> <nowait> <buffer> <Space>    <Plug>(VM-Toggle-Mappings)
 
-    call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.\n", 0)
+    call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
 
     let g:VM.is_active = 1
     return s:V
