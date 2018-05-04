@@ -41,6 +41,7 @@ fun! vm#commands#select_operator(all)
         return
     endif
 
+    let s:v.storepos = getpos('.')[1:2]
     let c = nr2char(getchar())
     if index(split('webWEB$0^', '\zs'), c) >= 0
         call s:V.Edit.select_op('gs'.c )
@@ -48,8 +49,6 @@ fun! vm#commands#select_operator(all)
         let d = nr2char(getchar())
         call s:V.Edit.select_op('gs'.c.d)
     endif
-
-    call s:G.update_and_select_region()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -473,21 +472,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:inclusive(c)
-    let c = a:c
-
-    if     index(['[', ']'], c) != -1 | let c = '[' | let d = ']'
-    elseif index(['(', ')'], c) != -1 | let c = '(' | let d = ')'
-    elseif index(['{', '}'], c) != -1 | let c = '{' | let d = '}'
-    elseif index(['<', '>'], c) != -1 | let c = '<' | let d = '>'
-    else
-        let d = nr2char(getchar())
-    endif
-    return [c, d]
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! vm#commands#shrink_or_enlarge(shrink, this)
     """Reduce/enlarge selection size by 1."""
     if s:F.no_regions() | return                  | endif
@@ -536,19 +520,16 @@ fun! vm#commands#move(...)
     call s:before_move()
 
     if s:only_this()
-        call s:R()[s:v.index].move(s:motion) | let s:v.only_this = 0
+        call R.move(s:motion) | let s:v.only_this = 0
     else
-        for r in s:R() | call r.move(s:motion) | endfor | endif
+        for r in s:R()        | call r.move(s:motion) | endfor | endif
 
     "update variables, facing direction, highlighting
-    if s:after_move() | return | endif
+    if s:after_move()         | return                | endif
 
     let s:v.direction = R.dir
     call s:G.update_highlight()
     call s:G.select_region(R.index)
-
-    call s:F.count_msg(0)
-    let s:v.silence = 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

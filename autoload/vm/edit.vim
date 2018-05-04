@@ -419,14 +419,15 @@ fun! s:Edit.run_normal(cmd, recursive, count, maps) dict
 
     if a:cmd ==# 'X'
         for r in s:R() | call r.bytes([-1,-1]) | endfor
+        call s:G.merge_cursors()
     elseif a:cmd ==# 'x'
         for r in s:R() | if r.a == col([r.L, '$']) | call r.bytes([-1,-1]) | endif  | endfor
+        call s:G.merge_cursors()
     endif
 
 
     let g:VM.last_normal = [cmd, a:recursive]
-    call self.post_process(0)
-    call s:after_macro()
+    call s:after_macro(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -451,8 +452,7 @@ fun! s:Edit.run_visual(cmd, maps, ...) dict
     call self.process_visual(cmd)
 
     let g:VM.last_visual = cmd
-    call self.post_process(0)
-    call s:after_macro()
+    call s:after_macro(0)
     if s:X() | call s:G.change_mode(1) | endif
 endfun
 
@@ -482,8 +482,7 @@ fun! s:Edit.run_ex(...) dict
 
     call s:before_macro(1)
     call self._process(cmd)
-    call self.post_process(0)
-    call s:after_macro()
+    call s:after_macro(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -505,8 +504,7 @@ fun! s:Edit.run_macro(replace) dict
     if s:X() | call s:G.change_mode(1) | endif
 
     call self.process()
-    call self.post_process(0)
-    call s:after_macro()
+    call s:after_macro(0)
     redraw!
 endfun
 
@@ -620,8 +618,8 @@ fun! s:Edit.del_key() dict
 
     call s:before_macro(0)
     call self._process(0, 'del')
-    call self.post_process(0)
-    call s:after_macro()
+    call s:G.merge_cursors()
+    call s:after_macro(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -644,8 +642,7 @@ fun! s:Edit.select_op(cmd) dict
             doautocmd CursorMoved
         endif
     endfor
-    call self.post_process(0)
-    call s:after_macro()
+    call s:after_macro(0)
 
     if empty(s:v.search) | let @/ = ''                      | endif
     if !has('nvim')      | let &updatetime = g:VM.oldupdate | endif
@@ -733,8 +730,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:after_macro()
+fun! s:after_macro(reselect, ...)
     let s:v.multiline = s:old_multiline
+    if a:reselect
+        call s:V.Edit.post_process(1, a:1)
+    else
+        call s:V.Edit.post_process(0)
+    endif
     call s:V.Maps.mappings(1)
 endfun
 

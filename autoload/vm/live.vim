@@ -48,6 +48,7 @@ fun! s:Live.start(mode) dict
     let I.cursors   = []
     let I.lines     = {}
     let I.change    = 0
+    let s:C         = { -> I.cursors }
 
     call clearmatches()
 
@@ -196,7 +197,7 @@ fun! s:Cursor.new(byte, ln, col) dict
     let C.l      = a:ln
     let C.L      = a:ln
     let C.a      = a:col
-    let C.b      = C.a
+    let C._a    = C.a
     let C.active = ( C.index == s:Live.index )
     let C.hl  = matchaddpos('MultiCursor', [[C.l, C.a]], 40)
 
@@ -213,7 +214,7 @@ fun! s:Cursor.update(l, c) dict
         let C.a = a:c
     endif
     let C.A = s:Byte([C.l, a:c])
-    let C.b = a:c
+    let C._a = a:c
 
     call matchdelete(C.hl)
     let C.hl  = matchaddpos('MultiCursor', [[C.l, a:c]], 40)

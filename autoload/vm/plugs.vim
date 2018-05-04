@@ -144,7 +144,7 @@ fun! vm#plugs#init()
     imap            <Plug>(VM-Insert-Up-Arrow)         <esc>:silent! undojoin<cr>ki
     imap            <Plug>(VM-Insert-Right-Arrow)      <esc>:silent! undojoin<cr>li
     imap            <Plug>(VM-Insert-Return)           <esc>:call b:VM_Selection.Live.return()<cr>i
-    imap            <Plug>(VM-Insert-Del)              <esc>:silent! undojoin<cr><del>i
+    imap            <Plug>(VM-Insert-Del)              <esc>:silent! undojoin<cr>xi
     imap            <Plug>(VM-Insert-BS)               <esc>:silent! undojoin<cr>Xi
     imap            <Plug>(VM-Insert-Paste)            <esc>:call b:VM_Selection.Live.paste()<cr>oi
     imap            <Plug>(VM-Insert-CtrlW)            <esc>sbdi
