@@ -37,6 +37,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldlz            = &lz
     let s:v.oldch            = &ch
     let s:v.oldcase          = [&smartcase, &ignorecase]
+    let s:v.oldtout          = &timeoutlen
 
     "init new vars
 
@@ -77,10 +78,13 @@ fun! vm#init_buffer(empty, ...)
     set virtualedit=onemore
     set ww=h,l,<,>
     set lz
-    if !has('nvim')
-        set ch=2
-    endif
+    "if !has('nvim')
+        "set ch=2
+    "endif
 
+    if !has('nvim') && !has('gui_running')
+        nnoremap <silent> <nowait> <buffer> <esc><esc> <esc><esc>
+    endif
     nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
     nmap     <silent> <nowait> <buffer> <Space>    <Plug>(VM-Toggle-Mappings)
 
@@ -102,6 +106,7 @@ fun! vm#reset(...)
     let &ignorecase  = s:v.oldcase[1]
     let &lz          = s:v.oldlz
     let &ch          = s:v.oldch
+    call vm#commands#regex_reset()
     call s:V.Funcs.restore_regs()
     call s:V.Maps.mappings(0, 1)
     call vm#maps#default()
@@ -110,10 +115,12 @@ fun! vm#reset(...)
     let b:VM_Selection = {}
     let g:VM.is_active = 0
     let g:VM.extend_mode = 0
-    let s:v.silence = 0
 
     nunmap <buffer> <Space>
     nunmap <buffer> <esc>
+    if !has('nvim') && !has('gui_running')
+        nunmap <buffer> <esc><esc>
+    endif
 
     "exiting manually
     if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif
@@ -142,9 +149,12 @@ fun! vm#augroup(end)
         au BufEnter     * call s:buffer_enter()
 
         if has('nvim')
-            au TextYankPost * if s:v.yanked     | call <SID>set_reg()                   | endif
+            au TextYankPost * if s:v.yanked | call <SID>set_reg() | endif
         else
-            au CursorMoved  * if s:v.yanked     | call <SID>set_reg()                   | endif
+            if v:version == 800 && has('patch1206')
+                au CmdlineLeave * let &timeoutlen = s:v.oldtout | silent! cunmap <buffer> <esc><esc>
+            endif
+            au CursorMoved  * if s:v.yanked | call <SID>set_reg() | endif
         endif
     augroup END
 endfun

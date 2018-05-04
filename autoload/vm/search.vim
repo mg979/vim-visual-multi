@@ -59,7 +59,6 @@ endfun
 fun! s:Search.get_slash_reg() dict
     """Get pattern from current "/" register."
     call s:update_search(self.get_pattern('/', 1))
-    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

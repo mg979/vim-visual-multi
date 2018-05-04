@@ -126,7 +126,7 @@ fun! s:Edit.delete(X, register, count) dict
     let r = s:G.select_region_at_pos('.') | let s:v.storepos = [r.l, r.a]
 
     if a:X
-        let size = s:size() | let change = 0
+        let size = s:size() | let change = 0 | let s:v.deleted_text = []
         for r in s:R()
             call r.bytes([change, change])
             call cursor(r.l, r.a)
@@ -140,6 +140,7 @@ fun! s:Edit.delete(X, register, count) dict
                 let s:v.use_register = a:register
                 call self.yank(1, 1, 1)
             endif
+            call add(s:v.deleted_text, r.txt)
             exe "normal! `[d`]"
 
             "update changed size
@@ -295,7 +296,7 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
 
     "write custom and vim registers
     let g:VM.registers[register] = text
-    let type = s:v.multiline? 'V' : 'b'.maxw
+    let type = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
     call setreg(register, join(text, "\n"), type)
 
     "restore default register if a different register was provided
@@ -367,13 +368,13 @@ fun! s:Edit.get_motion(op, n) dict
     if empty(M) | echon ' ...Aborted'
 
     elseif a:op ==# 'd'
-        let s:deleted_text = []
+        let s:v.deleted_text = []
         call self._process("normal! ".M, 'd')
         call self.post_process(0)
-        let maxw = max(map(copy(s:deleted_text), 'len(v:val)'))
+        let maxw = max(map(copy(s:v.deleted_text), 'len(v:val)'))
         let type = s:v.multiline? 'V' : 'b'.maxw
-        call setreg(reg, join(s:deleted_text, "\n"), type)
-        let g:VM.registers[reg] = s:deleted_text
+        call setreg(reg, join(s:v.deleted_text, "\n"), type)
+        let g:VM.registers[reg] = s:v.deleted_text
 
     elseif a:op ==# 'y'
         call s:G.change_mode(1)
@@ -723,9 +724,15 @@ endfun
 
 fun! s:before_macro(maps)
     let s:v.silence = 1 | let s:v.auto = 1 | let s:v.eco = 1
-    let s:old_multiline = s:v.multiline
-    let s:v.multiline = 1
-    if a:maps && g:VM.mappings_enabled | call s:V.Maps.mappings(0, 1) | endif
+    let s:old_multiline = s:v.multiline    | let s:v.multiline = 1
+
+    "disable mappings and run custom functions
+    let s:maps = a:maps
+    nunmap <buffer> <Space>
+    nunmap <buffer> <esc>
+    if a:maps && g:VM.mappings_enabled      | call s:V.Maps.mappings(0, 1) | endif
+    if exists('*VM_before_auto')            | call VM_before_auto()        | endif
+    if a:maps && exists('*VM_disable_maps') | call VM_disable_maps()       | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -737,7 +744,13 @@ fun! s:after_macro(reselect, ...)
     else
         call s:V.Edit.post_process(0)
     endif
+
+    "reenable mappings and run custom functions
+    nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
+    nmap     <silent> <nowait> <buffer> <Space>    <Plug>(VM-Toggle-Mappings)
     call s:V.Maps.mappings(1)
+    if exists('*VM_after_auto')             | call VM_after_auto()   | endif
+    if s:maps && exists('*VM_enable_maps')  | call VM_enable_maps()  | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -755,8 +768,20 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:min(nr)
-    "check for a minimum of available regions
+    "Check for a minimum of available regions
     return ( s:X() && len(s:R()) >= a:nr )
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:fill_text(list)
+    "Ensure there are enough lines for all regions
+    let L = a:list
+    let i = len(s:R()) - len(a:list)
+    while i
+        call add(L, s:v.deleted_text[-i])
+        let i -= 1
+    endwhile
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -774,8 +799,7 @@ fun! s:default_text(regions)
             while len(reg[t]) < width | let reg[t] .= ' ' | endwhile
         endfor
 
-        "ensure there are enough lines for all regions
-        while len(reg) < len(s:R()) | call add(reg, '') | endwhile
+        call s:fill_text(reg)
 
         for n in range(len(s:R()))
             call add(text, reg[n])
@@ -808,7 +832,7 @@ fun! s:special(cmd, r, args)
 
         let s = ok? '' : '_'
         call append(line('.'), s)
-        
+
         if ok               | exe a:cmd    | normal! d$jp==
         elseif end && ind   | normal! j==
         endif
@@ -823,7 +847,7 @@ fun! s:special(cmd, r, args)
         call cursor(a:r.l, a:r.a)
         exe a:cmd
         if s:v.use_register != "_"
-            call add(s:deleted_text, getreg(s:v.use_register))
+            call add(s:v.deleted_text, getreg(s:v.use_register))
         endif
         return 1
 
@@ -846,7 +870,7 @@ fun! s:store_widths(...)
     endif
 
     "mismatching blocks must be corrected
-    if use_list | while len(list) < len(s:R()) | call add(list, '') | endwhile | endif
+    if use_list | call s:fill_text(list) | endif
 
     for r in s:R()
         "if using list, w must be len[i]-1, but always >= 0, set it to 0 if empty

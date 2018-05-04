@@ -50,7 +50,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Erase-Regions)           :call b:VM_Selection.Global.erase_regions()<cr>
     nnoremap        <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
     nnoremap        <Plug>(VM-Switch-Mode)             :call b:VM_Selection.Global.change_mode(0)<cr>
-    nnoremap        <Plug>(VM-Reset)                   :call vm#reset()<cr>
+    nnoremap        <Plug>(VM-Reset)                   :call vm#reset()<cr><esc>
     nnoremap        <Plug>(VM-Undo)                    u:call b:VM_Selection.Global.update_regions()<cr>
 
     nnoremap        <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction()<cr>
@@ -139,17 +139,17 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1, 1)<cr>
     nnoremap        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:VM.last_visual, 1)<cr>
 
-    imap            <Plug>(VM-Insert-Left-Arrow)       <esc>:silent! undojoin<cr>hi
-    imap            <Plug>(VM-Insert-Down-Arrow)       <esc>:silent! undojoin<cr>ji
-    imap            <Plug>(VM-Insert-Up-Arrow)         <esc>:silent! undojoin<cr>ki
-    imap            <Plug>(VM-Insert-Right-Arrow)      <esc>:silent! undojoin<cr>li
+    imap            <Plug>(VM-Insert-Left-Arrow)       <esc>hi
+    imap            <Plug>(VM-Insert-Down-Arrow)       <esc>ji
+    imap            <Plug>(VM-Insert-Up-Arrow)         <esc>ki
+    imap            <Plug>(VM-Insert-Right-Arrow)      <esc>li
     imap            <Plug>(VM-Insert-Return)           <esc>:call b:VM_Selection.Live.return()<cr>i
     imap            <Plug>(VM-Insert-Del)              <esc>:silent! undojoin<cr>xi
     imap            <Plug>(VM-Insert-BS)               <esc>:silent! undojoin<cr>Xi
     imap            <Plug>(VM-Insert-Paste)            <esc>:call b:VM_Selection.Live.paste()<cr>oi
     imap            <Plug>(VM-Insert-CtrlW)            <esc>sbdi
-    imap            <Plug>(VM-Insert-CtrlA)            <esc>^:silent! undojoin<cr>i
-    imap            <Plug>(VM-Insert-CtrlE)            <esc>$:silent! undojoin<cr>a
+    imap            <Plug>(VM-Insert-CtrlA)            <esc>^i
+    imap            <Plug>(VM-Insert-CtrlE)            <esc>$a
 
     fun! s:Yank(hard)
         if empty(b:VM_Selection.Global.is_region_at_pos('.')) | let b:VM_Selection.Vars.yanked = 1 | return 'y' | endif
@@ -161,6 +161,7 @@ fun! vm#plugs#init()
         call b:VM_Selection.Funcs.msg([["Enter regex".mode.":", 'WarningMsg'], ["\n/", 'None']], 1)
     endfun
 
+    "Cmdline
     nnoremap <expr> <Plug>(VM-:)                       vm#commands#regex_reset(':')
     nnoremap <expr> <Plug>(VM-/)                       vm#commands#regex_reset('/')
     nnoremap <expr> <Plug>(VM-?)                       vm#commands#regex_reset('?')

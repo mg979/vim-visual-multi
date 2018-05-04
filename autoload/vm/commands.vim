@@ -9,6 +9,7 @@ fun! s:init(whole, cursor, extend_mode)
     "return if already initialized
     if g:VM.is_active
 
+        if s:v.using_regex | call vm#commands#regex_reset() | endif
         let s:v.whole_word = a:whole
         return 1 | endif
 
@@ -161,6 +162,10 @@ endfun
 fun! vm#commands#regex_reset(...)
     silent! cunmap <buffer> <cr>
     silent! cunmap <buffer> <esc>
+    if !has('nvim') && !has('gui_running')
+        silent! cunmap <buffer> <esc><esc>
+        let &timeoutlen = s:v.oldtout
+    endif
     let s:v.using_regex = 0
     if a:0 | return a:1 | endif
 endfun
@@ -169,9 +174,8 @@ endfun
 
 fun! vm#commands#regex_abort()
     let @/ = s:regex_reg
-    call s:F.msg('Regex search aborted. ', 0) | call s:F.count_msg(1)
-    call setpos('.', s:regex_pos)
-    call vm#commands#regex_reset()
+    call s:F.msg('Regex search aborted. ', 0) | call s:F.count_msg(0)
+    call setpos('.', s:regex_pos)             | call vm#commands#regex_reset()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -182,23 +186,25 @@ fun! vm#commands#regex_done()
     silent keepjumps normal! gny`]
     call s:Search.get_slash_reg()
 
-    if s:X()      | call s:G.new_region() | call s:F.count_msg(0)
-    else          | call vm#commands#add_cursor_at_word(0, 0)
-    endif
+    if s:X() | call s:G.new_region()                     | call s:F.count_msg(0)
+    else     | call vm#commands#add_cursor_at_word(0, 0) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_by_regex(...)
-    call s:init(0, 0, 1)
+    if !g:VM.is_active | call s:init(0, 0, 1) | endif
     let s:v.using_regex = 1
 
     "store reg and position, to check if the search will be aborted
-    let s:regex_pos = getpos('.')
-    let s:regex_reg = @/
+    let s:regex_pos = getpos('.') | let s:regex_reg = @/
 
-    cnoremap <silent> <buffer> <cr> <cr>:call vm#commands#regex_done()<cr>
-    cnoremap <buffer> <esc> <cr>:call vm#commands#regex_abort()<cr>
+    cnoremap <silent> <buffer> <cr>  <cr>:call vm#commands#regex_done()<cr>
+    cnoremap          <buffer> <esc> <esc>:call vm#commands#regex_abort()<cr><esc>
+    if !has('nvim') && !has('gui_running')
+        cnoremap <silent> <buffer> <esc><esc> <esc><esc>
+        set timeoutlen=300
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

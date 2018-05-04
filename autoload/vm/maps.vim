@@ -71,7 +71,7 @@ let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.', '\zs'), '"z".v:va
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
-let s:alt_maps = ['j', 'k', ']', 'q', 'BS', 'm', 'd' ]
+let s:alt_maps = ['j', 'k', 's', 'q', 'BS', 'm', 'd' ]
 let s:leader   = []
 let s:leader2  = []
 let s:fkeys    = ['1', '2']
@@ -181,7 +181,7 @@ fun! s:Maps.start() dict
     nmap     <silent> <nowait> <buffer> <c-x>]     <Plug>(VM-Add-Search)
     nmap     <silent> <nowait> <buffer> <C-x>/     <Plug>(VM-Read-From-Search)
     nmap     <silent> <nowait> <buffer> <c-x>}     <Plug>(VM-Rewrite-All-Search)
-    nmap     <silent> <nowait> <buffer> <M-]>      <Plug>(VM-Rewrite-Last-Search)
+    nmap     <silent> <nowait> <buffer> <M-s>      <Plug>(VM-Rewrite-Last-Search)
 
     "utility
     nmap     <silent> <nowait> <buffer> <F1>       <Plug>(VM-Show-Help)
@@ -253,7 +253,6 @@ fun! s:Maps.edit_start() dict
     imap <silent> <nowait> <buffer> <C-l>           <Plug>(VM-Insert-Right-Arrow)
     imap <silent> <nowait> <buffer> <CR>            <Plug>(VM-Insert-Return)
     imap <silent> <nowait> <buffer> <BS>            <Plug>(VM-Insert-BS)
-    imap <silent> <nowait> <buffer> <Del>           <Plug>(VM-Insert-Del)
     imap <silent> <nowait> <buffer> <C-v>           <Plug>(VM-Insert-Paste)
     imap <silent> <nowait> <buffer> <C-w>           <Plug>(VM-Insert-CtrlW)
     imap <silent> <nowait> <buffer> <C-d>           <Plug>(VM-Insert-Del)
@@ -430,7 +429,6 @@ fun! s:Maps.edit_stop() dict
     iunmap <buffer> <C-l>
     iunmap <buffer> <Right>
     iunmap <buffer> <Left>
-    iunmap <buffer> <Del>
     iunmap <buffer> <CR>
     iunmap <buffer> <BS>
     silent! nunmap <buffer> <M-o>
