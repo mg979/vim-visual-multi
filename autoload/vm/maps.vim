@@ -14,7 +14,7 @@ endfun
 fun! vm#maps#default()
 
     if g:VM_s_mappings
-        nmap <silent> s]         <Plug>(VM-Find-I-Word)
+        nmap <silent> s]         <Plug>(VM-Find-Under)
         nmap <silent> s[         <Plug>(VM-Find-A-Word)
         nmap <silent> s}         <Plug>(VM-Find-I-Whole-Word)
         nmap <silent> s{         <Plug>(VM-Find-A-Whole-Word)
@@ -43,7 +43,7 @@ fun! vm#maps#permanent()
         nmap <silent> <C-S-Up>    <Plug>(VM-Select-Line-Up)
         nmap <silent> <M-C-Right> <Plug>(VM-Select-E)
         nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
-        nmap <silent> <C-d>       <Plug>(VM-Find-I-Word)
+        nmap <silent> <C-d>       <Plug>(VM-Find-Under)
     endif
 
     if g:VM_default_mappings

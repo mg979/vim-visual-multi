@@ -228,19 +228,23 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_under(visual, whole, inclusive)
+fun! vm#commands#find_under(visual, whole, inclusive, ...)
     call s:init(a:whole, 0, 1)
 
-    if s:is_r() | return s:check_overlap(vm#commands#find_next(0, 0)) | endif
+    "C-d command
+    if a:0 && s:is_r() | return vm#commands#find_next(0, 0) | endif
 
     " yank and create region
-    if !a:visual | call s:yank(a:inclusive) | endif
+    if !a:visual | call s:yank(a:inclusive)                 | endif
+
+    "replace region if calling the command on an existing region
+    if s:is_r()  | call s:G.is_region_at_pos('.').remove()  | endif
 
     call s:Search.add()
     let R = s:G.new_region()
     if R.h && !s:v.multiline | call s:F.toggle_option('multiline', 1) | endif
     call s:F.count_msg(1)
-    return s:check_overlap(R)
+    return R
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
