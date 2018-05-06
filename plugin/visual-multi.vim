@@ -56,14 +56,24 @@ fun! <SID>VM_Init()
     endif
 endfun
 
+fun! s:Select()
+    if g:VM.selecting
+        if g:VM.is_active
+            call b:VM_Selection.Global.get_region()
+        endif
+        let g:VM.selecting = 0
+        let &updatetime    = g:VM.oldupdate
+    endif
+endfun
+
 augroup plugin-visual-multi-start
     au!
     au VimEnter     * call <SID>VM_Init()
     au BufEnter     * let b:VM_Selection = {}
     if has('nvim')
-        au TextYankPost * if g:VM.selecting | call b:VM_Selection.Global.get_region() | endif
+        au TextYankPost * call <sid>Select()
     else
-        au CursorMoved  * if g:VM.selecting | call b:VM_Selection.Global.get_region() | endif
-        au CursorHold   * if g:VM.selecting | call b:VM_Selection.Global.get_region() | endif
+        au CursorMoved  * call <sid>Select()
+        au CursorHold   * call <sid>Select()
     endif
 augroup END

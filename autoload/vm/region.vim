@@ -174,7 +174,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.get_text() dict
-    """INCOMPLETE: Get text content between A and B offsets.
+    """UNUSED: Get text content between A and B offsets.
     let r = self
 
     if r.h == 0 | return getline(r.l)[r.a-1:r.b-1]             | endif

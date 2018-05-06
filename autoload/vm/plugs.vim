@@ -104,9 +104,9 @@ fun! vm#plugs#init()
 
     "Edit commands
     nnoremap        <Plug>(VM-Edit-D)                  :<C-u>call b:VM_Selection.Edit.run_normal('D', 0, 1, 0)<cr>
-    nnoremap        <Plug>(VM-Edit-x)                  :<C-u>call b:VM_Selection.Edit.run_normal('x', 0, v:count1, 0)<cr>
-    nnoremap        <Plug>(VM-Edit-X)                  :<C-u>call b:VM_Selection.Edit.run_normal('X', 0, v:count1, 0)<cr>
-    nnoremap        <Plug>(VM-Edit-J)                  :<C-u>call b:VM_Selection.Edit.run_normal('J', 0, v:count1, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-x)                  :<C-u>call b:VM_Selection.Edit.run_normal('x', 0, v:count1, 0)<cr>:silent! undojoin<cr>
+    nnoremap        <Plug>(VM-Edit-X)                  :<C-u>call b:VM_Selection.Edit.run_normal('X', 0, v:count1, 0)<cr>:silent! undojoin<cr>
+    nnoremap        <Plug>(VM-Edit-J)                  :<C-u>call b:VM_Selection.Edit.run_normal('J', 0, v:count1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-Edit-Del)                :call b:VM_Selection.Edit.del_key()<cr>
     nnoremap        <Plug>(VM-Edit-a-Append)           :<C-u>call b:VM_Selection.Insert.key('a')<cr>
     nnoremap        <Plug>(VM-Edit-A-Append)           :<C-u>call b:VM_Selection.Insert.key('A')<cr>
@@ -144,17 +144,24 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1, 1)<cr>
     nnoremap        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:VM.last_visual, 1)<cr>
 
-    imap            <Plug>(VM-Insert-Left-Arrow)       <esc>hi
-    imap            <Plug>(VM-Insert-Down-Arrow)       <esc>ji
-    imap            <Plug>(VM-Insert-Up-Arrow)         <esc>ki
-    imap            <Plug>(VM-Insert-Right-Arrow)      <esc>li
+    imap     <expr> <Plug>(VM-Insert-Left-Arrow)       <sid>Insert('h')
+    imap     <expr> <Plug>(VM-Insert-Down-Arrow)       <sid>Insert('j')
+    imap     <expr> <Plug>(VM-Insert-Up-Arrow)         <sid>Insert('k')
+    imap     <expr> <Plug>(VM-Insert-Right-Arrow)      <sid>Insert('l')
     imap            <Plug>(VM-Insert-Return)           <esc>:call b:VM_Selection.Live.return()<cr>i
-    imap            <Plug>(VM-Insert-Del)              <esc>:silent! undojoin<cr>xi
-    imap            <Plug>(VM-Insert-BS)               <esc>:silent! undojoin<cr>Xi
+    imap     <expr> <Plug>(VM-Insert-Del)              <sid>Insert('x')
+    imap     <expr> <Plug>(VM-Insert-BS)               <sid>Insert('X')
     imap            <Plug>(VM-Insert-Paste)            <esc>:call b:VM_Selection.Live.paste()<cr>oi
     imap            <Plug>(VM-Insert-CtrlW)            <esc>sbdi
     imap            <Plug>(VM-Insert-CtrlA)            <esc>^i
     imap            <Plug>(VM-Insert-CtrlE)            <esc>$a
+
+    fun! s:Insert(key)
+        "only join undo if there's been a change
+        let u = (a:key ==? 'x')? b:VM_Selection.Live.change? ":silent! undojoin\<cr>" : "" : ""
+        let b:VM_Selection.Vars.restart_insert = 1
+        return "\<esc>".u.a:key."i"
+    endfun
 
     fun! s:Yank(hard)
         if empty(b:VM_Selection.Global.is_region_at_pos('.')) | let b:VM_Selection.Vars.yanked = 1 | return 'y' | endif

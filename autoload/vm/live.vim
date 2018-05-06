@@ -22,6 +22,7 @@ fun! vm#live#init()
     let s:newline = { m    -> index(['o', 'O'], m) >= 0 }
 
     let s:CR = 0
+    let s:v.restart_insert = 0
     return s:Live
 endfun
 
@@ -58,7 +59,7 @@ fun! s:Live.start(mode) dict
         let C = s:Cursor.new(A, r.l, I.append? r.a+1 : r.a)
         call add(I.cursors, C)
 
-        if I.append | call s:V.Edit.extra_spaces(r, 0) | endif
+        if I.append || col([r.l, '$']) == 1 | call s:V.Edit.extra_spaces(r, 0) | endif
 
         if !has_key(I.lines, r.l)
             let I.lines[r.l] = s:Line.new(r.l, C)
@@ -121,7 +122,9 @@ endfun
 
 fun! s:Live.paste() dict
     call s:G.select_region(-1)
+    let b:VM_Selection.Vars.restart_insert = 1
     call s:V.Edit.paste(1, 1, 1)
+    let b:VM_Selection.Vars.restart_insert = 0
     call s:G.select_region(self.index)
 endfun
 
@@ -141,10 +144,10 @@ endfun
 
 fun! s:Live.stop() dict
     silent! iunmap <buffer> <esc>
-    call self.auto_end() | let s:v.eco = 1 | let i = 0
+    call self.auto_end() | let i = 0
 
     "should the cursor step back when exiting insert mode?
-    let back = self.append || self.mode=='c' || s:CR
+    let back = self.append || s:CR
 
     for r in s:R()
         let c = self.cursors[i]
@@ -154,7 +157,8 @@ fun! s:Live.stop() dict
         let i += 1
     endfor
 
-    let s:CR = 0
+    if s:v.restart_insert | let s:v.restart_insert = 0 | return | endif
+    let s:CR = 0 | let s:v.eco = 1
     let s:V.Insert.is_active = 0
 
     call s:V.Edit.post_process(0,0)

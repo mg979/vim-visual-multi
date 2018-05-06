@@ -244,9 +244,46 @@ fun! s:Edit.paste(before, regions, reselect, ...) dict
         let s:v.new_text = s:fill_text(g:VM.registers[reg])
     endif
 
-    call self.block_paste(a:before)
+    if s:v.restart_insert
+        call self.insert_paste()
+    else
+        call self.block_paste(a:before)
+    endif
     let s:W = s:store_widths(s:v.new_text)
     call self.post_process((X? 1 : a:reselect), !a:before)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.insert_paste() dict
+    let size = s:size() | let change = 0 | let text = copy(s:v.new_text) | let s:v.eco = 1
+
+    for r in s:R()
+        if !empty(text)
+            call r.bytes([change, change])
+            call cursor(r.l, r.a)
+            let s = remove(text, 0)
+            call s:F.set_reg(s)
+
+            let before = r.a!=col([r.L, '$'])-1? 1 : 0
+
+            if before | normal! P
+            else      | normal! p
+            endif
+
+            if !before
+                call r.update_cursor([r.l, col([r.l, '$'])])
+                call setline(r.l, getline(r.l).' ')
+                call r.bytes([1,1])
+            else
+                let s = len(s)
+                call r.bytes([s, s])
+            endif
+
+            let change = s:size() - size
+        else | break | endif
+    endfor
+    call s:F.restore_reg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -288,8 +325,8 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     for r in s:R()
         if len(r.txt) > maxw | let maxw = len(r.txt) | endif
         call add(text, r.txt)
-        "add last newline in multiline
-        if s:v.multiline && r.b == col([r.L, '$'])
+        "NOTE: maybe not necessary anymore(see last check). Add last newline in multiline.
+        if s:v.multiline && r.b == col([r.L, '$']) && text[-1][-1:] != "\n"
             let text[-1] = text[-1]."\n"
         endif
     endfor
@@ -416,7 +453,11 @@ fun! s:Edit.run_normal(cmd, recursive, count, maps) dict
     if s:X() | call s:G.change_mode(1) | endif
 
     call s:before_macro(a:maps)
-    call self._process(s:cmd)
+    if a:cmd ==# 'X' && s:V.Insert.is_active
+        call self._process(s:cmd, 'IX')
+    else
+        call self._process(s:cmd)
+    endif
 
     if a:cmd ==# 'X'
         for r in s:R() | call r.bytes([-1,-1]) | endfor
@@ -425,7 +466,6 @@ fun! s:Edit.run_normal(cmd, recursive, count, maps) dict
         for r in s:R() | if r.a == col([r.L, '$']) | call r.bytes([-1,-1]) | endif  | endfor
         call s:G.merge_cursors()
     endif
-
 
     let g:VM.last_normal = [cmd, a:recursive]
     call s:after_macro(0)
@@ -715,9 +755,9 @@ fun! s:Edit.extra_spaces(r, remove) dict
         endfor
         let s:v.extra_spaces = [] | return | endif
 
-
+    "add space if empty line(>) or eol(=)
     let L = getline(a:r.L)
-    if a:r.b == len(L)
+    if a:r.b >= len(L)
         call setline(a:r.L, L.' ')
         call add(s:v.extra_spaces, a:r.index)
     endif
@@ -825,6 +865,14 @@ fun! s:special(cmd, r, args)
         call cursor(a:r.l, a:r.a)
         if a:r.a == col([a:r.l, '$']) - 1 | normal! Jx
         else                              | normal! x
+        endif
+        return 1
+
+    elseif a:args[0] ==# 'IX'
+        call a:r.bytes([s:change, s:change])
+        call cursor(a:r.l, a:r.a)
+        if a:r.a >= col([a:r.l, '$']) - 2 | normal! x
+        else                              | normal! X
         endif
         return 1
 
