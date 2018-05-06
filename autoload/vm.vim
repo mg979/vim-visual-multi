@@ -116,10 +116,10 @@ fun! vm#reset(...)
     let g:VM.is_active = 0
     let g:VM.extend_mode = 0
 
-    nunmap <buffer> <Space>
-    nunmap <buffer> <esc>
+    silent! nunmap <buffer> <Space>
+    silent! nunmap <buffer> <esc>
     if !has('nvim') && !has('gui_running')
-        nunmap <buffer> <esc><esc>
+        silent! nunmap <buffer> <esc><esc>
     endif
 
     "exiting manually

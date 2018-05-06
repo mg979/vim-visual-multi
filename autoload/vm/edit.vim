@@ -241,7 +241,7 @@ fun! s:Edit.paste(before, regions, reselect, ...) dict
     if !a:regions || !has_key(g:VM.registers, reg) || empty(g:VM.registers[reg])
         let s:v.new_text = s:default_text(a:regions)
     else
-        let s:v.new_text = g:VM.registers[reg]
+        let s:v.new_text = s:fill_text(g:VM.registers[reg])
     endif
 
     call self.block_paste(a:before)

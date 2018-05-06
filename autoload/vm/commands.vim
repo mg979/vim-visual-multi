@@ -183,7 +183,9 @@ endfun
 fun! vm#commands#regex_done()
     call vm#commands#regex_reset()
 
-    silent keepjumps normal! gny`]
+    if s:X() | silent keepjumps normal! gny`]
+    else     | silent keepjumps normal! gny
+    endif
     call s:Search.get_slash_reg()
 
     if s:X() | call s:G.new_region()                     | call s:F.count_msg(0)
@@ -244,7 +246,7 @@ fun! vm#commands#find_under(visual, whole, inclusive, ...)
     let R = s:G.new_region()
     if R.h && !s:v.multiline | call s:F.toggle_option('multiline', 1) | endif
     call s:F.count_msg(1)
-    return R
+    return (a:0 && a:visual)? vm#commands#find_next(0, 0) : R
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -279,16 +281,29 @@ endfun
 " Find next/previous
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:get_next(n)
+fun! s:get_next()
     if s:X()
-        silent exe "keepjumps normal! ".a:n."g".a:n."y`]"
+        silent keepjumps normal! ngny`]
         let R = s:G.new_region()
         call s:F.count_msg(1)
     else
-        silent exe "keepjumps normal! ".a:n."g".a:n."y`["
+        silent keepjumps normal! ngny`[
         let R = vm#commands#add_cursor_at_word(0, 0)
     endif
-    let s:v.nav_direction = a:n ==# 'n'? 1 : 0
+    let s:v.nav_direction = 1
+    return R
+endfun
+
+fun! s:get_prev()
+    if s:X()
+        silent keepjumps normal! NgNy`]
+        let R = s:G.new_region()
+        call s:F.count_msg(1)
+    else
+        silent keepjumps normal! NgNy`[
+        let R = vm#commands#add_cursor_at_word(0, 0)
+    endif
+    let s:v.nav_direction = 0
     return R
 endfun
 
@@ -333,7 +348,7 @@ fun! vm#commands#find_next(skip, nav)
     elseif a:skip | call s:skip() | endif
     "skip current match
 
-    return s:get_next('n')
+    return s:get_next()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -360,7 +375,7 @@ fun! vm#commands#find_prev(skip, nav)
 
     "move to the beginning of the current match
     call cursor(pos)
-    return s:get_next('N')
+    return s:get_prev()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -23,7 +23,7 @@ let s:Search = {}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Search.get_pattern(register, regex) dict
-    let t = eval('@'.a:register)
+    let t = getreg(a:register)
     if !a:regex
         let t = self.escape_pattern(t)
         if s:v.whole_word | let t = '\<'.t.'\>' | endif | endif
@@ -178,7 +178,7 @@ fun! s:pattern_found(t, i)
         call s:V.Global.update_region_patterns(a:t)
         let wm = 'WarningMsg' | let L = 'Label'
         call s:F.msg([['Pattern updated:   [', wm ], [old, L],
-                    \     [']  ->  [', wm],              [a:t, L],
+                    \     [']  ->  [', wm],          [a:t, L],
                     \     ["]\n", wm]], 1)
         return 1
     endif

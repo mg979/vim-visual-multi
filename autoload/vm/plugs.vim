@@ -18,6 +18,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
     xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(1, 0, 0)<cr>`]
     nnoremap        <Plug>(VM-Find-Under)              :call vm#commands#find_under(0, 0, 0, 1)<cr>
+    xnoremap        <Plug>(VM-Find-Subword-Under)      y:call vm#commands#find_under(1, 0, 0, 1)<cr>`]
     nnoremap        <Plug>(VM-Find-I-Word)             :call vm#commands#find_under(0, 0, 0)<cr>
     nnoremap        <Plug>(VM-Find-A-Word)             :call vm#commands#find_under(0, 0, 1)<cr>
     nnoremap        <Plug>(VM-Find-I-Whole-Word)       :call vm#commands#find_under(0, 1, 0)<cr>
@@ -102,6 +103,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Merge-To-Bol)            :call vm#commands#merge_to_beol(0, 0)<cr>
 
     "Edit commands
+    nnoremap        <Plug>(VM-Edit-D)                  :<C-u>call b:VM_Selection.Edit.run_normal('D', 0, 1, 0)<cr>
     nnoremap        <Plug>(VM-Edit-x)                  :<C-u>call b:VM_Selection.Edit.run_normal('x', 0, v:count1, 0)<cr>
     nnoremap        <Plug>(VM-Edit-X)                  :<C-u>call b:VM_Selection.Edit.run_normal('X', 0, v:count1, 0)<cr>
     nnoremap        <Plug>(VM-Edit-J)                  :<C-u>call b:VM_Selection.Edit.run_normal('J', 0, v:count1, 0)<cr>
@@ -113,7 +115,9 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-o-New-Line)         :<C-u>call b:VM_Selection.Insert.key('o')<cr>
     nnoremap        <Plug>(VM-Edit-O-New-Line)         :<C-u>call b:VM_Selection.Insert.key('O')<cr>
     nnoremap        <Plug>(VM-Edit-Delete)             :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, v:register, v:count1)<cr>
-    nnoremap        <Plug>(VM-Edit-Change)             :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1)<cr>
+    nnoremap        <Plug>(VM-Edit-Delete-Exit)        :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, v:register, v:count1)<cr>:call vm#reset()<cr>
+    nnoremap        <Plug>(VM-Edit-c-Change)           :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1)<cr>
+    nnoremap        <Plug>(VM-Edit-C-Change)           :<C-u>call b:VM_Selection.Edit.run_normal('D', 0, 1, 0)<cr>:call b:VM_Selection.Insert.key('a')<cr>
     nnoremap        <Plug>(VM-Edit-Replace)            :<C-u>call b:VM_Selection.Edit.replace()<cr>
     nnoremap        <Plug>(VM-Edit-p-Paste-Regions)    :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 1, g:VM.extend_mode)<cr>
     nnoremap        <Plug>(VM-Edit-P-Paste-Regions)    :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 1, g:VM.extend_mode)<cr>

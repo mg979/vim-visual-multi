@@ -44,6 +44,7 @@ fun! vm#maps#permanent()
         nmap <silent> <M-C-Right> <Plug>(VM-Select-E)
         nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
         nmap <silent> <C-d>       <Plug>(VM-Find-Under)
+        xmap <silent> <C-d>       <Plug>(VM-Find-Subword-Under)
     endif
 
     if g:VM_default_mappings
@@ -72,11 +73,11 @@ let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
 let s:alt_maps = ['j', 'k', 's', 'q', 'BS', 'm', 'd' ]
-let s:leader   = []
+let s:leader   = split('ydpP', '\zs')
 let s:leader2  = []
 let s:fkeys    = ['1', '2']
 let s:sfkeys   = ['2']
-let s:edit     = split('dcpPyxXraAiIOJ', '\zs')
+let s:edit     = split('dcpPyxXraAiIOJDC', '\zs')
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
@@ -270,10 +271,13 @@ fun! s:Maps.edit_start() dict
     nmap <silent> <nowait> <buffer> x               <Plug>(VM-Edit-x)
     nmap <silent> <nowait> <buffer> X               <Plug>(VM-Edit-X)
     nmap <silent> <nowait> <buffer> J               <Plug>(VM-Edit-J)
+    nmap <silent> <nowait> <buffer> D               <Plug>(VM-Edit-D)
     nmap <silent> <nowait> <buffer> <del>           <Plug>(VM-Edit-Del)
     nmap <silent> <nowait> <buffer> r               <Plug>(VM-Edit-Replace)
-    nmap <silent> <nowait> <buffer> c               <Plug>(VM-Edit-Change)
+    nmap <silent> <nowait> <buffer> c               <Plug>(VM-Edit-c-Change)
     nmap <silent> <nowait> <buffer> d               <Plug>(VM-Edit-Delete)
+    nmap <silent> <nowait> <buffer> C               <Plug>(VM-Edit-C-Change)
+    nmap <silent> <nowait> <buffer> <leader>d       <Plug>(VM-Edit-Delete-Exit)
     nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
     nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
     nmap <silent> <nowait> <buffer> <C-t>           <Plug>(VM-Edit-Transpose)
@@ -347,8 +351,8 @@ fun! s:Maps.end() dict
 
     call self.edit_stop()
 
-    for m in (s:leader2)
-        exe "nunmap <buffer> <leader><leader>".m
+    for m in (s:leader)
+        exe "nunmap <buffer> <leader>".m
     endfor
 
     let cm = g:VM_custom_commands
@@ -433,10 +437,7 @@ fun! s:Maps.edit_stop() dict
     iunmap <buffer> <BS>
     silent! nunmap <buffer> <M-o>
     silent! nunmap <buffer> <del>
-    silent! nunmap <buffer> <leader>y
     silent! nunmap <buffer> <C-t>
-    silent! nunmap <buffer> <leader>p
-    silent! nunmap <buffer> <leader>P
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -469,6 +470,7 @@ fun! s:Maps.default_stop() dict
         nunmap <M-C-Right>
         nunmap <M-C-Left>
         nunmap <C-d>
+        xunmap <C-d>
     endif
 
     if g:VM_default_mappings

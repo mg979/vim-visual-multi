@@ -164,7 +164,10 @@ fun! s:Region.remove() dict
     call self.remove_highlight()
     let R = remove(s:R(), self.index)
     call remove(s:v.IDs_list, index(s:v.IDs_list, self.id))
-    call s:G.update_indices()
+
+    if len(s:R()) | call s:G.update_indices()
+    else          | let s:v.index = -1
+    endif
     return R
 endfun
 
