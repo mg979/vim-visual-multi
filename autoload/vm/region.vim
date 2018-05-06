@@ -334,6 +334,11 @@ fun! s:Region.update_content() dict
     """Yank region content if in extend mode."""
     call cursor(self.l, self.a)   | keepjumps normal! m[
     call cursor(self.L, self.b+1) | silent keepjumps normal! m]`[y`]
+    let self.txt = getreg(s:v.def_reg)
+    if s:v.multiline && self.b == col([self.L, '$'])
+        let self.txt .= "\n"
+    endif
+    let self.pat = s:pattern(self)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -348,8 +353,8 @@ fun! s:Region.update_region(...) dict
         let b = r.b_() | let r.L = b[0] | let r.b = b[1] | endif
 
     call s:fix_pos(r)
-    call self.update_content()
     call self.update_vars()
+    call self.update_content()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -367,7 +372,7 @@ fun! s:Region.update_vars() dict
         let r.A   = r.A_()           | let r.B = r.A
         let r.k   = r.a              | let r.K = r.A
         let r.w   = 1                | let r.h = 0
-        let r.pat = s:pattern(r)     | let r.txt = ''
+        let r.txt = ''               | let r.pat = s:pattern(r)
 
         "--------- extend mode ----------------------------
 
@@ -375,7 +380,6 @@ fun! s:Region.update_vars() dict
         let r.A   = r.A_()           | let r.B = r.B_()
         let r.w   = r.B - r.A + 1    | let r.h = r.L - r.l
         let r.k   = r.dir? r.a : r.b | let r.K   = r.dir? r.A : r.B
-        let r.pat = s:pattern(r)     | let r.txt = getreg(s:v.def_reg)
 
         if g:VM.selecting && r.h && !s:v.multiline
             call s:F.toggle_option('multiline') | endif
@@ -462,7 +466,7 @@ endfun
 fun! s:pattern(r)
     """Find the search pattern associated with the region."""
 
-    if empty(s:v.search) | return '' | endif
+    if empty(s:v.search) | return s:V.Search.escape_pattern(a:r.txt) | endif
 
     for p in s:v.search | if a:r.txt =~ p | return p | endif | endfor
 
@@ -562,7 +566,6 @@ fun! s:region_vars(r, cursor, ...)
         let R.k     = R.dir? R.a : R.b      " anchor
         let R.K     = R.dir? R.A : R.B      " anchor offset
 
-        let R.txt   = R.get_text()
-        let R.pat   = s:V.Search.escape_pattern(R.txt)
+        call R.update_content()
     endif
 endfun
