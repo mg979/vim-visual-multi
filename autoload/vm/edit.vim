@@ -22,6 +22,7 @@ fun! vm#edit#init()
     let s:W              = []
     let s:v.storepos     = []
     let s:v.insert_marks = {}
+    let s:v.extra_spaces = []
     let s:change = 0
 
     return s:Edit
@@ -129,12 +130,11 @@ fun! s:Edit.delete(X, register, count) dict
         let size = s:size() | let change = 0 | let s:v.deleted_text = []
         for r in s:R()
             call r.bytes([change, change])
+            call self.extra_spaces(r, 0)
             call cursor(r.l, r.a)
             normal! m[
             call cursor(r.L, r.b>1? r.b+1 : 1)
             normal! m]
-
-            call self.extra_spaces(r, 0)
 
             if a:register != "_"
                 let s:v.use_register = a:register
@@ -708,15 +708,18 @@ fun! s:Edit.extra_spaces(r, remove) dict
 
     if a:remove
         "remove the extra space only if it comes after r.b, and it's just before \n
-        for r in s:R()
-            let L = getline(r.L)
-            if len(L) && r.b == len(L)-1 && L[-1:] ==# ' '
-                call setline(r.L, L[:-2]) | endif
-        endfor | return | endif
+        for i in s:v.extra_spaces
+            let r = s:R()[i]
+            call cursor(r.L, r.b<col([r.L, '$'])-1? r.b+1 : r.b)
+            normal! x
+        endfor
+        let s:v.extra_spaces = [] | return | endif
+
 
     let L = getline(a:r.L)
     if a:r.b == len(L)
         call setline(a:r.L, L.' ')
+        call add(s:v.extra_spaces, a:r.index)
     endif
 endfun
 
@@ -782,6 +785,7 @@ fun! s:fill_text(list)
         call add(L, s:v.deleted_text[-i])
         let i -= 1
     endwhile
+    return L
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

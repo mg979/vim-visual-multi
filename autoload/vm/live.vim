@@ -49,6 +49,7 @@ fun! s:Live.start(mode) dict
     let I.lines     = {}
     let I.change    = 0
     let s:C         = { -> I.cursors }
+    let I.col       = getpos('.')[2]
 
     call clearmatches()
 
@@ -57,25 +58,17 @@ fun! s:Live.start(mode) dict
         let C = s:Cursor.new(A, r.l, I.append? r.a+1 : r.a)
         call add(I.cursors, C)
 
-        call s:V.Edit.extra_spaces(r, 0)
+        if I.append | call s:V.Edit.extra_spaces(r, 0) | endif
 
         if !has_key(I.lines, r.l)
             let I.lines[r.l] = s:Line.new(r.l, C)
-            let first_a = r.a | let nth = 0 | let C.nth = 0
+            let nth = 0 | let C.nth = 0
         else
             let nth += 1
             let C.nth = nth
-            "not the first cursor in its line? change main cursor and restart
-            if r == R
-                call I.stop()
-                call cursor(r.l, first_a)
-                call s:G.select_region_at_pos('.')
-                call I.start(I.mode)
-                return
-            else
-                call add(I.lines[r.l].cursors, C)
-            endif
+            call add(I.lines[r.l].cursors, C)
         endif
+        if C.index == I.index | let I.nth = C.nth | endif
     endfor
 
     "start tracking text changes
@@ -107,27 +100,21 @@ endfun
 fun! s:Live.insert(...) dict
     "TextChangedI
 
-    let I  = self
-    let L  = I.lines
-    let ln = getpos('.')[1]
-
-    "line change
-    if ln != I.begin[0]
-        for l in keys(I.lines)
-            let I.lines[l].l = I.lines[l].l + ln - I.begin[0]
-        endfor
-        let I.begin = getpos('.')[1:2]
-    endif
-
+    let I        = self
+    let L        = I.lines
+    let ln       = getpos('.')[1]
     let pos      = I.begin[1]
+
     "popup eats one char on esc, give one more space
     let cur      = a:0? getpos('.')[2]+1 : getpos('.')[2]
+    let pos      = pos + I.change*I.nth
     let I.change = cur - pos
     let text     = getline(ln)[(pos-1):(cur-2)]
 
     for l in keys(L)
         call L[l].update(I.change, text)
     endfor
+    call cursor(ln, I.col)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -153,11 +140,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Live.stop() dict
-    iunmap <buffer> <esc>
+    silent! iunmap <buffer> <esc>
     call self.auto_end() | let s:v.eco = 1 | let i = 0
 
     "should the cursor step back when exiting insert mode?
-    let back = self.append || s:CR
+    let back = self.append || self.mode=='c' || s:CR
 
     for r in s:R()
         let c = self.cursors[i]
@@ -209,10 +196,6 @@ endfun
 fun! s:Cursor.update(l, c) dict
     "Update cursors positions and highlight.
     let C = self
-    if C.l != a:l
-        let C.l = a:l
-        let C.a = a:c
-    endif
     let C.A = s:Byte([C.l, a:c])
     let C._a = a:c
 
@@ -247,6 +230,7 @@ endfun
 fun! s:Line.update(change, text) dict
     let change = 0
     let text = self.txt
+    let I    = s:V.Live
 
     for c in self.cursors
         let a = c.a>1? c.a-2 : c.a-1
@@ -258,6 +242,7 @@ fun! s:Line.update(change, text) dict
         "echom t1 "|||" t2 "///" text
         let change += a:change
         call c.update(self.l, c.a+change)
+        if c.index == I.index | let I.col = c._a | endif
     endfor
     call setline(self.l, text)
 endfun
