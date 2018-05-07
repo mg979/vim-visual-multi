@@ -3,8 +3,8 @@ let g:VM.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ','
 let g:VM.find_motions   = ['f', 'F', 't', 'T']
 
 fun! vm#plugs#init()
-    nmap            <Plug>(VM-Select-Operator)         :call vm#commands#select_operator(0)<cr>y
-    nnoremap        <Plug>(VM-Select-All-Operator)     :call vm#commands#select_operator(1)<cr>
+    nmap  <silent>  <Plug>(VM-Select-Operator)         :<c-u>call vm#commands#select_operator(0, 0)<cr>y
+    nnoremap        <Plug>(VM-Select-All-Operator)     :<c-u>call vm#commands#select_operator(1, v:count)<cr>
 
     nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0, 0)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-At-Word)      :call vm#commands#add_cursor_at_word(1, 1)<cr>
@@ -32,11 +32,11 @@ fun! vm#plugs#init()
     xnoremap        <Plug>(VM-Hash)                    y:call vm#commands#find_under(1, 1, 0)<cr>`]
 
     nnoremap        <Plug>(VM-Toggle-Mappings)         :call b:VM_Selection.Maps.mappings_toggle()<cr>
-    nnoremap        <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline')<cr>
-    nnoremap        <Plug>(VM-Toggle-Block)            :call b:VM_Selection.Funcs.toggle_option('block_mode')<cr>
+    nnoremap        <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline', 1)<cr>
+    nnoremap        <Plug>(VM-Toggle-Block)            :call b:VM_Selection.Funcs.toggle_option('block_mode', 1)<cr>
     nnoremap        <Plug>(VM-Toggle-Debug)            :let g:VM_debug = !g:VM_debug<cr>
-    nnoremap        <Plug>(VM-Toggle-Whole-Word)       :call b:VM_Selection.Funcs.toggle_option('whole_word')<cr>
-    nnoremap        <Plug>(VM-Toggle-Only-This-Region) :call b:VM_Selection.Funcs.toggle_option('only_this_always')<cr>
+    nnoremap        <Plug>(VM-Toggle-Whole-Word)       :call b:VM_Selection.Funcs.toggle_option('whole_word', 1)<cr>
+    nnoremap        <Plug>(VM-Toggle-Only-This-Region) :call b:VM_Selection.Funcs.toggle_option('only_this_always', 1)<cr>
     nnoremap        <Plug>(VM-Show-Help)               :call b:VM_Selection.Funcs.show_help()<cr>
     nnoremap        <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
     nnoremap        <Plug>(VM-Rewrite-Last-Search)     :call b:VM_Selection.Search.rewrite(1)<cr>
@@ -103,7 +103,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Merge-To-Bol)            :call vm#commands#merge_to_beol(0, 0)<cr>
 
     "Edit commands
-    nnoremap        <Plug>(VM-Edit-D)                  :<C-u>call b:VM_Selection.Edit.run_normal('D', 0, 1, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-D)                  :<C-u>call b:VM_Selection.Edit.get_motion('d', 0)<cr>$
     nnoremap        <Plug>(VM-Edit-x)                  :<C-u>call b:VM_Selection.Edit.run_normal('x', 0, v:count1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-Edit-X)                  :<C-u>call b:VM_Selection.Edit.run_normal('X', 0, v:count1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-Edit-J)                  :<C-u>call b:VM_Selection.Edit.run_normal('J', 0, v:count1, 0)<cr>:silent! undojoin<cr>

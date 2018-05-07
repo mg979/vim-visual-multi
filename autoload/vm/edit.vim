@@ -23,7 +23,8 @@ fun! vm#edit#init()
     let s:v.storepos     = []
     let s:v.insert_marks = {}
     let s:v.extra_spaces = []
-    let s:change = 0
+    let s:change         = 0
+    let s:can_multiline  = 0
 
     return s:Edit
 endfun
@@ -314,7 +315,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.yank(hard, def_reg, silent, ...) dict
-    if !s:X()         | call self.get_motion('y', v:count)          | return | endif
+    if !s:X()         | call self.get_motion('y', v:count)      | return | endif
     if !s:min(1)      | call s:F.msg('No regions selected.', 0) | return | endif
 
     let register = (s:v.use_register != s:v.def_reg)? s:v.use_register :
@@ -325,16 +326,14 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     for r in s:R()
         if len(r.txt) > maxw | let maxw = len(r.txt) | endif
         call add(text, r.txt)
-        "NOTE: maybe not necessary anymore(see last check). Add last newline in multiline.
-        if s:v.multiline && r.b == col([r.L, '$']) && text[-1][-1:] != "\n"
-            let text[-1] = text[-1]."\n"
-        endif
     endfor
 
     "write custom and vim registers
-    let g:VM.registers[register] = text
-    let type = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
-    call setreg(register, join(text, "\n"), type)
+    if register != "_"
+        let g:VM.registers[register] = text
+        let type = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
+        call setreg(register, join(text, "\n"), type)
+    endif
 
     "restore default register if a different register was provided
     if register !=# s:v.def_reg | call s:F.restore_reg() | endif
@@ -358,71 +357,99 @@ endfun
 " Get motion
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:del  = { c -> index(['d'], c) >= 0                     }
-let s:chg  = { c -> index(['s'], c) >= 0                     }
-let s:ynk  = { c -> index([], c) >= 0                        }
+let s:forw = { c -> index(['f', 't'], c) >= 0                }
+let s:back = { c -> index(['F', 'T', '0', '^'], c) >= 0      }
+let s:ia   = { c -> index(['i', 'a'], c) >= 0                }
 let s:all  = { c -> index(split('webWEB$^0', '\zs'), c) >= 0 }
 let s:find = { c -> index(split('fFtT', '\zs'), c) >= 0      }
 
 fun! s:Edit.get_motion(op, n) dict
 
-    let reg = v:register
-    let hl1 = 'WarningMsg' | let hl2 = 'Label'
+    let reg = v:register | let hl1 = 'WarningMsg' | let hl2 = 'Label'
 
     let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
                 \ a:op==#'c'? [['Change ', hl1], ['([n] s/w/e/b/$...) ?  ',   hl2]] :
-                \ a:op==#'y'? [['Yank   ', hl1], ['([n] w/e/b/$...) ?  ',     hl2]] : 'Aborted.'
+                \ a:op==#'y'? [['Yank   ', hl1], ['([n] y/w/e/b/$...) ?  ',   hl2]] : 'Aborted.'
 
     call s:F.msg(s, 1)
 
-    if index(['y', 'd'], a:op) >= 0
-        let m = (a:n>1? a:n : '').( reg == s:v.def_reg? '' : '"'.reg ).a:op
-        let M = (a:n>1? a:n : '').( reg == s:v.def_reg? '' : '"'.reg ).a:op
-        let s:v.use_register = reg
-    else
-        let m = (a:n>1? a:n : '').a:op
-        let M = (a:n>1? a:n : '').( a:op==#'c'? 'd' : a:op )
-        endif
-    echon m
+    "starting string
+    let M = (a:n>1? a:n : '').( reg == s:v.def_reg? '' : '"'.reg ).a:op
 
+    "preceding count
+    let n = a:n>1? a:n : 1
+
+    echon M
     while 1
         let c = nr2char(getchar())
-        if str2nr(c) > 0                     | echon c | let M .= c | let m .= c
-        elseif s:find(c)                     | echon c | let M .= c | let m .= c
-            let c = nr2char(getchar())       | echon c | let M .= c | let m .= c | break
+        if str2nr(c) > 0                     | echon c | let M .= c
+        elseif s:find(c)                     | echon c | let M .= c
+            let c = nr2char(getchar())       | echon c | let M .= c | break
 
-        elseif a:op ==# 'c' && c==#'s'       | echon c | let M .= c | let m .= c
-            let c = nr2char(getchar())       | echon c | let M .= c | let m .= c
-            let c = nr2char(getchar())       | echon c | let M .= c | let m .= c | break
+        elseif s:ia(c)                       | echon c | let M .= c
+            let c = nr2char(getchar())       | echon c | let M .= c | break
 
-        elseif a:op ==# 'd' && (s:del(c) || s:all(c)) | echon c | let M .= c | let m .= c | break
-        elseif a:op ==# 'c' && (s:chg(c) || s:all(c)) | echon c | let M .= c | let m .= c | break
-        elseif a:op ==# 'y' && (s:ynk(c) || s:all(c)) | echon c | let M .= c | let m .= c | break
+        elseif a:op ==# 'c' && c==#'s'       | echon c | let M .= c
+            let c = nr2char(getchar())       | echon c | let M .= c
+            let c = nr2char(getchar())       | echon c | let M .= c | break
 
-        else | let M = '' | break | endif
+        elseif s:all(c)                      | echon c | let M .= c | break
+        elseif a:op ==# 'd' && c==#'d'       | echon c | let M .= c | break
+        elseif a:op ==# 'c' && c==#'c'       | echon c | let M .= c | break
+        elseif a:op ==# 'y' && c==#'y'       | echon c | let M .= c | break
+
+        else | echon ' ...Aborted'           | return  | endif
     endwhile
 
-    if empty(M) | echon ' ...Aborted'
-
-    elseif a:op ==# 'd'
-        let s:v.deleted_text = []
-        call self._process("normal! ".M, 'd')
+    if a:op ==# 'd'
+        let s:v.deleted_text = [] | let s:v.merge = 1
+        nunmap <buffer> d
+        call s:F.external_funcs(0, 0)
+        call self._process("normal ".M, 'd')
+        nmap <silent> <nowait> <buffer> d <Plug>(VM-Edit-Delete)
         call self.post_process(0)
-        let maxw = max(map(copy(s:v.deleted_text), 'len(v:val)'))
-        let type = s:v.multiline? 'V' : 'b'.maxw
-        call setreg(reg, join(s:v.deleted_text, "\n"), type)
-        let g:VM.registers[reg] = s:v.deleted_text
+        call s:F.external_funcs(0, 1)
+        if reg != "_"
+            let maxw = max(map(copy(s:v.deleted_text), 'len(v:val)'))
+            let type = s:v.multiline? 'V' : 'b'.maxw
+            call setreg(reg, join(s:v.deleted_text, "\n"), type)
+            let g:VM.registers[reg] = s:v.deleted_text
+        endif
 
     elseif a:op ==# 'y'
         call s:G.change_mode(1)
-        let cmd = substitute(M, "^.*y", "", "")."\"".reg.'y'
-        call feedkeys(cmd)
+
+        "what comes after 'y'; check for 'yy'
+        let S = substitute(M, '^\d*y\(.*\)$', '\1', '') | let Y = S[0]==#'y'
+
+        let x = match(S, '\d') >= 0? substitute(S, '\D', '', 'g') : 0
+        if x | let S = substitute(S, x, '', '') | endif
+
+        "final count
+        let N = x? n*x : n>1? n : 1 | let N = N>1? N : ''
+
+        if Y
+            call vm#commands#motion('0', 1, 0, 0)
+            call vm#commands#motion('$', 1, 0, 0)
+            let s:v.multiline = 1
+            call vm#commands#motion('l', 1, 0, 0)
+            call feedkeys('y')
+        else | call feedkeys(N.S."\"".reg.'y') | endif
 
     elseif a:op ==# 'c'
-        if m[:1] ==# 'cs' | call self.run_normal(m, 1, '', 0) | return | endif
-        let s:cmd = substitute(M, '^(\d{-})c', '\1d', '')
-        call self.process()
-        call s:V.Insert.start('i')
+        "cs surround
+        if M[:1] ==# 'cs' | call self.run_normal(m, 1, 1, 0) | return | endif
+
+        "what comes after 'c'; check for 'cc'
+        let S = substitute(M, '^\d*c\(.*\)$', '\1', '') | let m = S[0] | let C = m==#'c'
+
+        "'cc' motion -> ^d$
+        if !C | let S = substitute(S, '^c', 'd', '')     | endif
+
+        "backwards and i/a motions use select operator, forward motions use delete
+        if s:back(m) || s:ia(m) | call feedkeys(n."s".S."c")
+        elseif C                | call feedkeys('^d$a')
+        else                    | call feedkeys(n."\"_d".S."i") | endif
     endif
 endfun
 
@@ -546,7 +573,7 @@ fun! s:Edit.run_macro(replace) dict
 
     call self.process()
     call s:after_macro(0)
-    redraw!
+    "redraw!
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -636,7 +663,7 @@ fun! s:Edit.surround() dict
     let c = nr2char(getchar())
 
     "not possible
-    if c == '<' | call s:F.msg('Not possible. Use visual command (zv) instead. ', 1)
+    if c == '<' || c == '>' | call s:F.msg('Not possible. Use visual command (zv) instead. ', 1)
         return | endif
 
     nunmap <buffer> S
@@ -741,8 +768,6 @@ fun! s:Edit.shift(dir) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Misc functions
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.extra_spaces(r, remove) dict
 
@@ -764,18 +789,19 @@ fun! s:Edit.extra_spaces(r, remove) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Misc functions
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:before_macro(maps)
     let s:v.silence = 1 | let s:v.auto = 1 | let s:v.eco = 1
-    let s:old_multiline = s:v.multiline    | let s:v.multiline = 1
+    let s:old_multiline = s:v.multiline    | let s:v.multiline = s:can_multiline
+    let s:can_multiline = 0
 
     "disable mappings and run custom functions
     let s:maps = a:maps
     nunmap <buffer> <Space>
     nunmap <buffer> <esc>
-    if a:maps && g:VM.mappings_enabled      | call s:V.Maps.mappings(0, 1) | endif
-    if exists('*VM_before_auto')            | call VM_before_auto()        | endif
-    if a:maps && exists('*VM_disable_maps') | call VM_disable_maps()       | endif
+    call s:F.external_funcs(a:maps, 0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -791,9 +817,7 @@ fun! s:after_macro(reselect, ...)
     "reenable mappings and run custom functions
     nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
     nmap     <silent> <nowait> <buffer> <Space>    <Plug>(VM-Toggle-Mappings)
-    call s:V.Maps.mappings(1)
-    if exists('*VM_after_auto')             | call VM_after_auto()   | endif
-    if s:maps && exists('*VM_enable_maps')  | call VM_enable_maps()  | endif
+    call s:F.external_funcs(s:maps, 1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

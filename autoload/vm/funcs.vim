@@ -211,6 +211,23 @@ fun! s:Funcs.region_txt(r) dict
     echohl None
 endfun
 
+fun! s:Funcs.external_funcs(maps, restore)
+    if a:restore
+        if exists('*VM_after_auto')       | call VM_after_auto()     | endif
+        if a:maps
+            call s:V.Maps.mappings(1)
+            if exists('*VM_after_macro') | call VM_after_macro()     | endif
+        endif
+        return
+    endif
+
+    if exists('*VM_before_auto')      | call VM_before_auto()        | endif
+    if a:maps
+        if g:VM.mappings_enabled      | call s:V.Maps.mappings(0, 1) | endif
+        if exists('*VM_before_macro') | call VM_before_macro()       | endif
+    endif
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Toggle options
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -255,7 +272,7 @@ fun! s:Funcs.toggle_option(option, ...) dict
         return
     endif
 
-    if !a:0 | redraw! | call self.count_msg(1) | endif
+    if a:0 | redraw! | call self.count_msg(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -31,7 +31,7 @@ endfun
 " Select operator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#select_operator(all)
+fun! vm#commands#select_operator(all, count)
     """Perform a yank, the autocmd will create the region.
 
     if !a:all
@@ -43,13 +43,38 @@ fun! vm#commands#select_operator(all)
     endif
 
     let s:v.storepos = getpos('.')[1:2]
-    let c = nr2char(getchar())
-    if index(split('webWEB$0^', '\zs'), c) >= 0
-        call s:V.Edit.select_op('gs'.c )
-    elseif index(['i', 'a'], c) >= 0
-        let d = nr2char(getchar())
-        call s:V.Edit.select_op('gs'.c.d)
-    endif
+
+    let abort = 0
+    let s = ''                     | let n = ''
+    let x = a:count>1? a:count : 1 | echo "Selecting: s"
+
+    let l:Single = { c -> index(split('webWEB$0^', '\zs'), c) >= 0 }
+    let l:Double = { c -> index(split('iaftFT', '\zs'), c) >= 0    }
+
+    while 1
+        let c = nr2char(getchar())
+        if c == "\<esc>"                 | let abort = 1 | break
+
+        elseif str2nr(c) > 1 && empty(s) | let n .= c    | echon c
+
+        elseif str2nr(c) > 0             | let s .= c    | echon c
+            break
+
+        elseif l:Single(c)               | let s .= c    | echon c
+            break
+
+        elseif l:Double(c)
+            let s .= c                   | echon c
+            let s .= nr2char(getchar())  | echon c
+            break
+
+        else                             | let abort = 1  | break    | endif
+    endwhile
+
+    if abort | let g:VM.selecting = 0 | return | endif
+
+    let n = n*x>1? n*x : ''
+    call s:V.Edit.select_op('gs'.n.s)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -148,7 +173,7 @@ endfun
 
 fun! vm#commands#expand_line(down)
     call s:check_extend_default(1)
-    if !s:v.multiline | call s:F.toggle_option('multiline', 1) | endif
+    if !s:v.multiline | call s:F.toggle_option('multiline') | endif
 
     let R = s:G.is_region_at_pos('.')
     if empty(R)
@@ -259,7 +284,7 @@ fun! vm#commands#find_under(visual, whole, inclusive, ...)
 
     call s:Search.add()
     let R = s:G.new_region()
-    if R.h && !s:v.multiline | call s:F.toggle_option('multiline', 1) | endif
+    if R.h && !s:v.multiline | call s:F.toggle_option('multiline') | endif
     call s:F.count_msg(1)
     return (a:0 && a:visual)? vm#commands#find_next(0, 0) : R
 endfun
@@ -330,7 +355,6 @@ fun! s:navigate(force, dir)
     elseif a:force || @/==''
         let i = a:dir? s:v.index+1 : s:v.index-1
         call s:G.select_region(i)
-        "redraw!
         call s:F.count_msg(1)
         return s:keep_block() | endif
 endfun
@@ -459,7 +483,7 @@ fun! vm#commands#motion(motion, count, select, this)
     if a:select && !s:X()  | let g:VM.extend_mode = 1   | endif
 
     if a:select && !s:v.multiline && s:vertical()
-        call s:F.toggle_option('multiline', 1) | endif
+        call s:F.toggle_option('multiline') | endif
 
     call s:V.Block.horizontal(1)
     call s:call_motion(a:this)
@@ -554,7 +578,7 @@ endfun
 
 fun! vm#commands#move(...)
     if !s:v.moving || s:F.no_regions() | return | endif
-    let s:v.moving -= 1 | call s:G.reset_byte_map(0)
+
     let R = s:R()[ s:v.index ]
 
     call s:before_move()
@@ -565,16 +589,15 @@ fun! vm#commands#move(...)
         for r in s:R()        | call r.move(s:motion) | endfor | endif
 
     "update variables, facing direction, highlighting
-    if s:after_move()         | return                | endif
-
-    let s:v.direction = R.dir
-    call s:G.update_highlight()
-    call s:G.select_region(R.index)
+    call s:after_move(R)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:before_move()
+    let s:v.moving -= 1
+    call s:G.reset_byte_map(0)
+
     if s:v.direction && s:always_from_back()
         call vm#commands#invert_direction()
 
@@ -585,12 +608,19 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:after_move()
-    if s:always_from_back() | call vm#commands#invert_direction() | endif
-    if s:v.merge            | call s:G.merge_regions()            | endif
+fun! s:after_move(R)
+    let s:v.direction = a:R.dir
 
-    call s:F.restore_reg()
-    let s:v.merge = 0
+    if s:always_from_back() | call vm#commands#invert_direction() | endif
+
+    if s:v.merge
+        call s:G.select_region(a:R.index)
+        call s:G.update_and_select_region(a:R.A)
+    else
+        call s:F.restore_reg()
+        call s:G.update_highlight()
+        call s:G.select_region(a:R.index)
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

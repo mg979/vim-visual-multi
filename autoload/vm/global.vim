@@ -152,6 +152,8 @@ endfun
 
 fun! s:Global.update_and_select_region(...) dict
     """Update regions and select region at cursor position."""
+    if s:v.merge | let s:v.merge = 0 | return self.merge_regions() | endif
+
     call self.update_regions()
     let R = self.select_region_at_pos(a:0? a:1 : '.')
     call s:F.restore_reg()
@@ -390,7 +392,7 @@ endfun
 
 fun! s:Global.merge_regions(...) dict
     ""Merge overlapping regions."""
-    if !s:X() | call self.merge_cursors() | return | endif
+    if !s:X() | return self.merge_cursors() | endif
 
     let pos = getpos('.')[1:2]      | let s:v.eco = 1
     let A = self.A                  | let B = self.B+1
