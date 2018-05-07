@@ -131,6 +131,21 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! vm#commands#erase_regions()
+    """Clear all regions, but stay in visual-multi mode.
+
+    "empty start
+    if !g:VM.is_active | call s:init(0,1,0) | return | endif
+
+    let s:V.Regions = []
+    call clearmatches()
+    let s:v.index = -1
+    call s:V.Block.stop()
+    call s:F.count_msg(1)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#commands#expand_line(down)
     call s:check_extend_default(1)
     if !s:v.multiline | call s:F.toggle_option('multiline', 1) | endif

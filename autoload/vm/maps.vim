@@ -50,6 +50,7 @@ fun! vm#maps#permanent()
     if g:VM_default_mappings
 
         nmap <silent> gs         <Plug>(VM-Select-Operator)
+        nmap <silent> gr         <Plug>(VM-Erase-Regions)
 
         nmap <silent> g<space>   <Plug>(VM-Add-Cursor-At-Pos)
         nmap <silent> g<cr>      <Plug>(VM-Add-Cursor-At-Word)
@@ -72,7 +73,7 @@ let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.', '\zs'), '"z".v:va
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
-let s:alt_maps = ['j', 'k', 's', 'q', 'BS', 'm', 'd' ]
+let s:alt_maps = ['j', 'k', 's', 'q', 'm', 'd' ]
 let s:leader   = split('ydpP', '\zs')
 let s:leader2  = []
 let s:fkeys    = ['1', '2']
@@ -139,7 +140,6 @@ fun! s:Maps.start() dict
 
     "basic mappings
     nmap     <silent> <nowait> <buffer> <Tab>      <Plug>(VM-Switch-Mode)
-    nmap     <silent> <nowait> <buffer> <M-BS>     <Plug>(VM-Erase-Regions)
     nmap     <silent> <nowait> <buffer> <BS>       <Plug>(VM-Toggle-Block)
     nmap     <silent> <nowait> <buffer> <CR>       <Plug>(VM-Toggle-Only-This-Region)
 
@@ -476,6 +476,7 @@ fun! s:Maps.default_stop() dict
     if g:VM_default_mappings
 
         nunmap gs
+        nunmap gr
 
         nunmap g<space>
         nunmap g<cr>

@@ -64,18 +64,6 @@ fun! s:Global.new_cursor(...) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Global.erase_regions() dict
-    """Clear all regions, but stay in visual-multi mode.
-
-    let s:V.Regions = []
-    call clearmatches()
-    let s:v.index = -1
-    call s:V.Block.stop()
-    call s:F.count_msg(1)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Change mode
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -408,7 +396,7 @@ fun! s:Global.merge_regions(...) dict
     let A = self.A                  | let B = self.B+1
     let By = copy(s:V.Bytes[A:B])   | let a = 0
 
-    call self.erase_regions()
+    call vm#commands#erase_regions()
 
     for i in range(len(By))
         if By[i] && !a     | let a = i+A
