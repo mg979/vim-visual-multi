@@ -73,7 +73,7 @@ let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.', '\zs'), '"z".v:va
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
-let s:alt_maps = ['j', 'k', 's', 'q', 'm', 'd' ]
+let s:alt_maps = ['j', 'k', 's', 'q', 'm', 'd', 'a' ]
 let s:leader   = split('ydpP', '\zs')
 let s:leader2  = []
 let s:fkeys    = ['1', '2']
@@ -282,6 +282,7 @@ fun! s:Maps.edit_start() dict
     nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
     nmap <silent> <nowait> <buffer> <C-t>           <Plug>(VM-Edit-Transpose)
     nmap <silent> <nowait> <buffer> <M-d>           <Plug>(VM-Edit-Duplicate)
+    nmap <silent> <nowait> <buffer> <M-a>           <Plug>(VM-Edit-Align)
 
     nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-p-Paste-Regions)
     nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-P-Paste-Regions)

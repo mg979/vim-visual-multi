@@ -13,16 +13,21 @@ Select operator, here shown with 'wellle/targets.vim' plugin: sib, sia, saa + se
 ![Imgur](https://i.imgur.com/yM3Fele.gif)
 
 -------
-Edit test: join lines(J), change motion at cursors, append(a), visual command at cursors 
+Align text at arbitrary positions
 
-![Imgur](https://i.imgur.com/2QKCaYv.gif)
+![Imgur](https://i.imgur.com/gnqWFMk.gif)
 
 -------
 Add numbering with expression
 
 ![Imgur](https://i.imgur.com/K3MDnVH.gif)
 
----------
+-------
+Edit test: join lines(J), change motion at cursors, append(a), visual command at cursors 
+
+![Imgur](https://i.imgur.com/2QKCaYv.gif)
+
+-------
 Place cursors at words:
 
 ![Imgur](https://i.imgur.com/swo5zHd.gif)

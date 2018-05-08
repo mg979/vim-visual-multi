@@ -438,7 +438,7 @@ fun! s:Edit.get_motion(op, n) dict
 
     elseif a:op ==# 'c'
         "cs surround
-        if M[:1] ==# 'cs' | call self.run_normal(m, 1, 1, 0) | return | endif
+        if M[:1] ==# 'cs' | call self.run_normal(M, 1, 1, 0) | return | endif
 
         "what comes after 'c'; check for 'cc'
         let S = substitute(M, '^\d*c\(.*\)$', '\1', '') | let m = S[0] | let C = m==#'c'
@@ -750,6 +750,25 @@ fun! s:Edit.transpose() dict
         call insert(g:VM.registers[s:v.def_reg], t, rlines[rl][0])
         call self.paste(1, 1, 1)
     endfor
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.align() dict
+    if s:v.multiline | return | endif
+    if s:X() | call s:G.change_mode(1) | endif
+
+    normal D
+    let max = max(map(copy(s:R()), 'v:val.a'))
+    let reg = g:VM.registers[s:v.def_reg]
+    for r in s:R()
+        let s = ''
+        while len(s) < max-r.a | let s .= ' ' | endwhile
+        let L = getline(r.l)
+        call setline(r.l, L[:r.a-1].s.L[r.a:].reg[r.index])
+        call r.update_cursor([r.l, r.a+len(s)])
+    endfor
+    call s:G.update_and_select_region()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
