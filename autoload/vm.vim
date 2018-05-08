@@ -106,6 +106,7 @@ fun! vm#reset(...)
     let &ignorecase  = s:v.oldcase[1]
     let &lz          = s:v.oldlz
     let &ch          = s:v.oldch
+    let &timeoutlen  = s:v.oldtout
     call vm#commands#regex_reset()
     call s:V.Funcs.restore_regs()
     call s:V.Maps.mappings(0, 1)

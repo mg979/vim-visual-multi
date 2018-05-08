@@ -125,7 +125,7 @@ fun! s:Edit.delete(X, register, count) dict
     """Delete the selected text and change to cursor mode.
     """Remember the lines that have been added an extra space, for later removal
     if !s:v.direction                     | call vm#commands#invert_direction() | endif
-    let r = s:G.select_region_at_pos('.') | let s:v.storepos = [r.l, r.a]
+    let ix = s:G.select_region_at_pos('.').index
 
     if a:X
         let size = s:size() | let change = 0 | let s:v.deleted_text = []
@@ -149,11 +149,10 @@ fun! s:Edit.delete(X, register, count) dict
         endfor
 
         call s:G.change_mode(1)
+        call s:G.select_region(ix)
 
         if a:register != "_" | call self.post_process(0)
-        else
-            call s:F.restore_reg()
-            call s:G.select_region_at_pos(s:v.storepos) | endif
+        else                 | call s:F.restore_reg()     | endif
 
     elseif a:count
         "ask for motion
@@ -420,7 +419,7 @@ fun! s:Edit.get_motion(op, n) dict
         call s:G.change_mode(1)
 
         "what comes after 'y'; check for 'yy'
-        let S = substitute(M, '^\d*y\(.*\)$', '\1', '') | let Y = S[0]==#'y'
+        let S = substitute(M, '^\d*y\(.*\)$', '\1', '') | let m = S[0] | let Y = m==#'y'
 
         let x = match(S, '\d') >= 0? substitute(S, '\D', '', 'g') : 0
         if x | let S = substitute(S, x, '', '') | endif
@@ -428,13 +427,15 @@ fun! s:Edit.get_motion(op, n) dict
         "final count
         let N = x? n*x : n>1? n : 1 | let N = N>1? N : ''
 
+        "NOTE: yy doesn't accept count.
         if Y
             call vm#commands#motion('0', 1, 0, 0)
             call vm#commands#motion('$', 1, 0, 0)
             let s:v.multiline = 1
             call vm#commands#motion('l', 1, 0, 0)
             call feedkeys('y')
-        else | call feedkeys(N.S."\"".reg.'y') | endif
+        else
+            call feedkeys("s".N.S."\"".reg."y") | endif
 
     elseif a:op ==# 'c'
         "cs surround
@@ -864,10 +865,18 @@ fun! s:fill_text(list)
     "Ensure there are enough lines for all regions
     let L = a:list
     let i = len(s:R()) - len(a:list)
-    while i
-        call add(L, s:v.deleted_text[-i])
-        let i -= 1
-    endwhile
+
+    if !has_key(s:v, 'deleted_text') || empty(s:v.deleted_text)
+        while i>0
+            call add(L, '')
+            let i -= 1
+        endwhile
+    else
+        while i>0
+            call add(L, s:v.deleted_text[-i])
+            let i -= 1
+        endwhile
+    endif
     return L
 endfun
 

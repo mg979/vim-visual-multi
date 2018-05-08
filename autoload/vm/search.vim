@@ -176,7 +176,8 @@ fun! s:pattern_found(t, i)
         let old = s:v.search[a:i]
         let s:v.search[a:i] = a:t
         call s:V.Global.update_region_patterns(a:t)
-        let wm = 'WarningMsg' | let L = 'Label'
+        let @/ = join(s:v.search, '\|') | set hlsearch
+        let wm = 'WarningMsg'           | let L = 'Label'
         call s:F.msg([['Pattern updated:   [', wm ], [old, L],
                     \     [']  ->  [', wm],          [a:t, L],
                     \     ["]\n", wm]], 1)
