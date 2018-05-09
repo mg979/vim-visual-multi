@@ -422,17 +422,18 @@ endfun
 
 fun! s:Edit.transpose() dict
     if !s:min(2)                           | return         | endif
-    let rlines = s:G.lines_with_regions(0) | let inline = 1 | let l = 0
+    let rlines = s:G.lines_with_regions(0) | let inline = 1 | let n = 0
+    let klines = sort(keys(rlines), 'n')
 
     "check if there is the same nr of regions in each line
-    if len(keys(rlines)) == 1 | let inline = 0
+    if len(klines) == 1 | let inline = 0
     else
-        for rl in keys(rlines)
-            let nr = len(rlines[rl])
+        for l in klines
+            let nr = len(rlines[l])
 
-            if nr == 1     | let inline = 0 | break
-            elseif !l      | let l = nr
-            elseif nr != l | let inline = 0 | break
+            if     nr == 1 | let inline = 0 | break     "line with 1 region
+            elseif !n      | let n = nr                 "set required n regions x line
+            elseif nr != n | let inline = 0 | break     "different number of regions
             endif
         endfor
     endif
@@ -447,11 +448,12 @@ fun! s:Edit.transpose() dict
         return | endif
 
     "inline transpositions
-    for rl in keys(rlines)
-        let t = remove(g:VM.registers[s:v.def_reg], rlines[rl][-1])
-        call insert(g:VM.registers[s:v.def_reg], t, rlines[rl][0])
-        call self.paste(1, 1, 1)
+    for l in klines
+        let t = remove(g:VM.registers[s:v.def_reg], rlines[l][-1])
+        call insert(g:VM.registers[s:v.def_reg], t, rlines[l][0])
     endfor
+    call self.delete(1, "_", 0)
+    call self.paste(1, 1, 1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
