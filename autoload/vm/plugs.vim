@@ -2,6 +2,10 @@ let g:VM.select_motions = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E']
 let g:VM.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '~', '$', '0', '^', '%']
 let g:VM.find_motions   = ['f', 'F', 't', 'T']
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"Plugs
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#plugs#init()
     nmap  <silent>  <Plug>(VM-Select-Operator)         :<c-u>call vm#commands#select_operator(0, 0)<cr>y
     nnoremap        <Plug>(VM-Select-All-Operator)     :<c-u>call vm#commands#select_operator(1, v:count)<cr>
@@ -158,25 +162,31 @@ fun! vm#plugs#init()
     imap            <Plug>(VM-Insert-CtrlA)            <esc>^i
     imap            <Plug>(VM-Insert-CtrlE)            <esc>$a
 
-    fun! s:Insert(key)
-        "only join undo if there's been a change
-        let u = (a:key ==? 'x')? b:VM_Selection.Live.change? ":silent! undojoin\<cr>" : "" : ""
-        let b:VM_Selection.Vars.restart_insert = 1
-        return "\<esc>".u.a:key."i"
-    endfun
-
-    fun! s:Yank(hard)
-        if empty(b:VM_Selection.Global.is_region_at_pos('.')) | let b:VM_Selection.Vars.yanked = 1 | return 'y' | endif
-        return ":\<C-u>call b:VM_Selection.Edit.yank(".a:hard.", 0, 0, 1)\<cr>"
-    endfun
-
-    fun! s:Mode()
-        let mode = g:VM.extend_mode? ' (extend mode)' : ' (cursor mode)'
-        call b:VM_Selection.Funcs.msg([["Enter regex".mode.":", 'WarningMsg'], ["\n/", 'None']], 1)
-    endfun
-
     "Cmdline
     nnoremap <expr> <Plug>(VM-:)                       vm#commands#regex_reset(':')
     nnoremap <expr> <Plug>(VM-/)                       vm#commands#regex_reset('/')
     nnoremap <expr> <Plug>(VM-?)                       vm#commands#regex_reset('?')
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Helper functions
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Insert(key)
+    "only join undo if there's been a change
+    let u = (a:key ==? 'x')? b:VM_Selection.Live.change? ":silent! undojoin\<cr>" : "" : ""
+    let k = b:VM_Selection.Live.append? 'a' : 'i'
+    let b:VM_Selection.Vars.restart_insert = 1
+    return "\<esc>".u.a:key.k
+endfun
+
+fun! s:Yank(hard)
+    if empty(b:VM_Selection.Global.is_region_at_pos('.')) | let b:VM_Selection.Vars.yanked = 1 | return 'y' | endif
+    return ":\<C-u>call b:VM_Selection.Edit.yank(".a:hard.", 0, 0, 1)\<cr>"
+endfun
+
+fun! s:Mode()
+    let mode = g:VM.extend_mode? ' (extend mode)' : ' (cursor mode)'
+    call b:VM_Selection.Funcs.msg([["Enter regex".mode.":", 'WarningMsg'], ["\n/", 'None']], 1)
+endfun
+

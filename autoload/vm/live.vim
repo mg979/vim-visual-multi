@@ -59,7 +59,8 @@ fun! s:Live.start(mode) dict
         let C = s:Cursor.new(A, r.l, I.append? r.a+1 : r.a)
         call add(I.cursors, C)
 
-        if I.append || col([r.l, '$']) == 1 | call s:V.Edit.extra_spaces(r, 0) | endif
+        let eol = r.b == col([r.l, '$'])-1
+        if (I.append && eol) || col([r.l, '$']) == 1 | call s:V.Edit.extra_spaces(r, 0) | endif
 
         if !has_key(I.lines, r.l)
             let I.lines[r.l] = s:Line.new(r.l, C)
@@ -157,7 +158,10 @@ fun! s:Live.stop() dict
         let i += 1
     endfor
 
+    "NOTE: restart_insert is set in plugs, to avoid postprocessing, but it will
+    "be reset on <esc>, in scripts check for Insert.is_active instead
     if s:v.restart_insert | let s:v.restart_insert = 0 | return | endif
+
     let s:CR = 0 | let s:v.eco = 1
     let s:V.Insert.is_active = 0
 

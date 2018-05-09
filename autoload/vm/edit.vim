@@ -467,33 +467,20 @@ fun! s:Edit.run_normal(cmd, recursive, count, maps) dict
         if empty(cmd) | call s:F.msg('Command aborted.', 1) | return | endif
 
     elseif empty(a:cmd)
-        call s:F.msg('Command not found.', 1) | return
+        call s:F.msg('No last command.', 1) | return
 
-    elseif !a:0
-        let cmd = a:cmd
-
-    elseif !empty(a:1)
-        call self.run_normal(a:1[0], a:1[1]) | return | endif
+    else | let cmd = a:cmd | endif
 
     "-----------------------------------------------------------------------
 
-    let s:cmd = a:recursive? ("normal ".a:count.cmd) : ("normal! ".a:count.cmd)
+    let c = a:count>1? a:count : ''
+    let s:cmd = a:recursive? ("normal ".c.cmd) : ("normal! ".c.cmd)
     if s:X() | call s:G.change_mode(1) | endif
 
     call s:before_macro(a:maps)
-    if a:cmd ==# 'X' && s:V.Insert.is_active
-        call self._process(s:cmd, 'IX')
-    else
-        call self._process(s:cmd)
-    endif
 
-    if a:cmd ==# 'X'
-        for r in s:R() | call r.bytes([-1,-1]) | endfor
-        call s:G.merge_cursors()
-    elseif a:cmd ==# 'x'
-        for r in s:R() | if r.a == col([r.L, '$']) | call r.bytes([-1,-1]) | endif  | endfor
-        call s:G.merge_cursors()
-    endif
+    if a:cmd ==? 'x' | call s:bs_del(a:cmd)
+    else             | call self._process(s:cmd) | endif
 
     let g:VM.last_normal = [cmd, a:recursive]
     call s:after_macro(0)
@@ -909,6 +896,22 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:bs_del(cmd)
+    if s:V.Insert.is_active | call s:V.Edit._process(s:cmd, 'ix')
+    else                    | call s:V.Edit._process(s:cmd)         | endif
+
+    if a:cmd ==# 'X'
+        for r in s:R() | call r.bytes([-1,-1]) | endfor
+        call s:G.merge_cursors()
+    elseif a:cmd ==# 'x'
+        let eol = s:V.Insert.is_active? s:V.Live.append : 0
+        for r in s:R() | if r.a == col([r.L, '$'])-eol | call r.bytes([-1,-1]) | endif  | endfor
+        call s:G.merge_cursors()
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:special(cmd, r, args)
     "Some commands need special adjustments while being processed.
 
@@ -921,11 +924,30 @@ fun! s:special(cmd, r, args)
         endif
         return 1
 
-    elseif a:args[0] ==# 'IX'
-        call a:r.bytes([s:change, s:change])
+    elseif a:args[0] ==# 'ix'
+        "insert BS/C-D is quite messy when at eol
+        let eol = a:r.a == col([a:r.l, '$']) - 1
+        let app = s:V.Live.mode == 'a'
+
+        "no adjustments
+        if !eol && !app | return | endif
+
+        let s = app? 1 : 0
+        call a:r.bytes([s:change+s, s:change+s])
+
         call cursor(a:r.l, a:r.a)
-        if a:r.a >= col([a:r.l, '$']) - 2 | normal! x
-        else                              | normal! X
+
+        if a:cmd ==# 'normal! x'
+            normal! x
+            if s | call a:r.bytes([-1, -1]) | endif
+        else
+            if eol
+                call s:V.Edit.extra_spaces(a:r, 0)
+                normal! x
+            else
+                normal! X
+            endif
+            if s | call a:r.bytes([-1, -1]) | endif
         endif
         return 1
 
