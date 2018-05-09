@@ -720,8 +720,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.transpose() dict
-    if !s:min(2)                                 | return         | endif
-    let rlines = s:G.lines_with_regions(0)  | let inline = 1 | let l = 0
+    if !s:min(2)                           | return         | endif
+    let rlines = s:G.lines_with_regions(0) | let inline = 1 | let l = 0
 
     "check if there is the same nr of regions in each line
     if len(keys(rlines)) == 1 | let inline = 0
@@ -756,8 +756,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.align() dict
-    if s:v.multiline | return | endif
-    if s:X() | call s:G.change_mode(1) | endif
+    if s:v.multiline | return                  | endif
+    if s:X()         | call s:G.change_mode(1) | endif
 
     normal D
     let max = max(map(copy(s:R()), 'v:val.a'))
@@ -770,6 +770,7 @@ fun! s:Edit.align() dict
         call r.update_cursor([r.l, r.a+len(s)])
     endfor
     call s:G.update_and_select_region()
+    call vm#commands#motion('l', 1, 0, 0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

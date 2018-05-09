@@ -214,8 +214,8 @@ endfun
 fun! s:Funcs.external_funcs(maps, restore)
     if a:restore
         if exists('*VM_after_auto')       | call VM_after_auto()     | endif
+        call s:V.Maps.mappings(1)
         if a:maps
-            call s:V.Maps.mappings(1)
             if exists('*VM_after_macro') | call VM_after_macro()     | endif
         endif
         return

@@ -41,7 +41,7 @@ fun! s:Live.start(mode) dict
     let I.mode      = a:mode
     let I.append    = index(['a', 'A'], I.mode) >= 0
 
-    let R           = s:G.is_region_at_pos('.')
+    let R           = s:G.select_region_at_pos('.')
     let I.index     = R.index
     let I.Begin     = I.append? R.A+1 : R.A
     let I.begin     = [R.l, I.append? R.a+1 : R.a]

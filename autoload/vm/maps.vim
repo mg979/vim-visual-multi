@@ -69,7 +69,7 @@ let s:NVIM = has('gui_running') || has('nvim')
 
 let s:simple   = split('nNqQU*#o[]{}?/:uMS', '\zs')
 
-let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.', '\zs'), '"z".v:val')
+let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.`', '\zs'), '"z".v:val')
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
@@ -222,6 +222,7 @@ fun! s:Maps.start() dict
     nmap <silent> <nowait> <buffer> <C-z>           <Plug>(VM-Run-Last-Ex)
     nmap <silent> <nowait> <buffer> z@              <Plug>(VM-Run-Macro)
     nmap <silent> <nowait> <buffer> z.              <Plug>(VM-Run-Dot)
+    nmap <silent> <nowait> <buffer> z`              <Plug>(VM-Align-Char)
     nmap          <nowait> <buffer> zn              <Plug>(VM-Numbers)
     nmap <silent> <nowait> <buffer> zN              <Plug>(VM-Numbers-Append)
     nmap          <nowait> <buffer> z0n             <Plug>(VM-Zero-Numbers)
@@ -282,7 +283,7 @@ fun! s:Maps.edit_start() dict
     nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
     nmap <silent> <nowait> <buffer> <C-t>           <Plug>(VM-Edit-Transpose)
     nmap <silent> <nowait> <buffer> <M-d>           <Plug>(VM-Edit-Duplicate)
-    nmap <silent> <nowait> <buffer> <M-a>           <Plug>(VM-Edit-Align)
+    nmap <silent> <nowait> <buffer> <M-a>           <Plug>(VM-Align)
 
     nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-p-Paste-Regions)
     nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-P-Paste-Regions)

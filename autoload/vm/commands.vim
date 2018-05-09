@@ -624,6 +624,22 @@ fun! s:after_move(R)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Align
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#align(count)
+    if s:X() | call s:G.change_mode(1) | endif
+
+    let c = nr2char(getchar())
+    if c == "\<esc>"          | return | endif | let i = a:count
+    while i
+        call vm#commands#find_motion('f', c, 0)
+        call s:V.Edit.align()
+        let i -= 1
+    endwhile
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#undo()
     call clearmatches()

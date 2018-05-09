@@ -157,7 +157,7 @@ fun! s:Global.update_and_select_region(...) dict
     call self.update_regions()
     let R = self.select_region_at_pos(a:0? a:1 : '.')
     call s:F.restore_reg()
-    call s:F.count_msg(0)
+    call s:F.count_msg(1)
     return R
 endfun
 
