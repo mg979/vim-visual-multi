@@ -21,7 +21,6 @@ fun! vm#live#init()
     let s:Cur     = { byte -> s:F.Cursor(byte)          }
     let s:newline = { m    -> index(['o', 'O'], m) >= 0 }
 
-    let s:CR = 0
     let s:v.restart_insert = 0
     return s:Live
 endfun
@@ -89,7 +88,7 @@ fun! s:Live.start(mode) dict
     "check if there are insert marks that must be cleared
     if !empty(s:v.insert_marks)
         for l in keys(s:v.insert_marks)
-            call setline(l, substitute(getline(l), '_', '', ''))
+            call setline(l, substitute(getline(l), '^\(\s*\)_', '\1', ''))
             call remove(s:v.insert_marks, l)
         endfor
     endif
@@ -132,13 +131,83 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Live.return() dict
+    "NOTE: this function could probably be simplified, only 'end' seems necessary
 
-    call s:V.Edit._process(self.append? 'normal! l' : '', 'cr')
-    normal j^
+    "invert regions order, so that they are processed from bottom to top
+    let s:V.Regions = reverse(s:R())
+
+    let app = self.append | let nR = len(s:R())-1
+
+    for r in s:R()
+        "these vars will be used to see what must be done (read NOTE)
+        let eol = col([r.l, '$']) | let end = (r.a >= eol-1)
+        let ind = indent(r.l)     | let ok = ind && !end
+
+        call cursor(r.l, r.a)
+
+        "append new line with mark/extra space if needed
+        if ok          | call append(line('.'), '')
+        elseif !ind    | call append(line('.'), ' ')
+        else           | call append(line('.'), '_ ')
+        endif
+
+        "cut and paste below, or just move down if at eol, then reindent
+        if !end && app | normal! ld$jp==
+        elseif !end    | normal! d$jp==
+        elseif end     | normal! j==
+        endif
+
+        "cursor line will be moved down by the next cursors
+        call r.update_cursor([r.l + 1 + r.index, getpos('.')[2]])
+        if !ok | call add(s:v.extra_spaces, nR - r.index) | endif
+
+        "remember which lines have been marked
+        if !ok | let s:v.insert_marks[r.l] = indent(r.l) | endif
+    endfor
+
+    "reorder regions
+    let s:V.Regions = reverse(s:R())
+
+    "reindent all and move back cursors to indent level
+    normal ^
+    for r in s:R()
+        call cursor(r.l, r.a) | normal! ==
+    endfor
+    normal ^
     silent! undojoin
+endfun
 
-    "after cr mode will be set to 'i', but we must remeber if current mode is 'a'
-    let s:CR = self.mode==?'a'
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Live.return_above() dict
+    "invert regions order, so that they are processed from bottom to top
+    let s:V.Regions = reverse(s:R())
+
+    let nR = len(s:R())-1
+
+    for r in s:R()
+        call cursor(r.l, r.a)
+
+        "append new line above, with mark/extra space
+        call append(line('.')-1, '_ ')
+
+        "move up, then reindent
+        normal! k==
+
+        "cursor line will be moved down by the next cursors
+        call r.update_cursor([r.l + r.index, getpos('.')[2]])
+        call add(s:v.extra_spaces, nR - r.index)
+
+        "remember which lines have been marked
+        let s:v.insert_marks[r.l] = indent(r.l)
+    endfor
+
+    "reorder regions
+    let s:V.Regions = reverse(s:R())
+
+    "move back all cursors to indent level
+    normal ^
+    silent! undojoin
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -148,7 +217,7 @@ fun! s:Live.stop() dict
     call self.auto_end() | let i = 0
 
     "should the cursor step back when exiting insert mode?
-    let back = self.append || s:CR
+    let back = self.append
 
     for r in s:R()
         let c = self.cursors[i]
@@ -162,8 +231,7 @@ fun! s:Live.stop() dict
     "be reset on <esc>, in scripts check for Insert.is_active instead
     if s:v.restart_insert | let s:v.restart_insert = 0 | return | endif
 
-    let s:CR = 0 | let s:v.eco = 1
-    let s:V.Insert.is_active = 0
+    let s:v.eco = 1 | let s:V.Insert.is_active = 0
 
     call s:V.Edit.post_process(0,0)
     set hlsearch
@@ -228,7 +296,7 @@ fun! s:Line.new(line, cursor) dict
 
     "check if there are insert marks that must be cleared
     if has_key(s:v.insert_marks, L.l)
-        let L.txt = substitute(L.txt, '_', '', '')
+        let L.txt = substitute(L.txt, '^\(\s*\)_', '\1', '')
     endif
 
     return L

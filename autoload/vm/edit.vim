@@ -147,7 +147,7 @@ fun! s:Edit._process(cmd, ...) dict
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
     "cursors on empty lines still give problems, remove them
-    let fix = (a:0 && a:1=='cr')? [] : map(copy(s:R()), '[len(getline(v:val.l)), v:val.id]')
+    let fix = map(copy(s:R()), '[len(getline(v:val.l)), v:val.id]')
     for r in fix
         if !r[0]
             call s:F.region_with_id(r[1]).remove()
@@ -216,23 +216,6 @@ fun! s:special(cmd, r, args)
             endif
             if app | call a:r.bytes([-1, -1]) | endif
         endif
-        return 1
-
-    elseif a:args[0] ==# 'cr'
-        let r = a:r           | let r.l += r.index       | let eol = col([r.l, '$'])
-        let ind = indent(r.l) | let end = (r.a == eol-1) | let ok = ind && !end
-
-        call cursor(r.l, r.a)
-
-        let s = ok? '' : '_'
-        call append(line('.'), s)
-
-        if ok               | exe a:cmd    | normal! d$jp==
-        elseif end && ind   | normal! j==
-        endif
-
-        "remember which lines have been marked
-        let s:v.insert_marks[r.l+1] = indent(r.l+1)
         return 1
 
     elseif a:args[0] ==# 'd'
@@ -309,11 +292,14 @@ endfun
 fun! s:Edit.extra_spaces(r, remove) dict
 
     if a:remove
+        "let s:v.extra_spaces = s:v.extra_spaces[:len(s:R())-1]  "fix size
         "remove the extra space only if it comes after r.b, and it's just before \n
         for i in s:v.extra_spaces
             let r = s:R()[i]
             call cursor(r.L, r.b<col([r.L, '$'])-1? r.b+1 : r.b)
-            normal! x
+            if s:F.char_under_cursor() ==# ' '
+                normal! x
+            endif
         endfor
         let s:v.extra_spaces = [] | return | endif
 

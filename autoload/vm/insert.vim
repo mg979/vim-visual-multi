@@ -61,11 +61,13 @@ fun! s:Insert.key(type) dict
 
     elseif a:type ==# 'o'
         call vm#commands#merge_to_beol(1, 0)
-        call self.start('o')
+        call s:V.Live.return()
+        call self.start('i')
 
     elseif a:type ==# 'O'
         call vm#commands#merge_to_beol(0, 0)
-        call self.start('O')
+        call s:V.Live.return_above()
+        call self.start('i')
 
     elseif a:type ==# 'a'
         if s:X()

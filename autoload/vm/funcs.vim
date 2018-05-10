@@ -69,6 +69,12 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Funcs.char_under_cursor() dict
+    return matchstr(getline('.'), '\%' . col('.') . 'c.')
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Funcs.default_reg() dict
     let clipboard_flags = split(&clipboard, ',')
     if index(clipboard_flags, 'unnamedplus') >= 0
