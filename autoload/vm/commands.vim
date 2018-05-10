@@ -36,7 +36,7 @@ fun! vm#commands#select_operator(all, count)
 
     if !a:all
         if !g:VM.is_active     | call s:init(0, 0, 1)   | endif
-        if !has('nvim')        | let &updatetime = 10   | endif
+        if g:VM.oldupdate      | let &updatetime = 10   | endif
         let g:VM.selecting = 1 | let g:VM.extend_mode = 1
         silent! nunmap <buffer> y
         return
@@ -245,7 +245,8 @@ fun! vm#commands#find_by_regex(...)
     cnoremap          <buffer> <esc> <esc>:call vm#commands#regex_abort()<cr><esc>
     if !has('nvim') && !has('gui_running')
         cnoremap <silent> <buffer> <esc><esc> <esc><esc>
-        set timeoutlen=300
+        set timeoutlen=200
+        let s:v.reset_tout = 1
     endif
 endfun
 

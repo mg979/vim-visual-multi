@@ -30,19 +30,22 @@ endfun
 fun! s:Live.start(mode) dict
     "--------------------------------------------------------------------------
 
-    "Initialize Insert Mode dict. 'Begin' is the initial offset, and will be
+    "Initialize Insert Mode dict. 'begin' is the initial ln/col, and will be
     "used to track all changes from that point, to apply them on all cursors
 
     "--------------------------------------------------------------------------
     let I = self
-    let s:V.Insert.is_active = 1
 
     let I.mode      = a:mode
     let I.append    = index(['a', 'A'], I.mode) >= 0
 
-    let R           = s:G.select_region_at_pos('.')
+    if s:V.Insert.is_active
+        let R = s:G.select_region(I.index)
+    else
+        let R = s:G.select_region_at_pos('.')
+    endif
+
     let I.index     = R.index
-    let I.Begin     = I.append? R.A+1 : R.A
     let I.begin     = [R.l, I.append? R.a+1 : R.a]
     let I.size      = s:size()
     let I.cursors   = []
@@ -50,6 +53,8 @@ fun! s:Live.start(mode) dict
     let I.change    = 0
     let s:C         = { -> I.cursors }
     let I.col       = getpos('.')[2]
+
+    let s:V.Insert.is_active = 1
 
     call clearmatches()
 

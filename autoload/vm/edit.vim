@@ -146,14 +146,6 @@ fun! s:Edit._process(cmd, ...) dict
     let size = s:size()    | let s:change = 0 | let cmd = a:cmd  | let s:v.eco = 1
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
-    "cursors on empty lines still give problems, remove them
-    let fix = map(copy(s:R()), '[len(getline(v:val.l)), v:val.id]')
-    for r in fix
-        if !r[0]
-            call s:F.region_with_id(r[1]).remove()
-        endif
-    endfor
-
     for r in s:R()
         if !s:v.auto && r.index == self.skip_index | continue | endif
 

@@ -154,11 +154,16 @@ fun! s:Region.bytes(...) dict
     let r.a = r.A - line2byte(r.l)
     let r.L = byte2line(r.B)
     let r.b = r.B - line2byte(r.L)
+
+    "fix for empty lines
+    if !r.a | let r.a = 1 | let r.l -= 1 | endif
+    if !r.b | let r.b = 1 | let r.L -= 1 | endif
+
     if !s:v.eco | call r.update() | endif
     return [r.l, r.L, r.a, r.b]
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.remove() dict
     call self.remove_highlight()

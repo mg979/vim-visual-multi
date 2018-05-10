@@ -155,11 +155,11 @@ fun! vm#plugs#init()
     imap     <expr> <Plug>(VM-Insert-Down-Arrow)       <sid>Insert('j')
     imap     <expr> <Plug>(VM-Insert-Up-Arrow)         <sid>Insert('k')
     imap     <expr> <Plug>(VM-Insert-Right-Arrow)      <sid>Insert('l')
-    imap            <Plug>(VM-Insert-Return)           <esc>:call b:VM_Selection.Live.return()<cr>i
+    imap     <expr> <Plug>(VM-Insert-Return)           <sid>Insert('cr')
     imap     <expr> <Plug>(VM-Insert-Del)              <sid>Insert('x')
     imap     <expr> <Plug>(VM-Insert-BS)               <sid>Insert('X')
-    imap            <Plug>(VM-Insert-Paste)            <esc>:call b:VM_Selection.Live.paste()<cr>oi
-    imap            <Plug>(VM-Insert-CtrlW)            <esc>sbdi
+    imap     <expr> <Plug>(VM-Insert-Paste)            <sid>Insert('p')
+    imap     <expr> <Plug>(VM-Insert-CtrlW)            <sid>Insert('cw')
     imap            <Plug>(VM-Insert-CtrlA)            <esc>^i
     imap            <Plug>(VM-Insert-CtrlE)            <esc>$a
 
@@ -174,10 +174,20 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert(key)
+    let b:VM_Selection.Vars.restart_insert = 1
+    let app = b:VM_Selection.Live.append
+
+    if a:key == 'cr'            "return
+        return "\<esc>:call b:VM_Selection.Live.return()\<cr>i"
+    elseif a:key == 'p'         "c-v
+        return "\<esc>".(app? 'l' : '').":call b:VM_Selection.Live.paste()\<cr>oi"
+    elseif a:key == 'cw'        "c-w
+        return "\<esc>".(app? 'l' : '')."sbhdi"
+    endif
+
     "only join undo if there's been a change
     let u = (a:key ==? 'x')? b:VM_Selection.Live.change? ":silent! undojoin\<cr>" : "" : ""
-    let k = b:VM_Selection.Live.append? 'a' : 'i'
-    let b:VM_Selection.Vars.restart_insert = 1
+    let k = app? 'a' : 'i'
     return "\<esc>".u.a:key.k
 endfun
 

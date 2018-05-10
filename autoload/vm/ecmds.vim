@@ -396,7 +396,7 @@ endfun
 
 fun! s:Edit.select_op(cmd) dict
 
-    if !has('nvim')        | let &updatetime = 10   | endif
+    if g:VM.oldupdate | let &updatetime = 10 | endif
 
     call self.before_macro(1)
 
@@ -415,7 +415,7 @@ fun! s:Edit.select_op(cmd) dict
     call self.after_macro(0)
 
     if empty(s:v.search) | let @/ = ''                      | endif
-    if !has('nvim')      | let &updatetime = g:VM.oldupdate | endif
+    if g:VM.oldupdate    | let &updatetime = g:VM.oldupdate | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

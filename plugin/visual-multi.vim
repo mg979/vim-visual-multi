@@ -18,7 +18,7 @@ fun! <SID>VM_Init()
     let g:VM.last_ex          = ''
     let g:VM.last_normal      = ''
     let g:VM.last_visual      = ''
-    let g:VM.oldupdate        = &updatetime
+    let g:VM.oldupdate        = (has('nvim') || has('patch1394'))? 0 : &updatetime
     let g:VM.registers        = {'"': []}
 
     let g:VM_live_editing                     = get(g:, 'VM_live_editing', 1)
@@ -62,7 +62,7 @@ fun! s:Select()
             call b:VM_Selection.Global.get_region()
         endif
         let g:VM.selecting = 0
-        let &updatetime    = g:VM.oldupdate
+        if g:VM.oldupdate | let &updatetime = g:VM.oldupdate | endif
     endif
 endfun
 
@@ -70,7 +70,7 @@ augroup plugin-visual-multi-start
     au!
     au VimEnter     * call <SID>VM_Init()
     au BufEnter     * let b:VM_Selection = {}
-    if has('nvim')
+    if has('nvim') || has('patch1394')
         au TextYankPost * call <sid>Select()
     else
         au CursorMoved  * call <sid>Select()

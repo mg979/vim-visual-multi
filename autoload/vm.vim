@@ -61,6 +61,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.vertical_col     = 0
     let s:v.yanked           = 0
     let s:v.merge            = 0
+    let s:v.reset_tout       = 0
 
     let s:V.Search     = vm#search#init()
     let s:V.Global     = vm#global#init()
@@ -119,6 +120,7 @@ fun! vm#reset(...)
 
     silent! nunmap <buffer> <Space>
     silent! nunmap <buffer> <esc>
+    silent! cunmap <buffer> <esc><esc>
     if !has('nvim') && !has('gui_running')
         silent! nunmap <buffer> <esc><esc>
     endif
@@ -149,13 +151,13 @@ fun! vm#augroup(end)
         au BufLeave     * call s:buffer_leave()
         au BufEnter     * call s:buffer_enter()
 
-        if has('nvim')
+        if has('nvim') || has('patch1394')
             au TextYankPost * if s:v.yanked | call <SID>set_reg() | endif
         else
-            if v:version == 800 && has('patch1206')
-                au CmdlineLeave * let &timeoutlen = s:v.oldtout | silent! cunmap <buffer> <esc><esc>
-            endif
             au CursorMoved  * if s:v.yanked | call <SID>set_reg() | endif
+        endif
+        if has('patch1206') && !has('gui_running')
+            au CmdlineLeave * if s:v.reset_tout | call s:reset_timeout() | endif
         endif
     augroup END
 endfun
@@ -174,7 +176,7 @@ fun! vm#au_cursor(end)
     augroup END
 endfun
 
-fun! <SID>VM_cursor_moved()
+fun! s:VM_cursor_moved()
     if s:v.block_mode
         if !s:v.block[3]
             call s:V.Block.stop()
@@ -182,6 +184,8 @@ fun! <SID>VM_cursor_moved()
         else
             let s:v.block[3] = 0
         endif
+    elseif s:v.reset_tout
+        call s:reset_timeout()
     endif
 endfun
 
@@ -195,11 +199,18 @@ fun! s:buffer_enter()
     let b:VM_Selection = {}
 endfun
 
-fun! <SID>set_reg()
+fun! s:reset_timeout()
+    let s:v.reset_tout = 0
+    let &timeoutlen = s:v.oldtout
+    silent! cunmap <buffer> <esc><esc>
+endfun
+
+fun! s:set_reg()
     "Replace old default register if yanking in VM outside a region or cursor
     let s:v.yanked = 0
     let g:VM.registers['"'] = []
     let s:v.oldreg = s:V.Funcs.get_reg(v:register)
 endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
