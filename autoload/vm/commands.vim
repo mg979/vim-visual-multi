@@ -627,16 +627,47 @@ endfun
 " Align
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#align(count)
+fun! vm#commands#align(count, regex)
     if s:X() | call s:G.change_mode(1) | endif
 
-    let c = nr2char(getchar())
-    if c == "\<esc>"          | return | endif | let i = a:count
-    while i
-        call vm#commands#find_motion('f', c, 0)
-        call s:V.Edit.align()
-        let i -= 1
-    endwhile
+    if !a:regex
+        let n = a:count | let s = n>1? 's' : ''
+        echohl Label    | echo 'Align with '.n.' char'.s.' > '   | echohl None
+
+        let C = []
+        while n
+            let c = nr2char(getchar())
+            if c == "\<esc>" | return
+            else             | call add(C, c) | let n -= 1 | echon c
+            endif
+        endwhile
+
+        let i = a:count | let as = map(copy(s:R()), 'v:val.a')
+        while !empty(C)
+            let c = remove(C, 0)
+            call vm#commands#find_motion('f', c, 0)
+
+            "remove region if a match isn't found, otherwise it will be aligned
+            for r in s:R()
+                if r.a == as[r.index] | call r.remove() | endif
+            endfor
+
+            "TODO: strip white spaces preceding the shortest columns
+            call s:V.Edit.align()
+        endwhile
+        return
+    endif
+
+    echohl Label | let rx = input('Align with regex > ')   | echohl None
+    if empty(rx) | echohl WarningMsg | echon ' ...Aborted' | return  | endif
+
+    set nohlsearch
+    for r in s:R()
+        call cursor(r.l, r.a)
+        if !search(rx, 'zp', r.l) | call r.remove() | continue | endif
+        call r.update_cursor([r.l, getpos('.')[2]])
+    endfor
+    call s:V.Edit.align()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

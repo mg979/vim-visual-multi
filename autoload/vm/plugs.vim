@@ -135,7 +135,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-Duplicate)          :call b:VM_Selection.Edit.duplicate()<cr>
 
     nnoremap        <Plug>(VM-Align)                   :<C-u>call b:VM_Selection.Edit.align()<cr>
-    nnoremap        <Plug>(VM-Align-Char)              :<C-u>call vm#commands#align(v:count1)<cr>
+    nnoremap        <Plug>(VM-Align-Char)              :<C-u>call vm#commands#align(v:count1, 0)<cr>
+    nnoremap        <Plug>(VM-Align-Regex)             :<C-u>call vm#commands#align(1, 1)<cr>
     nnoremap        <Plug>(VM-Numbers)                 :<C-u>call b:VM_Selection.Edit.numbers(v:count1, 0)<cr>
     nnoremap        <Plug>(VM-Numbers-Append)          :<C-u>call b:VM_Selection.Edit.numbers(v:count1, 1)<cr>
     nnoremap        <Plug>(VM-Zero-Numbers)            :<C-u>call b:VM_Selection.Edit.numbers(v:count, 0)<cr>

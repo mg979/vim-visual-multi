@@ -198,22 +198,23 @@ fun! s:special(cmd, r, args)
         "no adjustments
         if !eol && !app | return | endif
 
-        let s = app? 1 : 0
-        call a:r.bytes([s:change+s, s:change+s])
+        "in append mode, after <esc> cursors have been moved back by 1
+        if app | call a:r.bytes([s:change+1, s:change+1]) | endif
 
         call cursor(a:r.l, a:r.a)
 
+        "echom a:r.a col([a:r.l, '$'])-1 eol   "still something amiss near eol
         if a:cmd ==# 'normal! x'
             normal! x
-            if s | call a:r.bytes([-1, -1]) | endif
+            if app | call a:r.bytes([-1, -1]) | endif
         else
             if eol
-                call s:V.Edit.extra_spaces(a:r, 0)
+                "call s:V.Edit.extra_spaces(a:r, 0)     "not necessary?
                 normal! x
             else
                 normal! X
             endif
-            if s | call a:r.bytes([-1, -1]) | endif
+            if app | call a:r.bytes([-1, -1]) | endif
         endif
         return 1
 
