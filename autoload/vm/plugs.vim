@@ -30,10 +30,10 @@ fun! vm#plugs#init()
     xnoremap        <Plug>(VM-Find-A-Subword)          y:call vm#commands#find_under(1, 0, 0)<cr>`]
     xnoremap        <Plug>(VM-Find-A-Whole-Subword)    y:call vm#commands#find_under(1, 1, 0)<cr>`]
 
-    nnoremap        <Plug>(VM-Star)                    :call vm#commands#find_under(0, 1, 0)<cr>
-    nnoremap        <Plug>(VM-Hash)                    :call vm#commands#find_under(0, 1, 1)<cr>
-    xnoremap        <Plug>(VM-Star)                    y:call vm#commands#find_under(1, 0, 0)<cr>`]
-    xnoremap        <Plug>(VM-Hash)                    y:call vm#commands#find_under(1, 1, 0)<cr>`]
+    nnoremap        <Plug>(VM-Star)                    :call <sid>Star(1)<cr>
+    nnoremap        <Plug>(VM-Hash)                    :call <sid>Star(2)<cr>
+    xnoremap        <Plug>(VM-Star)                    y:call <sid>Star(3)<cr>`]
+    xnoremap        <Plug>(VM-Hash)                    y:call <sid>Star(4)<cr>`]
 
     nnoremap        <Plug>(VM-Toggle-Mappings)         :call b:VM_Selection.Maps.mappings_toggle()<cr>
     nnoremap        <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline', 1)<cr>
@@ -46,7 +46,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Rewrite-Last-Search)     :call b:VM_Selection.Search.rewrite(1)<cr>
     nnoremap        <Plug>(VM-Rewrite-All-Search)      :call b:VM_Selection.Search.rewrite(0)<cr>
     nnoremap        <Plug>(VM-Read-From-Search)        :call b:VM_Selection.Search.get_slash_reg()<cr>
-    nnoremap        <Plug>(VM-Add-Search)              :call b:VM_Selection.Search.add()<cr>
+    nnoremap        <Plug>(VM-Add-Search)              :call b:VM_Selection.Search.get()<cr>
     nnoremap        <Plug>(VM-Remove-Search)           :call b:VM_Selection.Search.remove(0)<cr>
     nnoremap        <Plug>(VM-Remove-Search-Regions)   :call b:VM_Selection.Search.remove(1)<cr>
 
@@ -172,6 +172,21 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Helper functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Star(type)
+    set nosmartcase
+    set noignorecase
+
+    if a:type == 1
+        call vm#commands#find_under(0, 1, 0)
+    elseif a:type == 2
+        call vm#commands#find_under(0, 1, 1)
+    elseif a:type == 3
+        call vm#commands#find_under(1, 0, 0)
+    elseif a:type == 4
+        call vm#commands#find_under(1, 1, 0)
+    endif
+endfun
 
 fun! s:Insert(key)
     let b:VM_Selection.Vars.restart_insert = 1

@@ -63,8 +63,8 @@ fun! vm#init_buffer(empty, ...)
     let s:v.merge            = 0
     let s:v.reset_tout       = 0
 
-    let s:V.Search     = vm#search#init()
     let s:V.Global     = vm#global#init()
+    let s:V.Search     = vm#search#init()
     let s:V.Edit       = vm#edit#init()
     let s:V.Insert     = vm#insert#init()
     let s:V.Live       = vm#live#init()

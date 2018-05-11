@@ -6,6 +6,7 @@ fun! vm#search#init()
     let s:V        = b:VM_Selection
     let s:v        = s:V.Vars
     let s:F        = s:V.Funcs
+    let s:G        = s:V.Global
 
     let s:V.Search = s:Search
 
@@ -56,6 +57,15 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Search.get() dict
+    """Get a new search pattern from selected region."
+    let r = s:G.is_region_at_pos('.') | if empty(r) | return | endif
+    let pat = self.escape_pattern(r.txt)
+    call s:update_search(pat)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Search.get_slash_reg() dict
     """Get pattern from current "/" register."
     call s:update_search(self.get_pattern('/', 1))
@@ -81,9 +91,13 @@ fun! s:Search.remove(also_regions) dict
     let pats = s:v.search
 
     if !empty(pats)
-        call s:F.count_msg(1)
-        let i = input('Which index? ') | let i = str2nr(i)
-        if ( i < 0 || i >= len(pats) ) | call s:F.msg('      Wrong index', 0) | return | endif
+        let s1 = ['Which index? ', 'WarningMsg']
+        let s2 = [string(s:v.search), 'Type']
+        call s:F.msg([s1,s2], 0)
+        let i = nr2char(getchar())
+        if ( i == "\<esc>" ) | call s:F.msg("\tCanceled.\n", 0)             | call s:F.count_msg(1) | return | endif
+        if ( i < 0 || i >= len(pats) ) | call s:F.msg("\tWrong index\n", 0) | call s:F.count_msg(1) | return | endif
+        call s:F.msg("\n", 0)
         let pat = pats[i]
         call remove(pats, i)
         call self.update_current()
@@ -98,7 +112,7 @@ fun! s:Search.remove(also_regions) dict
                 let removed += 1 | endif
             let i -= 1 | endwhile
 
-        if removed | call s:V.Global.update_and_select_region() | endif
+        if removed | call s:G.update_and_select_region() | endif
     endif
     call s:F.count_msg(1)
 endfun
@@ -175,7 +189,7 @@ fun! s:pattern_found(t, i)
     if a:t =~ p || p =~ a:t
         let old = s:v.search[a:i]
         let s:v.search[a:i] = a:t
-        call s:V.Global.update_region_patterns(a:t)
+        call s:G.update_region_patterns(a:t)
         let @/ = join(s:v.search, '\|') | set hlsearch
         let wm = 'WarningMsg'           | let L = 'Label'
         call s:F.msg([['Pattern updated:   [', wm ], [old, L],
@@ -186,7 +200,7 @@ fun! s:pattern_found(t, i)
 endfun
 
 fun! s:Search.rewrite(last) dict
-    let r = s:V.Global.is_region_at_pos('.') | if empty(r) | return | endif
+    let r = s:G.is_region_at_pos('.') | if empty(r) | return | endif
 
     let t = self.escape_pattern(r.txt)
 

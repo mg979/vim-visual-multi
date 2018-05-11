@@ -72,9 +72,10 @@ let s:simple   = split('nNqQU*#o[]{}?/:uMS', '\zs')
 let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.<>', '\zs'), '"z".v:val')
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
-let s:cx_maps  = ['t', '/', ']', '}', 's', 'S', '<F12>', '"']
-let s:alt_maps = ['j', 'k', 's', 'q', 'm', 'd', 'a' ]
+let s:cx_maps  = ['t', '"', '<F12>']
+let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a' ]
 let s:leader   = split('ydpP', '\zs')
+let s:search   = split('acCrR/', '\zs')
 let s:leader2  = []
 let s:fkeys    = ['1', '2']
 let s:sfkeys   = ['2']
@@ -179,17 +180,17 @@ fun! s:Maps.start() dict
     nmap     <silent> <nowait> <buffer> <S-Home>   <Plug>(VM-Merge-To-Bol)
 
     "search
-    nmap     <silent> <nowait> <buffer> <c-x>]     <Plug>(VM-Add-Search)
-    nmap     <silent> <nowait> <buffer> <C-x>/     <Plug>(VM-Read-From-Search)
-    nmap     <silent> <nowait> <buffer> <c-x>}     <Plug>(VM-Rewrite-All-Search)
-    nmap     <silent> <nowait> <buffer> <M-s>      <Plug>(VM-Rewrite-Last-Search)
+    nmap     <silent> <nowait> <buffer> \sa        <Plug>(VM-Add-Search)
+    nmap     <silent> <nowait> <buffer> \s/        <Plug>(VM-Read-From-Search)
+    nmap     <silent> <nowait> <buffer> \sC        <Plug>(VM-Rewrite-All-Search)
+    nmap     <silent> <nowait> <buffer> \sc        <Plug>(VM-Rewrite-Last-Search)
+    nmap     <silent> <nowait> <buffer> \sr        <Plug>(VM-Remove-Search)
+    nmap     <silent> <nowait> <buffer> \sR        <Plug>(VM-Remove-Search-Regions)
 
     "utility
     nmap     <silent> <nowait> <buffer> <F1>       <Plug>(VM-Show-Help)
     nmap              <nowait> <buffer> <C-x>t     <Plug>(VM-Show-Regions-Text)
     nmap              <nowait> <buffer> <C-x>"     <Plug>(VM-Show-Registers)
-    nmap     <silent> <nowait> <buffer> <C-x>s     <Plug>(VM-Remove-Search)
-    nmap     <silent> <nowait> <buffer> <C-x>S     <Plug>(VM-Remove-Search-Regions)
     nmap     <silent> <nowait> <buffer> <c-x><F12> <Plug>(VM-Toggle-Debug)
 
     "ctrl
@@ -356,6 +357,10 @@ fun! s:Maps.end() dict
 
     for m in (s:leader)
         exe "nunmap <buffer> <leader>".m
+    endfor
+
+    for m in (s:search)
+        exe "nunmap <buffer> \\s".m
     endfor
 
     let cm = g:VM_custom_commands
