@@ -151,7 +151,7 @@ fun! vm#augroup(end)
         au BufLeave     * call s:buffer_leave()
         au BufEnter     * call s:buffer_enter()
 
-        if has('nvim') || has('patch1394')
+        if has('nvim')
             au TextYankPost * if s:v.yanked | call <SID>set_reg() | endif
         else
             au CursorMoved  * if s:v.yanked | call <SID>set_reg() | endif

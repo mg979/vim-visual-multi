@@ -208,6 +208,7 @@ fun! s:Global.is_region_at_pos(pos) dict
     "Return an empty dict otherwise."""
 
     let pos = s:F.pos2byte(a:pos)
+    if s:X() && !s:V.Bytes[pos] | return {} | endif
 
     for r in s:R()
         if pos >= r.A && pos <= r.B

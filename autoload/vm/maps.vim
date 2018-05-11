@@ -73,7 +73,7 @@ let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.<>', '\zs'), '"z".v:
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = ['t', '"', '<F12>']
-let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a' ]
+let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a', 's' ]
 let s:leader   = split('ydpP', '\zs')
 let s:search   = split('acCrR/', '\zs')
 let s:leader2  = []
@@ -186,6 +186,7 @@ fun! s:Maps.start() dict
     nmap     <silent> <nowait> <buffer> \sc        <Plug>(VM-Rewrite-Last-Search)
     nmap     <silent> <nowait> <buffer> \sr        <Plug>(VM-Remove-Search)
     nmap     <silent> <nowait> <buffer> \sR        <Plug>(VM-Remove-Search-Regions)
+    nmap     <silent> <nowait> <buffer> <M-s>      <Plug>(VM-Rewrite-Last-Search)
 
     "utility
     nmap     <silent> <nowait> <buffer> <F1>       <Plug>(VM-Show-Help)

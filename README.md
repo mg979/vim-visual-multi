@@ -1,5 +1,9 @@
 Work in progress.
 
+### [Wiki](https://github.com/mg979/vim-visual-multi/wiki)
+A work-in-progress as well, but it's some documentation nonetheless.
+
+-------
 Some random pics:
 
 -------

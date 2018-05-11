@@ -128,8 +128,8 @@ fun! s:Region.new(cursor, ...)
 
     if !s:v.eco
         call R.highlight()
-        call R.update_bytes_map()
     endif
+    call R.update_bytes_map()
 
     return R
 endfun
@@ -457,7 +457,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_bytes_map() dict
-    if !s:X() || s:v.eco | return | endif | let r = self
+    if !s:X() | return | endif | let r = self
 
     let s:V.Bytes[r.A:r.B] = map(s:V.Bytes[r.A:r.B], 'v:val+1')
     if r.A < s:G.A | let s:G.A = r.A | endif
