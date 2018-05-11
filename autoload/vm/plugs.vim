@@ -1,5 +1,5 @@
 let g:VM.select_motions = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E']
-let g:VM.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '~', '$', '0', '^', '%']
+let g:VM.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '$', '0', '^', '%']
 let g:VM.find_motions   = ['f', 'F', 't', 'T']
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -108,9 +108,11 @@ fun! vm#plugs#init()
 
     "Edit commands
     nnoremap        <Plug>(VM-Edit-D)                  :<C-u>call b:VM_Selection.Edit.get_motion('d', 0)<cr>$
+    nnoremap        <Plug>(VM-Edit-Y)                  :<C-u>call b:VM_Selection.Edit.get_motion('y', 0)<cr>$
     nnoremap        <Plug>(VM-Edit-x)                  :<C-u>call b:VM_Selection.Edit.run_normal('x', 0, v:count1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-Edit-X)                  :<C-u>call b:VM_Selection.Edit.run_normal('X', 0, v:count1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-Edit-J)                  :<C-u>call b:VM_Selection.Edit.run_normal('J', 0, v:count1, 0)<cr>:silent! undojoin<cr>
+    nnoremap        <Plug>(VM-Edit-~)                  :<C-u>call b:VM_Selection.Edit.run_normal('~', 0, 1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-Edit-Del)                :call b:VM_Selection.Edit.del_key()<cr>
     nnoremap        <Plug>(VM-Edit-a-Append)           :<C-u>call b:VM_Selection.Insert.key('a')<cr>
     nnoremap        <Plug>(VM-Edit-A-Append)           :<C-u>call b:VM_Selection.Insert.key('A')<cr>
@@ -121,7 +123,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-Delete)             :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, v:register, v:count1)<cr>
     nnoremap        <Plug>(VM-Edit-Delete-Exit)        :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, v:register, v:count1)<cr>:call vm#reset()<cr>
     nnoremap        <Plug>(VM-Edit-c-Change)           :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1)<cr>
-    nnoremap        <Plug>(VM-Edit-C-Change)           :<C-u>call b:VM_Selection.Edit.run_normal('D', 0, 1, 0)<cr>:call b:VM_Selection.Insert.key('a')<cr>
+    nmap            <Plug>(VM-Edit-C-Change)           Da
     nnoremap        <Plug>(VM-Edit-Replace)            :<C-u>call b:VM_Selection.Edit.replace()<cr>
     nnoremap        <Plug>(VM-Edit-p-Paste-Regions)    :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 1, g:VM.extend_mode)<cr>
     nnoremap        <Plug>(VM-Edit-P-Paste-Regions)    :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 1, g:VM.extend_mode)<cr>
@@ -148,8 +150,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Run-Last-Ex)             :call b:VM_Selection.Edit.run_ex(g:VM.last_ex)<cr>
     nnoremap        <Plug>(VM-Run-Normal)              :<C-u>call b:VM_Selection.Edit.run_normal(-1, 1,  v:count1,1)<cr>
     nnoremap        <Plug>(VM-Run-Last-Normal)         :<C-u>call b:VM_Selection.Edit.run_normal(g:VM.last_normal[0] ,g:VM.last_normal[1], v:count1, 1)<cr>
-    nnoremap        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1, 1)<cr>
-    nnoremap        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:VM.last_visual, 1)<cr>
+    nnoremap        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1, 0)<cr>
+    nnoremap        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:VM.last_visual[0], g:VM.last_visual[1])<cr>
 
     imap     <expr> <Plug>(VM-Insert-Left-Arrow)       <sid>Insert('h')
     imap     <expr> <Plug>(VM-Insert-Down-Arrow)       <sid>Insert('j')

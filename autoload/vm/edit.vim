@@ -40,6 +40,9 @@ fun! s:Edit.run_normal(cmd, recursive, count, maps) dict
         let cmd = input('Normal command? ')
         if empty(cmd) | call s:F.msg('Command aborted.', 1) | return | endif
 
+    elseif a:cmd == '~' && s:X()
+        call self.run_visual('~', 0)        | return
+
     elseif empty(a:cmd)
         call s:F.msg('No last command.', 1) | return
 
@@ -62,7 +65,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_visual(cmd, maps, ...) dict
+fun! s:Edit.run_visual(cmd, recursive, ...) dict
 
     "-----------------------------------------------------------------------
 
@@ -78,10 +81,10 @@ fun! s:Edit.run_visual(cmd, maps, ...) dict
 
     "-----------------------------------------------------------------------
 
-    call self.before_macro(a:maps)
+    call self.before_macro(!a:recursive)
     call self.process_visual(cmd)
 
-    let g:VM.last_visual = cmd
+    let g:VM.last_visual = [cmd, a:recursive]
     call self.after_macro(0)
     if s:X() | call s:G.change_mode(1) | endif
 endfun

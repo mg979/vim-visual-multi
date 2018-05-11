@@ -79,7 +79,7 @@ let s:search   = split('acCrR/', '\zs')
 let s:leader2  = []
 let s:fkeys    = ['1', '2']
 let s:sfkeys   = ['2']
-let s:edit     = split('dcpPyxXraAiIOJDC', '\zs')
+let s:edit     = split('dcpPyxXraAiIOJDCY~', '\zs')
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
@@ -275,6 +275,8 @@ fun! s:Maps.edit_start() dict
     nmap <silent> <nowait> <buffer> X               <Plug>(VM-Edit-X)
     nmap <silent> <nowait> <buffer> J               <Plug>(VM-Edit-J)
     nmap <silent> <nowait> <buffer> D               <Plug>(VM-Edit-D)
+    nmap <silent> <nowait> <buffer> Y               <Plug>(VM-Edit-Y)
+    nmap <silent> <nowait> <buffer> ~               <Plug>(VM-Edit-~)
     nmap <silent> <nowait> <buffer> <del>           <Plug>(VM-Edit-Del)
     nmap <silent> <nowait> <buffer> r               <Plug>(VM-Edit-Replace)
     nmap <silent> <nowait> <buffer> c               <Plug>(VM-Edit-c-Change)

@@ -263,6 +263,7 @@ let s:all  = { c -> index(split('webWEB$^0', '\zs'), c) >= 0 }
 let s:find = { c -> index(split('fFtT', '\zs'), c) >= 0      }
 
 fun! s:Edit.get_motion(op, n) dict
+    if s:X() | call s:G.change_mode(1) | endif
 
     let reg = v:register | let hl1 = 'WarningMsg' | let hl2 = 'Label'
 
@@ -301,6 +302,10 @@ fun! s:Edit.get_motion(op, n) dict
     endwhile
 
     if a:op ==# 'd'
+
+        "for commands like D, C, d$, dd... ensure there is only one region per line
+        if (M == 'd$' || M == 'dd') | call s:G.one_region_per_line() | endif
+
         let s:v.deleted_text = [] | let s:v.merge = 1
         nunmap <buffer> d
         call s:F.external_funcs(0, 0)
@@ -317,6 +322,9 @@ fun! s:Edit.get_motion(op, n) dict
 
     elseif a:op ==# 'y'
         call s:G.change_mode(1)
+
+        "for Y, y$, yy, ensure there is only one region per line
+        if (M == 'y$' || M == 'yy') | call s:G.one_region_per_line() | endif
 
         "what comes after 'y'; check for 'yy'
         let S = substitute(M, '^\d*y\(.*\)$', '\1', '') | let m = S[0] | let Y = m==#'y'
@@ -338,6 +346,10 @@ fun! s:Edit.get_motion(op, n) dict
             call feedkeys("s".N.S."\"".reg."y") | endif
 
     elseif a:op ==# 'c'
+
+        "for c$, cc, ensure there is only one region per line
+        if (M == 'c$' || M == 'cc') | call s:G.one_region_per_line() | endif
+
         "cs surround
         if M[:1] ==# 'cs' | call self.run_normal(M, 1, 1, 0) | return | endif
 
@@ -370,7 +382,7 @@ fun! s:Edit.surround() dict
 
     nunmap <buffer> S
 
-    call self.run_visual('S'.c, 0)
+    call self.run_visual('S'.c, 1)
     if index(['[', '{', '('], c) >= 0
         call map(s:v.W, 'v:val + 3')
     else
