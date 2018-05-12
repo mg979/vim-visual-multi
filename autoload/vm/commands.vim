@@ -156,7 +156,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#erase_regions()
+fun! vm#commands#erase_regions(...)
     """Clear all regions, but stay in visual-multi mode.
 
     "empty start
@@ -166,7 +166,7 @@ fun! vm#commands#erase_regions()
     call clearmatches()
     let s:v.index = -1
     call s:V.Block.stop()
-    call s:F.count_msg(1)
+    if !a:0 | call s:F.count_msg(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -635,27 +635,31 @@ fun! vm#commands#align(count, regex)
         let n = a:count | let s = n>1? 's' : ''
         echohl Label    | echo 'Align with '.n.' char'.s.' > '   | echohl None
 
-        let C = []
+        let C = [] | let s = 'czp'
         while n
             let c = nr2char(getchar())
-            if c == "\<esc>" | return
+            if c == "\<esc>" | echohl WarningMsg | echon ' ...Aborted' | return
             else             | call add(C, c) | let n -= 1 | echon c
             endif
         endwhile
 
-        let i = a:count | let as = map(copy(s:R()), 'v:val.a')
+        let s:v.silence = 1
         while !empty(C)
             let c = remove(C, 0)
-            call vm#commands#find_motion('f', c, 0)
 
             "remove region if a match isn't found, otherwise it will be aligned
             for r in s:R()
-                if r.a == as[r.index] | call r.remove() | endif
+                call cursor(r.l, r.a)
+                if !search(c, s, r.l) | call r.remove() | continue | endif
+                call r.update_cursor([r.l, getpos('.')[2]])
             endfor
 
             "TODO: strip white spaces preceding the shortest columns
             call s:V.Edit.align()
+            let s = 'zp'
         endwhile
+        let s:v.silence = 0
+        call s:F.count_msg(0)
         return
     endif
 
@@ -665,7 +669,7 @@ fun! vm#commands#align(count, regex)
     set nohlsearch
     for r in s:R()
         call cursor(r.l, r.a)
-        if !search(rx, 'zp', r.l) | call r.remove() | continue | endif
+        if !search(rx, 'czp', r.l) | call r.remove() | continue | endif
         call r.update_cursor([r.l, getpos('.')[2]])
     endfor
     call s:V.Edit.align()

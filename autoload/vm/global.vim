@@ -157,7 +157,7 @@ fun! s:Global.update_and_select_region(...) dict
     call self.update_regions()
     let R = self.select_region_at_pos(a:0? a:1 : '.')
     call s:F.restore_reg()
-    call s:F.count_msg(1)
+    call s:F.count_msg(0)
     return R
 endfun
 
@@ -242,7 +242,7 @@ fun! s:Global.eco_off() dict
     """Common operations when eco/auto modes end.
     if !( s:v.eco || s:v.auto ) | return | endif
 
-    let s:v.silence = 0 | let s:v.auto = 0 | let s:v.eco = 0
+    let s:v.auto = 0 | let s:v.eco = 0
     call s:F.restore_reg()
 endfun
 
@@ -258,8 +258,10 @@ fun! s:Global.remove_last_region(...) dict
         endif
     endfor
 
-    if !len(s:R()) | call s:F.count_msg(1) | return | endif
+    if !len(s:R()) | call s:F.count_msg(0) | return | endif
+
     call self.select_region(s:v.index)
+    call s:F.count_msg(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -411,7 +413,7 @@ fun! s:Global.merge_regions(...) dict
     let A = self.A                  | let B = self.B+1
     let By = copy(s:V.Bytes[A:B])   | let a = 0
 
-    call vm#commands#erase_regions()
+    call vm#commands#erase_regions(1)
 
     for i in range(len(By))
         if By[i] && !a     | let a = i+A

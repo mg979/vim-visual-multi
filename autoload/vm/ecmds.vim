@@ -543,6 +543,8 @@ fun! s:Edit._numbers(start, stop, step, sep, app) dict
 endfun
 
 fun! s:Edit.numbers(start, app) dict
+    let X = s:X() | if !X | call s:G.change_mode(1) | endif
+
     let text = []
 
     let l:Invalid = { -> s:F.msg('Invalid expression', 1) }
@@ -583,6 +585,10 @@ fun! s:Edit.numbers(start, app) dict
 
     elseif n == 4        | call self._numbers(x[0],  x[1],       x[2],  x[3],   a:app) | endif
 
+    "if started in cursor mode, return to it
+    if !X && a:app | exe "normal o" | call s:G.change_mode(1)
+    elseif !X      | call s:G.change_mode(1)
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
