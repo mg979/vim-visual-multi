@@ -354,13 +354,25 @@ fun! s:bs_del(cmd)
     if s:V.Insert.is_active | call s:V.Edit._process(s:cmd, 'ix')
     else                    | call s:V.Edit._process(s:cmd)         | endif
 
-    if a:cmd ==# 'X'
+    if s:V.Insert.is_active && a:cmd ==# 'X'
+        for r in s:R()
+            if r.a > 1 || col([r.L, '$'])>(1+s:V.Live.append)
+                call r.bytes([-1,-1])
+            endif
+        endfor
+
+    elseif a:cmd ==# 'X'
         for r in s:R() | call r.bytes([-1,-1]) | endfor
-        call s:G.merge_cursors()
+
     elseif a:cmd ==# 'x'
         let eol = s:V.Insert.is_active? s:V.Live.append : 0
-        for r in s:R() | if r.a == col([r.L, '$'])-eol | call r.bytes([-1,-1]) | endif  | endfor
-        call s:G.merge_cursors()
+        for r in s:R()
+            if r.a == col([r.L, '$'])-eol
+                call r.bytes([-1,-1])
+            endif
+        endfor
     endif
+
+    call s:G.merge_cursors()
 endfun
 
