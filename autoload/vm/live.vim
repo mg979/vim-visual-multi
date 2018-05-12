@@ -61,10 +61,14 @@ fun! s:Live.start(mode) dict
     for r in s:R()
         let A = I.append? r.A+1 : r.A
         let C = s:Cursor.new(A, r.l, I.append? r.a+1 : r.a)
+
+        let E = col([r.l, '$'])
+        let eol = r.b == (E>1? E-1 : E)
+
         call add(I.cursors, C)
 
-        let eol = r.b == col([r.l, '$'])-1
-        if (I.append && eol) || col([r.l, '$']) == 1 | call s:V.Edit.extra_spaces(r, 0) | endif
+        "if (I.append && eol) || E == 1 | call s:V.Edit.extra_spaces(r, 0) | endif
+        if I.append || eol | call s:V.Edit.extra_spaces(r, 0) | endif
 
         if !has_key(I.lines, r.l)
             let I.lines[r.l] = s:Line.new(r.l, C)

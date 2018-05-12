@@ -25,6 +25,7 @@ fun! vm#edit#init()
     let s:change         = 0
     let s:can_multiline  = 0
 
+    call vm#icmds#init()
     return extend(s:Edit, vm#ecmds#init())
 endfun
 
@@ -185,34 +186,6 @@ fun! s:special(cmd, r, args)
         endif
         return 1
 
-    elseif a:args[0] ==# 'ix'
-        "insert BS/C-D is quite messy when at eol
-        let eol = a:r.a == col([a:r.l, '$']) - 1
-        let app = s:V.Live.mode == 'a'
-
-        "no adjustments
-        if !eol && !app | return | endif
-
-        "in append mode, after <esc> cursors have been moved back by 1
-        if app | call a:r.bytes([s:change+1, s:change+1]) | endif
-
-        call cursor(a:r.l, a:r.a)
-
-        "echom a:r.a col([a:r.l, '$'])-1 eol   "still something amiss near eol
-        if a:cmd ==# 'normal! x'
-            normal! x
-            if app | call a:r.bytes([-1, -1]) | endif
-        else
-            if eol
-                "call s:V.Edit.extra_spaces(a:r, 0)     "not necessary?
-                normal! x
-            else
-                normal! X
-            endif
-            if app | call a:r.bytes([-1, -1]) | endif
-        endif
-        return 1
-
     elseif a:args[0] ==# 'd'
         "store deleted text so that it can all be put in the register
         call a:r.bytes([s:change, s:change])
@@ -351,23 +324,15 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:bs_del(cmd)
-    if s:V.Insert.is_active | call s:V.Edit._process(s:cmd, 'ix')
-    else                    | call s:V.Edit._process(s:cmd)         | endif
+    if s:V.Insert.is_active | call vm#icmds#x(a:cmd)        | return
+    else                    | call s:V.Edit._process(s:cmd) | endif
 
-    if s:V.Insert.is_active && a:cmd ==# 'X'
-        for r in s:R()
-            if r.a > 1
-                call r.bytes([-1,-1])
-            endif
-        endfor
-
-    elseif a:cmd ==# 'X'
+    if a:cmd ==# 'X'
         for r in s:R() | call r.bytes([-1,-1]) | endfor
 
     elseif a:cmd ==# 'x'
-        let eol = s:V.Insert.is_active? s:V.Live.append : 0
         for r in s:R()
-            if r.a == col([r.L, '$'])-eol
+            if r.a == col([r.L, '$'])
                 call r.bytes([-1,-1])
             endif
         endfor
