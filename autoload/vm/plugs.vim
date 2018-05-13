@@ -153,17 +153,17 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1, 0)<cr>
     nnoremap        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:VM.last_visual[0], g:VM.last_visual[1])<cr>
 
-    imap     <expr> <Plug>(VM-Insert-Left-Arrow)       <sid>Insert('h')
-    imap     <expr> <Plug>(VM-Insert-Down-Arrow)       <sid>Insert('j')
-    imap     <expr> <Plug>(VM-Insert-Up-Arrow)         <sid>Insert('k')
-    imap     <expr> <Plug>(VM-Insert-Right-Arrow)      <sid>Insert('l')
-    imap     <expr> <Plug>(VM-Insert-Return)           <sid>Insert('cr')
-    imap     <expr> <Plug>(VM-Insert-Del)              <sid>Insert('x')
-    imap     <expr> <Plug>(VM-Insert-BS)               <sid>Insert('X')
-    imap     <expr> <Plug>(VM-Insert-Paste)            <sid>Insert('p')
-    imap     <expr> <Plug>(VM-Insert-CtrlW)            <sid>Insert('cw')
-    imap            <Plug>(VM-Insert-CtrlA)            <esc>^i
-    imap            <Plug>(VM-Insert-CtrlE)            <esc>$a
+    inoremap <expr> <Plug>(VM-Insert-Left-Arrow)       <sid>Insert('h')
+    inoremap <expr> <Plug>(VM-Insert-Down-Arrow)       <sid>Insert('j')
+    inoremap <expr> <Plug>(VM-Insert-Up-Arrow)         <sid>Insert('k')
+    inoremap <expr> <Plug>(VM-Insert-Right-Arrow)      <sid>Insert('l')
+    inoremap <expr> <Plug>(VM-Insert-Return)           <sid>Insert('cr')
+    inoremap <expr> <Plug>(VM-Insert-Del)              <sid>Insert('x')
+    inoremap <expr> <Plug>(VM-Insert-BS)               <sid>Insert('X')
+    inoremap <expr> <Plug>(VM-Insert-Paste)            <sid>Insert('p')
+    inoremap <expr> <Plug>(VM-Insert-CtrlW)            <sid>Insert('cw')
+    inoremap <expr> <Plug>(VM-Insert-CtrlA)            <sid>Insert('^')
+    inoremap <expr> <Plug>(VM-Insert-CtrlE)            <sid>Insert('$')
 
     "Cmdline
     nnoremap <expr> <Plug>(VM-:)                       vm#commands#regex_reset(':')
@@ -192,20 +192,24 @@ endfun
 
 fun! s:Insert(key)
     let b:VM_Selection.Vars.restart_insert = 1
-    let app = b:VM_Selection.Live.append
+    let i = ":call b:VM_Selection.Insert.key('i')\<cr>"
+    let a = ":call b:VM_Selection.Insert.key('a')\<cr>"
+    let u = b:VM_Selection.Insert.change? ":silent! undojoin\<cr>" : ""
 
     if a:key == 'cr'            "return
-        return "\<esc>:call b:VM_Selection.Live.return()\<cr>i"
+        return "\<esc>:call vm#icmds#return()\<cr>".i
+    elseif a:key ==? 'x'        "x/X
+        "only join undo if there's been a change
+        return "\<esc>".u.":call vm#icmds#x('".a:key."')\<cr>".i
+    elseif index(split('hjkl^', '\zs'), a:key) >= 0
+        return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
+    elseif a:key == '$'
+        return "\<esc>".u.":call b:VM_Selection.Insert.key('A')\<cr>"
     elseif a:key == 'p'         "c-v
-        return "\<esc>".(app? 'l' : '').":call b:VM_Selection.Live.paste()\<cr>oi"
+        return "\<esc>".u.":call vm#icmds#paste()\<cr>".i
     elseif a:key == 'cw'        "c-w
-        return "\<esc>".(app? 'l' : '')."sbhdi"
+        return "\<esc>".u.":call vm#icmds#cw()\<cr>".i
     endif
-
-    "only join undo if there's been a change
-    let u = (a:key ==? 'x')? b:VM_Selection.Live.change? ":silent! undojoin\<cr>" : "" : ""
-    let k = app? 'a' : 'i'
-    return "\<esc>".u.a:key.k
 endfun
 
 fun! s:Yank(hard)

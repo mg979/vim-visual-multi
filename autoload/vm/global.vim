@@ -107,7 +107,7 @@ fun! s:Global.update_cursor_highlight(...) dict
 
     highlight clear MultiCursor
 
-    if s:V.Insert.is_active
+    if s:v.insert
         exe "highlight link MultiCursor ".g:VM_Ins_Mode_hl
 
     elseif !s:X() && self.all_empty()

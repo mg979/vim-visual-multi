@@ -87,7 +87,7 @@ fun! s:Edit.change(X, count) dict
     if a:X
         "delete existing region contents and leave the cursors
         call self.delete(1, "_", 1)
-        call s:V.Insert.start('c')
+        call s:V.Insert.start(0)
     else
         call self.get_motion('c', a:count)
     endif
@@ -262,11 +262,11 @@ endfun
 " Get motion
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:forw = { c -> index(['f', 't'], c) >= 0                }
-let s:back = { c -> index(['F', 'T', '0', '^'], c) >= 0      }
-let s:ia   = { c -> index(['i', 'a'], c) >= 0                }
-let s:all  = { c -> index(split('webWEB$^0', '\zs'), c) >= 0 }
-let s:find = { c -> index(split('fFtT', '\zs'), c) >= 0      }
+let s:forw = { c -> index(['f', 't'], c) >= 0                  }
+let s:back = { c -> index(['F', 'T', '0', '^'], c) >= 0        }
+let s:ia   = { c -> index(['i', 'a'], c) >= 0                  }
+let s:all  = { c -> index(split('hlwebWEB$^0', '\zs'), c) >= 0 }
+let s:find = { c -> index(split('fFtT', '\zs'), c) >= 0        }
 
 fun! s:Edit.get_motion(op, n) dict
     if s:X() | call s:G.change_mode(1) | endif
@@ -566,8 +566,8 @@ fun! s:Edit.numbers(start, app) dict
 
     "invalid expressions
     if ( n == 3 && !l:N(x[1]) ) ||
-      \( n == 4 && (!l:N(x[1]) || !l:N(x[2])) ) ||
-      \( n > 4 )
+      \( n == 4 && (!l:N(x[1])  || !l:N(x[2])) ) ||
+      \( n >  4 )
         call l:Invalid() | return | endif
 
     "                                         start    stop     step   separ.   append?
