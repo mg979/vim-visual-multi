@@ -203,11 +203,6 @@ endfun
 
 fun! vm#commands#regex_reset(...)
     silent! cunmap <buffer> <cr>
-    silent! cunmap <buffer> <esc>
-    if !has('nvim') && !has('gui_running')
-        silent! cunmap <buffer> <esc><esc>
-        let &timeoutlen = s:v.oldtout
-    endif
     let s:v.using_regex = 0
     if a:0 | return a:1 | endif
 endfun
@@ -244,12 +239,6 @@ fun! vm#commands#find_by_regex(...)
     let s:regex_pos = getpos('.') | let s:regex_reg = @/
 
     cnoremap <silent> <buffer> <cr>  <cr>:call vm#commands#regex_done()<cr>
-    cnoremap          <buffer> <esc> <esc>:call vm#commands#regex_abort()<cr><esc>
-    if !has('nvim') && !has('gui_running')
-        cnoremap <silent> <buffer> <esc><esc> <esc><esc>
-        set timeoutlen=200
-        let s:v.reset_tout = 1
-    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

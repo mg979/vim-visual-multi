@@ -28,7 +28,7 @@ fun! vm#icmds#x(cmd)
         call r.bytes([s:change, s:change])
 
         if a:cmd ==# 'x' | let done = s:del(r)
-        else             | let done = s:bs(r)  | endif
+        else             | let done = 0         | endif
 
         if !done
             call cursor(r.l, r.a)
@@ -77,6 +77,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:bs(r)
+    "UNUSED: for now
     let r = a:r
 
     "no adjustments
@@ -105,7 +106,7 @@ fun! vm#icmds#cw()
         endif
     endfor
     call vm#commands#select_operator(1, 1, 'b')
-    normal hd
+    normal h"_d
     call s:G.merge_cursors()
 endfun
 
@@ -139,7 +140,7 @@ fun! vm#icmds#return()
         "append new line with mark/extra space if needed
         if ok          | call append(line('.'), '')
         elseif !ind    | call append(line('.'), ' ')
-        else           | call append(line('.'), '_ ')
+        else           | call append(line('.'), '° ')
         endif
 
         "cut and paste below, or just move down if at eol, then reindent
@@ -179,7 +180,7 @@ fun! vm#icmds#return_above()
         call cursor(r.l, r.a)
 
         "append new line above, with mark/extra space
-        call append(line('.')-1, '_ ')
+        call append(line('.')-1, '° ')
 
         "move up, then reindent
         normal! k==

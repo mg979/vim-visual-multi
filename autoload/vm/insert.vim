@@ -120,10 +120,6 @@ fun! s:Insert.start(append) dict
     "start tracking text changes
     let s:v.insert = 1 | call I.auto_start()
 
-    inoremap <silent> <expr> <buffer> <esc>   pumvisible()?
-                \ "\<esc>:call b:VM_Selection.Insert.insert(1)\<cr>:call b:VM_Selection.Insert.stop()\<cr>" :
-                \ "\<esc>:call b:VM_Selection.Insert.stop()\<cr>"
-
     call s:G.update_cursor_highlight()
 
     "start insert mode and break the undo point
@@ -132,7 +128,7 @@ fun! s:Insert.start(append) dict
     "check if there are insert marks that must be cleared
     if !empty(s:v.insert_marks)
         for l in keys(s:v.insert_marks)
-            call setline(l, substitute(getline(l), '^\(\s*\)_', '\1', ''))
+            call setline(l, substitute(getline(l), '^\(\s*\)°', '\1', ''))
             call remove(s:v.insert_marks, l)
         endfor
     endif
@@ -165,7 +161,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.stop() dict
-    silent! iunmap <buffer> <esc>
     call self.auto_end() | let i = 0
 
     for r in s:R()
@@ -246,7 +241,7 @@ fun! s:Line.new(line, cursor) dict
 
     "check if there are insert marks that must be cleared
     if has_key(s:v.insert_marks, L.l)
-        let L.txt = substitute(L.txt, '^\(\s*\)_', '\1', '')
+        let L.txt = substitute(L.txt, '^\(\s*\)°', '\1', '')
     endif
 
     return L
@@ -284,6 +279,8 @@ fun! s:Insert.auto_start() dict
     augroup plugin-vm-insert
         au!
         au TextChangedI * call b:VM_Selection.Insert.insert()
+        au CompleteDone * call b:VM_Selection.Insert.insert()
+        au InsertLeave  * call b:VM_Selection.Insert.stop()
     augroup END
 endfun
 

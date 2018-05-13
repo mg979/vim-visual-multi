@@ -37,7 +37,6 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldlz            = &lz
     let s:v.oldch            = &ch
     let s:v.oldcase          = [&smartcase, &ignorecase]
-    let s:v.oldtout          = &timeoutlen
 
     "init new vars
 
@@ -61,7 +60,6 @@ fun! vm#init_buffer(empty, ...)
     let s:v.vertical_col     = 0
     let s:v.yanked           = 0
     let s:v.merge            = 0
-    let s:v.reset_tout       = 0
     let s:v.insert           = 0
 
     let s:V.Global     = vm#global#init()
@@ -107,7 +105,6 @@ fun! vm#reset(...)
     let &ignorecase  = s:v.oldcase[1]
     let &lz          = s:v.oldlz
     let &ch          = s:v.oldch
-    let &timeoutlen  = s:v.oldtout
     call vm#commands#regex_reset()
     call s:V.Funcs.restore_regs()
     call s:V.Maps.mappings(0, 1)
@@ -120,7 +117,6 @@ fun! vm#reset(...)
 
     silent! nunmap <buffer> <Space>
     silent! nunmap <buffer> <esc>
-    silent! cunmap <buffer> <esc><esc>
     if !has('nvim') && !has('gui_running')
         silent! nunmap <buffer> <esc><esc>
     endif
@@ -156,8 +152,8 @@ fun! vm#augroup(end)
         else
             au CursorMoved  * if s:v.yanked | call <SID>set_reg() | endif
         endif
-        if has('patch1206') && !has('gui_running')
-            au CmdlineLeave * if s:v.reset_tout | call s:reset_timeout() | endif
+        if has('patch1206')
+            au CmdlineLeave * if s:v.using_regex | call vm#commands#regex_reset() | endif
         endif
     augroup END
 endfun
@@ -184,8 +180,6 @@ fun! s:VM_cursor_moved()
         else
             let s:v.block[3] = 0
         endif
-    elseif s:v.reset_tout
-        call s:reset_timeout()
     endif
 endfun
 
@@ -197,12 +191,6 @@ endfun
 
 fun! s:buffer_enter()
     let b:VM_Selection = {}
-endfun
-
-fun! s:reset_timeout()
-    let s:v.reset_tout = 0
-    let &timeoutlen = s:v.oldtout
-    silent! cunmap <buffer> <esc><esc>
 endfun
 
 fun! s:set_reg()
