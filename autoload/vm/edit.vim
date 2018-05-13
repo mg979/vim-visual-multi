@@ -324,7 +324,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:bs_del(cmd)
-    if s:V.Insert.is_active | call vm#icmds#x(a:cmd)        | return
+    if s:v.insert | call vm#icmds#x(a:cmd)        | return
     else                    | call s:V.Edit._process(s:cmd) | endif
 
     if a:cmd ==# 'X'

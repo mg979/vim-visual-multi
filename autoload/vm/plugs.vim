@@ -192,20 +192,18 @@ endfun
 
 fun! s:Insert(key)
     let b:VM_Selection.Vars.restart_insert = 1
-    let app = b:VM_Selection.Live.append
 
     if a:key == 'cr'            "return
-        return "\<esc>:call b:VM_Selection.Live.return()\<cr>i"
+        return "\<esc>:call vm#icmds#return()\<cr>i"
     elseif a:key == 'p'         "c-v
-        return "\<esc>".(app? 'l' : '').":call b:VM_Selection.Live.paste()\<cr>oi"
+        return "\<esc>:call vm#icmds#paste()\<cr>oi"
     elseif a:key == 'cw'        "c-w
         return "\<esc>:call vm#icmds#cw()\<cr>i"
     endif
 
     "only join undo if there's been a change
-    let u = (a:key ==? 'x')? b:VM_Selection.Live.change? ":silent! undojoin\<cr>" : "" : ""
-    let k = app? 'a' : 'i'
-    return "\<esc>".u.a:key.k
+    let u = (a:key ==? 'x')? b:VM_Selection.Insert.change? ":silent! undojoin\<cr>" : "" : ""
+    return "\<esc>".u.a:key."i"
 endfun
 
 fun! s:Yank(hard)

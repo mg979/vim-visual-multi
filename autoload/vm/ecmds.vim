@@ -87,7 +87,7 @@ fun! s:Edit.change(X, count) dict
     if a:X
         "delete existing region contents and leave the cursors
         call self.delete(1, "_", 1)
-        call s:V.Insert.start('c')
+        call s:V.Insert.start(0)
     else
         call self.get_motion('c', a:count)
     endif
