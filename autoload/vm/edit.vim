@@ -265,9 +265,9 @@ fun! s:Edit.extra_spaces(r, remove) dict
         for i in s:v.extra_spaces
             let r = s:R()[i]
             call cursor(r.L, r.b<col([r.L, '$'])-1? r.b+1 : r.b)
-            if s:F.char_under_cursor() ==# ' '
+            while line('.') == r.L && s:F.char_under_cursor() ==# ' '
                 normal! x
-            endif
+            endwhile
         endfor
         let s:v.extra_spaces = [] | return | endif
 
@@ -325,7 +325,7 @@ endfun
 
 fun! s:bs_del(cmd)
     if s:v.insert | call vm#icmds#x(a:cmd)        | return
-    else                    | call s:V.Edit._process(s:cmd) | endif
+    else          | call s:V.Edit._process(s:cmd) | endif
 
     if a:cmd ==# 'X'
         for r in s:R() | call r.bytes([-1,-1]) | endfor

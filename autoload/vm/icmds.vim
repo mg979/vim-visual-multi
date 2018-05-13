@@ -13,7 +13,8 @@ fun! vm#icmds#init()
     let s:size      = {      -> line2byte(line('$') + 1) }
     let s:Byte      = { pos  -> s:F.pos2byte(pos)        }
     let s:Pos       = { byte -> s:F.byte2pos(byte)       }
-    let s:E         = { r    -> col([r.l, '$']) }
+    let s:E         = { r    -> col([r.l, '$'])          }
+    let s:eol       = { r    -> r.a == (s:E(r) - 1)      }
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -42,15 +43,14 @@ fun! vm#icmds#x(cmd)
 
     if a:cmd ==# 'X'
         for r in s:R()
-            if r.a > 1 || col([r.L, '$'])>1
+            if r.a > 1 || s:E(r)>1
                 call r.bytes([-1,-1])
             endif
         endfor
 
     else
         for r in s:R()
-            "
-            if r.a > 1 && r.a == col([r.L, '$'])
+            if r.a > 1 && r.a == s:E(r)
                 call r.bytes([-1,-1])
             endif
         endfor
@@ -67,11 +67,9 @@ fun! s:del(r)
     "no adjustments
     if !s:eol(r) | return | endif
 
+    "at eol, join lines and del 1 char
     call cursor(r.l, r.a)
-
-    if r.a == s:E(r)-1 | normal! Jhx
-    else               | normal! x
-    endif
+    normal! Jhx
 
     return 1
 endfun
@@ -84,7 +82,11 @@ fun! s:bs(r)
     "no adjustments
     if !s:eol(r) | return | endif
 
-    call cursor(r.l, r.a) | normal! X
+    "add an extra space and push cursor
+    call cursor(r.l, r.a)
+    normal! X
+    call s:V.Edit.extra_spaces(r, 0)
+    call r.bytes([1,1])
 
     return 1
 endfun
@@ -93,8 +95,15 @@ endfun
 
 fun! vm#icmds#cw()
     let s:v.storepos = getpos('.')[1:2]
-    let s:v.direction = 1
+    let s:v.direction = 1 | let n = 0
 
+    for r in s:R()
+        if s:eol(r)
+            call s:V.Edit.extra_spaces(r, 0)
+            call r.bytes([1+n,1+n])
+            let n += 1
+        endif
+    endfor
     call vm#commands#select_operator(1, 1, 'b')
     normal hd
     call s:G.merge_cursors()
@@ -192,12 +201,3 @@ fun! vm#icmds#return_above()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:eol(r)
-    if index(s:v.extra_spaces, a:r.index)
-        return a:r.a == (s:E(a:r) - 2)
-    else
-        return a:r.a == (s:E(a:r) - 1)
-    endif
-endfun
-
