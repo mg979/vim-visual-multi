@@ -1,4 +1,4 @@
-"script to handle BS/C-d in insert mode
+"script to handle several insert mode commands
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -108,4 +108,23 @@ fun! s:bs(r)
     if app | call r.bytes([-1, -1]) | endif
 
     return 1
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#icmds#cw()
+    let s:v.storepos = getpos('.')[1:2] | let app = s:V.Live.append
+    let s:v.direction = 1
+
+    if app
+        for r in s:R()
+            if r.a != col([r.l, '$'])-1
+                call r.move('l')
+            endif
+        endfor
+    endif
+
+    call vm#commands#select_operator(1, 1, 'b')
+    normal hd
+    call s:G.merge_cursors()
 endfun

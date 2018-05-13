@@ -31,7 +31,7 @@ endfun
 " Select operator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#select_operator(all, count)
+fun! vm#commands#select_operator(all, count, ...)
     """Perform a yank, the autocmd will create the region.
 
     if !a:all
@@ -43,6 +43,8 @@ fun! vm#commands#select_operator(all, count)
     endif
 
     let s:v.storepos = getpos('.')[1:2]
+
+    if a:0 | call s:V.Edit.select_op('gs'.a:1) | return | endif
 
     let abort = 0
     let s = ''                     | let n = ''

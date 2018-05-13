@@ -199,7 +199,7 @@ fun! s:Insert(key)
     elseif a:key == 'p'         "c-v
         return "\<esc>".(app? 'l' : '').":call b:VM_Selection.Live.paste()\<cr>oi"
     elseif a:key == 'cw'        "c-w
-        return "\<esc>".(app? 'l' : '')."sbhdi"
+        return "\<esc>:call vm#icmds#cw()\<cr>i"
     endif
 
     "only join undo if there's been a change

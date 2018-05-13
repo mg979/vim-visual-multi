@@ -67,7 +67,7 @@ fun! s:Live.start(mode) dict
 
         call add(I.cursors, C)
 
-        "if (I.append && eol) || E == 1 | call s:V.Edit.extra_spaces(r, 0) | endif
+        "if (I.append && eol) || E == 1 || Key == 'l' | call s:V.Edit.extra_spaces(r, 0) | endif
         if I.append || eol | call s:V.Edit.extra_spaces(r, 0) | endif
 
         if !has_key(I.lines, r.l)
