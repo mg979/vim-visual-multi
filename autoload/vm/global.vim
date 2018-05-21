@@ -241,6 +241,7 @@ fun! s:Global.eco_off() dict
     if !( s:v.eco || s:v.auto ) | return | endif
 
     let s:v.auto = 0 | let s:v.eco = 0
+    call self.update_indices()
     call s:F.restore_reg()
 endfun
 
@@ -266,6 +267,7 @@ endfun
 
 fun! s:Global.update_indices() dict
     """Adjust region indices."""
+    if s:v.eco | return | endif
 
     let i = 0
     for r in s:R()
@@ -397,7 +399,7 @@ fun! s:Global.merge_cursors()
     endfor
 
     call setpos('.', storepos)
-    let s:v.eco = 0
+    call self.eco_off()
     return self.update_and_select_region()
 endfun
 
@@ -412,7 +414,7 @@ fun! s:Global.merge_regions(...) dict
     let pos = getpos('.')[1:2]       | let s:v.eco = 1
     let A = By[0]                    | let B = By[0]
 
-    call vm#commands#erase_regions(1)
+    call vm#commands#erase_regions()
 
     for i in By[1:]
         if i == B+1 | let B = i
@@ -420,7 +422,7 @@ fun! s:Global.merge_regions(...) dict
     endfor
     call vm#region#new(0, A, B)
 
-    let s:v.eco = 0
+    call self.eco_off()
     return self.update_and_select_region(pos)
 endfun
 

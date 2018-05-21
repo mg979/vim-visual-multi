@@ -421,9 +421,11 @@ fun! s:Edit.select_op(cmd) dict
     let g:VM.extend_mode = 1
     silent! nunmap <buffer> y
 
-    for r in s:R()
-        call cursor(r.l, r.a)
-        call r.remove()
+    let Rs = map(copy(s:R()), '[v:val.l, v:val.a]')
+    call vm#commands#erase_regions()
+
+    for r in Rs
+        call cursor(r[0], r[1])
         exe "normal ".a:cmd
         call b:VM_Selection.Global.get_region()
     endfor

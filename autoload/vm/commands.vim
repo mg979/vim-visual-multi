@@ -169,7 +169,7 @@ fun! vm#commands#erase_regions(...)
     call clearmatches()
     let s:v.index = -1
     call s:V.Block.stop()
-    if !a:0 | call s:F.count_msg(1) | endif
+    if a:0 | call s:F.count_msg(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
