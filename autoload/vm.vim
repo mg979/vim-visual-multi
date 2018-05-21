@@ -77,9 +77,7 @@ fun! vm#init_buffer(empty, ...)
     set virtualedit=onemore
     set ww=h,l,<,>
     set lz
-    "if !has('nvim')
-        "set ch=2
-    "endif
+    let &ch = get(g:, 'VM_cmdheight', 2)
 
     if !has('nvim') && !has('gui_running')
         nnoremap <silent> <nowait> <buffer> <esc><esc> <esc><esc>
