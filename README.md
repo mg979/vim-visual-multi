@@ -1,15 +1,13 @@
-Work in progress.
-
 ### [Wiki](https://github.com/mg979/vim-visual-multi/wiki)
-A work-in-progress as well, but it's some documentation nonetheless.
+Work in progress. Most functionalities shold work as expected and described in the documentation. Testers are welcome.
 
 -------
 Some random pics:
 
 -------
-Live edit test with autocomplete
+Insert mode with autocomplete, alignment
 
-![Imgur](https://i.imgur.com/XmsozQ4.gif)
+![Imgur](https://i.imgur.com/u5pPY5W.gif)
 
 -------
 Select operator, here shown with 'wellle/targets.vim' plugin: sib, sia, saa + selection shift
@@ -17,14 +15,24 @@ Select operator, here shown with 'wellle/targets.vim' plugin: sib, sia, saa + se
 ![Imgur](https://i.imgur.com/yM3Fele.gif)
 
 -------
-Align text at arbitrary positions
-
-![Imgur](https://i.imgur.com/gnqWFMk.gif)
-
--------
 Add numbering with expression
 
 ![Imgur](https://i.imgur.com/K3MDnVH.gif)
+
+-------
+Synched column transposition
+
+![Imgur](https://i.imgur.com/9JDaLBi.gif)
+
+-------
+Unsynched transposition (cycle all regions, also in different lines)
+
+![Imgur](https://i.imgur.com/UQOCxyf.gif)
+
+-------
+Shift regions left and right (M-S-\<\>)
+
+![Imgur](https://i.imgur.com/Q7EF8YI.gif)
 
 -------
 Edit test: join lines(J), change motion at cursors, append(a), visual command at cursors 
@@ -81,17 +89,3 @@ First editing functions: yank, delete, paste from register, paste block from yan
 
 ![Imgur](https://i.imgur.com/0jRkVdp.gif)
 
--------
-Shift regions left and right (M-S-\<\>)
-
-![Imgur](https://i.imgur.com/B1AiXcQ.gif)
-
--------
-Synched column transposition
-
-![Imgur](https://i.imgur.com/hsYZudK.gif)
-
--------
-Unsynched transposition (cycle all regions, also in different lines)
-
-![Imgur](https://i.imgur.com/H7ul6mT.gif)

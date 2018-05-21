@@ -58,11 +58,15 @@ endfun
 
 fun! s:Select()
     if g:VM.selecting
-        if g:VM.is_active
-            call b:VM_Selection.Global.get_region()
-        endif
         let g:VM.selecting = 0
+        call b:VM_Selection.Global.get_region()
+        let R = b:VM_Selection.Global.select_region_at_pos('.')
+
+        if R.h && !b:VM_Selection.Vars.multiline
+            call b:VM_Selection.Funcs.toggle_option('multiline') | endif
+
         if g:VM.oldupdate | let &updatetime = g:VM.oldupdate | endif
+        nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
     endif
 endfun
 

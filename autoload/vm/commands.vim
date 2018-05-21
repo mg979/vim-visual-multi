@@ -44,7 +44,7 @@ fun! vm#commands#select_operator(all, count, ...)
 
     let s:v.storepos = getpos('.')[1:2]
 
-    if a:0 | call s:V.Edit.select_op('gs'.a:1) | return | endif
+    if a:0 | call s:V.Edit.select_op('y'.a:1) | return | endif
 
     let abort = 0
     let s = ''                     | let n = ''
@@ -73,10 +73,10 @@ fun! vm#commands#select_operator(all, count, ...)
         else                             | let abort = 1  | break    | endif
     endwhile
 
-    if abort | let g:VM.selecting = 0 | return | endif
+    if abort | return | endif
 
     let n = n*x>1? n*x : ''
-    call s:V.Edit.select_op('gs'.n.s)
+    call s:V.Edit.select_op('y'.n.s)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

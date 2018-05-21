@@ -418,19 +418,23 @@ fun! s:Edit.select_op(cmd) dict
 
     call self.before_macro(1)
 
-    "if not using permanent mappings, this will be unmapped but it's needed
-    nmap <silent> gs         <Plug>(VM-Select-Operator)
+    let g:VM.extend_mode = 1
+    silent! nunmap <buffer> y
 
     for r in s:R()
         call cursor(r.l, r.a)
         call r.remove()
-        let g:VM.selecting = 1
         exe "normal ".a:cmd
-        if !has('nvim')
-            doautocmd CursorMoved
-        endif
+        call b:VM_Selection.Global.get_region()
     endfor
     call self.after_macro(0)
+
+    if !s:v.multiline
+        for r in s:R()
+            if r.h | call s:F.toggle_option('multiline') | break | endif
+        endfor | endif
+
+    nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
 
     if empty(s:v.search) | let @/ = ''                      | endif
     if g:VM.oldupdate    | let &updatetime = g:VM.oldupdate | endif

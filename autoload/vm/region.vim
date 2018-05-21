@@ -72,9 +72,6 @@ fun! vm#region#new(cursor, ...)
 
     call s:G.update_cursor_highlight()
 
-    "reset select operator variable
-    let g:VM.selecting = 0
-
     return R
 endfun
 
@@ -385,9 +382,6 @@ fun! s:Region.update_vars() dict
         let r.A   = r.A_()           | let r.B = r.B_()
         let r.w   = r.B - r.A + 1    | let r.h = r.L - r.l
         let r.k   = r.dir? r.a : r.b | let r.K   = r.dir? r.A : r.B
-
-        if g:VM.selecting && r.h && !s:v.multiline
-            call s:F.toggle_option('multiline') | endif
 
         call r.update_bytes_map()
     endif
