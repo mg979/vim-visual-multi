@@ -406,7 +406,7 @@ fun! s:Edit.del_key() dict
 
     call self.before_macro(0)
     call self._process(0, 'del')
-    call s:G.merge_cursors()
+    call s:G.merge_regions()
     call self.after_macro(0)
 endfun
 

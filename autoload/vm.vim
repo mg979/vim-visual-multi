@@ -10,7 +10,7 @@
 fun! vm#init_buffer(empty, ...)
     """If already initialized, return current instance."""
 
-    if !empty(b:VM_Selection) | return s:V | endif
+    if exists('b:VM_Selection') && !empty(b:VM_Selection) | return s:V | endif
 
     let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Funcs':  {}, 'Block': {}, 'Bytes': '',
                         \ 'Edit': {}, 'Global':  {}, 'Search': {}, 'Maps':  {},

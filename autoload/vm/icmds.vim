@@ -56,7 +56,7 @@ fun! vm#icmds#x(cmd)
         endfor
     endif
 
-    call s:G.merge_cursors()
+    call s:G.merge_regions()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -107,7 +107,7 @@ fun! vm#icmds#cw()
     endfor
     call vm#commands#select_operator(1, 1, 'b')
     normal h"_d
-    call s:G.merge_cursors()
+    call s:G.merge_regions()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

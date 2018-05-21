@@ -451,11 +451,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_bytes_map() dict
-    if !s:X() | return | endif | let r = self
+    if !s:X() | return | endif
 
-    let s:V.Bytes[r.A:r.B] = map(s:V.Bytes[r.A:r.B], 'v:val+1')
-    if r.A < s:G.A | let s:G.A = r.A | endif
-    if r.B > s:G.B | let s:G.B = r.B | endif
+    for b in range(self.A, self.B)
+        let s:V.Bytes[b] = get(s:V.Bytes, b, 0) + 1
+    endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

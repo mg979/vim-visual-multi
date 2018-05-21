@@ -165,6 +165,7 @@ fun! vm#commands#erase_regions(...)
     if !g:VM.is_active | call s:init(0,1,0) | return | endif
 
     let s:V.Regions = []
+    let s:V.Bytes = {}
     call clearmatches()
     let s:v.index = -1
     call s:V.Block.stop()
@@ -278,7 +279,7 @@ fun! vm#commands#find_under(visual, whole, inclusive, ...)
     let R = s:G.new_region()
     if R.h && !s:v.multiline | call s:F.toggle_option('multiline') | endif
     call s:F.count_msg(1)
-    return (a:0 && a:visual)? vm#commands#find_next(0, 0) : R
+    return (a:0 && a:visual)? vm#commands#find_next(0, 0) : s:check_overlap(R)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

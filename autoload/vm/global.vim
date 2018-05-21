@@ -208,7 +208,7 @@ fun! s:Global.is_region_at_pos(pos) dict
     "Return an empty dict otherwise."""
 
     let pos = s:F.pos2byte(a:pos)
-    if s:X() && !s:V.Bytes[pos] | return {} | endif
+    if s:X() && !has_key(s:V.Bytes, pos) | return {} | endif
 
     for r in s:R()
         if pos >= r.A && pos <= r.B
@@ -220,16 +220,14 @@ endfun
 
 fun! s:Global.overlapping_regions(R) dict
     """Check if two regions are overlapping."""
-    let B = s:V.Bytes[a:R.A:a:R.B]
-    for b in B | if b > 1 | return 1 | endif | endfor
+    let B = range(a:R.A, a:R.B)
+    for b in B | if s:V.Bytes[b] > 1 | return 1 | endif | endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.reset_byte_map(update) dict
-    let self.A = line2byte(line('$') + 1) + 1
-    let self.B = 0
-    let s:V.Bytes = map(range(self.A), 0)
+    let s:V.Bytes = {}
 
     if a:update
         for r in s:R() | call r.update_bytes_map() | endfor
@@ -407,18 +405,20 @@ endfun
 
 fun! s:Global.merge_regions(...) dict
     ""Merge overlapping regions."""
-    if !s:X() | return self.merge_cursors() | endif
+    if !len(s:R()) | return                      | endif
+    if !s:X()      | return self.merge_cursors() | endif
 
-    let pos = getpos('.')[1:2]      | let s:v.eco = 1
-    let A = self.A                  | let B = self.B+1
-    let By = copy(s:V.Bytes[A:B])   | let a = 0
+    let By = sort(map(keys(s:V.Bytes), 'str2nr(v:val)'), 'n')
+    let pos = getpos('.')[1:2]       | let s:v.eco = 1
+    let A = By[0]                    | let B = By[0]
 
     call vm#commands#erase_regions(1)
 
-    for i in range(len(By))
-        if By[i] && !a     | let a = i+A
-        elseif a && !By[i] | call vm#region#new(0, a, i+A-1) | let a = 0 | endif
+    for i in By[1:]
+        if i == B+1 | let B = i
+        else        | call vm#region#new(0, A, B) | let A = i | let B = i | endif
     endfor
+    call vm#region#new(0, A, B)
 
     let s:v.eco = 0
     return self.update_and_select_region(pos)

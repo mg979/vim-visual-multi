@@ -338,6 +338,6 @@ fun! s:bs_del(cmd)
         endfor
     endif
 
-    call s:G.merge_cursors()
+    call s:G.merge_regions()
 endfun
 
