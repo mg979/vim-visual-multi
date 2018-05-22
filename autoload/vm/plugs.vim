@@ -10,6 +10,9 @@ fun! vm#plugs#init()
     nmap  <silent>  <Plug>(VM-Select-Operator)         :<c-u>call vm#commands#select_operator(0, 0)<cr>y
     nnoremap        <Plug>(VM-Select-All-Operator)     :<c-u>call vm#commands#select_operator(1, v:count)<cr>
 
+    nmap <expr> <silent>  <Plug>(VM-Find-Operator)           vm#commands#find_operator(0)
+    xmap <expr> <silent>  <Plug>(VM-Find-Operator)           vm#commands#find_operator(1)
+
     nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0, 0)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-At-Word)      :call vm#commands#add_cursor_at_word(1, 1)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-Down)         :call vm#commands#add_cursor_at_pos(1, 0)<cr>
@@ -50,7 +53,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Remove-Search)           :call b:VM_Selection.Search.remove(0)<cr>
     nnoremap        <Plug>(VM-Remove-Search-Regions)   :call b:VM_Selection.Search.remove(1)<cr>
 
-    nnoremap        <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex()<cr>:call <SID>Mode()<cr>/
+    nnoremap        <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex(1)<cr>:call <SID>Mode()<cr>/
+    xnoremap        <Plug>(VM-Start-Visual-Search)     :call vm#commands#find_by_regex(2)<cr>:call <SID>Mode()<cr>/
     nnoremap        <Plug>(VM-Show-Regions-Text)       :call b:VM_Selection.Funcs.regions_contents()<cr>
     nnoremap        <Plug>(VM-Show-Registers)          :call b:VM_Selection.Funcs.show_registers()<cr>
     nnoremap        <Plug>(VM-Erase-Regions)           :call vm#commands#erase_regions(1)<cr>

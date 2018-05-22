@@ -25,6 +25,7 @@ fun! s:init(whole, cursor, extend_mode)
 
     let s:v.whole_word = a:whole
     let s:v.nav_direction = 1
+    let s:v.finding = 0
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -77,6 +78,46 @@ fun! vm#commands#select_operator(all, count, ...)
 
     let n = n*x>1? n*x : ''
     call s:V.Edit.select_op('y'.n.s)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Find operator
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#find_operator(visual, ...)
+
+    if !a:0
+
+        if !g:VM.is_active
+            call s:init(0, 0, 1)
+            if a:visual
+                "use search register if just starting from visual mode
+                let @/ = s:v.oldsearch[0]
+                call s:Search.get_slash_reg()
+            endif
+        endif
+
+        if g:VM.oldupdate      | let &updatetime = 10   | endif
+        let g:VM.selecting = 1 | let s:v.finding = 1
+        silent! nunmap <buffer> y
+        return 'y'
+    endif
+
+    "set the cursor to the start of the yanked region, then find occurrences until end mark is met
+    keepjumps normal! `]
+    let endpos = s:F.pos2byte('.')
+    keepjumps normal! `[
+
+    while 1
+        let R = vm#commands#find_next(0, 0)
+        if empty(R) | break
+        elseif R.B > endpos
+            call R.remove()
+            if s:v.index >= 0 | let s:v.index -= 1 | endif
+            break | endif
+    endwhile
+
+    call s:G.select_region_at_pos('.')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -219,10 +260,17 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#regex_done()
+    let visual = s:v.using_regex == 2
     call vm#commands#regex_reset()
 
-    if s:X() | silent keepjumps normal! gny`]
-    else     | silent keepjumps normal! gny
+    if visual
+        call s:Search.get_slash_reg()
+        let g:VM.selecting = 1 | let s:v.finding = 1
+        keepjumps normal! gvy
+        return
+
+    elseif s:X() | silent keepjumps normal! gny`]
+    else         | silent keepjumps normal! gny
     endif
     call s:Search.get_slash_reg()
 
@@ -232,9 +280,9 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_by_regex(...)
+fun! vm#commands#find_by_regex(mode)
     if !g:VM.is_active | call s:init(0, 0, 1) | endif
-    let s:v.using_regex = 1
+    let s:v.using_regex = a:mode
 
     "store reg and position, to check if the search will be aborted
     let s:regex_pos = getpos('.') | let s:regex_reg = @/
@@ -283,6 +331,8 @@ fun! vm#commands#find_under(visual, whole, inclusive, ...)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Find all
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_all(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
@@ -308,7 +358,6 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     call s:G.select_region_at_pos('.')
     call s:F.count_msg(1)
 endfun
-
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find next/previous

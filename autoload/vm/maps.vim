@@ -55,11 +55,14 @@ fun! vm#maps#permanent()
         nmap <silent> g<space>   <Plug>(VM-Add-Cursor-At-Pos)
         nmap <silent> g<cr>      <Plug>(VM-Add-Cursor-At-Word)
         nmap <silent> g/         <Plug>(VM-Start-Regex-Search)
+        xmap <silent> g/         <Plug>(VM-Start-Visual-Search)
 
         nmap <silent> <M-A>      <Plug>(VM-Select-All)
         xmap <silent> <M-A>      <Plug>(VM-Select-All)
         nmap <silent> <M-j>      <Plug>(VM-Add-Cursor-Down)
         nmap <silent> <M-k>      <Plug>(VM-Add-Cursor-Up)
+
+        xmap <silent> <M-j>      <Plug>(VM-Find-Operator)
     endif
 endfun
 
@@ -69,7 +72,7 @@ let s:NVIM = has('gui_running') || has('nvim')
 
 let s:simple   = split('nNqQU*#o[]{}?/:uMS', '\zs')
 
-let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.<>', '\zs'), '"z".v:val')
+let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.<>s', '\zs'), '"z".v:val')
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = ['t', '"', '<F12>']
@@ -207,8 +210,9 @@ fun! s:Maps.start() dict
     nmap     <silent> <nowait> <buffer> <M-j>       <Plug>(VM-Add-Cursor-Down)
     nmap     <silent> <nowait> <buffer> <M-k>       <Plug>(VM-Add-Cursor-Up)
 
-    "select
+    "select/find operators
     nmap <silent>          <buffer> s               <Plug>(VM-Select-All-Operator)
+    nmap <silent>          <buffer> zs              <Plug>(VM-Find-Operator)
 
     "shrink/enlarge
     nmap <silent> <nowait> <buffer> z-              <Plug>(VM-Motion-Shrink)
@@ -495,6 +499,7 @@ fun! s:Maps.default_stop() dict
 
         nunmap <M-A>
         xunmap <M-A>
+        xunmap <M-j>
         nunmap <M-j>
         nunmap <M-k>
     endif

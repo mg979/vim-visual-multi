@@ -60,11 +60,19 @@ endfun
 fun! s:Select()
     if g:VM.selecting
         let g:VM.selecting = 0
-        call b:VM_Selection.Global.get_region()
-        let R = b:VM_Selection.Global.select_region_at_pos('.')
 
-        if R.h && !b:VM_Selection.Vars.multiline
-            call b:VM_Selection.Funcs.toggle_option('multiline') | endif
+        "find operator
+        if b:VM_Selection.Vars.finding
+            let b:VM_Selection.Vars.finding = 0
+            call vm#commands#find_operator(0, 1)
+        else
+            "select operator
+            call b:VM_Selection.Global.get_region()
+            let R = b:VM_Selection.Global.select_region_at_pos('.')
+
+            if R.h && !b:VM_Selection.Vars.multiline
+                call b:VM_Selection.Funcs.toggle_option('multiline') | endif
+        endif
 
         if g:VM.oldupdate | let &updatetime = g:VM.oldupdate | endif
         nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
