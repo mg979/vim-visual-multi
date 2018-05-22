@@ -36,6 +36,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldwhichwrap     = &whichwrap
     let s:v.oldlz            = &lz
     let s:v.oldch            = &ch
+    let s:v.oldhls           = &hls
     let s:v.oldcase          = [&smartcase, &ignorecase]
 
     "init new vars
@@ -103,6 +104,7 @@ fun! vm#reset(...)
     let &ignorecase  = s:v.oldcase[1]
     let &lz          = s:v.oldlz
     let &ch          = s:v.oldch
+    let &hls         = s:v.oldhls
     call vm#commands#regex_reset()
     call s:V.Funcs.restore_regs()
     call s:V.Maps.mappings(0, 1)
@@ -112,6 +114,7 @@ fun! vm#reset(...)
     let b:VM_Selection = {}
     let g:VM.is_active = 0
     let g:VM.extend_mode = 0
+    let g:VM.selecting = 0
 
     silent! nunmap <buffer> <Space>
     silent! nunmap <buffer> <esc>
@@ -123,7 +126,6 @@ fun! vm#reset(...)
     if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif
 
     call clearmatches()
-    set nohlsearch
     call garbagecollect()
 endfun
 

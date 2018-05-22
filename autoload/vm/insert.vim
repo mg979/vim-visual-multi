@@ -21,6 +21,7 @@ fun! vm#insert#init()
     let s:size    = {      -> line2byte(line('$') + 1) }
 
     let s:v.restart_insert = 0
+    let s:v.indentkeys = &indentkeys
     return s:Insert
 endfun
 
@@ -41,12 +42,12 @@ fun! s:Insert.key(type) dict
     elseif a:type ==# 'o'
         call vm#commands#merge_to_beol(1, 0)
         call vm#icmds#return()
-        call self.start(0) 
+        call self.start(0)
 
     elseif a:type ==# 'O'
         call vm#commands#merge_to_beol(0, 0)
         call vm#icmds#return_above()
-        call self.start(0) 
+        call self.start(0)
 
     elseif a:type ==# 'a'
         if s:X()
@@ -56,14 +57,14 @@ fun! s:Insert.key(type) dict
         for r in s:R() | call s:V.Edit.extra_spaces(r, 0) | endfor
         normal l
         let self.append = 1
-        call self.start(1) 
+        call self.start(1)
 
     else
         if s:X()
             if !s:v.direction       | call vm#commands#invert_direction() | endif
             call s:G.change_mode(1) | endif
 
-        call self.start(0) 
+        call self.start(0)
     endif
 endfun
 
@@ -170,8 +171,8 @@ fun! s:Insert.stop() dict
         let i += 1
     endfor
 
-    "NOTE: restart_insert is set in plugs, to avoid postprocessing, but it will
-    "be reset on <esc>, in scripts check for s:v.insert instead
+    "NOTE: restart_insert is set in plugs, to avoid postprocessing, but it will be reset on <esc>
+    "check for s:v.insert instead, it will be true until insert session is really over
     if s:v.restart_insert
         let s:v.restart_insert = 0 | return | endif
 
@@ -180,6 +181,10 @@ fun! s:Insert.stop() dict
     if self.append | call s:back() | endif
     call s:V.Edit.post_process(0,0)
     set hlsearch
+
+    "reindent all and adjust cursors position
+    let &indentkeys = s:v.indentkeys
+    call s:V.Edit.run_normal('==', 0, 1, 0)
 endfun
 
 
