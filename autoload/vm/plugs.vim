@@ -24,7 +24,7 @@ fun! vm#plugs#init()
 
     nnoremap        <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
     xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(1, 0, 0)<cr>`]
-    nnoremap        <Plug>(VM-Find-Under)              :call vm#commands#find_under(0, 0, 0, 1)<cr>
+    nnoremap        <Plug>(VM-Find-Under)              :call vm#commands#find_under(0, 1, 0, 1)<cr>
     xnoremap        <Plug>(VM-Find-Subword-Under)      y:call vm#commands#find_under(1, 0, 0, 1)<cr>`]
     nnoremap        <Plug>(VM-Find-I-Word)             :call vm#commands#find_under(0, 0, 0)<cr>
     nnoremap        <Plug>(VM-Find-A-Word)             :call vm#commands#find_under(0, 0, 1)<cr>

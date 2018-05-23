@@ -105,19 +105,19 @@ fun! vm#commands#find_operator(visual, ...)
 
     "set the cursor to the start of the yanked region, then find occurrences until end mark is met
     keepjumps normal! `]
-    let endpos = s:F.pos2byte('.')
+    let endline = getpos('.')[1]
     keepjumps normal! `[
 
     while 1
+        if !search(join(s:v.search, '\|'), 'czpn', endline) | break | endif
         let R = vm#commands#find_next(0, 0)
-        if empty(R) | break
-        elseif R.B > endpos
-            call R.remove()
+        if empty(R)
             if s:v.index >= 0 | let s:v.index -= 1 | endif
             break | endif
     endwhile
 
-    call s:G.select_region_at_pos('.')
+    call s:G.update_and_select_region()
+    nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

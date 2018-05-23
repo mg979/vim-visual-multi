@@ -75,6 +75,17 @@ fun! vm#init_buffer(empty, ...)
     call vm#augroup(0)
     call vm#au_cursor(0)
 
+    if g:VM_case_setting ==? 'smart'
+        set smartcase
+        set ignorecase
+    elseif g:VM_case_setting ==? 'sensitive'
+        set nosmartcase
+        set noignorecase
+    else
+        set nosmartcase
+        set ignorecase
+    endif
+
     set virtualedit=onemore
     set ww=h,l,<,>
     set lz
