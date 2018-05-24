@@ -58,36 +58,14 @@ fun! <SID>VM_Init()
     endif
 endfun
 
-fun! s:Select()
-    if g:VM.selecting
-        let g:VM.selecting = 0
-
-        "find operator
-        if b:VM_Selection.Vars.finding
-            let b:VM_Selection.Vars.finding = 0
-            call vm#commands#find_operator(0, 1)
-        else
-            "select operator
-            call b:VM_Selection.Global.get_region()
-            let R = b:VM_Selection.Global.select_region_at_pos('.')
-
-            if R.h && !b:VM_Selection.Vars.multiline
-                call b:VM_Selection.Funcs.toggle_option('multiline') | endif
-        endif
-
-        if g:VM.oldupdate | let &updatetime = g:VM.oldupdate | endif
-        nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
-    endif
-endfun
-
 augroup plugin-visual-multi-start
     au!
     au VimEnter     * call <SID>VM_Init()
     au BufEnter     * let b:VM_Selection = {}
     if has('nvim')
-        au TextYankPost * call <sid>Select()
+        au TextYankPost * call vm#operators#after_yank()
     else
-        au CursorMoved  * call <sid>Select()
-        au CursorHold   * call <sid>Select()
+        au CursorMoved  * call vm#operators#after_yank()
+        au CursorHold   * call vm#operators#after_yank()
     endif
 augroup END

@@ -3,121 +3,28 @@ let s:X    = { -> g:VM.extend_mode }
 let s:B    = { -> g:VM.is_active && s:v.block_mode && g:VM.extend_mode }
 let s:is_r = { -> g:VM.is_active && !empty(s:G.is_region_at_pos('.')) }
 
-fun! s:init(whole, cursor, extend_mode)
-    if a:extend_mode | let g:VM.extend_mode = 1 | endif
-
-    "return if already initialized
-    if g:VM.is_active
-
-        if s:v.using_regex | call vm#commands#regex_reset() | endif
-        let s:v.whole_word = a:whole
-        return 1 | endif
-
-    let s:V       = vm#init_buffer(a:cursor)
-
+fun! vm#commands#init()
+    let s:V       = b:VM_Selection
     let s:v       = s:V.Vars
     let s:G       = s:V.Global
     let s:F       = s:V.Funcs
     let s:Search  = s:V.Search
     let s:Block   = s:V.Block
-
-    let s:R    = { -> s:V.Regions }
-
-    let s:v.whole_word = a:whole
-    let s:v.nav_direction = 1
-    let s:v.finding = 0
+    let s:R       = { -> s:V.Regions }
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Select operator
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+fun! s:init(whole, empty, extend_mode)
+    if a:extend_mode | let g:VM.extend_mode = 1 | endif
 
-fun! vm#commands#select_operator(all, count, ...)
-    """Perform a yank, the autocmd will create the region.
-
-    if !a:all
-        if !g:VM.is_active     | call s:init(0, 0, 1)   | endif
-        if g:VM.oldupdate      | let &updatetime = 10   | endif
-        let g:VM.selecting = 1 | let g:VM.extend_mode = 1
-        silent! nunmap <buffer> y
-        return
+    "return if already initialized
+    if g:VM.is_active
+        if s:v.using_regex | call vm#commands#regex_reset() | endif
+        let s:v.whole_word = a:whole
+        return 1
+    else
+        call vm#init_buffer(a:empty)
+        let s:v.whole_word = a:whole
     endif
-
-    let s:v.storepos = getpos('.')[1:2]
-
-    if a:0 | call s:V.Edit.select_op('y'.a:1) | return | endif
-
-    let abort = 0
-    let s = ''                     | let n = ''
-    let x = a:count>1? a:count : 1 | echo "Selecting: s"
-
-    let l:Single = { c -> index(split('webWEB$0^', '\zs'), c) >= 0 }
-    let l:Double = { c -> index(split('iaftFT', '\zs'), c) >= 0    }
-
-    while 1
-        let c = nr2char(getchar())
-        if c == "\<esc>"                 | let abort = 1 | break
-
-        elseif str2nr(c) > 1 && empty(s) | let n .= c    | echon c
-
-        elseif str2nr(c) > 0             | let s .= c    | echon c
-            break
-
-        elseif l:Single(c)               | let s .= c    | echon c
-            break
-
-        elseif l:Double(c)
-            let s .= c                   | echon c
-            let s .= nr2char(getchar())  | echon c
-            break
-
-        else                             | let abort = 1  | break    | endif
-    endwhile
-
-    if abort | return | endif
-
-    let n = n*x>1? n*x : ''
-    call s:V.Edit.select_op('y'.n.s)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Find operator
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#commands#find_operator(visual, ...)
-
-    if !a:0
-
-        if !g:VM.is_active
-            call s:init(0, 0, 1)
-            if a:visual
-                "use search register if just starting from visual mode
-                let @/ = s:v.oldsearch[0]
-                call s:Search.get_slash_reg()
-            endif
-        endif
-
-        if g:VM.oldupdate      | let &updatetime = 10   | endif
-        let g:VM.selecting = 1 | let s:v.finding = 1
-        silent! nunmap <buffer> y
-        return 'y'
-    endif
-
-    "set the cursor to the start of the yanked region, then find occurrences until end mark is met
-    keepjumps normal! `]
-    let endline = getpos('.')[1]
-    keepjumps normal! `[
-
-    while 1
-        if !search(join(s:v.search, '\|'), 'czpn', endline) | break | endif
-        let R = vm#commands#find_next(0, 0)
-        if empty(R)
-            if s:v.index >= 0 | let s:v.index -= 1 | endif
-            break | endif
-    endwhile
-
-    call s:G.update_and_select_region()
-    nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

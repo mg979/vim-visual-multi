@@ -349,7 +349,7 @@ fun! s:Edit.get_motion(op, n) dict
             call vm#commands#motion('l', 1, 0, 0)
             call feedkeys('y')
         else
-            call feedkeys("s".N.S."\"".reg."y") | endif
+            call feedkeys("g".N.S."\"".reg."y") | endif
 
     elseif a:op ==# 'c'
 
@@ -366,7 +366,7 @@ fun! s:Edit.get_motion(op, n) dict
         if !C | let S = substitute(S, '^c', 'd', '')     | endif
 
         "backwards and i/a motions use select operator, forward motions use delete
-        if s:back(m) || s:ia(m) | call feedkeys(n."s".S."c")
+        if s:back(m) || s:ia(m) | call feedkeys(n."g".S."c")
         elseif C                | call feedkeys('^d$a')
         else                    | call feedkeys(n."\"_d".S."i") | endif
     endif
@@ -377,7 +377,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.surround() dict
-    if !s:X() | exe "normal siw" | endif
+    if !s:X() | call vm#operators#select(1, 1, 'iw') | endif
 
     let s:v.W = s:store_widths()
     let c = nr2char(getchar())
@@ -408,38 +408,6 @@ fun! s:Edit.del_key() dict
     call self._process(0, 'del')
     call s:G.merge_regions()
     call self.after_macro(0)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Edit.select_op(cmd) dict
-
-    if g:VM.oldupdate | let &updatetime = 10 | endif
-
-    call self.before_macro(1)
-
-    let g:VM.extend_mode = 1
-    silent! nunmap <buffer> y
-
-    let Rs = map(copy(s:R()), '[v:val.l, v:val.a]')
-    call vm#commands#erase_regions()
-
-    for r in Rs
-        call cursor(r[0], r[1])
-        exe "normal ".a:cmd
-        call b:VM_Selection.Global.get_region()
-    endfor
-    call self.after_macro(0)
-
-    if !s:v.multiline
-        for r in s:R()
-            if r.h | call s:F.toggle_option('multiline') | break | endif
-        endfor | endif
-
-    nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
-
-    if empty(s:v.search) | let @/ = ''                      | endif
-    if g:VM.oldupdate    | let &updatetime = g:VM.oldupdate | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -105,7 +105,7 @@ fun! vm#icmds#cw()
             let n += 1
         endif
     endfor
-    call vm#commands#select_operator(1, 1, 'b')
+    call vm#operators#select(1, 1, 'b')
     normal h"_d
     call s:G.merge_regions()
 endfun

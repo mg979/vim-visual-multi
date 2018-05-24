@@ -70,9 +70,9 @@ endfun
 
 let s:NVIM = has('gui_running') || has('nvim')
 
-let s:simple   = split('nNqQU*#o[]{}?/:uMS', '\zs')
+let s:simple   = split('nNqQU*#o[]{}?/:uMSsm', '\zs')
 
-let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.<>s', '\zs'), '"z".v:val')
+let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.<>', '\zs'), '"z".v:val')
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = ['t', '"', '<F12>']
@@ -211,29 +211,29 @@ fun! s:Maps.start() dict
     nmap     <silent> <nowait> <buffer> <M-k>       <Plug>(VM-Add-Cursor-Up)
 
     "select/find operators
-    nmap <silent>          <buffer> s               <Plug>(VM-Select-All-Operator)
-    nmap <silent>          <buffer> zs              <Plug>(VM-Find-Operator)
+    nmap     <silent>          <buffer> s           <Plug>(VM-Select-All-Operator)
+    nmap     <silent> <nowait> <buffer> m           <Plug>(VM-Find-Operator)
 
     "shrink/enlarge
-    nmap <silent> <nowait> <buffer> z-              <Plug>(VM-Motion-Shrink)
-    nmap <silent> <nowait> <buffer> z+              <Plug>(VM-Motion-Enlarge)
+    nmap     <silent> <nowait> <buffer> z-          <Plug>(VM-Motion-Shrink)
+    nmap     <silent> <nowait> <buffer> z+          <Plug>(VM-Motion-Enlarge)
 
     "normal/ex/visual
-    nmap <silent> <nowait> <buffer> S               <Plug>(VM-Run-Surround)
-    nmap          <nowait> <buffer> zz              <Plug>(VM-Run-Normal)
-    nmap <silent> <nowait> <buffer> Z               <Plug>(VM-Run-Last-Normal)
-    nmap          <nowait> <buffer> zv              <Plug>(VM-Run-Visual)
-    nmap <silent> <nowait> <buffer> zV              <Plug>(VM-Run-Last-Visual)
-    nmap          <nowait> <buffer> zq              <Plug>(VM-Run-Ex)
-    nmap <silent> <nowait> <buffer> <C-z>           <Plug>(VM-Run-Last-Ex)
-    nmap <silent> <nowait> <buffer> z@              <Plug>(VM-Run-Macro)
-    nmap <silent> <nowait> <buffer> z.              <Plug>(VM-Run-Dot)
-    nmap <silent> <nowait> <buffer> z<              <Plug>(VM-Align-Char)
-    nmap <silent> <nowait> <buffer> z>              <Plug>(VM-Align-Regex)
-    nmap          <nowait> <buffer> zn              <Plug>(VM-Numbers)
-    nmap <silent> <nowait> <buffer> zN              <Plug>(VM-Numbers-Append)
-    nmap          <nowait> <buffer> z0n             <Plug>(VM-Zero-Numbers)
-    nmap <silent> <nowait> <buffer> z0N             <Plug>(VM-Zero-Numbers-Append)
+    nmap     <silent> <nowait> <buffer> S           <Plug>(VM-Run-Surround)
+    nmap              <nowait> <buffer> zz          <Plug>(VM-Run-Normal)
+    nmap     <silent> <nowait> <buffer> Z           <Plug>(VM-Run-Last-Normal)
+    nmap              <nowait> <buffer> zv          <Plug>(VM-Run-Visual)
+    nmap     <silent> <nowait> <buffer> zV          <Plug>(VM-Run-Last-Visual)
+    nmap              <nowait> <buffer> zq          <Plug>(VM-Run-Ex)
+    nmap     <silent> <nowait> <buffer> <C-z>       <Plug>(VM-Run-Last-Ex)
+    nmap     <silent> <nowait> <buffer> z@          <Plug>(VM-Run-Macro)
+    nmap     <silent> <nowait> <buffer> z.          <Plug>(VM-Run-Dot)
+    nmap     <silent> <nowait> <buffer> z<          <Plug>(VM-Align-Char)
+    nmap     <silent> <nowait> <buffer> z>          <Plug>(VM-Align-Regex)
+    nmap              <nowait> <buffer> zn          <Plug>(VM-Numbers)
+    nmap     <silent> <nowait> <buffer> zN          <Plug>(VM-Numbers-Append)
+    nmap              <nowait> <buffer> z0n         <Plug>(VM-Zero-Numbers)
+    nmap     <silent> <nowait> <buffer> z0N         <Plug>(VM-Zero-Numbers-Append)
 
     "edit
     call self.edit_start()
@@ -380,8 +380,6 @@ fun! s:Maps.end() dict
     endif
 
     call s:arrows_end()
-
-    nunmap <buffer> s
 
     if !g:VM_s_mappings
         nunmap <buffer> s]

@@ -7,11 +7,11 @@ let g:VM.find_motions   = ['f', 'F', 't', 'T']
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#plugs#init()
-    nmap  <silent>  <Plug>(VM-Select-Operator)         :<c-u>call vm#commands#select_operator(0, 0)<cr>y
-    nnoremap        <Plug>(VM-Select-All-Operator)     :<c-u>call vm#commands#select_operator(1, v:count)<cr>
+    nmap  <silent>  <Plug>(VM-Select-Operator)         :<c-u>call vm#operators#select(0, 0)<cr>y
+    nnoremap        <Plug>(VM-Select-All-Operator)     :<c-u>call vm#operators#select(1, v:count)<cr>
 
-    nmap <expr> <silent>  <Plug>(VM-Find-Operator)           vm#commands#find_operator(0)
-    xmap <expr> <silent>  <Plug>(VM-Find-Operator)           vm#commands#find_operator(1)
+    nmap <expr> <silent>  <Plug>(VM-Find-Operator)           vm#operators#find(1, 0)
+    xmap <expr> <silent>  <Plug>(VM-Find-Operator)           vm#operators#find(1, 1)
 
     nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0, 0)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-At-Word)      :call vm#commands#add_cursor_at_word(1, 1)<cr>
