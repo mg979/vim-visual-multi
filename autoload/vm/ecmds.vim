@@ -82,11 +82,11 @@ endfun
 " Change
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.change(X, count) dict
+fun! s:Edit.change(X, count, ...) dict
     if !s:v.direction | call vm#commands#invert_direction() | endif
     if a:X
         "delete existing region contents and leave the cursors
-        call self.delete(1, "_", 1)
+        call self.delete(1, a:0? a:1 : "_", 1)
         call s:V.Insert.start(0)
     else
         call self.get_motion('c', a:count)
@@ -259,19 +259,31 @@ endfun
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Get motion
+" Operations at cursors
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:forw = { c -> index(['f', 't'], c) >= 0                  }
-let s:back = { c -> index(['F', 'T', '0', '^'], c) >= 0        }
+let s:back = { c -> index(split('FTlb0^', '\zs'), c) >= 0      }
 let s:ia   = { c -> index(['i', 'a'], c) >= 0                  }
 let s:all  = { c -> index(split('hlwebWEB$^0', '\zs'), c) >= 0 }
 let s:find = { c -> index(split('fFtT', '\zs'), c) >= 0        }
 
+fun! s:total_count(n, S)
+    let S = a:S | let n = a:n
+
+    let x = match(S, '\d') >= 0? substitute(S, '\D', '', 'g') : 0
+    if x | let S = substitute(S, x, '', '') | endif
+
+    "final count
+    let N = x? n*x : n>1? n : 1 | let N = N>1? N : ''
+
+    return [S, N]
+endfun
+
 fun! s:Edit.get_motion(op, n) dict
     if s:X() | call s:G.change_mode(1) | endif
 
-    let reg = v:register | let hl1 = 'WarningMsg' | let hl2 = 'Label'
+    let reg = v:register | let r = "\"".reg | let hl1 = 'WarningMsg' | let hl2 = 'Label'
 
     let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
                 \ a:op==#'c'? [['Change ', hl1], ['([n] s/w/e/b/$...) ?  ',   hl2]] :
@@ -308,38 +320,34 @@ fun! s:Edit.get_motion(op, n) dict
     endwhile
 
     if a:op ==# 'd'
+        "what comes after 'd'; check for 'dd'
+        let S = substitute(M, r, '', '')
+        let S = substitute(S, '^\d*d\(.*\)$', '\1', '')
+        let [S, N] = s:total_count(n, S)
+        let D = S[0]==#'d' | let back = s:back(S)
 
-        "for commands like D, C, d$, dd... ensure there is only one region per line
-        if (M == 'd$' || M == 'dd') | call s:G.one_region_per_line() | endif
+        "for D, d$, dd: ensure there is only one region per line
+        if (S == '$' || S == 'd') | call s:G.one_region_per_line() | endif
 
-        let s:v.deleted_text = [] | let s:v.merge = 1
-        nunmap <buffer> d
-        call s:F.external_funcs(0, 0)
-        call self._process("normal ".M, 'd')
-        nmap <silent> <nowait> <buffer> d <Plug>(VM-Edit-Delete)
-        call self.post_process(0)
-        call s:F.external_funcs(0, 1)
-        if reg != "_"
-            let maxw = max(map(copy(s:v.deleted_text), 'len(v:val)'))
-            let type = s:v.multiline? 'V' : 'b'.maxw
-            call setreg(reg, join(s:v.deleted_text, "\n"), type)
-            let g:VM.registers[reg] = s:v.deleted_text
+        if D | call s:V.Edit.run_normal('dd', 0, 1, 0)
+        else
+            call vm#operators#select(1, 1, N.S)
+            if back | exe "normal h" | endif
+            exe "normal ".r."d"
         endif
+        call s:G.merge_regions()
 
     elseif a:op ==# 'y'
         call s:G.change_mode(1)
 
-        "for Y, y$, yy, ensure there is only one region per line
-        if (M == 'y$' || M == 'yy') | call s:G.one_region_per_line() | endif
-
         "what comes after 'y'; check for 'yy'
-        let S = substitute(M, '^\d*y\(.*\)$', '\1', '') | let m = S[0] | let Y = m==#'y'
+        let S = substitute(M, r, '', '')
+        let S = substitute(S, '^\d*y\(.*\)$', '\1', '')
+        let [S, N] = s:total_count(n, S)
+        let Y = S[0]==#'y' | let back = s:back(S)
 
-        let x = match(S, '\d') >= 0? substitute(S, '\D', '', 'g') : 0
-        if x | let S = substitute(S, x, '', '') | endif
-
-        "final count
-        let N = x? n*x : n>1? n : 1 | let N = N>1? N : ''
+        "for Y, y$, yy, ensure there is only one region per line
+        if (S == '$' || S == 'y') | call s:G.one_region_per_line() | endif
 
         "NOTE: yy doesn't accept count.
         if Y
@@ -349,26 +357,43 @@ fun! s:Edit.get_motion(op, n) dict
             call vm#commands#motion('l', 1, 0, 0)
             call feedkeys('y')
         else
-            call feedkeys("g".N.S."\"".reg."y") | endif
+            call vm#operators#select(1, 1, N.S.r)
+            if back | exe "normal h" | endif | normal y
+        endif
 
     elseif a:op ==# 'c'
-
-        "for c$, cc, ensure there is only one region per line
-        if (M == 'c$' || M == 'cc') | call s:G.one_region_per_line() | endif
 
         "cs surround
         if M[:1] ==# 'cs' | call self.run_normal(M, 1, 1, 0) | return | endif
 
         "what comes after 'c'; check for 'cc'
-        let S = substitute(M, '^\d*c\(.*\)$', '\1', '') | let m = S[0] | let C = m==#'c'
+        let S = substitute(M, r, '', '')
+        let S = substitute(S, '^\d*c\(.*\)$', '\1', '')
+        let [S, N] = s:total_count(n, S)
+        let C = S[0]==#'c' | let back = s:back(S)
 
-        "'cc' motion -> ^d$
-        if !C | let S = substitute(S, '^c', 'd', '')     | endif
+        "for c$, cc, ensure there is only one region per line
+        if (S == '$' || S == 'c') | call s:G.one_region_per_line() | endif
 
-        "backwards and i/a motions use select operator, forward motions use delete
-        if s:back(m) || s:ia(m) | call feedkeys(n."g".S."c")
-        elseif C                | call feedkeys('^d$a')
-        else                    | call feedkeys(n."\"_d".S."i") | endif
+        let S = substitute(S, '^c', 'd', '')
+        let reg = reg != "\""? reg : "_"
+
+        if C
+            normal s$
+            call vm#commands#motion('^', 1, 0, 0)
+            call self.delete(1, "\"".reg, 1)
+            call s:V.Insert.key('a')
+
+        elseif S=='$'
+            call vm#operators#select(1, 1, 's$')
+            call self.delete(1, "\"".reg, 1)
+            call s:V.Insert.key('a')
+
+        else
+            call vm#operators#select(1, 1, N.S)
+            if back | exe "normal h" | endif
+            call self.change(1, 1, reg)
+        endif
     endif
 endfun
 
@@ -646,4 +671,5 @@ fun! s:store_widths(...)
                 \) | endfor
     return W
 endfun
+
 
