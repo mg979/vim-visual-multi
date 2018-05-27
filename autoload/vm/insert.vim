@@ -121,7 +121,11 @@ fun! s:Insert.start(append) dict
     "start tracking text changes
     let s:v.insert = 1 | call I.auto_start()
 
+    "change cursor highlight
     call s:G.update_cursor_highlight()
+
+    "disable indentkeys
+    set indentkeys=
 
     "start insert mode and break the undo point
     call feedkeys("i\<c-g>u", 'n')
@@ -182,9 +186,15 @@ fun! s:Insert.stop() dict
     call s:V.Edit.post_process(0,0)
     set hlsearch
 
-    "reindent all and adjust cursors position
+    "reindent all and adjust cursors position, only if filetype allows
     let &indentkeys = s:v.indentkeys
-    call s:V.Edit.run_normal('==', 0, 1, 0)
+    if !empty(&ft)
+        if g:VM_reindent_all_filetypes && index(g:VM_no_reindent_filetype, &ft) == -1
+            call s:V.Edit.run_normal('==', 0, 1, 0)
+        elseif index(g:VM_reindent_filetype, &ft) >= 0
+            call s:V.Edit.run_normal('==', 0, 1, 0)
+        endif
+    endif
 endfun
 
 

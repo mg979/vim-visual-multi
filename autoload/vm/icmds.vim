@@ -128,9 +128,6 @@ fun! vm#icmds#return()
     "invert regions order, so that they are processed from bottom to top
     let s:V.Regions = reverse(s:R()) | let nR = len(s:R())-1
 
-    "disable indentkeys
-    set indentkeys=
-
     for r in s:R()
         "these vars will be used to see what must be done (read NOTE)
         let eol = col([r.l, '$']) | let end = (r.a >= eol-1)
@@ -174,9 +171,6 @@ endfun
 fun! vm#icmds#return_above()
     "invert regions order, so that they are processed from bottom to top
     let s:V.Regions = reverse(s:R()) | let nR = len(s:R())-1
-
-    "disable indentkeys
-    set indentkeys=
 
     for r in s:R()
         call cursor(r.l, r.a)

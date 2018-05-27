@@ -38,6 +38,13 @@ fun! <SID>VM_Init()
     let g:VM_case_setting                     = get(g:, 'VM_case_setting', 'smart')
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "Reindentation after insert mode
+
+    let g:VM_reindent_all_filetypes           = get(g:, 'VM_reindent_all_filetypes', 1)
+    let g:VM_reindent_filetype                = get(g:, 'VM_reindent_filetype', ['vim', 'python'])
+    let g:VM_no_reindent_filetype             = get(g:, 'VM_no_reindent_filetype', [])
+
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Set up highlighting
 
     let g:VM_Selection_hl                     = get(g:, 'VM_Selection_hl',     'Visual')
