@@ -111,8 +111,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Merge-To-Bol)            :call vm#commands#merge_to_beol(0, 0)<cr>
 
     "Edit commands
-    nnoremap        <Plug>(VM-Edit-D)                  :<C-u>call b:VM_Selection.Edit.get_motion('d', 0)<cr>$
-    nnoremap        <Plug>(VM-Edit-Y)                  :<C-u>call b:VM_Selection.Edit.get_motion('y', 0)<cr>$
+    nnoremap        <Plug>(VM-Edit-D)                  :<C-u>call vm#operators#cursors('d', 0)<cr>$
+    nnoremap        <Plug>(VM-Edit-Y)                  :<C-u>call vm#operators#cursors('y', 0)<cr>$
     nnoremap        <Plug>(VM-Edit-x)                  :<C-u>call b:VM_Selection.Edit.run_normal('x', 0, v:count1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-Edit-X)                  :<C-u>call b:VM_Selection.Edit.run_normal('X', 0, v:count1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-Edit-J)                  :<C-u>call b:VM_Selection.Edit.run_normal('J', 0, v:count1, 0)<cr>:silent! undojoin<cr>
@@ -127,7 +127,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-Delete)             :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, v:register, v:count1)<cr>
     nnoremap        <Plug>(VM-Edit-Delete-Exit)        :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, v:register, v:count1)<cr>:call vm#reset()<cr>
     nnoremap        <Plug>(VM-Edit-c-Change)           :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1)<cr>
-    nnoremap        <Plug>(VM-Edit-C-Change)           :<C-u>call b:VM_Selection.Edit.get_motion('c', 0)<cr>$
+    nnoremap        <Plug>(VM-Edit-C-Change)           :<C-u>call vm#operators#cursors('c', 0)<cr>$
     nnoremap        <Plug>(VM-Edit-Replace)            :<C-u>call b:VM_Selection.Edit.replace()<cr>
     nnoremap        <Plug>(VM-Edit-p-Paste-Regions)    :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 1, g:VM.extend_mode)<cr>
     nnoremap        <Plug>(VM-Edit-P-Paste-Regions)    :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 1, g:VM.extend_mode)<cr>

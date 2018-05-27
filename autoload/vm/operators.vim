@@ -10,7 +10,8 @@ fun! vm#operators#init()
     let s:Search  = s:V.Search
 
     let s:v.finding    = 0
-    let s:R            = { -> s:V.Regions }
+    let s:R            = { -> s:V.Regions      }
+    let s:X            = { -> g:VM.extend_mode }
 endfun
 
 fun! s:init()
@@ -155,6 +156,144 @@ fun! vm#operators#after_yank()
 
         if g:VM.oldupdate | let &updatetime = g:VM.oldupdate | endif
         nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Operations at cursors (yank, delete, change)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+let s:back = { c -> index(split('FTlb0^', '\zs'), c) >= 0      }
+let s:ia   = { c -> index(['i', 'a'], c) >= 0                  }
+let s:all  = { c -> index(split('hlwebWEB$^0', '\zs'), c) >= 0 }
+let s:find = { c -> index(split('fFtT', '\zs'), c) >= 0        }
+
+fun! s:total_count(n, S)
+    let S = a:S | let n = a:n
+
+    let x = match(S, '\d') >= 0? substitute(S, '\D', '', 'g') : 0
+    if x | let S = substitute(S, x, '', '') | endif
+
+    "final count
+    let N = x? n*x : n>1? n : 1 | let N = N>1? N : ''
+
+    return [S, N]
+endfun
+
+fun! vm#operators#cursors(op, n)
+    if s:X() | call s:G.change_mode(1) | endif
+
+    let reg = v:register | let r = "\"".reg | let hl1 = 'WarningMsg' | let hl2 = 'Label'
+
+    let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
+                \ a:op==#'c'? [['Change ', hl1], ['([n] s/w/e/b/$...) ?  ',   hl2]] :
+                \ a:op==#'y'? [['Yank   ', hl1], ['([n] y/w/e/b/$...) ?  ',   hl2]] : 'Aborted.'
+
+    call s:F.msg(s, 1)
+
+    "starting string
+    let M = (a:n>1? a:n : '').( reg == s:v.def_reg? '' : '"'.reg ).a:op
+
+    "preceding count
+    let n = a:n>1? a:n : 1
+
+    echon M
+    while 1
+        let c = nr2char(getchar())
+        if str2nr(c) > 0                     | echon c | let M .= c
+        elseif s:find(c)                     | echon c | let M .= c
+            let c = nr2char(getchar())       | echon c | let M .= c | break
+
+        elseif s:ia(c)                       | echon c | let M .= c
+            let c = nr2char(getchar())       | echon c | let M .= c | break
+
+        elseif a:op ==# 'c' && c==#'s'       | echon c | let M .= c
+            let c = nr2char(getchar())       | echon c | let M .= c
+            let c = nr2char(getchar())       | echon c | let M .= c | break
+
+        elseif s:all(c)                      | echon c | let M .= c | break
+        elseif a:op ==# 'd' && c==#'d'       | echon c | let M .= c | break
+        elseif a:op ==# 'c' && c==#'c'       | echon c | let M .= c | break
+        elseif a:op ==# 'y' && c==#'y'       | echon c | let M .= c | break
+
+        else | echon ' ...Aborted'           | return  | endif
+    endwhile
+
+    if a:op ==# 'd'
+        "what comes after 'd'; check for 'dd'
+        let S = substitute(M, r, '', '')
+        let S = substitute(S, '^\d*d\(.*\)$', '\1', '')
+        let [S, N] = s:total_count(n, S)
+        let D = S[0]==#'d' | let back = s:back(S)
+
+        "for D, d$, dd: ensure there is only one region per line
+        if (S == '$' || S == 'd') | call s:G.one_region_per_line() | endif
+
+        if D | call s:V.Edit.run_normal('dd', 0, 1, 0)
+        else
+            call vm#operators#select(1, 1, N.S)
+            if back | exe "normal h" | endif
+            exe "normal ".r."d"
+        endif
+        call s:G.merge_regions()
+
+    elseif a:op ==# 'y'
+        call s:G.change_mode(1)
+
+        "what comes after 'y'; check for 'yy'
+        let S = substitute(M, r, '', '')
+        let S = substitute(S, '^\d*y\(.*\)$', '\1', '')
+        let [S, N] = s:total_count(n, S)
+        let Y = S[0]==#'y' | let back = s:back(S)
+
+        "for Y, y$, yy, ensure there is only one region per line
+        if (S == '$' || S == 'y') | call s:G.one_region_per_line() | endif
+
+        "NOTE: yy doesn't accept count.
+        if Y
+            call vm#commands#motion('0', 1, 0, 0)
+            call vm#commands#motion('$', 1, 0, 0)
+            let s:v.multiline = 1
+            call vm#commands#motion('l', 1, 0, 0)
+            call feedkeys('y')
+        else
+            call vm#operators#select(1, 1, N.S.r)
+            if back | exe "normal h" | endif | normal y
+        endif
+
+    elseif a:op ==# 'c'
+
+        "cs surround
+        if M[:1] ==# 'cs' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
+
+        "what comes after 'c'; check for 'cc'
+        let S = substitute(M, r, '', '')
+        let S = substitute(S, '^\d*c\(.*\)$', '\1', '')
+        let [S, N] = s:total_count(n, S)
+        let C = S[0]==#'c' | let back = s:back(S)
+
+        "for c$, cc, ensure there is only one region per line
+        if (S == '$' || S == 'c') | call s:G.one_region_per_line() | endif
+
+        let S = substitute(S, '^c', 'd', '')
+        let reg = reg != "\""? reg : "_"
+
+        if C
+            normal s$
+            call vm#commands#motion('^', 1, 0, 0)
+            call s:V.Edit.delete(1, "\"".reg, 1)
+            call s:V.Insert.key('a')
+
+        elseif S=='$'
+            call vm#operators#select(1, 1, 's$')
+            call s:V.Edit.delete(1, "\"".reg, 1)
+            call s:V.Insert.key('a')
+
+        else
+            call vm#operators#select(1, 1, N.S)
+            if back | exe "normal h" | endif
+            call s:V.Edit.change(1, 1, reg)
+        endif
     endif
 endfun
 
