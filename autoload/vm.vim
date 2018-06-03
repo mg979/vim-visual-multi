@@ -124,6 +124,7 @@ fun! vm#reset(...)
     call s:V.Funcs.restore_regs()
     call s:V.Maps.mappings(0, 1)
     call vm#maps#default()
+    call vm#comp#reset()
     call vm#augroup(1)
     call vm#au_cursor(1)
     let b:VM_Selection = {}

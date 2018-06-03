@@ -195,6 +195,8 @@ fun! s:Star(type)
 endfun
 
 fun! s:Insert(key)
+    call vm#comp#icmds()  "compatibility tweaks
+
     let b:VM_Selection.Vars.restart_insert = 1
     let i = ":call b:VM_Selection.Insert.key('i')\<cr>"
     let a = ":call b:VM_Selection.Insert.key('a')\<cr>"

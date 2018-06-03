@@ -146,6 +146,8 @@ endfun
 fun! s:Insert.insert(...) dict
     "TextChangedI
 
+    call vm#comp#TextChangedI()  "compatibility tweaks
+
     let I        = self
     let L        = I.lines
     let ln       = getpos('.')[1]
