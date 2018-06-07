@@ -30,17 +30,11 @@ fun! s:Edit.delete(X, register, count) dict
     if a:X
         let size = s:size() | let change = 0 | let s:v.deleted_text = []
         for r in s:R()
-            let eol = r.b == col([r.L, '$'])
-
             call r.bytes([change, change])
             call self.extra_spaces(r, 0)
             call cursor(r.l, r.a)
             normal! m[
-            if eol
-                call cursor(r.L+1, 1)
-            else
-                call cursor(r.L, r.b+1)
-            endif
+            call cursor(r.L, r.b>1? r.b+1 : 1)
             normal! m]
 
             if a:register != "_"

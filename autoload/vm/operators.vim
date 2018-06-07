@@ -276,23 +276,23 @@ fun! vm#operators#cursors(op, n)
         if (S == '$' || S == 'c') | call s:G.one_region_per_line() | endif
 
         let S = substitute(S, '^c', 'd', '')
-        let reg = reg != "\""? reg : "_"
+        let reg = reg != "_"? reg : "\""        "black hole not working for now
 
         if C
             normal s$
             call vm#commands#motion('^', 1, 0, 0)
-            call s:V.Edit.delete(1, "\"".reg, 1)
+            call s:V.Edit.delete(1, reg, 1)
             call s:V.Insert.key('a')
 
         elseif S=='$'
             call vm#operators#select(1, 1, 's$')
-            call s:V.Edit.delete(1, "\"".reg, 1)
+            call s:V.Edit.delete(1, reg, 1)
             call s:V.Insert.key('a')
 
         else
             call vm#operators#select(1, 1, N.S)
             if back | exe "normal h" | endif
-            call s:V.Edit.change(1, 1, reg)
+            call feedkeys('c')
         endif
     endif
 endfun
