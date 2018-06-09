@@ -37,6 +37,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldlz            = &lz
     let s:v.oldch            = &ch
     let s:v.oldhls           = &hls
+    let s:v.oldtab           = &expandtab
     let s:v.oldcase          = [&smartcase, &ignorecase]
 
     "init new vars
@@ -90,6 +91,15 @@ fun! vm#init_buffer(empty, ...)
         set ignorecase
     endif
 
+    "expand tabs
+    if g:VM_always_expand_tabs && !&expandtab
+	let s:v.expanded_tabs = 1
+        set expandtab
+        %retab!
+    else
+	let s:v.expanded_tabs = 0
+    endif
+
     set virtualedit=onemore
     set ww=h,l,<,>
     set lz
@@ -131,6 +141,12 @@ fun! vm#reset(...)
     let g:VM.is_active = 0
     let g:VM.extend_mode = 0
     let g:VM.selecting = 0
+
+    "restore tabs
+    if g:VM_always_expand_tabs && s:v.expanded_tabs
+        set noexpandtab
+        %retab!
+    endif
 
     silent! nunmap <buffer> <Space>
     silent! nunmap <buffer> <esc>

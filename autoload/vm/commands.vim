@@ -55,6 +55,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:skip_shorter_lines(where)
+    call s:F.fix_tabs_in_line(0)     "convert tabs if necessary
+
     let vcol    = s:v.vertical_col
     let col     = col('.')
     "we don't want cursors on final column('$'), except when adding at column 1
@@ -68,6 +70,8 @@ fun! s:skip_shorter_lines(where)
     else
         let endline = (col('$') > 1)? col('$') : 2
     endif
+
+    call s:F.fix_tabs_in_line(1)     "reconvert tabs if necessary
 
     "when adding cursors below or above, don't add on shorter lines
     if ( col < vcol || col == endline )

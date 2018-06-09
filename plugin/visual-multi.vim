@@ -35,6 +35,7 @@ fun! <SID>VM_Init()
     let g:VM_custom_commands                  = get(g:, 'VM_custom_commands', {})
     let g:VM_commands_aliases                 = get(g:, 'VM_commands_aliases', {})
     let g:VM_debug                            = get(g:, 'VM_debug', 0)
+    let g:VM_always_expand_tabs               = get(g:, 'VM_always_expand_tabs', 0)
     let g:VM_case_setting                     = get(g:, 'VM_case_setting', 'smart')
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
