@@ -14,7 +14,7 @@ endfun
 fun! vm#maps#default()
 
     if g:VM_s_mappings
-        nmap <silent> s]         <Plug>(VM-Find-Under)
+        nmap <silent> s]         <Plug>(VM-Find-I-Word)
         nmap <silent> s[         <Plug>(VM-Find-A-Word)
         nmap <silent> s}         <Plug>(VM-Find-I-Whole-Word)
         nmap <silent> s{         <Plug>(VM-Find-A-Whole-Word)

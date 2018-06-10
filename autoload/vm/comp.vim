@@ -21,3 +21,10 @@ fun! vm#comp#reset()
         call deoplete#custom#buffer_option('auto_complete', v:true)
     endif
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" don't reindent for filetypes
+
+fun! vm#comp#reindents()
+    return g:VM_no_reindent_filetype + ['ctrlsf']
+endfun
