@@ -40,6 +40,12 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldtab           = &expandtab
     let s:v.oldcase          = [&smartcase, &ignorecase]
 
+    "nvim clipboard default
+    if has('nvim')
+        let s:v.clipboard = &clipboard
+        set clipboard=
+    endif
+
     "init new vars
 
     "block: [ left edge, right edge, min edge for all regions, au var ]
@@ -93,11 +99,11 @@ fun! vm#init_buffer(empty, ...)
 
     "expand tabs
     if g:VM_always_expand_tabs && !&expandtab
-	let s:v.expanded_tabs = 1
+        let s:v.expanded_tabs = 1
         set expandtab
         %retab!
     else
-	let s:v.expanded_tabs = 0
+        let s:v.expanded_tabs = 0
     endif
 
     set virtualedit=onemore
@@ -130,6 +136,7 @@ fun! vm#reset(...)
     let &lz          = s:v.oldlz
     let &ch          = s:v.oldch
     let &hls         = s:v.oldhls
+    if has('nvim') | let &clipboard = s:v.clipboard | endif
     call vm#commands#regex_reset()
     call s:V.Funcs.restore_regs()
     call s:V.Maps.mappings(0, 1)

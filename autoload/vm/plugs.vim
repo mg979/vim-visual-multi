@@ -13,12 +13,12 @@ fun! vm#plugs#init()
     nmap <expr> <silent>  <Plug>(VM-Find-Operator)           vm#operators#find(1, 0)
     xmap <expr> <silent>  <Plug>(VM-Find-Operator)           vm#operators#find(1, 1)
 
-    nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0, 0)<cr>
+    nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-At-Word)      :call vm#commands#add_cursor_at_word(1, 1)<cr>
-    nnoremap        <Plug>(VM-Add-Cursor-Down)         :call vm#commands#add_cursor_at_pos(1, 0)<cr>
-    nnoremap        <Plug>(VM-Add-Cursor-Up)           :call vm#commands#add_cursor_at_pos(2, 0)<cr>
-    nnoremap        <Plug>(VM-Select-Cursor-Down)      :call vm#commands#add_cursor_at_pos(1, 1)<cr>
-    nnoremap        <Plug>(VM-Select-Cursor-Up)        :call vm#commands#add_cursor_at_pos(2, 1)<cr>
+    nnoremap        <Plug>(VM-Add-Cursor-Down)         :<C-u>call vm#commands#add_cursor_down(0, v:count1)<cr>
+    nnoremap        <Plug>(VM-Add-Cursor-Up)           :<C-u>call vm#commands#add_cursor_up(0, v:count1)<cr>
+    nnoremap        <Plug>(VM-Select-Cursor-Down)      :<C-u>call vm#commands#add_cursor_down(1, v:count1)<cr>
+    nnoremap        <Plug>(VM-Select-Cursor-Up)        :<C-u>call vm#commands#add_cursor_up(1, v:count1)<cr>
     nnoremap        <Plug>(VM-Select-Line-Down)        :call vm#commands#expand_line(1)<cr>
     nnoremap        <Plug>(VM-Select-Line-Up)          :call vm#commands#expand_line(0)<cr>
 

@@ -1,7 +1,9 @@
 let s:motion = ''
-let s:X    = { -> g:VM.extend_mode }
-let s:B    = { -> g:VM.is_active && s:v.block_mode && g:VM.extend_mode }
-let s:is_r = { -> g:VM.is_active && !empty(s:G.is_region_at_pos('.')) }
+let s:X          = { -> g:VM.extend_mode }
+let s:B          = { -> g:VM.is_active && s:v.block_mode && g:VM.extend_mode }
+let s:is_r       = { -> g:VM.is_active && !empty(s:G.is_region_at_pos('.')) }
+let s:first_line = { -> line('.') == 1 }
+let s:last_line  = { -> line('.') == line('$') }
 
 fun! vm#commands#init()
     let s:V       = b:VM_Selection
@@ -12,6 +14,8 @@ fun! vm#commands#init()
     let s:Block   = s:V.Block
     let s:R       = { -> s:V.Regions }
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:init(whole, empty, extend_mode)
     if a:extend_mode | let g:VM.extend_mode = 1 | endif
@@ -28,8 +32,6 @@ fun! s:init(whole, empty, extend_mode)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Add cursor
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:check_extend_default(X)
     """If just starting, enable extend mode if option is set."""
@@ -39,6 +41,8 @@ fun! s:check_extend_default(X)
     else                                     | return s:init(0, 1, 0) | endif
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Add cursor
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#add_cursor_at_word(yank, search)
@@ -54,57 +58,78 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:skip_shorter_lines(where)
-    call s:F.fix_tabs_in_line(0)     "convert tabs if necessary
+fun! s:set_vcol()
+    if (!s:v.vertical_col || (col('.') > 1 && s:v.vertical_col > 1))
+        let s:v.vertical_col = col('.')
+    endif
+endfun
 
-    let vcol    = s:v.vertical_col
-    let col     = col('.')
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:skip_shorter_lines()
+    "when adding cursors below or above, don't add on shorter lines
     "we don't want cursors on final column('$'), except when adding at column 1
     "in this case, moving to an empty line would give:
     "   vcol     = 1
     "   col      = 1
     "   endline  = 1
-    "and the line would be skipped. 'Push' endline, so that the cursor is added
-    if g:VM_skip_empty_lines
-        let endline = col('$')
-    else
-        let endline = (col('$') > 1)? col('$') : 2
-    endif
+    "and the line would be skipped: check endline as 2, so that the cursor is added
+
+    call s:F.fix_tabs_in_line(0)     "convert tabs if necessary
+
+    let vcol    = s:v.vertical_col
+    let col     = col('.')
+    let endline = g:VM_skip_empty_lines? col('$') : ((col('$') > 1)? col('$') : 2)
 
     call s:F.fix_tabs_in_line(1)     "reconvert tabs if necessary
 
-    "when adding cursors below or above, don't add on shorter lines
-    if ( col < vcol || col == endline )
-        call vm#commands#add_cursor_at_pos(a:where, 0, 1) | return 1
-    endif
+    "skip line
+    if ( col < vcol || col == endline ) | return 1              | endif
 
-    if !s:V.Block.vertical() | call s:G.new_cursor() | else | return 1 | endif
+    "in block mode, cursor add is handled in block script
+    if !s:V.Block.vertical()            | call s:G.new_cursor() | endif
 endfun
 
-fun! vm#commands#add_cursor_at_pos(where, extend, ...)
-    "stop at first and last line if adding cursors vertically
-    if     a:where == 2 && line('.') == 1         | return
-    elseif a:where == 1 && line('.') == line('$') | return | endif
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! vm#commands#add_cursor_at_pos(extend)
     call s:check_extend_default(a:extend)
+    call s:Block.stop()
+    call s:G.new_cursor()
+    call s:F.count_msg(1)
+endfun
 
-    if a:where
-        if (!s:v.vertical_col || (col('.') > 1 && s:v.vertical_col > 1))
-            let s:v.vertical_col = col('.') | endif
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-    else | call s:Block.stop() | endif
+fun! vm#commands#add_cursor_down(extend, count)
+    if s:last_line() | return | endif
+    call s:check_extend_default(a:extend)
+    call s:set_vcol()
+    call s:G.new_cursor()
+    let N = a:count>1? a:count-1 : 1
 
-    "add one cursor at pos, if not adding vertically from callback function
-    if !a:0 | call s:G.new_cursor() | endif
-
-    if a:where == 1
+    while N
         keepjumps normal! j
-        if s:skip_shorter_lines(a:where) | return | endif
-    elseif a:where == 2
-        keepjumps normal! k
-        if s:skip_shorter_lines(a:where) | return | endif
-    endif
+        if !s:skip_shorter_lines() | let N -= 1 | endif
+        if s:last_line()           | break      | endif
+    endwhile
+    call s:F.count_msg(1)
+endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#add_cursor_up(extend, count)
+    if s:first_line() | return | endif
+    call s:check_extend_default(a:extend)
+    call s:set_vcol()
+    call s:G.new_cursor()
+    let N = a:count>1? a:count-1 : 1
+
+    while N
+        keepjumps normal! k
+        if !s:skip_shorter_lines() | let N -= 1 | endif
+        if s:first_line()          | break      | endif
+    endwhile
     call s:F.count_msg(1)
 endfun
 
