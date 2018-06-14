@@ -191,12 +191,19 @@ fun! s:Insert.stop() dict
     "reindent all and adjust cursors position, only if filetype allows
     let &indentkeys = s:v.indentkeys
     if !empty(&ft)
-        if g:VM_reindent_all_filetypes && index(vm#comp#reindents(), &ft) == -1
+
+        if index(g:VM_no_reindent_filetype, &ft) >= 0
+
+        elseif g:VM_reindent_all_filetypes && index(vm#comp#reindents(), &ft) == -1
             call s:V.Edit.run_normal('==', 0, 1, 0)
+
         elseif index(g:VM_reindent_filetype, &ft) >= 0
             call s:V.Edit.run_normal('==', 0, 1, 0)
+
         endif
     endif
+
+    if g:VM_reselect_first_insert | call s:G.select_region(0) | endif
 endfun
 
 

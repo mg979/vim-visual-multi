@@ -155,7 +155,10 @@ fun! s:Global.update_and_select_region(...) dict
     if s:v.merge | let s:v.merge = 0 | return self.merge_regions() | endif
 
     call self.update_regions()
-    let R = self.select_region_at_pos(a:0? a:1 : '.')
+
+    if !g:VM_reselect_first_always | let R = self.select_region_at_pos(a:0? a:1 : '.')
+    else                           | let R = self.select_region(0) | endif
+
     call s:F.restore_reg()
     call s:F.count_msg(0)
     return R

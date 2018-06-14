@@ -35,6 +35,8 @@ fun! <SID>VM_Init()
     let g:VM_custom_commands                  = get(g:, 'VM_custom_commands', {})
     let g:VM_commands_aliases                 = get(g:, 'VM_commands_aliases', {})
     let g:VM_debug                            = get(g:, 'VM_debug', 0)
+    let g:VM_reselect_first_insert            = get(g:, 'VM_reselect_first_insert', 0)
+    let g:VM_reselect_first_always            = get(g:, 'VM_reselect_first_always', 0)
     let g:VM_always_expand_tabs               = get(g:, 'VM_always_expand_tabs', 0)
     let g:VM_case_setting                     = get(g:, 'VM_case_setting', 'smart')
 
@@ -42,8 +44,8 @@ fun! <SID>VM_Init()
     "Reindentation after insert mode
 
     let g:VM_reindent_all_filetypes           = get(g:, 'VM_reindent_all_filetypes', 1)
-    let g:VM_reindent_filetype                = get(g:, 'VM_reindent_filetype', ['vim', 'python'])
-    let g:VM_no_reindent_filetype             = get(g:, 'VM_no_reindent_filetype', [])
+    let g:VM_reindent_filetype                = get(g:, 'VM_reindent_filetype', [])
+    let g:VM_no_reindent_filetype             = get(g:, 'VM_no_reindent_filetype', ['text'])
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Set up highlighting
