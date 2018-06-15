@@ -43,9 +43,9 @@ fun! <SID>VM_Init()
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Reindentation after insert mode
 
-    let g:VM_reindent_all_filetypes           = get(g:, 'VM_reindent_all_filetypes', 1)
+    let g:VM_reindent_all_filetypes           = get(g:, 'VM_reindent_all_filetypes', 0)
     let g:VM_reindent_filetype                = get(g:, 'VM_reindent_filetype', [])
-    let g:VM_no_reindent_filetype             = get(g:, 'VM_no_reindent_filetype', ['text'])
+    let g:VM_no_reindent_filetype             = get(g:, 'VM_no_reindent_filetype', ['text', 'markdown'])
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Set up highlighting

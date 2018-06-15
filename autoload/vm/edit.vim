@@ -92,7 +92,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_ex(...) dict
+fun! s:Edit.run_ex(count, ...) dict
 
     "-----------------------------------------------------------------------
 
@@ -115,7 +115,9 @@ fun! s:Edit.run_ex(...) dict
     if s:X() | call s:G.change_mode(1) | endif
 
     call self.before_macro(1)
-    call self._process(cmd)
+    for n in range(a:count)
+        call self._process(cmd)
+    endfor
     call self.after_macro(0)
 endfun
 

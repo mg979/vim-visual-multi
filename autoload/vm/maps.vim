@@ -72,11 +72,11 @@ let s:NVIM = has('gui_running') || has('nvim')
 
 let s:simple   = split('nNqQU*#o[]{}?/:uMSsm', '\zs')
 
-let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+qvVnN@.<>', '\zs'), '"z".v:val')
+let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+xvVnN@.<>', '\zs'), '"z".v:val')
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = ['t', '"', '<F12>']
-let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a', 's' ]
+let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a', 's', 'z' ]
 let s:leader   = split('ydpP', '\zs')
 let s:search   = split('acCrR/', '\zs')
 let s:leader2  = []
@@ -224,7 +224,8 @@ fun! s:Maps.start() dict
     nmap     <silent> <nowait> <buffer> Z           <Plug>(VM-Run-Last-Normal)
     nmap              <nowait> <buffer> zv          <Plug>(VM-Run-Visual)
     nmap     <silent> <nowait> <buffer> zV          <Plug>(VM-Run-Last-Visual)
-    nmap              <nowait> <buffer> zq          <Plug>(VM-Run-Ex)
+    nmap     <silent> <nowait> <buffer> <M-z>       <Plug>(VM-Run-Last-Visual)
+    nmap              <nowait> <buffer> zx          <Plug>(VM-Run-Ex)
     nmap     <silent> <nowait> <buffer> <C-z>       <Plug>(VM-Run-Last-Ex)
     nmap     <silent> <nowait> <buffer> z@          <Plug>(VM-Run-Macro)
     nmap     <silent> <nowait> <buffer> z.          <Plug>(VM-Run-Dot)

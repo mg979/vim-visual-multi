@@ -150,8 +150,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Run-Dot)                 :<C-u>call b:VM_Selection.Edit.run_normal('.', 0, v:count1, 0)<cr>
     nnoremap        <Plug>(VM-Run-Surround)            :call b:VM_Selection.Edit.surround()<cr>
     nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
-    nnoremap        <Plug>(VM-Run-Ex)                  :call b:VM_Selection.Edit.run_ex()<cr>
-    nnoremap        <Plug>(VM-Run-Last-Ex)             :call b:VM_Selection.Edit.run_ex(g:VM.last_ex)<cr>
+    nnoremap        <Plug>(VM-Run-Ex)                  :<C-u>call b:VM_Selection.Edit.run_ex(v:count1)<cr>
+    nnoremap        <Plug>(VM-Run-Last-Ex)             :<C-u>call b:VM_Selection.Edit.run_ex(v:count1, g:VM.last_ex)<cr>
     nnoremap        <Plug>(VM-Run-Normal)              :<C-u>call b:VM_Selection.Edit.run_normal(-1, 1,  v:count1,1)<cr>
     nnoremap        <Plug>(VM-Run-Last-Normal)         :<C-u>call b:VM_Selection.Edit.run_normal(g:VM.last_normal[0] ,g:VM.last_normal[1], v:count1, 1)<cr>
     nnoremap        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1, 0)<cr>
