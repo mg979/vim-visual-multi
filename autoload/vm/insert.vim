@@ -81,6 +81,10 @@ fun! s:Insert.start(append) dict
 
     if s:v.insert
         let R = s:G.select_region(I.index)
+    elseif g:VM_use_first_cursor_in_line
+        let R = s:G.select_region_at_pos('.')
+        let ix = s:G.lines_with_regions(0, R.l)[R.l][0]
+        let R = s:G.select_region(ix)
     else
         let R = s:G.select_region_at_pos('.')
     endif
@@ -153,8 +157,7 @@ fun! s:Insert.insert(...) dict
     let ln       = getpos('.')[1]
     let pos      = I.begin[1]
 
-    "popup eats one char on esc, give one more space
-    let cur      = a:0? getpos('.')[2]+1 : getpos('.')[2]
+    let cur      = getpos('.')[2]
     let pos      = pos + I.change*I.nth
     let I.change = cur - pos
     let text     = getline(ln)[(pos-1):(cur-2)]
