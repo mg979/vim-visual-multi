@@ -486,6 +486,20 @@ fun! vm#commands#convert_visual_selection()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#mouse_column()
+    let start = getpos('.')[1:2]
+    exe "normal! \<LeftMouse>"
+    let end = getpos('.')[1:2]
+    let w = start[1] - end[1]
+
+    call cursor(start[0], start[1])
+    while getpos('.')[1] < end[0]
+        call vm#commands#add_cursor_down(0, 1)
+    endwhile
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Motion commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

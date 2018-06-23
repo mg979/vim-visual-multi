@@ -65,6 +65,12 @@ fun! vm#maps#permanent()
 
         xmap <silent> <M-j>      <Plug>(VM-Find-Operator)
     endif
+
+    if g:VM_mouse_mappings
+        nmap <silent> <C-LeftMouse>      <Plug>(VM-Mouse-Cursor)
+        nmap <silent> <C-RightMouse>     <Plug>(VM-Mouse-Word)
+        nmap <silent> <M-C-RightMouse>   <Plug>(VM-Mouse-Column)
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

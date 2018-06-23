@@ -177,6 +177,11 @@ fun! vm#plugs#init()
     nnoremap <expr> <Plug>(VM-:)                       vm#commands#regex_reset(':')
     nnoremap <expr> <Plug>(VM-/)                       vm#commands#regex_reset('/')
     nnoremap <expr> <Plug>(VM-?)                       vm#commands#regex_reset('?')
+
+    "mouse
+    nmap            <Plug>(VM-Mouse-Cursor)            <LeftMouse>g<Space>
+    nmap            <Plug>(VM-Mouse-Word)              <LeftMouse><C-d>
+    nmap            <Plug>(VM-Mouse-Column)            :call vm#commands#mouse_column()<cr>
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
