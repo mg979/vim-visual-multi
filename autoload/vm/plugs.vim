@@ -24,6 +24,9 @@ fun! vm#plugs#init()
 
     nnoremap        <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
     xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(1, 0, 0)<cr>`]
+    xnoremap        <Plug>(VM-Convert-Visual)          :<c-u>call vm#commands#convert_visual_selection()<cr>
+    nnoremap        <Plug>(VM-Remove-Empty-Lines)      :<c-u>call vm#commands#remove_empty_lines()<cr>
+
     nnoremap        <Plug>(VM-Find-Under)              :call vm#commands#find_under(0, 1, 0, 1)<cr>
     xnoremap        <Plug>(VM-Find-Subword-Under)      y:call vm#commands#find_under(1, 0, 0, 1)<cr>`]
     nnoremap        <Plug>(VM-Find-I-Word)             :call vm#commands#find_under(0, 0, 0)<cr>
@@ -52,6 +55,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Add-Search)              :call b:VM_Selection.Search.get()<cr>
     nnoremap        <Plug>(VM-Remove-Search)           :call b:VM_Selection.Search.remove(0)<cr>
     nnoremap        <Plug>(VM-Remove-Search-Regions)   :call b:VM_Selection.Search.remove(1)<cr>
+    nnoremap        <Plug>(VM-Search-Menu)             :call b:VM_Selection.Search.menu()<cr>
 
     nnoremap        <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex(1)<cr>:call <SID>Mode()<cr>/
     xnoremap        <Plug>(VM-Start-Visual-Search)     :call vm#commands#find_by_regex(2)<cr>:call <SID>Mode()<cr>/

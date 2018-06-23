@@ -229,6 +229,17 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Global.remove_empty_lines()
+    """Remove regions that consist of the endline marker only."""
+    for r in s:R()
+        if r.a == 1 && r.A == r.B && col([r.l, '$']) == 1
+            call r.remove()
+        endif
+    endfor
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Global.reset_byte_map(update) dict
     let s:V.Bytes = {}
 
@@ -378,7 +389,7 @@ fun! s:Global.split_lines() dict
         endfor
     endfor
 
-    "reorder regions when done
+    if g:VM_autoremove_empty_lines | call vm#commands#remove_empty_lines() | endif
     call self.update_highlight()
     call s:F.count_msg(1)
 endfun

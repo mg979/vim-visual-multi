@@ -40,6 +40,7 @@ fun! <SID>VM_Init()
     let g:VM_always_expand_tabs               = get(g:, 'VM_always_expand_tabs', 0)
     let g:VM_case_setting                     = get(g:, 'VM_case_setting', 'smart')
     let g:VM_use_first_cursor_in_line         = get(g:, 'VM_use_first_cursor_in_line', 0)
+    let g:VM_autoremove_empty_lines           = get(g:, 'VM_autoremove_empty_lines', 0)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Reindentation after insert mode

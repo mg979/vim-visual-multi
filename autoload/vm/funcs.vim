@@ -259,11 +259,15 @@ fun! s:Funcs.toggle_option(option, ...) dict
         if s:v.multiline
             call s:V.Block.stop()
         else
-            call s:V.Global.split_lines()   | endif
+            call s:V.Global.split_lines()
+            call s:V.Global.select_region_at_pos('.')   | endif
 
     elseif a:option == 'block_mode'
         if s:v.block_mode
-            if s:v.multiline | let s:v.multiline = 0 | call s:V.Global.split_lines() | endif
+            if s:v.multiline
+                let s:v.multiline = 0
+                call s:V.Global.split_lines()
+                call s:V.Global.select_region_at_pos('.')   | endif
             call s:V.Block.start()
         else
             call s:V.Block.stop() | endif

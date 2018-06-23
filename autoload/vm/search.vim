@@ -113,8 +113,10 @@ fun! s:Search.remove(also_regions) dict
             let i -= 1 | endwhile
 
         if removed | call s:G.update_and_select_region() | endif
+
+    elseif !empty(pats)
+        call s:F.count_msg(1)
     endif
-    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -216,3 +218,30 @@ fun! s:Search.rewrite(last) dict
     call s:F.count_msg(1)
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Search.menu() dict
+    echohl WarningMsg | echo "1 - " | echohl Type | echon "Rewrite Last Search"   | echohl None
+    echohl WarningMsg | echo "2 - " | echohl Type | echon "Rewrite All Search"    | echohl None
+    echohl WarningMsg | echo "3 - " | echohl Type | echon "Read From Search"      | echohl None
+    echohl WarningMsg | echo "4 - " | echohl Type | echon "Add To Search"         | echohl None
+    echohl WarningMsg | echo "5 - " | echohl Type | echon "Remove Search"         | echohl None
+    echohl WarningMsg | echo "6 - " | echohl Type | echon "Remove Search Regions" | echohl None
+    echohl Directory | echo "Enter an option: " | echohl None
+    let c = nr2char(getchar())
+    echon c "\t"
+    if c == 1
+        call self.rewrite(1)
+    elseif c == 2
+        call self.rewrite(0)
+    elseif c == 3
+        call self.get_slash_reg()
+    elseif c == 4
+        call self.get()
+    elseif c == 5
+        call self.remove(0)
+    elseif c == 6
+        call self.remove(1)
+    endif
+    call feedkeys("\<cr>", 'n')
+endfun

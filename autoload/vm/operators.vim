@@ -113,6 +113,12 @@ fun! vm#operators#find(start, visual, ...)
             call s:init()
         endif
 
+        "ensure there is an active search
+        if empty(s:v.search)
+            if !len(s:R()) | call s:Search.get_slash_reg()
+            else           | call s:Search.get() | endif
+        endif
+
         if g:VM.oldupdate      | let &updatetime = 10   | endif
         let s:v.finding = 1
         silent! nunmap <buffer> y
@@ -125,7 +131,7 @@ fun! vm#operators#find(start, visual, ...)
     keepjumps normal! `[
 
     while 1
-        if !search(join(s:v.search, '\|'), 'czpn', endline) | break | endif
+        if !search(join(s:v.search, '\|'), 'znp', endline) | break | endif
         let R = vm#commands#find_next(0, 0)
         if empty(R)
             if s:v.index >= 0 | let s:v.index -= 1 | endif

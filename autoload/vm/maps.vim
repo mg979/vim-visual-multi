@@ -45,6 +45,7 @@ fun! vm#maps#permanent()
         nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
         nmap <silent> <C-d>       <Plug>(VM-Find-Under)
         xmap <silent> <C-d>       <Plug>(VM-Find-Subword-Under)
+        xmap <silent> <M-v>       <Plug>(VM-Convert-Visual)
     endif
 
     if g:VM_default_mappings
@@ -75,12 +76,11 @@ let s:simple   = split('nNqQU*#o[]{}?/:uMSsm', '\zs')
 let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+xvVnN@.<>', '\zs'), '"z".v:val')
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
-let s:cx_maps  = ['t', '"', '<F12>']
+let s:cx_maps  = ['t', '"', 'e', '<F1>', '<F12>']
 let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a', 's', 'z' ]
 let s:leader   = split('ydpP', '\zs')
-let s:search   = split('acCrR/', '\zs')
 let s:leader2  = []
-let s:fkeys    = ['1', '2']
+let s:fkeys    = ['2']
 let s:sfkeys   = ['2']
 let s:edit     = split('dcpPyxXraAiIOJDCY~', '\zs')
 
@@ -183,18 +183,14 @@ fun! s:Maps.start() dict
     nmap     <silent> <nowait> <buffer> <S-Home>   <Plug>(VM-Merge-To-Bol)
 
     "search
-    nmap     <silent> <nowait> <buffer> \sa        <Plug>(VM-Add-Search)
-    nmap     <silent> <nowait> <buffer> \s/        <Plug>(VM-Read-From-Search)
-    nmap     <silent> <nowait> <buffer> \sC        <Plug>(VM-Rewrite-All-Search)
-    nmap     <silent> <nowait> <buffer> \sc        <Plug>(VM-Rewrite-Last-Search)
-    nmap     <silent> <nowait> <buffer> \sr        <Plug>(VM-Remove-Search)
-    nmap     <silent> <nowait> <buffer> \sR        <Plug>(VM-Remove-Search-Regions)
+    nmap     <silent> <nowait> <buffer> \s         <Plug>(VM-Search-Menu)
     nmap     <silent> <nowait> <buffer> <M-s>      <Plug>(VM-Rewrite-Last-Search)
 
     "utility
-    nmap     <silent> <nowait> <buffer> <F1>       <Plug>(VM-Show-Help)
+    nmap     <silent> <nowait> <buffer> <C-x><F1>  <Plug>(VM-Show-Help)
     nmap              <nowait> <buffer> <C-x>t     <Plug>(VM-Show-Regions-Text)
     nmap              <nowait> <buffer> <C-x>"     <Plug>(VM-Show-Registers)
+    nmap     <silent> <nowait> <buffer> <C-x>e     <Plug>(VM-Remove-Empty-Lines)
     nmap     <silent> <nowait> <buffer> <c-x><F12> <Plug>(VM-Toggle-Debug)
 
     "ctrl
@@ -363,10 +359,6 @@ fun! s:Maps.end() dict
         exe "nunmap <buffer> <leader>".m
     endfor
 
-    for m in (s:search)
-        exe "nunmap <buffer> \\s".m
-    endfor
-
     let cm = g:VM_custom_commands
     for m in keys(cm)
         exe "silent! nunmap <buffer>".cm[m][0]
@@ -390,6 +382,7 @@ fun! s:Maps.end() dict
     nunmap <buffer> <Tab>
     nunmap <buffer> <BS>
     nunmap <buffer> <CR>
+    nunmap <buffer> \s
 
     xunmap <buffer> *
     xunmap <buffer> #
@@ -490,6 +483,7 @@ fun! s:Maps.default_stop() dict
 
         nunmap <M-A>
         xunmap <M-A>
+        xunmap <M-v>
         xunmap <M-j>
         nunmap <M-j>
         nunmap <M-k>
