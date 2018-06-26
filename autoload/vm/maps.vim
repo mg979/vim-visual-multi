@@ -17,7 +17,7 @@ fun! vm#maps#default()
         nmap <silent> s]         <Plug>(VM-Find-I-Word)
         nmap <silent> s[         <Plug>(VM-Find-A-Word)
         nmap <silent> s}         <Plug>(VM-Find-I-Whole-Word)
-        nmap <silent> s{         <Plug>(VM-Find-A-Whole-Word)
+        nmap <silent> s{         <Plug>(VM-Find-A-Word)
         xmap <silent> s]         <Plug>(VM-Find-A-Subword)
         xmap <silent> s[         <Plug>(VM-Find-A-Whole-Subword)
     endif

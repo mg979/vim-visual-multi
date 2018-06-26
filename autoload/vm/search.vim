@@ -26,8 +26,9 @@ let s:Search = {}
 fun! s:Search.get_pattern(register, regex) dict
     let t = getreg(a:register)
     if !a:regex
+        let symbol = len(t) == 1 && match(t, '\W') >= 0
         let t = self.escape_pattern(t)
-        if s:v.whole_word | let t = '\<'.t.'\>' | endif | endif
+        if s:v.whole_word && !symbol | let t = '\<'.t.'\>' | endif | endif
     return t
 endfun
 
@@ -35,10 +36,7 @@ endfun
 
 fun! s:update_search(p)
 
-    if empty(s:v.search)
-        call insert(s:v.search, a:p)    "just started
-
-    elseif index(s:v.search, a:p) < 0   "not in list
+    if index(s:v.search, a:p) < 0   "not in list
         call insert(s:v.search, a:p)
     endif
 
