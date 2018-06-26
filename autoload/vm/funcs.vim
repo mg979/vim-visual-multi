@@ -117,17 +117,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.fix_tabs_in_line(restore) dict
-    """Temporarily convert tabs to spaces in current line."""
-    if (s:v.expanded_tabs || s:v.oldtab) | return | endif
-
-    let &expandtab = !a:restore
-    silent! undojoin
-    .retab!
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:Funcs.region_with_id(id) dict
     for r in s:R()
         if r.id == a:id | return r | endif

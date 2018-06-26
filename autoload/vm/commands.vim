@@ -75,13 +75,9 @@ fun! s:skip_shorter_lines()
     "   endline  = 1
     "and the line would be skipped: check endline as 2, so that the cursor is added
 
-    call s:F.fix_tabs_in_line(0)     "convert tabs if necessary
-
     let vcol    = s:v.vertical_col
-    let col     = col('.')
-    let endline = g:VM_skip_empty_lines? col('$') : ((col('$') > 1)? col('$') : 2)
-
-    call s:F.fix_tabs_in_line(1)     "reconvert tabs if necessary
+    let col     = virtcol('.')
+    let endline = g:VM_skip_empty_lines? virtcol('$') : ((virtcol('$') > 1)? virtcol('$') : 2)
 
     "skip line
     if ( col < vcol || col == endline ) | return 1              | endif

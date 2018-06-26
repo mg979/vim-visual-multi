@@ -334,11 +334,11 @@ fun! s:Edit.align() dict
     if s:X()         | call s:G.change_mode(1) | endif
 
     normal D
-    let max = max(map(copy(s:R()), 'v:val.a'))
+    let max = max(map(copy(s:R()), 'virtcol([v:val.l, v:val.a])'))
     let reg = g:VM.registers[s:v.def_reg]
     for r in s:R()
         let s = ''
-        while len(s) < max-r.a | let s .= ' ' | endwhile
+        while len(s) < (max - virtcol([r.l, r.a])) | let s .= ' ' | endwhile
         let L = getline(r.l)
         call setline(r.l, L[:r.a-1].s.L[r.a:].reg[r.index])
         call r.update_cursor([r.l, r.a+len(s)])
