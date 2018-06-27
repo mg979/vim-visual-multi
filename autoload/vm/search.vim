@@ -56,17 +56,24 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Search.get() dict
-    """Get a new search pattern from selected region."
-    let r = s:G.is_region_at_pos('.') | if empty(r) | return | endif
-    let pat = self.escape_pattern(r.txt)
-    call s:update_search(pat)
+    """Get a new search pattern from the selected region, with a fallback."
+    let r = s:G.is_region_at_pos('.')
+    if !empty(r)
+        let pat = self.escape_pattern(r.txt)
+        call s:update_search(pat) | return | endif
+
+    "fallback to first region.txt or @/, if no active search
+    if !empty(s:v.search) | return
+    elseif len(s:R())     | call self.add(self.escape_pattern(s:R()[0].txt))
+    else                  | call self.get_slash_reg() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Search.get_slash_reg() dict
-    """Get pattern from current "/" register."
+    """Get pattern from current "/" register. Use backup register if empty."
     call s:update_search(self.get_pattern('/', 1))
+    if empty(s:v.search) | call s:update_search(s:v.oldreg[1]) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
