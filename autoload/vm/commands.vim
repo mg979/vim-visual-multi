@@ -1,4 +1,3 @@
-let s:motion = ''
 let s:X          = { -> g:VM.extend_mode }
 let s:B          = { -> g:VM.is_active && s:v.block_mode && g:VM.extend_mode }
 let s:is_r       = { -> g:VM.is_active && !empty(s:G.is_region_at_pos('.')) }
@@ -12,7 +11,11 @@ fun! vm#commands#init()
     let s:F       = s:V.Funcs
     let s:Search  = s:V.Search
     let s:Block   = s:V.Block
-    let s:R       = { -> s:V.Regions }
+    let s:R       = { -> s:V.Regions }    "all regions
+    let s:RS      = { -> s:G.regions() }  "current regions set
+    let s:Group   = { -> s:V.Groups[s:v.active_group] }
+
+    let s:v.motion = ''
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -139,6 +142,7 @@ fun! vm#commands#erase_regions(...)
 
     let s:V.Regions = []
     let s:V.Bytes = {}
+    let s:V.Groups = {}
     call clearmatches()
     let s:v.index = -1
     call s:V.Block.stop()
@@ -198,7 +202,7 @@ fun! vm#commands#regex_done()
     if visual
         call s:Search.get_slash_reg()
         let g:VM.selecting = 1 | let s:v.finding = 1
-        keepjumps normal! gvy
+        silent keepjumps normal! gvy
         return
 
     elseif s:X() | silent keepjumps normal! gny`]
@@ -351,15 +355,12 @@ fun! vm#commands#find_next(skip, nav)
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
 
     "write search pattern if not navigating and no search set
-    if s:X() && !a:nav && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
+    if s:X() && !a:nav && @/=='' | let s:v.motion = '' | call s:Search.rewrite(1) | endif
 
     call s:Search.validate()
 
-    "just navigate to next
-    if s:navigate(a:nav, 1) | return
-
-    elseif a:skip | call s:skip() | endif
-    "skip current match
+    if s:navigate(a:nav, 1) | return 0                    "just navigate to previous
+    elseif a:skip           | call s:skip() | endif       "skip current match
 
     return s:get_next()
 endfun
@@ -371,7 +372,7 @@ fun! vm#commands#find_prev(skip, nav)
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
 
     "write search pattern if not navigating and no search set
-    if s:X() && !a:nav && @/=='' | let s:motion = '' | call s:Search.rewrite(1) | endif
+    if s:X() && !a:nav && @/=='' | let s:v.motion = '' | call s:Search.rewrite(1) | endif
 
     call s:Search.validate()
 
@@ -380,11 +381,8 @@ fun! vm#commands#find_prev(skip, nav)
     if !empty(r) | let pos = [r.l, r.a]
     else         | let pos = getpos('.')[1:2] | endif
 
-    "just navigate to previous
-    if s:navigate(a:nav, 0) | return
-
-    elseif a:skip | call s:skip() | endif
-    "skip current match
+    if s:navigate(a:nav, 0) | return 0                    "just navigate to previous
+    elseif a:skip           | call s:skip() | endif       "skip current match
 
     "move to the beginning of the current match
     call cursor(pos)
@@ -412,7 +410,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#invert_direction()
+fun! vm#commands#invert_direction(...)
     """Invert direction and reselect region."""
     if s:v.auto | return | endif
 
@@ -427,11 +425,20 @@ fun! vm#commands#invert_direction()
         for r in s:R() | let r.k = r.a | let r.K = r.A | endfor
     endif
 
+    if !a:0 | return | endif
     call s:G.update_highlight()
     call s:G.select_region(s:v.index)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#split_lines()
+    call s:G.split_lines()
+    if g:VM_autoremove_empty_lines
+        call s:G.remove_empty_lines()
+    endif
+    call s:G.update_and_select_region()
+endfun
 
 fun! vm#commands#remove_empty_lines()
     call s:G.remove_empty_lines()
@@ -505,14 +512,14 @@ let s:sublime = { -> !g:VM.is_active && g:VM_sublime_mappings }
 
 fun! vm#commands#motion(motion, count, select, this)
 
-    let s:motion = a:count>1? a:count.a:motion : a:motion
-
-    "-----------------------------------------------------------------------
-
     "start if sublime mappings are set;
     "reselect region on motion unless a:this (eg M-<> adds a new region)
     if s:sublime()          | call s:init(0, 1, 1)     | call s:G.new_cursor()
     elseif s:F.no_regions() || ( a:this && !s:is_r() ) | call s:G.new_cursor() | endif
+
+    "-----------------------------------------------------------------------
+
+    let s:v.motion = a:count>1? a:count.a:motion : a:motion
 
     "-----------------------------------------------------------------------
 
@@ -531,7 +538,7 @@ endfun
 
 fun! vm#commands#remap_motion(motion)
     if s:F.no_regions() | return | endif
-    let s:motion = a:motion
+    let s:v.motion = a:motion
     call s:call_motion(a:this)
 endfun
 
@@ -542,7 +549,7 @@ fun! vm#commands#end_back(fast, this, ...)
     if s:F.no_regions() | return                   | endif
     if a:0 && !s:X()    | let g:VM.extend_mode = 1 | endif
 
-    let s:motion = a:fast? 'BBW' : 'bbbe'
+    let s:v.motion = a:fast? 'BBW' : 'bbbe'
     call s:call_motion(a:this)
 endfun
 
@@ -552,7 +559,7 @@ fun! vm#commands#merge_to_beol(eol, this)
     if s:F.no_regions() | return                  | endif
     if s:X()            | call s:G.change_mode(1) | endif
 
-    let s:motion = a:eol? "\<End>" : '0'
+    let s:v.motion = a:eol? "\<End>" : '0'
     let s:v.merge = 1
     call s:call_motion(a:this)
 endfun
@@ -563,9 +570,9 @@ fun! vm#commands#find_motion(motion, char, this, ...)
     if s:F.no_regions() | return | endif
 
     if a:char != ''
-        let s:motion = a:motion.a:char
+        let s:v.motion = a:motion.a:char
     else
-        let s:motion = a:motion.nr2char(getchar())
+        let s:v.motion = a:motion.nr2char(getchar())
     endif
 
     call s:call_motion(a:this)
@@ -580,28 +587,28 @@ fun! vm#commands#shrink_or_enlarge(shrink, this)
 
     let dir = s:v.direction
 
-    let s:motion = a:shrink? (dir? 'h':'l') : (dir? 'l':'h')
+    let s:v.motion = a:shrink? (dir? 'h':'l') : (dir? 'l':'h')
     call s:call_motion(a:this)
 
     call vm#commands#invert_direction()
 
-    let s:motion = a:shrink? (dir? 'l':'h') : (dir? 'h':'l')
+    let s:v.motion = a:shrink? (dir? 'l':'h') : (dir? 'h':'l')
     call s:call_motion(a:this)
 
-    if s:v.direction != dir | call vm#commands#invert_direction() | endif
+    if s:v.direction != dir | call vm#commands#invert_direction(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Motion event
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:only_this        = {   -> s:v.only_this || s:v.only_this_always               }
-let s:can_from_back    = {   -> s:X() && s:motion == '$' && !s:v.direction          }
-let s:always_from_back = {   -> s:X() && index(['^', '0', 'F', 'T'], s:motion) >= 0 }
-let s:symbol           = {   -> index(['^', '0', '%', '$'],          s:motion) >= 0 }
-let s:horizontal       = {   -> index(['h', 'l'],                    s:motion) >= 0 }
-let s:vertical         = {   -> index(['j', 'k'],                    s:motion) >= 0 }
-let s:simple           = { m -> index(split('hlwebWEB', '\zs'),      m)        >= 0 }
+let s:only_this        = {   -> s:v.only_this || s:v.only_this_always                 }
+let s:can_from_back    = {   -> s:X() && s:v.motion == '$' && !s:v.direction          }
+let s:always_from_back = {   -> s:X() && index(['^', '0', 'F', 'T'], s:v.motion) >= 0 }
+let s:symbol           = {   -> index(['^', '0', '%', '$'],          s:v.motion) >= 0 }
+let s:horizontal       = {   -> index(['h', 'l'],                    s:v.motion) >= 0 }
+let s:vertical         = {   -> index(['j', 'k'],                    s:v.motion) >= 0 }
+let s:simple           = { m -> index(split('hlwebWEB', '\zs'),      m)        >= 0   }
 
 fun! s:call_motion(this)
     let s:v.moving = 1

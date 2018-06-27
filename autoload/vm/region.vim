@@ -70,6 +70,9 @@ fun! vm#region#new(cursor, ...)
         call s:G.update_indices()
     endif
 
+    if s:v.active_group
+        call add(s:V.Groups[s:v.active_group], R)
+    endif
     call s:G.update_cursor_highlight()
 
     return R
@@ -99,6 +102,7 @@ fun! s:Region.new(cursor, ...)
     let R.index   = len(s:R())
     let R.dir     = s:v.direction
     let R.id      = s:v.ID + 1
+    let R.group   = s:v.active_group
 
     let R.A_      = { -> line2byte(R.l) + R.a }
     let R.B_      = { -> line2byte(R.L) + R.b }
@@ -161,16 +165,39 @@ fun! s:Region.bytes(...) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Remove region
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.remove() dict
+    """Remove a region and its id, then update indices."""
     call self.remove_highlight()
-    let R = remove(s:R(), self.index)
+    call remove(s:R(), self.index)
     call remove(s:v.IDs_list, index(s:v.IDs_list, self.id))
 
     if len(s:R()) | call s:G.update_indices()
     else          | let s:v.index = -1
     endif
-    return R
+    return self
+endfun
+
+fun! s:Region.clear(...) dict
+    """Called if it's necessary to clear the byte map as well."""
+    call self.remove_from_byte_map(a:0)
+    return self.remove()
+endfun
+
+fun! s:Region.remove_from_byte_map(all) dict
+    """Remove a region from the bytes map."""
+    if !s:X() | return | endif
+
+    if a:all
+        for b in range(self.A, self.B) | call remove(s:V.Bytes, b) | endfor
+    else
+        for b in range(self.A, self.B)
+            if s:V.Bytes[b] > 1 | let s:V.Bytes[b] -= 1
+            else                | call remove(s:V.Bytes, b) | endif
+        endfor
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -201,8 +228,8 @@ let s:vertical  = { -> index(['j', 'k'],                                    s:mo
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.move(motion) dict
-    let s:motion = a:motion
+fun! s:Region.move(...) dict
+    let s:motion = a:0? a:1 : s:v.motion
 
     "set vertical column if motion is j or k
     if s:vertical() && !s:v.vertical_col | let s:v.vertical_col = col('.')

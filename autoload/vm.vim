@@ -13,7 +13,7 @@ fun! vm#init_buffer(empty, ...)
     if exists('b:VM_Selection') && !empty(b:VM_Selection) | return s:V | endif
 
     let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Funcs':  {}, 'Block': {}, 'Bytes': '',
-                        \ 'Edit': {}, 'Global':  {}, 'Search': {}, 'Maps':  {},
+                \ 'Edit': {}, 'Global':  {}, 'Search': {}, 'Maps':  {}, 'Groups': {}
                         \}
 
     let s:V            = b:VM_Selection
@@ -53,6 +53,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.search           = []
     let s:v.IDs_list         = []
     let s:v.ID               = 0
+    let s:v.active_group     = 0
     let s:v.index            = -1
     let s:v.direction        = 1
     let s:v.nav_direction    = 1

@@ -12,6 +12,9 @@ fun! vm#global#init()
     let s:X       = { -> g:VM.extend_mode }
     let s:R       = { -> s:V.Regions      }
     let s:B       = { -> s:v.block_mode && g:VM.extend_mode }
+    let s:Group   = { -> s:V.Groups[s:v.active_group] }
+
+    let s:only_this = { -> s:v.only_this || s:v.only_this_always }
 
     "make a bytes map of the file, where 0 is unselected, 1 is selected
     call s:Global.reset_byte_map(0)
@@ -61,6 +64,15 @@ fun! s:Global.new_cursor(...) dict
 
     let s:v.matches = getmatches()
     return R
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.regions(...) dict
+    """Return current working set of regions."""
+    if s:only_this()        | return [s:V.Regions[s:v.index]]
+    elseif s:v.active_group | return s:Group()
+    else                    | return s:V.Regions | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -207,8 +219,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.is_region_at_pos(pos) dict
-    """Find if the cursor is on a highlighted region.
-    "Return an empty dict otherwise."""
+    """Return the region under the cursor, or an empty dict if not found."""
 
     let pos = s:F.pos2byte(a:pos)
     if s:X() && !has_key(s:V.Bytes, pos) | return {} | endif
@@ -241,7 +252,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.reset_byte_map(update) dict
-    let s:V.Bytes = {}
+    """Reset byte map for region, group, or all regions."""
+
+    if s:only_this()        | call s:R()[s:v.index].remove_from_byte_map(0)
+    elseif s:v.active_group | for r in s:Group() | call r.remove_from_byte_map(0) | endfor
+    else                    | let s:V.Bytes = {} | endif
 
     if a:update
         for r in s:R() | call r.update_bytes_map() | endfor
@@ -366,8 +381,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.split_lines() dict
-    """When switching off multiline, split selections, so that each is
-    "contained in a single line."""
+    """Split regions, so that each is contained in a single line."""
 
     let prev = s:v.index
 
@@ -388,10 +402,6 @@ fun! s:Global.split_lines() dict
             let s:v.matches = getmatches()
         endfor
     endfor
-
-    if g:VM_autoremove_empty_lines | call vm#commands#remove_empty_lines() | endif
-    call self.update_highlight()
-    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -424,7 +434,13 @@ fun! s:Global.merge_regions(...) dict
     if !len(s:R()) | return                      | endif
     if !s:X()      | return self.merge_cursors() | endif
 
-    let By = sort(map(keys(s:V.Bytes), 'str2nr(v:val)'), 'n')
+    return self.rebuild_from_map()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.rebuild_from_map(...) dict
+    let By = sort(map(keys(a:0? a:1 : s:V.Bytes), 'str2nr(v:val)'), 'n')
     let pos = getpos('.')[1:2]       | let s:v.eco = 1
     let A = By[0]                    | let B = By[0]
 
@@ -439,5 +455,3 @@ fun! s:Global.merge_regions(...) dict
     call self.eco_off()
     return self.update_and_select_region(pos)
 endfun
-
-

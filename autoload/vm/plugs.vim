@@ -67,7 +67,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Reset)                   :call vm#reset()<cr><esc>
     nnoremap        <Plug>(VM-Undo)                    u:call b:VM_Selection.Global.update_regions()<cr>
 
-    nnoremap        <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction()<cr>
+    nnoremap        <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction(1)<cr>
     nnoremap        <Plug>(VM-Goto-Next)               :call vm#commands#find_next(0, 1)<cr>
     nnoremap        <Plug>(VM-Goto-Prev)               :call vm#commands#find_prev(0, 1)<cr>
     nnoremap        <Plug>(VM-Find-Next)               :call vm#commands#find_next(0, 0)<cr>
