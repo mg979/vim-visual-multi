@@ -163,13 +163,30 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_and_select_region(...) dict
-    """Update regions and select region at cursor position."""
+    """Update regions and select region at position, index or id."""
     if s:v.merge | let s:v.merge = 0 | return self.merge_regions() | endif
 
+    call self.reset_byte_map(0)
     call self.update_regions()
+    call self.update_indices()
 
-    if !g:VM_reselect_first_always | let R = self.select_region_at_pos(a:0? a:1 : '.')
-    else                           | let R = self.select_region(0) | endif
+    "a region is going to be reselected:
+    "   !a:0            ->      position '.'
+    "   a:0 == 1        ->      position a:1
+    "   a:0 > 1
+    "           a:1     ->      index == a:2
+    "           !a:1    ->      index of region with id == a:2
+
+    if !g:VM_reselect_first_always
+        if a:0 > 1
+            if a:1 | let R = self.select_region(a:2)
+            else   | let R = self.select_region(s:F.region_with_id(a:2).index)
+            endif
+        else
+            let R = self.select_region_at_pos(a:0? a:1 : '.')
+        endif
+    else
+        let R = self.select_region(0) | endif
 
     call s:F.restore_reg()
     call s:F.count_msg(0)
@@ -224,7 +241,7 @@ fun! s:Global.is_region_at_pos(pos) dict
     let pos = s:F.pos2byte(a:pos)
     if s:X() && !has_key(s:V.Bytes, pos) | return {} | endif
 
-    for r in s:R()
+    for r in (s:v.active_group? s:Group() : s:R())
         if pos >= r.A && pos <= r.B
             return r | endif | endfor
     return {}
@@ -281,7 +298,7 @@ fun! s:Global.remove_last_region(...) dict
 
     for r in s:R()
         if r.id == ( a:0? a:1 : s:v.IDs_list[-1] )
-            call r.remove()
+            call r.clear()
             break
         endif
     endfor

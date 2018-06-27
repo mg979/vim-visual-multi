@@ -45,7 +45,7 @@ fun! vm#maps#permanent()
         nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
         nmap <silent> <C-d>       <Plug>(VM-Find-Under)
         xmap <silent> <C-d>       <Plug>(VM-Find-Subword-Under)
-        xmap <silent> <M-v>       <Plug>(VM-Convert-Visual)
+        xmap <silent> <M-a>       <Plug>(VM-Add-Visual)
     endif
 
     if g:VM_default_mappings
@@ -83,7 +83,7 @@ let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+xvVnN@.<>', '\zs'), '"z".v:
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = ['t', '"', 'e', '<F1>', '<F12>']
-let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a', 's', 'z' ]
+let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a', 'z', 'r' ]
 let s:leader   = split('ydpP', '\zs')
 let s:leader2  = []
 let s:fkeys    = ['2']
@@ -190,7 +190,7 @@ fun! s:Maps.start() dict
 
     "search
     nmap     <silent> <nowait> <buffer> \s         <Plug>(VM-Search-Menu)
-    nmap     <silent> <nowait> <buffer> <M-s>      <Plug>(VM-Rewrite-Last-Search)
+    nmap     <silent> <nowait> <buffer> <M-r>      <Plug>(VM-Rewrite-Last-Search)
 
     "utility
     nmap     <silent> <nowait> <buffer> <C-x><F1>  <Plug>(VM-Show-Help)
@@ -211,6 +211,7 @@ fun! s:Maps.start() dict
 
     nmap     <silent> <nowait> <buffer> <M-j>       <Plug>(VM-Add-Cursor-Down)
     nmap     <silent> <nowait> <buffer> <M-k>       <Plug>(VM-Add-Cursor-Up)
+    xmap     <silent> <nowait> <buffer> <M-s>       <Plug>(VM-Subtract-Visual)
 
     "select/find operators
     nmap     <silent>          <buffer> s           <Plug>(VM-Select-All-Operator)
@@ -392,6 +393,7 @@ fun! s:Maps.end() dict
 
     xunmap <buffer> *
     xunmap <buffer> #
+    xunmap <buffer> <M-s>
 
     nunmap <buffer> <S-End>
     nunmap <buffer> <S-Home>
@@ -489,7 +491,7 @@ fun! s:Maps.default_stop() dict
 
         nunmap <M-A>
         xunmap <M-A>
-        xunmap <M-v>
+        xunmap <M-a>
         xunmap <M-j>
         nunmap <M-j>
         nunmap <M-k>

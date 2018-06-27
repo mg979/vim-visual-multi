@@ -340,7 +340,7 @@ endfun
 fun! s:skip()
     let r = s:G.is_region_at_pos('.')
     if empty(r) | call s:navigate(1, s:v.nav_direction)
-    else        | call r.remove()
+    else        | call r.clear()
     endif
 endfun
 
@@ -447,45 +447,14 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#convert_visual_selection()
+fun! vm#commands#from_visual_selection(subtract)
     let mode = visualmode()
     call s:check_extend_default(1)
     let s:v.silence = 1
 
-    if mode ==# 'v'                     "characterwise
-        keepjumps normal! `<y`>`]
-        call s:G.new_region()
-
-    elseif mode ==# 'V'                 "linewise
-        keepjumps normal! '<y'>`]
-        call s:G.new_region()
-        call s:G.split_lines()
-        if !g:VM_autoremove_empty_lines | call s:G.remove_empty_lines() | endif
-
-    else                                "block
-        let start = getpos('.')[1:2]
-        keepjumps normal! `>
-        let end = getpos('.')[1:2]
-        let w = start[1] - end[1]
-
-        "create cursors downwards until end of block
-        call cursor([start[0], start[1]])
-        call s:G.new_cursor()
-        while getpos('.')[1] < end[0]
-            call vm#commands#add_cursor_down(0, 1)
-        endwhile
-
-        "change to cursor mode if width=1, else turn on block mode
-        if !w
-            call s:G.change_mode(1)
-        else
-            exe "normal ".w."l"
-            call s:F.toggle_option('block_mode', 0)
-        endif
+    if a:subtract | call vm#visual#subtract(mode)
+    else          | call vm#visual#add(mode)
     endif
-
-    let s:v.silence = 0
-    call s:G.update_and_select_region()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

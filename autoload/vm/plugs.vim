@@ -24,7 +24,8 @@ fun! vm#plugs#init()
 
     nnoremap        <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
     xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(1, 0, 0)<cr>`]
-    xnoremap        <Plug>(VM-Convert-Visual)          :<c-u>call vm#commands#convert_visual_selection()<cr>
+    xnoremap        <Plug>(VM-Add-Visual)              :<c-u>call vm#commands#from_visual_selection(0)<cr>
+    xnoremap        <Plug>(VM-Subtract-Visual)         :<c-u>call vm#commands#from_visual_selection(1)<cr>
     nnoremap        <Plug>(VM-Remove-Empty-Lines)      :<c-u>call vm#commands#remove_empty_lines()<cr>
 
     nnoremap        <Plug>(VM-Find-Under)              :call vm#commands#find_under(0, 1, 0, 1)<cr>
