@@ -259,9 +259,9 @@ endfun
 
 fun! s:Global.remove_empty_lines()
     """Remove regions that consist of the endline marker only."""
-    for r in s:R()
+    for r in self.regions()
         if r.a == 1 && r.A == r.B && col([r.l, '$']) == 1
-            call r.remove()
+            call r.clear()
         endif
     endfor
 endfun
@@ -276,7 +276,7 @@ fun! s:Global.reset_byte_map(update) dict
     else                    | let s:V.Bytes = {} | endif
 
     if a:update
-        for r in s:R() | call r.update_bytes_map() | endfor
+        for r in self.regions() | call r.update_bytes_map() | endfor
     endif
 endfun
 
@@ -403,7 +403,7 @@ fun! s:Global.split_lines() dict
     let prev = s:v.index
 
     "make a list of regions to split
-    let lts = filter(copy(s:R()), 'v:val.h')
+    let lts = filter(copy(self.regions()), 'v:val.h')
 
     for r in lts
         let R = s:R()[r.index].remove()

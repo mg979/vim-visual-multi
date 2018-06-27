@@ -414,15 +414,15 @@ fun! vm#commands#invert_direction(...)
     """Invert direction and reselect region."""
     if s:v.auto | return | endif
 
-    for r in s:R() | let r.dir = !r.dir | endfor
+    for r in s:RS() | let r.dir = !r.dir | endfor
 
     "invert anchor
     if s:v.direction
         let s:v.direction = 0
-        for r in s:R() | let r.k = r.b | let r.K = r.B | endfor
+        for r in s:RS() | let r.k = r.b | let r.K = r.B | endfor
     else
         let s:v.direction = 1
-        for r in s:R() | let r.k = r.a | let r.K = r.A | endfor
+        for r in s:RS() | let r.k = r.a | let r.K = r.A | endfor
     endif
 
     if !a:0 | return | endif
@@ -596,10 +596,7 @@ fun! vm#commands#move(...)
 
     call s:before_move()
 
-    if s:only_this()
-        call R.move(s:motion) | let s:v.only_this = 0
-    else
-        for r in s:R()        | call r.move(s:motion) | endfor | endif
+    for r in s:RS() | call r.move() | endfor
 
     "update variables, facing direction, highlighting
     call s:after_move(R)
@@ -660,7 +657,7 @@ fun! vm#commands#align(count, regex)
             let c = remove(C, 0)
 
             "remove region if a match isn't found, otherwise it will be aligned
-            for r in s:R()
+            for r in s:RS()
                 call cursor(r.l, r.a)
                 if !search(c, s, r.l) | call r.remove() | continue | endif
                 call r.update_cursor([r.l, getpos('.')[2]])
@@ -679,7 +676,7 @@ fun! vm#commands#align(count, regex)
     if empty(rx) | echohl WarningMsg | echon ' ...Aborted' | return  | endif
 
     set nohlsearch
-    for r in s:R()
+    for r in s:RS()
         call cursor(r.l, r.a)
         if !search(rx, 'czp', r.l) | call r.remove() | continue | endif
         call r.update_cursor([r.l, getpos('.')[2]])

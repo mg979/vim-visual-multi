@@ -1,5 +1,6 @@
 ### [Wiki](https://github.com/mg979/vim-visual-multi/wiki)
-Work in progress. Most functionalities shold work as expected and described in the documentation. Testers are welcome.
+Work in progress. Most functionalities shold work as expected and described in the documentation.  
+Testers are welcome. Please consider that the wiki reflects more the feature of the test branch, rather than master. If you use master branch and something doesn't work as expected, please try the test branch.
 
 -------
 Some random pics:

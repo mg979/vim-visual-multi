@@ -24,7 +24,7 @@ fun! vm#visual#add(mode)
 
     call s:remove_group(0)
     call s:G.update_and_select_region(0, s:v.IDs_list[-1])
-    call s:F.toggle_option('block_mode', 0)
+    if w | call s:F.toggle_option('block_mode', 0) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
