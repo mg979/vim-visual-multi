@@ -57,6 +57,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Remove-Search)           :call b:VM_Selection.Search.remove(0)<cr>
     nnoremap        <Plug>(VM-Remove-Search-Regions)   :call b:VM_Selection.Search.remove(1)<cr>
     nnoremap        <Plug>(VM-Search-Menu)             :call b:VM_Selection.Search.menu()<cr>
+    nnoremap        <Plug>(VM-Case-Conversion-Menu)    :call b:VM_Selection.Case.menu()<cr>
 
     nnoremap        <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex(1)<cr>:call <SID>Mode()<cr>/
     xnoremap        <Plug>(VM-Start-Visual-Search)     :call vm#commands#find_by_regex(2)<cr>:call <SID>Mode()<cr>/

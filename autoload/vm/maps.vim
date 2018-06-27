@@ -84,7 +84,7 @@ let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = ['t', '"', 'e', '<F1>', '<F12>']
 let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a', 'z', 'r' ]
-let s:leader   = split('ydpP', '\zs')
+let s:leader   = split('ydpPsc', '\zs')
 let s:leader2  = []
 let s:fkeys    = ['2']
 let s:sfkeys   = ['2']
@@ -187,6 +187,9 @@ fun! s:Maps.start() dict
 
     nmap     <silent> <nowait> <buffer> <S-End>    <Plug>(VM-Merge-To-Eol)
     nmap     <silent> <nowait> <buffer> <S-Home>   <Plug>(VM-Merge-To-Bol)
+
+    "case conversion
+    nmap     <silent> <nowait> <buffer> \c         <Plug>(VM-Case-Conversion-Menu)
 
     "search
     nmap     <silent> <nowait> <buffer> \s         <Plug>(VM-Search-Menu)
@@ -389,7 +392,6 @@ fun! s:Maps.end() dict
     nunmap <buffer> <Tab>
     nunmap <buffer> <BS>
     nunmap <buffer> <CR>
-    nunmap <buffer> \s
 
     xunmap <buffer> *
     xunmap <buffer> #

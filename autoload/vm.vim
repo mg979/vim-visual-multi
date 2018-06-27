@@ -77,6 +77,7 @@ fun! vm#init_buffer(empty, ...)
     let s:V.Edit       = vm#edit#init()
     let s:V.Insert     = vm#insert#init()
     let s:V.Block      = vm#block#init()
+    let s:V.Case       = vm#special#case#init()
 
     call s:V.Maps.mappings(1)
     call vm#region#init()
