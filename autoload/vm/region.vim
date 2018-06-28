@@ -67,7 +67,7 @@ fun! vm#region#new(cursor, ...)
             let i += 1
         endfor
         let s:v.index = i
-        call s:G.update_indices()
+        call s:G.update_indices(i)
     endif
 
     if s:v.active_group

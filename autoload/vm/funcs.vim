@@ -125,6 +125,26 @@ fun! s:Funcs.region_with_id(id) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.winline(restore) dict
+    """Ensure viewport isn't scrolled."
+    if !a:restore
+        if !s:v.winline | let s:v.winline = winline() | endif
+        return | endif
+
+    if s:v.winline
+        let lines = winline() - s:v.winline
+        if lines > 0
+            exe "normal! ".lines."\<C-e>"
+        elseif lines < 0
+            let lines = lines * -1
+            exe "normal! ".lines."\<C-y>"
+        endif
+        let s:v.winline = 0
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Messages
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

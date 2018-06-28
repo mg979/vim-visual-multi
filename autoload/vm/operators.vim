@@ -132,13 +132,13 @@ fun! vm#operators#find(start, visual, ...)
 
     while 1
         if !search(join(s:v.search, '\|'), 'znp', endline) | break | endif
-        let R = vm#commands#find_next(0, 0)
+        let R = vm#commands#find_next(0, 0, 1)
         if empty(R)
             if s:v.index >= 0 | let s:v.index -= 1 | endif
             break | endif
     endwhile
 
-    call s:G.update_and_select_region()
+    call s:G.fast_update_and_select_region()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

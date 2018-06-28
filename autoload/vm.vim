@@ -71,6 +71,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.merge            = 0
     let s:v.insert           = 0
     let s:v.whole_word       = 0
+    let s:v.winline          = 0
 
     let s:V.Global     = vm#global#init()
     let s:V.Search     = vm#search#init()

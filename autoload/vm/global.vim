@@ -164,6 +164,7 @@ endfun
 
 fun! s:Global.update_and_select_region(...) dict
     """Update regions and select region at position, index or id."""
+    call s:F.winline(0)
     if s:v.merge | let s:v.merge = 0 | return self.merge_regions() | endif
 
     call self.reset_byte_map(0)
@@ -195,6 +196,17 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Global.fast_update_and_select_region(...) dict
+    "Faster update, that doesn't fully reupdate regions.
+    "Use when regions have been just created and there's no need to reupdate them.
+    call self.reset_byte_map(1)
+    call self.update_highlight()
+    call self.select_region_at_pos(a:0? a:1 : '.')
+    call s:F.count_msg(0)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Global.collapse_regions() dict
     """Collapse regions to cursors and turn off extend mode."""
 
@@ -216,6 +228,7 @@ fun! s:Global.select_region(i) dict
 
     let R = s:R()[i]
     call cursor(R.cur_ln(), R.cur_col())
+    call s:F.winline(1)
     let s:v.index = R.index
     return R
 endfun
@@ -311,9 +324,16 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.update_indices() dict
+fun! s:Global.update_indices(...) dict
     """Adjust region indices."""
     if s:v.eco | return | endif
+
+    if a:0
+        let i = a:1
+        for r in s:R()[i:]
+            let r.index = i
+            let i += 1
+        endfor | return | endif
 
     let i = 0
     for r in s:R()
@@ -451,15 +471,18 @@ fun! s:Global.merge_regions(...) dict
     if !len(s:R()) | return                      | endif
     if !s:X()      | return self.merge_cursors() | endif
 
-    return self.rebuild_from_map()
+    let s:v.eco = 1
+    let pos = getpos('.')[1:2]
+    call self.rebuild_from_map()
+    call self.eco_off()
+    call self.fast_update_and_select_region(pos)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.rebuild_from_map(...) dict
     let By = sort(map(keys(a:0? a:1 : s:V.Bytes), 'str2nr(v:val)'), 'n')
-    let pos = getpos('.')[1:2]       | let s:v.eco = 1
-    let A = By[0]                    | let B = By[0]
+    let A = By[0] | let B = By[0]
 
     call vm#commands#erase_regions()
 
@@ -468,7 +491,4 @@ fun! s:Global.rebuild_from_map(...) dict
         else        | call vm#region#new(0, A, B) | let A = i | let B = i | endif
     endfor
     call vm#region#new(0, A, B)
-
-    call self.eco_off()
-    return self.update_and_select_region(pos)
 endfun

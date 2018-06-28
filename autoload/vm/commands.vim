@@ -273,7 +273,8 @@ endfun
 fun! vm#commands#find_all(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
 
-    let storepos = getpos('.')
+    let pos = getpos('.')[1:2]
+    let s:v.winline = winline()
     let s:v.eco = 1
     let seen = []
 
@@ -284,26 +285,22 @@ fun! vm#commands#find_all(visual, whole, inclusive)
 
     while index(seen, R.id) == -1
         call add(seen, R.id)
-        let R = vm#commands#find_next(0, 0)
+        let R = vm#commands#find_next(0, 0, 1)
     endwhile
 
-    call setpos('.', storepos)
     call s:G.eco_off()
-    call s:G.reset_byte_map(1)
-    call s:G.update_highlight()
-    call s:G.select_region_at_pos('.')
-    call s:F.count_msg(1)
+    call s:G.fast_update_and_select_region(pos)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find next/previous
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:get_next()
+fun! s:get_next(...)
     if s:X()
         silent keepjumps normal! ngny`]
         let R = s:G.new_region()
-        call s:F.count_msg(1)
+        if !a:0 | call s:F.count_msg(1) | endif
     else
         silent keepjumps normal! ngny`[
         let R = vm#commands#add_cursor_at_word(0, 0)
@@ -350,7 +347,9 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_next(skip, nav)
+fun! vm#commands#find_next(skip, nav, ...)
+    if a:0 | return s:get_next(1) | endif       "multiple calls: shortcut and no message
+
     if ( a:nav || a:skip ) && s:F.no_regions()                          | return | endif
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
 
@@ -494,6 +493,7 @@ fun! vm#commands#motion(motion, count, select, this)
 
     if s:symbol()          | let s:v.merge = 1          | endif
     if a:select && !s:X()  | let g:VM.extend_mode = 1   | endif
+    call s:F.winline(0)
 
     if a:select && !s:v.multiline && s:vertical()
         call s:F.toggle_option('multiline') | endif
