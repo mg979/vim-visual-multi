@@ -147,12 +147,14 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.check_pattern() dict
+fun! s:Search.check_pattern(...) dict
     """Update the search patterns if the active search isn't listed."""
-    let current = split(@/, '\\|')
+    let current = a:0? [a:1] : split(@/, '\\|')
     for p in current
-        if index(s:v.search, p) == -1 | call self.get_slash_reg() | break | endif
+        if index(s:v.search, p) >= 0 | return | endif
     endfor
+    if a:0 | call self.get()
+    else   | call self.get_slash_reg() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
