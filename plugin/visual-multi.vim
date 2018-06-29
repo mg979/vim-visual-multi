@@ -81,3 +81,17 @@ augroup plugin-visual-multi-start
         au CursorHold   * call vm#operators#after_yank()
     endif
 augroup END
+
+if !has('python3') | finish | endif
+
+let s:root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+
+python3 << EOF
+import sys
+from os.path import normpath, join
+import vim
+root_dir = vim.eval('s:root_dir')
+python_root_dir = normpath(join(root_dir, '..', 'python'))
+sys.path.insert(0, python_root_dir)
+import vm
+EOF

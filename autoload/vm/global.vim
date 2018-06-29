@@ -492,3 +492,12 @@ fun! s:Global.rebuild_from_map(...) dict
     endfor
     call vm#region#new(0, A, B)
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" python section (functions here will overwrite previous ones)
+
+if !has('python3') | finish | endif
+
+fun! s:Global.rebuild_from_map(...) dict
+    python3 vm.merge_regions()
+endfun
