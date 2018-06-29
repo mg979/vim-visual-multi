@@ -201,8 +201,9 @@ fun! s:Global.fast_update_and_select_region(...) dict
     "Use when regions have been just created and there's no need to reupdate them.
     call self.reset_byte_map(1)
     call self.update_highlight()
-    call self.select_region_at_pos(a:0? a:1 : '.')
+    let R = self.select_region_at_pos(a:0? a:1 : '.')
     call s:F.count_msg(0)
+    return R
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -475,7 +476,7 @@ fun! s:Global.merge_regions(...) dict
     let pos = getpos('.')[1:2]
     call self.rebuild_from_map()
     call self.eco_off()
-    call self.fast_update_and_select_region(pos)
+    return self.fast_update_and_select_region(pos)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
