@@ -189,10 +189,10 @@ fun! s:Maps.start() dict
     nmap     <silent> <nowait> <buffer> <S-Home>   <Plug>(VM-Merge-To-Bol)
 
     "case conversion
-    nmap     <silent> <nowait> <buffer> \c         <Plug>(VM-Case-Conversion-Menu)
+    nmap     <silent> <nowait> <buffer> <leader>c  <Plug>(VM-Case-Conversion-Menu)
 
     "search
-    nmap     <silent> <nowait> <buffer> \s         <Plug>(VM-Search-Menu)
+    nmap     <silent> <nowait> <buffer> <leader>s  <Plug>(VM-Search-Menu)
     nmap     <silent> <nowait> <buffer> <M-r>      <Plug>(VM-Rewrite-Last-Search)
 
     "utility
