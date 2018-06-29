@@ -240,9 +240,10 @@ fun! s:yank(inclusive)
     endif
 endfun
 
-fun! s:check_overlap(R)
-    if s:G.overlapping_regions(a:R) | return s:G.merge_regions() | endif
-    return a:R
+fun! s:check_overlap(R, ...)
+    "if a:1 is given, just check without merging
+    if s:G.overlapping_regions(a:R) | return a:0? 1 : s:G.merge_regions() | endif
+    return a:0? 0 : a:R
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -309,11 +310,23 @@ endfun
 " Find next/previous
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:get_next(...)
+fun! s:get_next_all()
+    "variant for multiple searches (find_all, find_op, ...)
+    silent keepjumps normal! ngny`]
+    let R = s:G.new_region()
+    if s:check_overlap(R, 1)
+        let s:v.find_all_overlap = 1
+    endif
+    let s:v.nav_direction = 1
+    return R
+endfun
+
+fun! s:get_next()
+    "variant for single search (find_next)
     if s:X()
         silent keepjumps normal! ngny`]
         let R = s:G.new_region()
-        if !a:0 | call s:F.count_msg(1) | endif
+        call s:F.count_msg(1)
     else
         silent keepjumps normal! ngny`[
         let R = vm#commands#add_cursor_at_word(0, 0)
@@ -361,7 +374,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav, ...)
-    if a:0 | return s:get_next(1) | endif       "multiple calls: shortcut and no message
+    if a:0 | return s:get_next_all() | endif       "multiple calls: shortcut and no message
 
     if ( a:nav || a:skip ) && s:F.no_regions()                          | return | endif
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif

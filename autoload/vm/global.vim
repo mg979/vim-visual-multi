@@ -199,6 +199,10 @@ endfun
 fun! s:Global.fast_update_and_select_region(...) dict
     "Faster update, that doesn't fully reupdate regions.
     "Use when regions have been just created and there's no need to reupdate them.
+    if s:v.find_all_overlap
+        let s:v.find_all_overlap = 0
+        return self.merge_regions() | endif
+
     call self.reset_byte_map(1)
     call self.update_highlight()
     let R = self.select_region_at_pos(a:0? a:1 : '.')
