@@ -28,7 +28,7 @@ fun! vm#plugs#init()
     xnoremap        <Plug>(VM-Subtract-Visual)         :<c-u>call vm#commands#from_visual_selection(1)<cr>
     nnoremap        <Plug>(VM-Remove-Empty-Lines)      :<c-u>call vm#commands#remove_empty_lines()<cr>
 
-    nnoremap        <Plug>(VM-Find-Under)              :call vm#commands#find_under(0, 1, 0, 1)<cr>
+    nnoremap        <Plug>(VM-Find-Under)              :call vm#commands#ctrld()<cr>
     xnoremap        <Plug>(VM-Find-Subword-Under)      y:call vm#commands#find_under(1, 0, 0, 1)<cr>`]
     nnoremap        <Plug>(VM-Find-I-Word)             :call vm#commands#find_under(0, 0, 0)<cr>
     nnoremap        <Plug>(VM-Find-A-Word)             :call vm#commands#find_under(0, 0, 1)<cr>

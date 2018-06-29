@@ -247,6 +247,18 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! vm#commands#ctrld()
+    call s:init(1, 0, 0)
+
+    if !s:X() && s:is_r()
+        normal siw
+    else
+        call vm#commands#find_under(0, 1, 0, 1)
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#commands#find_under(visual, whole, inclusive, ...)
     call s:init(a:whole, 0, 1)
 
