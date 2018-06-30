@@ -15,7 +15,7 @@ fun! vm#operators#init()
 endfun
 
 fun! s:init()
-    let g:VM.extend_mode = 1 | let g:VM.selecting = 1
+    let g:VM.extend_mode = 1
     if !g:VM.is_active       | call vm#init_buffer(0) | endif
 endfun
 
@@ -24,6 +24,7 @@ fun! vm#operators#select(all, count, ...)
     call s:init()
 
     if !a:all
+        let g:VM.selecting = 1
         if g:VM.oldupdate      | let &updatetime = 10   | endif
         silent! nunmap <buffer> y
         return
@@ -83,6 +84,7 @@ fun! s:select(cmd)
         call s:G.get_region()
     endfor
     call s:V.Edit.after_macro(0)
+    let s:v.silence = 0
 
     if !s:v.multiline
         for r in s:R()

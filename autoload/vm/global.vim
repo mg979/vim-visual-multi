@@ -199,6 +199,8 @@ endfun
 fun! s:Global.fast_update_and_select_region(...) dict
     "Faster update, that doesn't fully reupdate regions.
     "Use when regions have been just created and there's no need to reupdate them.
+    let s:v.silence = 0
+
     if s:v.find_all_overlap
         let s:v.find_all_overlap = 0
         return self.merge_regions() | endif
