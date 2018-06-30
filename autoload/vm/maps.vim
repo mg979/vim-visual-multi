@@ -82,7 +82,7 @@ let s:simple   = split('nNqQU*#o[]{}?/:uMSsm', '\zs')
 let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+xvVnN@.<>', '\zs'), '"z".v:val')
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
-let s:cx_maps  = ['t', '"', 'e', '<F1>', '<F12>']
+let s:cx_maps  = split('ie"lLp', '\zs') + ['<F1>', '<F12>', '<C-x>']
 let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a', 'z', 'r' ]
 let s:leader   = split('ydpPsc', '\zs')
 let s:leader2  = []
@@ -196,10 +196,14 @@ fun! s:Maps.start() dict
     nmap     <silent> <nowait> <buffer> <M-r>      <Plug>(VM-Rewrite-Last-Search)
 
     "utility
+    nmap     <silent>          <buffer> <C-x><C-x> <Plug>(VM-Tools-Menu)
     nmap     <silent> <nowait> <buffer> <C-x><F1>  <Plug>(VM-Show-Help)
-    nmap              <nowait> <buffer> <C-x>t     <Plug>(VM-Show-Regions-Text)
+    nmap              <nowait> <buffer> <C-x>i     <Plug>(VM-Show-Regions-Info)
     nmap              <nowait> <buffer> <C-x>"     <Plug>(VM-Show-Registers)
     nmap     <silent> <nowait> <buffer> <C-x>e     <Plug>(VM-Remove-Empty-Lines)
+    nmap     <silent> <nowait> <buffer> <C-x>p     <Plug>(VM-Filter-Regions)
+    nmap     <silent> <nowait> <buffer> <C-x>l     <Plug>(VM-Filter-Lines)
+    nmap     <silent> <nowait> <buffer> <C-x>L     <Plug>(VM-Filter-Lines-Strip)
     nmap     <silent> <nowait> <buffer> <c-x><F12> <Plug>(VM-Toggle-Debug)
 
     "ctrl

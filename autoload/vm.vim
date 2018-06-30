@@ -86,6 +86,7 @@ fun! vm#init_buffer(empty, ...)
     call vm#commands#init()
     call vm#operators#init()
     call vm#comp#init()
+    call vm#special#commands#init()
 
     call vm#augroup(0)
     call vm#au_cursor(0)

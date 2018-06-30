@@ -191,6 +191,55 @@ fun! s:Funcs.count_msg(force, ...) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Toggle options
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.toggle_option(option, ...) dict
+    if s:v.eco | return | endif
+
+    let s = "s:v.".a:option
+    exe "let" s "= !".s
+
+    if a:option == 'multiline'
+        if s:v.multiline
+            call s:V.Block.stop()
+        else
+            call vm#commands#split_lines() | endif
+
+    elseif a:option == 'block_mode'
+        if s:v.block_mode
+            if s:v.multiline
+                let s:v.multiline = 0
+                call vm#commands#split_lines() | endif
+            call s:V.Block.start()
+        else
+            call s:V.Block.stop() | endif
+
+    elseif a:option == 'whole_word'
+        if empty(s:v.search) | call self.msg('No search patterns.', 1) | return | endif
+        let s = s:v.search[0]
+        let wm = 'WarningMsg' | let L = 'Label'
+
+        if s:v.whole_word
+            if s[:1] != '\<' | let s:v.search[0] = '\<'.s.'\>' | endif
+            let pats = self.pad(string(s:v.search), 120)
+            call self.msg([
+                        \['Search ->'               , wm], ['    whole word  ', L],
+                        \['  ->  Current patterns: ', wm], [pats              , L]], 1)
+        else
+            if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
+            let pats = self.pad(string(s:v.search), 120)
+            call self.msg([
+                        \['Search ->'              , wm], ['  not whole word ', L],
+                        \[' ->  Current patterns: ', wm], [pats               , L]], 1)
+        endif
+        return
+    endif
+
+    if a:0 | redraw! | call self.count_msg(1) | endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Utility functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -255,54 +304,31 @@ fun! s:Funcs.external_funcs(maps, restore)
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Toggle options
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Funcs.toggle_option(option, ...) dict
-    if s:v.eco | return | endif
-
-    let s = "s:v.".a:option
-    exe "let" s "= !".s
-
-    if a:option == 'multiline'
-        if s:v.multiline
-            call s:V.Block.stop()
-        else
-            call vm#commands#split_lines() | endif
-
-    elseif a:option == 'block_mode'
-        if s:v.block_mode
-            if s:v.multiline
-                let s:v.multiline = 0
-                call vm#commands#split_lines() | endif
-            call s:V.Block.start()
-        else
-            call s:V.Block.stop() | endif
-
-    elseif a:option == 'whole_word'
-        if empty(s:v.search) | call self.msg('No search patterns.', 1) | return | endif
-        let s = s:v.search[0]
-        let wm = 'WarningMsg' | let L = 'Label'
-
-        if s:v.whole_word
-            if s[:1] != '\<' | let s:v.search[0] = '\<'.s.'\>' | endif
-            let pats = self.pad(string(s:v.search), 120)
-            call self.msg([
-                        \['Search ->'               , wm], ['    whole word  ', L],
-                        \['  ->  Current patterns: ', wm], [pats              , L]], 1)
-        else
-            if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
-            let pats = self.pad(string(s:v.search), 120)
-            call self.msg([
-                        \['Search ->'              , wm], ['  not whole word ', L],
-                        \[' ->  Current patterns: ', wm], [pats               , L]], 1)
-        endif
-        return
+fun! s:Funcs.tools_menu()
+    echohl WarningMsg | echo '"    - ' | echohl Type | echon "Show VM registers"                         | echohl None
+    echohl WarningMsg | echo "t    - " | echohl Type | echon "Show regions info"                         | echohl None
+    echohl WarningMsg | echo "p    - " | echohl Type | echon "Paste regions contents in a new buffer"    | echohl None
+    echohl WarningMsg | echo "l(L) - " | echohl Type | echon "Filter lines with regions (strip indent)"  | echohl None
+    echohl Directory  | echo "Enter an option: "                                                         | echohl None
+    let c = nr2char(getchar())
+    if c ==# '"'
+        redraw!
+        call self.show_registers()
+    elseif c ==# 'i'
+        redraw!
+        call self.regions_contents()
+    elseif c ==# 'p'
+        call feedkeys("\<cr>", 'n')
+        call vm#special#commands#filter_regions()
+    elseif c ==# 'l'
+        call feedkeys("\<cr>", 'n')
+        call vm#special#commands#filter_lines(0)
+    elseif c == 'L'
+        call feedkeys("\<cr>", 'n')
+        call vm#special#commands#filter_lines(1)
+    else
+        call feedkeys("\<cr>", 'n')
     endif
-
-    if a:0 | redraw! | call self.count_msg(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
