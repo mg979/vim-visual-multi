@@ -306,7 +306,7 @@ endfun
 
 fun! s:Funcs.tools_menu()
     echohl WarningMsg | echo '"    - ' | echohl Type | echon "Show VM registers"                         | echohl None
-    echohl WarningMsg | echo "t    - " | echohl Type | echon "Show regions info"                         | echohl None
+    echohl WarningMsg | echo "i    - " | echohl Type | echon "Show regions info"                         | echohl None
     echohl WarningMsg | echo "p    - " | echohl Type | echon "Paste regions contents in a new buffer"    | echohl None
     echohl WarningMsg | echo "l(L) - " | echohl Type | echon "Filter lines with regions (strip indent)"  | echohl None
     echohl Directory  | echo "Enter an option: "                                                         | echohl None

@@ -21,7 +21,6 @@ fun! vm#insert#init()
     let s:size    = {      -> line2byte(line('$') + 1) }
 
     let s:v.restart_insert = 0
-    let s:v.indentkeys = &indentkeys
     return s:Insert
 endfun
 
