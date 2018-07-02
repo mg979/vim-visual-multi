@@ -164,8 +164,8 @@ endfun
 
 fun! s:Global.update_and_select_region(...) dict
     """Update regions and select region at position, index or id."""
-    call s:F.winline(0)
-    if s:v.merge | let s:v.merge = 0 | return self.merge_regions() | endif
+    if s:v.merge
+        call s:F.winline(0) | let s:v.merge = 0 | return self.merge_regions() | endif
 
     call self.reset_byte_map(0)
     call self.update_regions()

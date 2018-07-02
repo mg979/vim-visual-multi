@@ -287,7 +287,7 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
 
     let pos = getpos('.')[1:2]
-    let s:v.winline = winline()
+    call s:F.winline(0)
     let s:v.eco = 1
     let seen = []
 
@@ -554,7 +554,7 @@ fun! vm#commands#merge_to_beol(eol, this)
     if s:F.no_regions() | return                  | endif
     if s:X()            | call s:G.change_mode(1) | endif
 
-    let s:v.motion = a:eol? "\<End>" : '0'
+    let s:v.motion = a:eol? "\<End>" : '^'
     let s:v.merge = 1
     call s:call_motion(a:this)
 endfun
