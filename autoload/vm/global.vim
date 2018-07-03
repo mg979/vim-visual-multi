@@ -196,9 +196,9 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.fast_update_and_select_region(...) dict
-    "Faster update, that doesn't fully reupdate regions.
-    "Use when regions have been just created and there's no need to reupdate them.
+fun! s:Global.update_map_and_select_region(...) dict
+    "Don't reupdate regions, only the bytes map.
+    "Use when regions have been just created and there's no need to update them.
     let s:v.silence = 0
 
     if s:v.find_all_overlap
@@ -482,7 +482,7 @@ fun! s:Global.merge_regions(...) dict
     let pos = getpos('.')[1:2]
     call self.rebuild_from_map()
     call self.eco_off()
-    return self.fast_update_and_select_region(pos)
+    return self.update_map_and_select_region(pos)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

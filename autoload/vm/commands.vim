@@ -303,7 +303,7 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     endwhile
 
     call s:G.eco_off()
-    call s:G.fast_update_and_select_region(pos)
+    call s:G.update_map_and_select_region(pos)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

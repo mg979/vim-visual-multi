@@ -123,7 +123,7 @@ fun! vm#operators#find(start, visual, ...)
         endif
 
         if g:VM.oldupdate      | let &updatetime = 10   | endif
-        let s:v.finding = 1
+        let s:v.finding = 1    | let g:VM.selecting = 1
         silent! nunmap <buffer> y
         return 'y'
     endif
@@ -141,7 +141,7 @@ fun! vm#operators#find(start, visual, ...)
             break | endif
     endwhile
 
-    call s:G.fast_update_and_select_region()
+    call s:G.update_map_and_select_region()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
