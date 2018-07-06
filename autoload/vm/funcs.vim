@@ -94,7 +94,16 @@ fun! s:Funcs.get_reg(...) dict
     return [r, getreg(r), getregtype(r)]
 endfun
 
+fun! s:Funcs.get_regs09() dict
+    let regs = []
+    for r in range(10)
+        call add(regs, [r, getreg(r), getregtype(r)])
+    endfor
+    return regs
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Funcs.set_reg(text) dict
     let r = s:v.def_reg
     call setreg(r, a:text, 'v')
@@ -110,8 +119,14 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.restore_regs() dict
-    let s = s:v.oldsearch
+    "default reg
     call self.restore_reg()
+
+    "regs 0-9
+    for r in s:v.oldregs09 | call setreg(r[0], r[1], r[2]) | endfor
+
+    "search reg
+    let s = s:v.oldsearch
     call setreg("/", s[0], s[1])
     let g:VM.registers['"'] = []
 endfun

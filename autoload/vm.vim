@@ -28,6 +28,7 @@ fun! vm#init_buffer(empty, ...)
     "init search
     let s:v.def_reg          = s:V.Funcs.default_reg()
     let s:v.oldreg           = s:V.Funcs.get_reg()
+    let s:v.oldregs09        = s:V.Funcs.get_regs09()
     let s:v.oldsearch        = [getreg("/"), getregtype("/")]
     let @/                   = a:empty? '' : @/
 
