@@ -333,8 +333,6 @@ endfun
 
 fun! s:Global.update_indices(...) dict
     """Adjust region indices."""
-    if s:v.eco | return | endif
-
     if a:0
         let i = a:1
         for r in s:R()[i:]
@@ -455,20 +453,19 @@ endfun
 fun! s:Global.merge_cursors()
     """Merge overlapping cursors."""
 
-    let cursors_pos = map(copy(s:R()), 'v:val.A')
-    let cursors_pos = map(cursors_pos, 'count(cursors_pos, v:val) == 1')
-    let cursors_ids = map(copy(s:R()), 'v:val.id')
+    let ids_to_remove = [] | let last_A = 0 | let pos = getpos('.')[1:2]
 
-    let storepos = getpos('.') | let s:v.eco = 1 | let i = 0
-
-    for c in cursors_pos
-        if !c | call s:F.region_with_id(cursors_ids[i]).remove() | endif
-        let i += 1
+    for r in s:R()
+        if r.A == last_A | call add(ids_to_remove, r.id) | endif
+        let last_A = r.A
     endfor
 
-    call setpos('.', storepos)
-    call self.eco_off()
-    return self.update_and_select_region()
+    for id in ids_to_remove
+        call s:F.region_with_id(id).remove()
+    endfor
+
+    let s:v.silence = 0
+    return self.update_and_select_region(pos)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
