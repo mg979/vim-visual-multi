@@ -302,7 +302,6 @@ fun! vm#commands#find_all(visual, whole, inclusive)
         let R = vm#commands#find_next(0, 0, 1)
     endwhile
 
-    call s:G.eco_off()
     call s:G.update_map_and_select_region(pos)
 endfun
 
@@ -606,18 +605,9 @@ let s:vertical         = {   -> index(['j', 'k'],                    s:v.motion)
 let s:simple           = { m -> index(split('hlwebWEB', '\zs'),      m)        >= 0   }
 
 fun! s:call_motion(this)
-    let s:v.moving = 1
+    if s:F.no_regions() | return | endif
     let s:v.only_this = a:this
-    "let b:VM_backup = copy(b:VM_Selection)
-
-    call vm#commands#move()
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#commands#move(...)
-    if !s:v.moving || s:F.no_regions() | return | endif
-
+    call s:F.winline(0)
     let R = s:R()[ s:v.index ]
 
     call s:before_move()
@@ -631,7 +621,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:before_move()
-    let s:v.moving -= 1
     call s:G.reset_byte_map(0)
 
     if s:v.direction && s:always_from_back()

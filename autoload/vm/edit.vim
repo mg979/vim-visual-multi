@@ -245,10 +245,7 @@ fun! s:Edit.post_process(reselect, ...) dict
     call self.extra_spaces(0, 1)
 
     "clear highlight now to prevent weirdinesses, then update regions
-    call clearmatches()    | call s:G.eco_off()
-
-    "byte map must be reset after all editing has been done, and before final update
-    call s:G.reset_byte_map(0)
+    call clearmatches()
 
     "update, restore position and clear var
     let pos = empty(s:v.storepos)? '.' : s:v.storepos

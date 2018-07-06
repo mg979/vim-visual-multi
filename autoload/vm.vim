@@ -62,7 +62,6 @@ fun! vm#init_buffer(empty, ...)
     let s:v.auto             = 0
     let s:v.silence          = 0
     let s:v.eco              = 0
-    let s:v.moving           = 0
     let s:v.only_this        = 0
     let s:v.only_this_always = 0
     let s:v.using_regex      = 0

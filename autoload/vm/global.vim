@@ -165,11 +165,12 @@ endfun
 fun! s:Global.update_and_select_region(...) dict
     """Update regions and select region at position, index or id."""
     if s:v.merge
-        call s:F.winline(0) | let s:v.merge = 0 | return self.merge_regions() | endif
+        let s:v.merge = 0 | return self.merge_regions() | endif
 
     call self.reset_byte_map(0)
-    call self.update_regions()
+    call self.reset_vars()
     call self.update_indices()
+    call self.update_regions()
 
     "a region is going to be reselected:
     "   !a:0            ->      position '.'
@@ -189,7 +190,6 @@ fun! s:Global.update_and_select_region(...) dict
     else
         let R = self.select_region(0) | endif
 
-    call s:F.restore_reg()
     call s:F.count_msg(0)
     return R
 endfun
@@ -205,6 +205,8 @@ fun! s:Global.update_map_and_select_region(...) dict
         let s:v.find_all_overlap = 0
         return self.merge_regions() | endif
 
+    call self.reset_vars()
+    call self.update_indices()
     call self.reset_byte_map(1)
     call self.update_highlight()
     let R = self.select_region_at_pos(a:0? a:1 : '.')
@@ -302,12 +304,11 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.eco_off() dict
-    """Common operations when eco/auto modes end.
+fun! s:Global.reset_vars() dict
+    """Reset variables during final regions update.
     if !( s:v.eco || s:v.auto ) | return | endif
 
-    let s:v.auto = 0 | let s:v.eco = 0
-    call self.update_indices()
+    let s:v.auto = 0 | let s:v.eco = 0 | let s:v.silence = 0
     call s:F.restore_reg()
 endfun
 
@@ -478,7 +479,6 @@ fun! s:Global.merge_regions(...) dict
     let s:v.eco = 1
     let pos = getpos('.')[1:2]
     call self.rebuild_from_map()
-    call self.eco_off()
     return self.update_map_and_select_region(pos)
 endfun
 
