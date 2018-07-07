@@ -57,7 +57,7 @@ fun! s:Edit.delete(X, register, count) dict
 
     elseif a:count
         "ask for motion
-        call vm#operators#cursors('d', a:count)
+        call vm#operators#cursors('d', a:count, a:register)
     endif
 endfun
 
@@ -84,7 +84,7 @@ fun! s:Edit.change(X, count, reg) dict
         call self.delete(1, a:reg != s:v.def_reg? a:reg : "_", 1)
         call s:V.Insert.start(0)
     else
-        call vm#operators#cursors('c', a:count)
+        call vm#operators#cursors('c', a:count, a:reg)
     endif
 endfun
 
@@ -215,11 +215,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.yank(hard, def_reg, silent, ...) dict
-    if !s:X()         | call vm#operators#cursors('y', v:count) | return | endif
-    if !s:min(1)      | call s:F.msg('No regions selected.', 0) | return | endif
-
     let register = (s:v.use_register != s:v.def_reg)? s:v.use_register :
                 \  a:def_reg?                         s:v.def_reg : v:register
+
+    if !s:X()    | call vm#operators#cursors('y', v:count, register) | return | endif
+    if !s:min(1) | call s:F.msg('No regions selected.', 0)           | return | endif
 
     "invalid register
     if register == "_" | call s:F.msg('Invalid register.', 1) | return | endif

@@ -193,11 +193,11 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#operators#cursors(op, n)
+fun! vm#operators#cursors(op, n, register)
     if s:X() | call s:G.change_mode(1) | endif
     call s:F.Scroll.get()
 
-    let reg = v:register | let r = "\"".reg | let hl1 = 'WarningMsg' | let hl2 = 'Label'
+    let reg = a:register | let r = "\"".reg | let hl1 = 'WarningMsg' | let hl2 = 'Label'
 
     let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
                 \ a:op==#'c'? [['Change ', hl1], ['([n] s/w/e/b/$...) ?  ',   hl2]] :
@@ -251,7 +251,7 @@ fun! vm#operators#cursors(op, n)
         else
             call vm#operators#select(1, 1, N.S)
             if back | exe "normal h" | endif
-            exe "normal ".r."d"
+            call s:V.Edit.delete(1, reg, 1)
         endif
         call s:G.merge_regions()
 
