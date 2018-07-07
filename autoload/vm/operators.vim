@@ -177,6 +177,8 @@ let s:ia   = { c -> index(['i', 'a'], c) >= 0                  }
 let s:all  = { c -> index(split('hlwebWEB$^0', '\zs'), c) >= 0 }
 let s:find = { c -> index(split('fFtT', '\zs'), c) >= 0        }
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:total_count(n, S)
     let S = a:S | let n = a:n
 
@@ -189,8 +191,11 @@ fun! s:total_count(n, S)
     return [S, N]
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#operators#cursors(op, n)
     if s:X() | call s:G.change_mode(1) | endif
+    call s:F.Scroll.get()
 
     let reg = v:register | let r = "\"".reg | let hl1 = 'WarningMsg' | let hl2 = 'Label'
 
@@ -228,6 +233,10 @@ fun! vm#operators#cursors(op, n)
         else | echon ' ...Aborted'           | return  | endif
     endwhile
 
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "delete
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
     if a:op ==# 'd'
         "what comes after 'd'; check for 'dd'
         let S = substitute(M, r, '', '')
@@ -245,6 +254,10 @@ fun! vm#operators#cursors(op, n)
             exe "normal ".r."d"
         endif
         call s:G.merge_regions()
+
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "yank
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     elseif a:op ==# 'y'
         call s:G.change_mode(1)
@@ -270,6 +283,10 @@ fun! vm#operators#cursors(op, n)
             if back | exe "normal h" | endif | normal y
         endif
 
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "change
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
     elseif a:op ==# 'c'
 
         "cs surround
@@ -285,7 +302,7 @@ fun! vm#operators#cursors(op, n)
         if (S == '$' || S == 'c') | call s:G.one_region_per_line() | endif
 
         let S = substitute(S, '^c', 'd', '')
-        let reg = reg != "_"? reg : "\""        "black hole not working for now
+        let reg = reg != s:v.def_reg? reg : "_"
 
         if C
             normal s$
@@ -301,7 +318,7 @@ fun! vm#operators#cursors(op, n)
         else
             call vm#operators#select(1, 1, N.S)
             if back | exe "normal h" | endif
-            call feedkeys('c')
+            call feedkeys("\"".reg.'c')
         endif
     endif
 endfun

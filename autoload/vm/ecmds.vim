@@ -38,10 +38,6 @@ fun! s:Edit.delete(X, register, count) dict
             call cursor(r.L, r.b>1? r.b+1 : 1)
             normal! m]
 
-            if a:register != "_"
-                let s:v.use_register = a:register
-                call self.yank(1, 1, 1)
-            endif
             call add(s:v.deleted_text, r.txt)
             exe "normal! `[d`]"
 
@@ -49,12 +45,15 @@ fun! s:Edit.delete(X, register, count) dict
             let change = s:size() - size
         endfor
 
+        "write custom and vim registers
+        call s:fill_register(a:register, s:v.deleted_text)
+
         call s:F.Scroll.restore(1)
         call s:G.change_mode(1)
         call s:G.select_region(ix)
 
-        if a:register != "_" | call self.post_process(0)
-        else                 | call s:F.restore_reg()     | endif
+        call self.post_process(0)
+        if a:register == "_" | call s:F.restore_reg() | endif
 
     elseif a:count
         "ask for motion
@@ -78,11 +77,11 @@ endfun
 " Change
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.change(X, count, ...) dict
+fun! s:Edit.change(X, count, reg) dict
     if !s:v.direction | call vm#commands#invert_direction() | endif
     if a:X
         "delete existing region contents and leave the cursors
-        call self.delete(1, a:0? a:1 : "_", 1)
+        call self.delete(1, a:reg != s:v.def_reg? a:reg : "_", 1)
         call s:V.Insert.start(0)
     else
         call vm#operators#cursors('c', a:count)
@@ -222,19 +221,11 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     let register = (s:v.use_register != s:v.def_reg)? s:v.use_register :
                 \  a:def_reg?                         s:v.def_reg : v:register
 
-    let text = []  | let maxw = 0
-
-    for r in s:R()
-        if len(r.txt) > maxw | let maxw = len(r.txt) | endif
-        call add(text, r.txt)
-    endfor
+    "invalid register
+    if register == "_" | call s:F.msg('Invalid register.', 1) | return | endif
 
     "write custom and vim registers
-    if register != "_"
-        let g:VM.registers[register] = text
-        let type = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
-        call setreg(register, join(text, "\n"), type)
-    endif
+    let [text, type] = s:fill_register(register)
 
     "restore default register if a different register was provided
     if register !=# s:v.def_reg | call s:F.restore_reg() | endif
@@ -526,6 +517,27 @@ fun! s:store_widths(...)
                 \   r.w
                 \) | endfor
     return W
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:fill_register(reg, ...)
+    "Write custom and vim registers.
+    if a:reg == "_" | return | endif
+
+    if a:0
+        let text = s:v.deleted_text
+    else
+        let text = []
+        for r in s:R() | call add(text, r.txt) | endfor
+    endif
+
+    let maxw = max(map(copy(text), 'len(v:val)'))
+
+    let g:VM.registers[a:reg] = text
+    let type = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
+    call setreg(a:reg, join(text, "\n"), type)
+    return [text, type]
 endfun
 
 
