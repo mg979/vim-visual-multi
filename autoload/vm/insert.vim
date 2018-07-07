@@ -29,6 +29,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.key(type) dict
+    call s:F.Scroll.get()
 
     if a:type ==# 'I'
         call vm#commands#merge_to_beol(0, 0)
@@ -77,10 +78,12 @@ fun! s:Insert.start(append) dict
 
     "--------------------------------------------------------------------------
     let I = self
+    let I._index = get(I, '_index', -1)
 
     if s:v.insert
         let R = s:G.select_region(I.index)
     elseif len(s:R()) > g:VM_pick_first_after_n_cursors
+        let self._index = s:v.index
         let R = s:G.select_region(0)
     elseif g:VM_use_first_cursor_in_line
         let R = s:G.select_region_at_pos('.')
@@ -207,7 +210,13 @@ fun! s:Insert.stop() dict
         endif
     endif
 
-    if g:VM_reselect_first_insert | call s:G.select_region(0) | endif
+    if g:VM_reselect_first_insert
+        call s:G.select_region(0)
+    elseif self._index >= 0
+        call s:G.select_region(self._index)
+    else
+        call s:G.select_region(self.index)
+    endif
 endfun
 
 

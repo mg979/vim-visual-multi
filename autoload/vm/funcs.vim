@@ -161,6 +161,43 @@ fun! s:Funcs.winline(restore) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Keep viewport position
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+let s:Funcs.Scroll = {}
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.Scroll.get() dict
+    """Store winline()."""
+    let s:v.winline = winline()
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.Scroll.ignore() dict
+    """Called by commands that don't need winline restoring."""
+    if !s:v.multi_find | let s:v.winline = 0 | endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.Scroll.restore(...) dict
+    """Restore viewport position when done."""
+    if s:v.eco || !s:v.winline || s:v.multi_find | return | endif
+    let lines = winline() - s:v.winline
+    if lines > 0
+        exe "normal! ".lines."\<C-e>"
+    elseif lines < 0
+        let lines = lines * -1
+        exe "normal! ".lines."\<C-y>"
+    endif
+    if a:0 | let s:v.winline = winline() | endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Messages
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

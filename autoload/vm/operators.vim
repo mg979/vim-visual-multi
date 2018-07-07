@@ -31,7 +31,7 @@ fun! vm#operators#select(all, count, ...)
     endif
 
     let s:v.storepos = getpos('.')[1:2]
-    call s:F.winline(0)
+    call s:F.Scroll.get()
 
     if a:0 | call s:select('y'.a:1) | return | endif
 

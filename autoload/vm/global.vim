@@ -83,15 +83,16 @@ fun! s:Global.change_mode(silent) dict
     let g:VM.extend_mode = !s:X()
     let s:v.silence = a:silent
 
+    let ix = s:v.index
+    call s:F.Scroll.get()
     if s:X()
         call self.update_regions()
-        call s:F.count_msg(0, ['Switched to Extend Mode. ', 'WarningMsg'])
     else
-        let ix = s:v.index
         call self.collapse_regions()
-        call self.select_region(ix)
-        call s:F.count_msg(0, ['Switched to Cursor Mode. ', 'WarningMsg'])
     endif
+    call self.select_region(ix)
+    let x = s:X()? 'Extend' : 'Cursor'
+    call s:F.count_msg(0, ['Switched to '.x.' Mode. ', 'WarningMsg'])
 endfun
 
 
@@ -237,7 +238,7 @@ fun! s:Global.select_region(i) dict
 
     let R = s:R()[i]
     call cursor(R.cur_ln(), R.cur_col())
-    call s:F.winline(1)
+    call s:F.Scroll.restore()
     let s:v.index = R.index
     return R
 endfun
@@ -308,7 +309,8 @@ fun! s:Global.reset_vars() dict
     """Reset variables during final regions update.
     if !( s:v.eco || s:v.auto ) | return | endif
 
-    let s:v.auto = 0 | let s:v.eco = 0 | let s:v.silence = 0
+    let s:v.auto = 0    | let s:v.eco = 0
+    let s:v.silence = 0 | let s:v.multi_find = 0
     call s:F.restore_reg()
 endfun
 

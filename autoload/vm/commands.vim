@@ -25,11 +25,13 @@ fun! s:init(whole, empty, extend_mode)
 
     "return if already initialized
     if g:VM.is_active
+        call s:F.Scroll.get()
         if s:v.using_regex | call vm#commands#regex_reset() | endif
         let s:v.whole_word = a:whole
         return 1
     else
         call vm#init_buffer(a:empty)
+        call s:F.Scroll.get()
         let s:v.whole_word = a:whole
     endif
 endfun
@@ -50,6 +52,7 @@ endfun
 
 fun! vm#commands#add_cursor_at_word(yank, search)
     call s:init(0, 1, 0)
+    call s:F.Scroll.ignore()
 
     if a:yank   | call s:yank(0)      | exe "keepjumps normal! `[" | endif
     if a:search | call s:Search.add() | endif
@@ -262,6 +265,7 @@ endfun
 
 fun! vm#commands#find_under(visual, whole, inclusive, ...)
     call s:init(a:whole, 0, 1)
+    call s:F.Scroll.ignore()
 
     "C-d command
     if a:0 && s:is_r() | return vm#commands#find_next(0, 0) | endif
@@ -287,8 +291,7 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
 
     let pos = getpos('.')[1:2]
-    call s:F.winline(0)
-    let s:v.eco = 1
+    let s:v.eco = 1 | let s:v.multi_find = 1
     let seen = []
 
     if !a:visual | let R = s:G.is_region_at_pos('.')
@@ -374,6 +377,7 @@ endfun
 
 fun! vm#commands#find_next(skip, nav, ...)
     if a:0 | return s:get_next_all() | endif       "multiple calls: shortcut and no message
+    call s:F.Scroll.ignore()
 
     if ( a:nav || a:skip ) && s:F.no_regions()                          | return | endif
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
@@ -392,6 +396,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(skip, nav)
+    call s:F.Scroll.ignore()
+
     if ( a:nav || a:skip ) && s:F.no_regions()                          | return | endif
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
 
@@ -518,7 +524,6 @@ fun! vm#commands#motion(motion, count, select, this)
 
     if s:symbol()          | let s:v.merge = 1          | endif
     if a:select && !s:X()  | let g:VM.extend_mode = 1   | endif
-    call s:F.winline(0)
 
     if a:select && !s:v.multiline && s:vertical()
         call s:F.toggle_option('multiline') | endif
@@ -607,7 +612,7 @@ let s:simple           = { m -> index(split('hlwebWEB', '\zs'),      m)        >
 fun! s:call_motion(this)
     if s:F.no_regions() | return | endif
     let s:v.only_this = a:this
-    call s:F.winline(0)
+    call s:F.Scroll.get()
     let R = s:R()[ s:v.index ]
 
     call s:before_move()

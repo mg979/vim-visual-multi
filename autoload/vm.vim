@@ -74,6 +74,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.whole_word       = 0
     let s:v.winline          = 0
     let s:v.find_all_overlap = 0
+    let s:v.multi_find       = 0
 
     let s:V.Global     = vm#global#init()
     let s:V.Search     = vm#search#init()
