@@ -94,9 +94,9 @@ fun! s:Funcs.get_reg(...) dict
     return [r, getreg(r), getregtype(r)]
 endfun
 
-fun! s:Funcs.get_regs09() dict
+fun! s:Funcs.get_regs_1_9() dict
     let regs = []
-    for r in range(10)
+    for r in range(1, 9)
         call add(regs, [r, getreg(r), getregtype(r)])
     endfor
     return regs
@@ -123,7 +123,7 @@ fun! s:Funcs.restore_regs() dict
     call self.restore_reg()
 
     "regs 0-9
-    for r in s:v.oldregs09 | call setreg(r[0], r[1], r[2]) | endfor
+    for r in s:v.oldregs_1_9 | call setreg(r[0], r[1], r[2]) | endfor
 
     "search reg
     let s = s:v.oldsearch
