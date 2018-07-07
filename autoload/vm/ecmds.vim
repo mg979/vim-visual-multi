@@ -25,11 +25,12 @@ fun! s:Edit.delete(X, register, count) dict
     """Delete the selected text and change to cursor mode.
     """Remember the lines that have been added an extra space, for later removal
     if !s:v.direction | call vm#commands#invert_direction() | endif
-    let ix = s:G.select_region_at_pos('.').index
-    call s:F.Scroll.get()
 
     if a:X
         let size = s:size() | let change = 0 | let s:v.deleted_text = []
+        let ix = s:G.select_region_at_pos('.').index
+        call s:F.Scroll.get()
+
         for r in s:R()
             call r.bytes([change, change])
             call self.extra_spaces(r, 0)

@@ -200,7 +200,7 @@ fun! vm#operators#cursors(op, n, register)
     let reg = a:register | let r = "\"".reg | let hl1 = 'WarningMsg' | let hl2 = 'Label'
 
     let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
-                \ a:op==#'c'? [['Change ', hl1], ['([n] s/w/e/b/$...) ?  ',   hl2]] :
+                \ a:op==#'c'? [['Change ', hl1], ['([n] c/w/e/b/$...) ?  ',   hl2]] :
                 \ a:op==#'y'? [['Yank   ', hl1], ['([n] y/w/e/b/$...) ?  ',   hl2]] : 'Aborted.'
 
     call s:F.msg(s, 1)
@@ -225,6 +225,9 @@ fun! vm#operators#cursors(op, n, register)
             let c = nr2char(getchar())       | echon c | let M .= c
             let c = nr2char(getchar())       | echon c | let M .= c | break
 
+        elseif a:op ==# 'd' && c==#'s'       | echon c | let M .= c
+            let c = nr2char(getchar())       | echon c | let M .= c | break
+
         elseif s:all(c)                      | echon c | let M .= c | break
         elseif a:op ==# 'd' && c==#'d'       | echon c | let M .= c | break
         elseif a:op ==# 'c' && c==#'c'       | echon c | let M .= c | break
@@ -238,6 +241,10 @@ fun! vm#operators#cursors(op, n, register)
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     if a:op ==# 'd'
+
+        "ds surround
+        if M[:1] ==# 'ds' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
+
         "what comes after 'd'; check for 'dd'
         let S = substitute(M, r, '', '')
         let S = substitute(S, '^\d*d\(.*\)$', '\1', '')
