@@ -52,7 +52,6 @@ endfun
 
 fun! vm#commands#add_cursor_at_word(yank, search)
     call s:init(0, 1, 0)
-    call s:F.Scroll.ignore()
 
     if a:yank   | call s:yank(0)      | exe "keepjumps normal! `[" | endif
     if a:search | call s:Search.add() | endif
@@ -265,7 +264,6 @@ endfun
 
 fun! vm#commands#find_under(visual, whole, inclusive, ...)
     call s:init(a:whole, 0, 1)
-    call s:F.Scroll.ignore()
 
     "C-d command
     if a:0 && s:is_r() | return vm#commands#find_next(0, 0) | endif
@@ -305,6 +303,7 @@ fun! vm#commands#find_all(visual, whole, inclusive)
         let R = vm#commands#find_next(0, 0, 1)
     endwhile
 
+    let s:v.restore_scroll = 1
     call s:G.update_map_and_select_region(pos)
 endfun
 
@@ -377,7 +376,6 @@ endfun
 
 fun! vm#commands#find_next(skip, nav, ...)
     if a:0 | return s:get_next_all() | endif       "multiple calls: shortcut and no message
-    call s:F.Scroll.ignore()
 
     if ( a:nav || a:skip ) && s:F.no_regions()                          | return | endif
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
@@ -396,8 +394,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(skip, nav)
-    call s:F.Scroll.ignore()
-
     if ( a:nav || a:skip ) && s:F.no_regions()                          | return | endif
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
 
@@ -641,11 +637,13 @@ endfun
 fun! s:after_move(R)
     let s:v.direction = a:R.dir
     let s:v.only_this = 0
+    let s:v.restore_scroll = 1
 
     if s:always_from_back() | call vm#commands#invert_direction() | endif
 
     if s:v.merge
         call s:G.select_region(a:R.index)
+        call s:F.Scroll.get(1)
         call s:G.update_and_select_region(a:R.A)
     else
         call s:F.restore_reg()

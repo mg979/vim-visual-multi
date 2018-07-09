@@ -141,26 +141,6 @@ fun! s:Funcs.region_with_id(id) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Funcs.winline(restore) dict
-    """Ensure viewport isn't scrolled."
-    if !a:restore
-        if !s:v.winline | let s:v.winline = winline() | endif
-        return | endif
-
-    if s:v.winline
-        let lines = winline() - s:v.winline
-        if lines > 0
-            exe "normal! ".lines."\<C-e>"
-        elseif lines < 0
-            let lines = lines * -1
-            exe "normal! ".lines."\<C-y>"
-        endif
-        let s:v.winline = 0
-    endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Keep viewport position
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -168,23 +148,17 @@ let s:Funcs.Scroll = {}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.Scroll.get() dict
+fun! s:Funcs.Scroll.get(...) dict
     """Store winline()."""
+    let s:v.restore_scroll = a:0
     let s:v.winline = winline()
-endfun
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Funcs.Scroll.ignore() dict
-    """Called by commands that don't need winline restoring."""
-    if !s:v.multi_find | let s:v.winline = 0 | endif
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.Scroll.restore(...) dict
     """Restore viewport position when done."""
-    if s:v.eco || !s:v.winline || s:v.multi_find | return | endif
+    if s:v.restore_scroll | let s:v.restore_scroll = 0 | else | return | endif
     let lines = winline() - s:v.winline
     if lines > 0
         exe "normal! ".lines."\<C-e>"

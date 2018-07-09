@@ -2,97 +2,125 @@
 " Mappings help
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:settings = [
-      \["Ctrl+c\t\t",      "Case\t\t\t",             "cycle case settings (smart, ignore, noignore)"],
-      \["Ctrl+w\t\t",      "Word boundaries\t\t",    "toggle word boundaries for most recent pattern"]
-      \]
+let s:select    = {}
+let s:cursors   = {}
+let s:special   = {}
+let s:operators = {}
+let s:settings  = {}
+let s:commands  = {}
+let s:zeta      = {}
+let s:menus     = {}
 
-let s:select = [
-      \["Ctrl+d\t\t",      "Select inner word\t",    "with word boundaries"],
-      \["Ctrl+s\t\t",      "Skip current match\t",   "and find next in the current direction"],
-      \["Alt+Shift+a\t",   "Find all\t\t",           "also from visual mode"],
-      \["]\t\t",           "Find next\t\t",          "always downwards"],
-      \["[\t\t",           "Find previous\t\t",      "always upwards"],
-      \["}\t\t",           "Goto next\t",            ""],
-      \["{\t\t",           "Goto previous\t",        ""],
-      \["q\t\t",           "Skip current match\t",   "alternate for Ctrl-s"],
-      \["Q\t\t",           "Remove region\t\t",      "and go back to previous"]
-      \]
+let s:settings.maps  = ["Ctrl+c", "Ctrl+w"]
+let s:settings.desc  = ["Case", "Word boundaries"]
+let s:settings.note  = ["cycle case settings (smart, ignore, noignore)", "toggle word boundaries for most recent "]
 
-let s:cursors = [
-      \["Alt+j\t\t",       "Create new downwards\t", "start in cursor mode"],
-      \["Alt+k\t\t",       ",,         upwards\t",   ",,"],
-      \["Alt+Ctrl+Down\t", "Create new downwards\t", "start in extend mode"],
-      \["Alt+Ctrl+Up\t",   ",,         upwards\t",   ",,"],
-      \]
+let s:select.maps    = ["Ctrl+d",                                 "[",
+                       \"Ctrl+s",                                 "]",
+                       \"Alt+Shift+a",                            "}",
+                       \"g/",                                     "{",
+                       \"*",                                      "q",
+                       \"#",                                      "Q",
+                       \]
 
-let s:operators = [
-      \["gs[..]\t\t",        "Select Operator\t\t",    "create a new region"],
-      \["s[..]\t\t",         ",,     ,,\t\t",          "affects all cursors"],
-      \["m[..]\t\t",         "Find Operator\t\t",      "match all in text object"],
-      \["Alt+j\t\t",       ",,     ,,\t\t",          "from visual mode"],
-      \]
+let s:select.desc    = ["Select inner word",                      "Find next",
+                       \"Skip current match",                     "Find previous",
+                       \"Find all",                               "Goto next",
+                       \"Start regex search",                     "Goto previous",
+                       \"Select inner word",                      "Skip current match",
+                       \"Select around word",                     "Remove region",
+                       \]
 
-let s:commands = [
-      \["Alt+a\t\t",       "Align cursors\t\t",      "to the bigger column number"],
-      \["Ctrl+t\t\t",      "Transposition\t\t",      "rotate regions"],
-      \["Alt+d\t\t",       "Duplicate\t\t",          "extend mode only"],
-      \["S\t\t",           "Surround\t\t",           ",,"],
-      \]
+let s:select.note    = ["with word boundaries",                   "always downwards",
+                       \"and find next in the current direction", "always upwards",
+                       \"also from visual mode",                  "",
+                       \"and select first occurrence",            "",
+                       \"without word boundaries",                "alternate for Ctrl+s",
+                       \",, ,,",                                  "and go back to previous",
+                       \]
 
-let s:zeta = [
-      \["z-\t\t",            "Shrink\t\t",           ""],
-      \["z+\t\t",            "Enlarge\t\t",          ""],
-      \["zz\t\t",            "Run Normal\t\t",       "run normal command at cursors"],
-      \["zv\t\t",            "Run Visual\t\t",       "run visual command at cursors"],
-      \["zx\t\t",            "Run Ex\t\t\t",         "run ex command at cursors"],
-      \["z@\t\t",            "Run Macro\t\t",        "run macro at cursors"],
-      \["z.\t\t",            "Run Dot\t\t",          ""],
-      \["z<\t\t",            "Align by Char(s)\t",   "align by [count] specific characters"],
-      \["z>\t\t",            "Align by Regex\t\t",   "align by regex"],
-      \["zn\t\t",            "Numbers\t\t\t",        "(insert before region)"],
-      \["z0n\t\t",           ",,\t\t\t",             ",, (start from 0)"],
-      \["zN\t\t",            ",,\t\t\t",             "(append after region)"],
-      \["z0N\t\t",           ",,\t\t\t",             ",, (start from 0)"],
-      \["Z\t\t",             "Run Last Normal\t\t",  ""],
-      \["Alt+z\t\t",         "Run Last Visual\t\t",  ""],
-      \["Ctrl+z\t\t",        "Run Last Ex\t\t",      ""],
-      \]
+let s:cursors.maps   = ["Alt+j", "Alt+Ctrl+Down", "Alt+k", "Alt+Ctrl+Up"]
+let s:cursors.desc   = ["Create new downwards", "Create new downwards", ",,         upwards", ",,         upwards"]
+let s:cursors.note   = ["start in cursor mode", "start in extend mode", ",,", ",,"]
 
-let s:menus = [
-      \["<leader>x\t",     "Tools\t\t",              ""],
-      \["<leader>s\t",     "Search\t\t",             ""],
-      \["<leader>c\t",     "Case Conversion\t\t",    ""],
-      \]
+let s:operators.maps = ["gs[..]", "m[..]", "s[..]", "Alt+j"]
+let s:operators.desc = ["Select Operator", "Find Operator", ",,     ,,", ",,     ,,"]
+let s:operators.note = ["create a new region", "match all in text object", "affects all cursors", "from visual mode"]
 
-let s:special = [
-      \["Space\t\t",       "Toggle Mappings\t\t",    "(except space itself and escape)"],
-      \["Enter\t\t",       "Toggle Only\t\t",        "use to change a single region"],
-      \["Tab\t\t",         "Toggle Mode\t\t",        "between extend and cursor mode"],
-      \["Backspace\t",     "Block mode\t\t",         "(toggle)"],
-      \]
+let s:commands.maps  = ["Alt+a", "Ctrl+t", "Alt+d", "S"]
+let s:commands.desc  = ["Align cursors", "Transposition", "Duplicate", "Surround"]
+let s:commands.note  = ["to the bigger column number", "rotate regions", "extend mode only", ",,"]
+
+let s:zeta.maps      = [
+                       \"zz",                                   "zn",
+                       \"zv",                                   "z0n",
+                       \"zx",                                   "zN",
+                       \"z@",                                   "z0N",
+                       \"z.",                                   "Z",
+                       \"z<",                                   "Ctrl+z",
+                       \"z>",                                   "Alt+z",
+                       \]
+
+let s:zeta.desc      = [
+                       \"Run Normal",                           "Numbers",
+                       \"Run Visual",                           ",,",
+                       \"Run Ex",                               ",,",
+                       \"Run Macro",                            ",,",
+                       \"Run Dot",                              "Run Last Normal",
+                       \"Align by Char(s)",                     "Run Last Ex",
+                       \"Align by Regex",                       "Run Last Visual",
+                       \]
+
+let s:zeta.note      = [
+                       \"run normal command at cursors",        "insert before region",
+                       \"run visual command ,,",                ",, (start from 0)",
+                       \"run ex command ,,",                    "append after region",
+                       \"run macro ,,",                         ",, (start from 0)",
+                       \"run dot command ,,",                   "",
+                       \"align by [count] specific characters", "",
+                       \"align by regex",                       "",
+                       \]
+
+let s:menus.maps     = ["<leader>x", "<leader>s", "<leader>c"]
+let s:menus.desc     = ["Tools", "Search", "Case Conversion"]
+let s:menus.note     = ["", "", ""]
+
+let s:special.maps   = ["Space", "Enter", "Tab", "Backspace"]
+let s:special.desc   = ["Toggle Mappings", "Toggle Only", "Toggle Mode", "Block mode"]
+let s:special.note   = ["(except space itself and escape)", "to modify a single region", "between extend and cursor mode", "(toggle)"]
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#special#help#show()
 
+  let _ = "----------"
+
   let groups = [
-        \["\n--------- Select -------------------\n\n", s:select],
-        \["\n--------- Cursors ------------------\n\n", s:cursors],
-        \["\n--------- Special ------------------\n\n", s:special],
-        \["\n--------- Operators ----------------\n\n", s:operators],
-        \["\n--------- Settings -----------------\n\n", s:settings],
-        \["\n--------- Commands -----------------\n\n", s:commands],
-        \["\n--------- Zeta ---------------------\n\n", s:zeta],
-        \["\n--------- Menus --------------------\n\n", s:menus],
+        \["\n"._._._._._._._._." Select -------"._._._._._._._._."\n\n", "select"],
+        \["\n"._._._._._._._._." Cursors ------"._._._._._._._._."\n\n", "cursors"],
+        \["\n"._._._._._._._._." Special ------"._._._._._._._._."\n\n", "special"],
+        \["\n"._._._._._._._._." Operators ----"._._._._._._._._."\n\n", "operators"],
+        \["\n"._._._._._._._._." Settings -----"._._._._._._._._."\n\n", "settings"],
+        \["\n"._._._._._._._._." Commands -----"._._._._._._._._."\n\n", "commands"],
+        \["\n"._._._._._._._._." Zeta ---------"._._._._._._._._."\n\n", "zeta"],
+        \["\n"._._._._._._._._." Menus --------"._._._._._._._._."\n\n", "menus"],
         \]
+
+  let l:Pad = { t, n -> b:VM_Selection.Funcs.pad(t, n) }
+  let l:Txt = { i, m -> (i%2? 'echon "' : 'echo "').l:Pad(m[i], 15).'"' }
 
   for g in groups
     echohl WarningMsg | echo g[0] | echohl None
-    for t in g[1]
-      echohl Special | echo t[0] | echohl Type | echon t[1] | echohl None | echon t[2]
+    let M = eval("s:".g[1]).maps
+    let D = eval("s:".g[1]).desc
+    let N = eval("s:".g[1]).note
+    let i = 0
+    for m in M
+      echohl Special | exe l:Txt(i, M)
+      echohl Type    | echon l:Pad(D[i], 25)
+      echohl None    | echon l:Pad(N[i], 50)
+      let i += 1
     endfor
   endfor
-  echo "\n"
 endfun
 

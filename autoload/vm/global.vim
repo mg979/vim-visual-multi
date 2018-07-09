@@ -90,6 +90,8 @@ fun! s:Global.change_mode(silent) dict
     else
         call self.collapse_regions()
     endif
+
+    let s:v.restore_scroll = !a:silent          "restore winline if called manually
     call self.select_region(ix)
     let x = s:X()? 'Extend' : 'Cursor'
     call s:F.count_msg(0, ['Switched to '.x.' Mode. ', 'WarningMsg'])

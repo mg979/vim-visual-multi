@@ -55,7 +55,6 @@ fun! s:Edit.run_normal(cmd, recursive, count, maps) dict
     let s:cmd = a:recursive? ("normal ".c.cmd) : ("normal! ".c.cmd)
     if s:X() | call s:G.change_mode(1) | endif
 
-    call s:F.Scroll.ignore()
     call self.before_macro(a:maps)
 
     if a:cmd ==? 'x' | call s:bs_del(a:cmd)
@@ -83,7 +82,6 @@ fun! s:Edit.run_visual(cmd, recursive, ...) dict
 
     "-----------------------------------------------------------------------
 
-    call s:F.Scroll.ignore()
     call self.before_macro(!a:recursive)
     call self.process_visual(cmd)
 
@@ -116,7 +114,6 @@ fun! s:Edit.run_ex(count, ...) dict
     let g:VM.last_ex = cmd
     if s:X() | call s:G.change_mode(1) | endif
 
-    call s:F.Scroll.ignore()
     call self.before_macro(1)
     for n in range(a:count)
         call self._process(cmd)
@@ -138,7 +135,6 @@ fun! s:Edit.run_macro(replace) dict
         return | endif
 
     let s:cmd = "@".reg
-    call s:F.Scroll.ignore()
     call self.before_macro(1)
 
     if s:X() | call s:G.change_mode(1) | endif
