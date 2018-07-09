@@ -82,7 +82,7 @@ fun! s:Insert.start(append) dict
 
     if s:v.insert
         let R = s:G.select_region(I.index)
-    elseif len(s:R()) > g:VM_pick_first_after_n_cursors
+    elseif g:VM_pick_first_after_n_cursors && len(s:R()) > g:VM_pick_first_after_n_cursors
         let self._index = s:v.index
         let R = s:G.select_region(0)
     elseif g:VM_use_first_cursor_in_line
