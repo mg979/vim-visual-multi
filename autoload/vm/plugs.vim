@@ -139,6 +139,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-c-Change)           :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1, v:register)<cr>
     nnoremap        <Plug>(VM-Edit-C-Change)           :<C-u>call vm#operators#cursors('c', 0, v:register)<cr>$
     nnoremap        <Plug>(VM-Edit-Replace)            :<C-u>call b:VM_Selection.Edit.replace()<cr>
+    nnoremap        <Plug>(VM-Edit-Replace-Pattern)    :<C-u>call b:VM_Selection.Edit.replace_pattern()<cr>
     nnoremap        <Plug>(VM-Edit-p-Paste-Regions)    :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 1, g:VM.extend_mode)<cr>
     nnoremap        <Plug>(VM-Edit-P-Paste-Regions)    :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 1, g:VM.extend_mode)<cr>
     nnoremap        <Plug>(VM-Edit-p-Paste-Normal)     :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 0, g:VM.extend_mode)<cr>

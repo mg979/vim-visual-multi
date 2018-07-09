@@ -14,6 +14,7 @@ fun! vm#ecmds#init()
     let s:X         = { -> g:VM.extend_mode         }
     let s:size      = { -> line2byte(line('$') + 1) }
 
+    let s:v.deleted_text = []
     return s:Edit
 endfun
 
@@ -47,7 +48,7 @@ fun! s:Edit.delete(X, register, count) dict
         endfor
 
         "write custom and vim registers
-        call s:fill_register(a:register, s:v.deleted_text)
+        call self.fill_register(a:register, s:v.deleted_text)
 
         call s:F.Scroll.restore(1)
         call s:G.change_mode(1)
@@ -129,6 +130,24 @@ fun! s:Edit.replace() dict
         call self.run_normal('r'.char, 0, '', 0)
         call s:F.count_msg(1)
     endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.replace_pattern() dict
+    """Replace a pattern in all regions as with :s command."""
+    let ix = s:v.index | call s:F.Scroll.get()
+    echohl Type
+    let pat = input('Pattern to replace > ') | if empty(pat)  | call s:F.msg('Command aborted.', 1) | return | endif
+    let repl = input('Replacement > ')       | if empty(repl) | call s:F.msg('Command aborted.', 1) | return | endif
+    echohl None
+    let text = s:G.regions_text() | let T = []
+    for t in text
+        call add(T, substitute(t, pat, repl, 'g'))
+    endfor
+    call self.fill_register('"', T)
+    normal p
+    call s:G.select_region(ix)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -219,14 +238,14 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     let register = (s:v.use_register != s:v.def_reg)? s:v.use_register :
                 \  a:def_reg?                         s:v.def_reg : v:register
 
-    if !s:X()    | call vm#operators#cursors('y', v:count, register) | return | endif
     if !s:min(1) | call s:F.msg('No regions selected.', 0)           | return | endif
+    if !s:X()    | call vm#operators#cursors('y', v:count, register) | return | endif
 
     "invalid register
     if register == "_" | call s:F.msg('Invalid register.', 1) | return | endif
 
     "write custom and vim registers
-    let [text, type] = s:fill_register(register)
+    let [text, type] = self.fill_register(register)
 
     "restore default register if a different register was provided
     if register !=# s:v.def_reg | call s:F.restore_reg() | endif
@@ -452,7 +471,7 @@ fun! s:fill_text(list)
     let L = a:list
     let i = len(s:R()) - len(a:list)
 
-    if !has_key(s:v, 'deleted_text') || empty(s:v.deleted_text)
+    if empty(s:v.deleted_text)
         while i>0
             call add(L, '')
             let i -= 1
@@ -522,17 +541,11 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:fill_register(reg, ...)
+fun! s:Edit.fill_register(reg, ...) dict
     "Write custom and vim registers.
     if a:reg == "_" | return | endif
 
-    if a:0
-        let text = s:v.deleted_text
-    else
-        let text = []
-        for r in s:R() | call add(text, r.txt) | endfor
-    endif
-
+    let text = a:0? a:1 : s:G.regions_text()
     let maxw = max(map(copy(text), 'len(v:val)'))
 
     let g:VM.registers[a:reg] = text

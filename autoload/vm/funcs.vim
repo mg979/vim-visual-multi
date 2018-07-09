@@ -146,15 +146,11 @@ endfun
 
 let s:Funcs.Scroll = {}
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:Funcs.Scroll.get(...) dict
     """Store winline()."""
     let s:v.restore_scroll = a:0
     let s:v.winline = winline()
 endfun
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.Scroll.restore(...) dict
     """Restore viewport position when done."""
@@ -168,8 +164,6 @@ fun! s:Funcs.Scroll.restore(...) dict
     endif
     if a:0 | let s:v.winline = winline() | endif
 endfun
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Messages

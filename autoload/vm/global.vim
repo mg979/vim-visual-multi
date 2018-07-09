@@ -364,6 +364,15 @@ fun! s:Global.update_region_patterns(pat) dict
     endfor
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.regions_text()
+  """Return a lsit with all regions' contents."""
+  let t = []
+  for r in self.regions() | call add(t, r.txt) | endfor
+  return t
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.lines_with_regions(reverse, ...) dict

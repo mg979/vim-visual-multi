@@ -77,14 +77,14 @@ endfun
 
 let s:NVIM = has('gui_running') || has('nvim')
 
-let s:simple   = split('nNqQU*#o[]{}?/:uMSsm', '\zs')
+let s:simple   = split('nNqQU*#o[]{}?/:uMSsmR', '\zs')
 
 let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+xvVnN@.<>', '\zs'), '"z".v:val')
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = split('elLp', '\zs') + ['<F1>', '<F12>']
 let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a', 'z', 'r' ]
-let s:leader   = split('ydpPscx"', '\zs')
+let s:leader   = split('ypPscx"', '\zs')
 let s:leader2  = []
 let s:fkeys    = ['2']
 let s:sfkeys   = ['2']
@@ -292,8 +292,8 @@ fun! s:Maps.edit_start() dict
     nmap <silent> <nowait> <buffer> ~               <Plug>(VM-Edit-~)
     nmap <silent> <nowait> <buffer> <del>           <Plug>(VM-Edit-Del)
     nmap <silent> <nowait> <buffer> r               <Plug>(VM-Edit-Replace)
+    nmap <silent> <nowait> <buffer> R               <Plug>(VM-Edit-Replace-Pattern)
     nmap <silent> <nowait> <buffer> d               <Plug>(VM-Edit-Delete)
-    nmap <silent> <nowait> <buffer> <leader>d       <Plug>(VM-Edit-Delete-Exit)
     nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
     nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
     nmap <silent> <nowait> <buffer> <C-t>           <Plug>(VM-Edit-Transpose)
