@@ -54,7 +54,7 @@ fun! s:Insert.key(type) dict
             if s:v.direction        | call vm#commands#invert_direction() | endif
             call s:G.change_mode(1) | let s:v.direction = 1               | endif
 
-        for r in s:R() | call s:V.Edit.extra_spaces(r, 0) | endfor
+        for r in s:R() | call s:V.Edit.extra_spaces.add(r) | endfor
         normal l
         let self.append = 1
         call self.start(1)
@@ -113,7 +113,7 @@ fun! s:Insert.start(append) dict
         call add(I.cursors, C)
 
         "if (I.append && eol) || E == 1 || Key == 'l' | call s:V.Edit.extra_spaces(r, 0) | endif
-        if eol && !a:append | call s:V.Edit.extra_spaces(r, 0) | endif
+        if eol && !a:append | call s:V.Edit.extra_spaces.add(r) | endif
 
         if !has_key(I.lines, r.l)
             let I.lines[r.l] = s:Line.new(r.l, C)

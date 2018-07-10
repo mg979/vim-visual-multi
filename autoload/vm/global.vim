@@ -202,8 +202,6 @@ endfun
 fun! s:Global.update_map_and_select_region(...) dict
     "Don't reupdate regions, only the bytes map.
     "Use when regions have been just created and there's no need to update them.
-    let s:v.silence = 0
-
     if s:v.find_all_overlap
         let s:v.find_all_overlap = 0
         return self.merge_regions() | endif
@@ -312,7 +310,7 @@ fun! s:Global.reset_vars() dict
     if !( s:v.eco || s:v.auto ) | return | endif
 
     let s:v.auto = 0    | let s:v.eco = 0
-    let s:v.silence = 0 | let s:v.multi_find = 0
+    let s:v.multi_find = 0
     call s:F.restore_reg()
 endfun
 

@@ -22,45 +22,38 @@ endfun
 " Delete
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.delete(X, register, count) dict
+fun! s:Edit.delete(X, register, count, process) dict
     """Delete the selected text and change to cursor mode.
-    """Remember the lines that have been added an extra space, for later removal
     if !s:v.direction | call vm#commands#invert_direction() | endif
 
-    if a:X
-        let size = s:size() | let change = 0 | let s:v.deleted_text = []
-        let ix = s:G.select_region_at_pos('.').index
-        call s:F.Scroll.get()
+    if !a:X     "ask for motion
+        call vm#operators#cursors('d', a:count, a:register) | return | endif
 
-        for r in s:R()
-            call r.bytes([change, change])
-            call self.extra_spaces(r, 0)
-            call cursor(r.l, r.a)
-            normal! m[
-            call cursor(r.L, r.b>1? r.b+1 : 1)
-            normal! m]
+    let size = s:size() | let change = 0 | let text = s:G.regions_text()
+    let ix = s:G.select_region_at_pos('.').index
 
-            call add(s:v.deleted_text, r.txt)
-            exe "normal! `[d`]"
+    for r in s:R()
+        call r.bytes([change, change])
+        call self.extra_spaces.add(r)
+        call cursor(r.l, r.a)
+        normal! m[
+        call cursor(r.L, r.b>1? r.b+1 : 1)
+        normal! m]
 
-            "update changed size
-            let change = s:size() - size
-        endfor
+        exe "normal! `[d`]"
 
-        "write custom and vim registers
-        call self.fill_register(a:register, s:v.deleted_text)
+        "update changed size
+        let change = s:size() - size
+    endfor
 
-        call s:F.Scroll.restore(1)
-        call s:G.change_mode(1)
-        call s:G.select_region(ix)
+    "write custom and vim registers
+    call self.fill_register(a:register, text)
 
-        call self.post_process(0)
-        if a:register == "_" | call s:F.restore_reg() | endif
+    call s:G.change_mode()
+    call s:G.select_region(ix)
 
-    elseif a:count
-        "ask for motion
-        call vm#operators#cursors('d', a:count, a:register)
-    endif
+    if a:process         | call self.post_process(0) | endif
+    if a:register == "_" | call s:F.restore_reg()    | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -83,7 +76,7 @@ fun! s:Edit.change(X, count, reg) dict
     if !s:v.direction | call vm#commands#invert_direction() | endif
     if a:X
         "delete existing region contents and leave the cursors
-        call self.delete(1, a:reg != s:v.def_reg? a:reg : "_", 1)
+        call self.delete(1, a:reg != s:v.def_reg? a:reg : "_", 1, 0)
         call s:V.Insert.start(0)
     else
         call vm#operators#cursors('c', a:count, a:reg)
@@ -120,7 +113,7 @@ fun! s:Edit.replace() dict
             call add(s:v.new_text, r)
         endfor
 
-        call self.delete(1, "_", 1)
+        call self.delete(1, "_", 1, 0)
         call self.block_paste(1)
         call self.post_process(1, 0)
     else
@@ -157,7 +150,7 @@ endfun
 fun! s:Edit.paste(before, regions, reselect, ...) dict
     let reg = a:0? a:1 : v:register | let X = s:X()
 
-    if X | call self.delete(1, "_", 1) | endif
+    if X | call self.delete(1, "_", 1, 0) | endif
 
     if !a:regions || !has_key(g:VM.registers, reg) || empty(g:VM.registers[reg])
         let s:v.new_text = s:default_text(a:regions)
@@ -336,7 +329,7 @@ fun! s:Edit.transpose() dict
         let t = remove(g:VM.registers[s:v.def_reg], rlines[l][-1])
         call insert(g:VM.registers[s:v.def_reg], t, rlines[l][0])
     endfor
-    call self.delete(1, "_", 0)
+    call self.delete(1, "_", 0, 0)
     call self.paste(1, 1, 1)
 endfun
 
@@ -369,7 +362,7 @@ fun! s:Edit.shift(dir) dict
     if a:dir
         call self.paste(0, 1, 1)
     else
-        call self.delete(1, "_", 0)
+        call self.delete(1, "_", 0, 0)
         call vm#commands#motion('h', 1, 0, 0)
         call self.paste(1, 1, 1)
     endif

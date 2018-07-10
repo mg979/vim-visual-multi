@@ -242,9 +242,9 @@ fun! s:Edit.post_process(reselect, ...) dict
     endif
 
     "remove extra spaces that may have been added
-    call self.extra_spaces(0, 1)
+    call self.extra_spaces.remove()
 
-    "clear highlight now to prevent weirdinesses, then update regions
+    "clear highlight now, then update regions
     call clearmatches()
 
     "update, restore position and clear var
@@ -253,23 +253,24 @@ fun! s:Edit.post_process(reselect, ...) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Misc functions
+" Extra spaces
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.extra_spaces(r, remove) dict
+let s:Edit.extra_spaces = {}
 
-    if a:remove
-        "let s:v.extra_spaces = s:v.extra_spaces[:len(s:R())-1]  "fix size
-        "remove the extra space only if it comes after r.b, and it's just before \n
-        for i in s:v.extra_spaces
-            let r = s:R()[i]
-            call cursor(r.L, r.b<col([r.L, '$'])-1? r.b+1 : r.b)
-            while line('.') == r.L && s:F.char_under_cursor() ==# ' '
-                normal! x
-            endwhile
-        endfor
-        let s:v.extra_spaces = [] | return | endif
+fun! s:Edit.extra_spaces.remove() dict
+    "remove the extra space only if it comes after r.b, and it's just before \n
+    for i in s:v.extra_spaces
+        let r = s:R()[i]
+        call cursor(r.L, r.b<col([r.L, '$'])-1? r.b+1 : r.b)
+        while line('.') == r.L && s:F.char_under_cursor() ==# ' '
+            normal! x
+        endwhile
+    endfor
+    let s:v.extra_spaces = []
+endfun
 
+fun! s:Edit.extra_spaces.add(r) dict
     "add space if empty line(>) or eol(=)
     let L = getline(a:r.L)
     if a:r.b >= len(L)
@@ -279,6 +280,9 @@ fun! s:Edit.extra_spaces(r, remove) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Misc functions
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 fun! s:Edit.before_macro(maps) dict
     let s:v.silence = 1 | let s:v.auto = 1 | let s:v.eco = 1

@@ -86,7 +86,7 @@ fun! s:bs(r)
     "add an extra space and push cursor
     call cursor(r.l, r.a)
     normal! X
-    call s:V.Edit.extra_spaces(r, 0)
+    call s:V.Edit.extra_spaces.add(r)
     call r.bytes([1,1])
 
     return 1
@@ -100,7 +100,7 @@ fun! vm#icmds#cw()
 
     for r in s:R()
         if s:eol(r)
-            call s:V.Edit.extra_spaces(r, 0)
+            call s:V.Edit.extra_spaces.add(r)
             call r.bytes([1+n,1+n])
             let n += 1
         endif

@@ -258,7 +258,7 @@ fun! vm#operators#cursors(op, n, register)
         else
             call vm#operators#select(1, 1, N.S)
             if back | exe "normal h" | endif
-            call s:V.Edit.delete(1, reg, 1)
+            call s:V.Edit.delete(1, reg, 1, 1)
         endif
         call s:G.merge_regions()
 
@@ -314,12 +314,12 @@ fun! vm#operators#cursors(op, n, register)
         if C
             normal s$
             call vm#commands#motion('^', 1, 0, 0)
-            call s:V.Edit.delete(1, reg, 1)
+            call s:V.Edit.delete(1, reg, 1, 0)
             call s:V.Insert.key('a')
 
         elseif S=='$'
             call vm#operators#select(1, 1, 's$')
-            call s:V.Edit.delete(1, reg, 1)
+            call s:V.Edit.delete(1, reg, 1, 0)
             call s:V.Insert.key('a')
 
         else
