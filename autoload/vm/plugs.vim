@@ -69,7 +69,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Filter-Lines)            :call vm#special#commands#filter_lines(0)<cr>
     nnoremap        <Plug>(VM-Filter-Lines-Strip)      :call vm#special#commands#filter_lines(1)<cr>
     nnoremap        <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
-    nnoremap        <Plug>(VM-Switch-Mode)             :call b:VM_Selection.Global.change_mode(0)<cr>
+    nnoremap        <Plug>(VM-Switch-Mode)             :call b:VM_Selection.Global.change_mode(1)<cr>
     nnoremap        <Plug>(VM-Reset)                   :call vm#reset()<cr><esc>
     nnoremap        <Plug>(VM-Undo)                    u:call b:VM_Selection.Global.update_regions()<cr>
 
@@ -152,8 +152,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-Duplicate)          :call b:VM_Selection.Edit.duplicate()<cr>
 
     nnoremap        <Plug>(VM-Align)                   :<C-u>call b:VM_Selection.Edit.align()<cr>
-    nnoremap        <Plug>(VM-Align-Char)              :<C-u>call vm#commands#align(v:count1, 0)<cr>
-    nnoremap        <Plug>(VM-Align-Regex)             :<C-u>call vm#commands#align(1, 1)<cr>
+    nnoremap        <Plug>(VM-Align-Char)              :<C-u>call vm#commands#align_char(v:count1)<cr>
+    nnoremap        <Plug>(VM-Align-Regex)             :<C-u>call vm#commands#align_regex()<cr>
     nnoremap        <Plug>(VM-Numbers)                 :<C-u>call b:VM_Selection.Edit.numbers(v:count1, 0)<cr>
     nnoremap        <Plug>(VM-Numbers-Append)          :<C-u>call b:VM_Selection.Edit.numbers(v:count1, 1)<cr>
     nnoremap        <Plug>(VM-Zero-Numbers)            :<C-u>call b:VM_Selection.Edit.numbers(v:count, 0)<cr>

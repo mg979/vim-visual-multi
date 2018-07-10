@@ -194,7 +194,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#operators#cursors(op, n, register)
-    if s:X() | call s:G.change_mode(1) | endif
+    if s:X() | call s:G.change_mode() | endif
     call s:F.Scroll.get()
 
     let reg = a:register | let r = "\"".reg | let hl1 = 'WarningMsg' | let hl2 = 'Label'
@@ -267,7 +267,7 @@ fun! vm#operators#cursors(op, n, register)
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     elseif a:op ==# 'y'
-        call s:G.change_mode(1)
+        call s:G.change_mode()
 
         "what comes after 'y'; check for 'yy'
         let S = substitute(M, r, '', '')

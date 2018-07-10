@@ -53,7 +53,7 @@ fun! s:Edit.run_normal(cmd, recursive, count, maps) dict
 
     let c = a:count>1? a:count : ''
     let s:cmd = a:recursive? ("normal ".c.cmd) : ("normal! ".c.cmd)
-    if s:X() | call s:G.change_mode(1) | endif
+    if s:X() | call s:G.change_mode() | endif
 
     call self.before_macro(a:maps)
 
@@ -87,7 +87,7 @@ fun! s:Edit.run_visual(cmd, recursive, ...) dict
 
     let g:VM.last_visual = [cmd, a:recursive]
     call self.after_macro(0)
-    if s:X() | call s:G.change_mode(1) | endif
+    if s:X() | call s:G.change_mode() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -112,7 +112,7 @@ fun! s:Edit.run_ex(count, ...) dict
     endif
 
     let g:VM.last_ex = cmd
-    if s:X() | call s:G.change_mode(1) | endif
+    if s:X() | call s:G.change_mode() | endif
 
     call self.before_macro(1)
     for n in range(a:count)
@@ -137,7 +137,7 @@ fun! s:Edit.run_macro(replace) dict
     let s:cmd = "@".reg
     call self.before_macro(1)
 
-    if s:X() | call s:G.change_mode(1) | endif
+    if s:X() | call s:G.change_mode() | endif
 
     call self.process()
     call self.after_macro(0)
@@ -235,7 +235,7 @@ endfun
 fun! s:Edit.post_process(reselect, ...) dict
 
     if a:reselect
-        if !s:X()      | call s:G.change_mode(1) |  endif
+        if !s:X() | call s:G.change_mode() | endif
         for r in s:R()
             call r.bytes([a:1, a:1 + s:v.W[r.index]])
         endfor

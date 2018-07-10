@@ -79,9 +79,8 @@ endfun
 " Change mode
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.change_mode(silent) dict
+fun! s:Global.change_mode(...) dict
     let g:VM.extend_mode = !s:X()
-    let s:v.silence = a:silent
 
     let ix = s:v.index
     call s:F.Scroll.get()
@@ -91,10 +90,14 @@ fun! s:Global.change_mode(silent) dict
         call self.collapse_regions()
     endif
 
-    let s:v.restore_scroll = !a:silent          "restore winline if called manually
     call self.select_region(ix)
-    let x = s:X()? 'Extend' : 'Cursor'
-    call s:F.count_msg(0, ['Switched to '.x.' Mode. ', 'WarningMsg'])
+
+    if a:0  "called manually
+        let s:v.restore_scroll = 1
+        call s:F.Scroll.restore()
+        let x = s:X()? 'Extend' : 'Cursor'
+        call s:F.count_msg(0, ['Switched to '.x.' Mode. ', 'WarningMsg'])
+    endif
 endfun
 
 
@@ -142,7 +145,7 @@ fun! s:Global.all_empty() dict
 
     for r in s:R()
         if r.a != r.b
-            if !s:X() | call self.change_mode(0) | endif
+            if !s:X() | call self.change_mode() | endif
             return 0  | endif
     endfor
     return 1

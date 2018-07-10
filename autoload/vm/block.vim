@@ -91,7 +91,7 @@ endfun
 fun! s:Block.start() dict
     if s:v.eco | return | endif
 
-    if !s:X() | call s:G.change_mode(1) | endif
+    if !s:X() | call s:G.change_mode() | endif
 
     let s:v.block_mode = 1
     if s:v.only_this_always | call s:V.Funcs.toggle_option('only_this_always') | endif

@@ -131,7 +131,7 @@ fun! vm#commands#add_cursor_up(extend, count)
         if !s:skip_shorter_lines() | let N -= 1 | endif
         if s:first_line()          | break      | endif
     endwhile
-    call s:F.count_msg(1)
+    call s:F.count_msg(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -486,15 +486,19 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#mouse_column()
+    call s:check_extend_default(0)
     let start = getpos('.')[1:2]
     exe "normal! \<LeftMouse>"
     let end = getpos('.')[1:2]
     let w = start[1] - end[1]
 
     call cursor(start[0], start[1])
+    let s:v.silence = 1
     while getpos('.')[1] < end[0]
         call vm#commands#add_cursor_down(0, 1)
     endwhile
+    let s:v.silence = 0
+    call s:F.count_msg(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -552,7 +556,7 @@ endfun
 
 fun! vm#commands#merge_to_beol(eol, this)
     if s:F.no_regions() | return                  | endif
-    if s:X()            | call s:G.change_mode(1) | endif
+    if s:X()            | call s:G.change_mode()  | endif
 
     let s:v.motion = a:eol? "\<End>" : '^'
     let s:v.merge = 1
@@ -578,7 +582,7 @@ endfun
 fun! vm#commands#shrink_or_enlarge(shrink, this)
     """Reduce/enlarge selection size by 1."""
     if s:F.no_regions() | return                  | endif
-    if !s:X()           | call s:G.change_mode(1) | endif
+    if !s:X()           | call s:G.change_mode()  | endif
 
     let dir = s:v.direction
 
@@ -656,40 +660,46 @@ endfun
 " Align
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#align(count, regex)
-    if s:X() | call s:G.change_mode(1) | endif
+fun! vm#commands#align_char(count)
+    if s:X() | call s:G.change_mode() | endif
 
-    if !a:regex
-        let n = a:count | let s = n>1? 's' : ''
-        echohl Label    | echo 'Align with '.n.' char'.s.' > '   | echohl None
+    let n = a:count | let s = n>1? 's' : ''
+    echohl Label    | echo 'Align with '.n.' char'.s.' > '   | echohl None
 
-        let C = [] | let s = 'czp'
-        while n
-            let c = nr2char(getchar())
-            if c == "\<esc>" | echohl WarningMsg | echon ' ...Aborted' | return
-            else             | call add(C, c) | let n -= 1 | echon c
-            endif
-        endwhile
+    let C = []
+    while n
+        let c = nr2char(getchar())
+        if c == "\<esc>" | echohl WarningMsg | echon ' ...Aborted' | return
+        else             | call add(C, c) | let n -= 1 | echon c
+        endif
+    endwhile
 
-        let s:v.silence = 1
-        while !empty(C)
-            let c = remove(C, 0)
+    let s:v.silence = 1
+    let s = 'czp'    "search method: accept at cursor position
 
-            "remove region if a match isn't found, otherwise it will be aligned
-            for r in s:RS()
-                call cursor(r.l, r.a)
-                if !search(c, s, r.l) | call r.remove() | continue | endif
-                call r.update_cursor([r.l, getpos('.')[2]])
-            endfor
+    while !empty(C)
+        let c = remove(C, 0)
 
-            "TODO: strip white spaces preceding the shortest columns
-            call s:V.Edit.align()
-            let s = 'zp'
-        endwhile
-        let s:v.silence = 0
-        call s:F.count_msg(0)
-        return
-    endif
+        "remove region if a match isn't found, otherwise it will be aligned
+        for r in s:RS()
+            call cursor(r.l, r.a)
+            if !search(c, s, r.l) | call r.remove() | continue | endif
+            call r.update_cursor([r.l, getpos('.')[2]])
+        endfor
+
+        "TODO: strip white spaces preceding the shortest columns
+        call s:V.Edit.align()
+        let s = 'zp'    "change search method: don't accept at cursor position
+    endwhile
+    let s:v.silence = 0
+    call s:F.count_msg(0)
+    return
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#align_regex()
+    if s:X() | call s:G.change_mode() | endif
 
     echohl Label | let rx = input('Align with regex > ')   | echohl None
     if empty(rx) | echohl WarningMsg | echon ' ...Aborted' | return  | endif

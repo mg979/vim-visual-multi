@@ -52,7 +52,7 @@ fun! s:Insert.key(type) dict
     elseif a:type ==# 'a'
         if s:X()
             if s:v.direction        | call vm#commands#invert_direction() | endif
-            call s:G.change_mode(1) | let s:v.direction = 1               | endif
+            call s:G.change_mode()  | let s:v.direction = 1               | endif
 
         for r in s:R() | call s:V.Edit.extra_spaces.add(r) | endfor
         normal l
@@ -62,7 +62,7 @@ fun! s:Insert.key(type) dict
     else
         if s:X()
             if !s:v.direction       | call vm#commands#invert_direction() | endif
-            call s:G.change_mode(1) | endif
+            call s:G.change_mode()  | endif
 
         call self.start(0)
     endif

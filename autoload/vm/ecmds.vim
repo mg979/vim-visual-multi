@@ -64,7 +64,7 @@ fun! s:Edit.duplicate() dict
     if !s:X() | return | endif
 
     call self.yank(0, 1, 1)
-    call s:G.change_mode(1)
+    call s:G.change_mode()
     call self.paste(1, 1, 1)
 endfun
 
@@ -254,7 +254,7 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
 
     if !a:silent
         call s:F.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
-    if a:0 | call s:G.change_mode(1) | endif
+    if a:0 | call s:G.change_mode() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -337,7 +337,7 @@ endfun
 
 fun! s:Edit.align() dict
     if s:v.multiline | return                  | endif
-    if s:X()         | call s:G.change_mode(1) | endif
+    if s:X()         | call s:G.change_mode()  | endif
 
     normal D
     let max = max(map(copy(s:R()), 'virtcol([v:val.l, v:val.a])'))
@@ -402,7 +402,7 @@ fun! s:Edit._numbers(start, stop, step, sep, app) dict
 endfun
 
 fun! s:Edit.numbers(start, app) dict
-    let X = s:X() | if !X | call s:G.change_mode(1) | endif
+    let X = s:X() | if !X | call s:G.change_mode() | endif
 
     let text = []
 
@@ -445,8 +445,8 @@ fun! s:Edit.numbers(start, app) dict
     elseif n == 4        | call self._numbers(x[0],  x[1],       x[2],  x[3],   a:app) | endif
 
     "if started in cursor mode, return to it
-    if !X && a:app | exe "normal o" | call s:G.change_mode(1)
-    elseif !X      | call s:G.change_mode(1)
+    if !X && a:app | exe "normal o" | call s:G.change_mode()
+    elseif !X      | call s:G.change_mode()
     endif
 endfun
 
