@@ -186,7 +186,7 @@ fun! s:Funcs.msg(text, force) dict
 endfun
 
 fun! s:Funcs.count_msg(force, ...) dict
-    if s:v.eco                     | return
+    if s:v.eco || s:v.insert       | return
     elseif s:v.silence && !a:force | return
     elseif s:v.index < 0           | call self.msg("No selected regions.", 1) | return | endif
     let r = s:R()[s:v.index]

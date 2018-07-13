@@ -627,6 +627,7 @@ endfun
 
 fun! s:before_move()
     call s:G.reset_byte_map(0)
+    if !s:X() | let s:v.merge = 1 | endif
 
     if s:v.direction && s:always_from_back()
         call vm#commands#invert_direction()

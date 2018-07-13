@@ -286,8 +286,9 @@ fun! vm#operators#cursors(op, n, register)
             call vm#commands#motion('l', 1, 0, 0)
             call feedkeys('y')
         else
-            call vm#operators#select(1, 1, N.S.r)
-            if back | exe "normal h" | endif | normal y
+            call vm#operators#select(1, 1, N.S)
+            if back | exe "normal h" | endif
+            call feedkeys("\"".reg.'y')
         endif
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -29,6 +29,7 @@ fun! s:Edit.delete(X, register, count, process) dict
     if !a:X     "ask for motion
         call vm#operators#cursors('d', a:count, a:register) | return | endif
 
+    call s:G.merge_regions()
     let size = s:size() | let change = 0 | let text = s:G.regions_text()
     let ix = s:G.select_region_at_pos('.').index
 
@@ -231,8 +232,8 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     let register = (s:v.use_register != s:v.def_reg)? s:v.use_register :
                 \  a:def_reg?                         s:v.def_reg : v:register
 
-    if !s:min(1) | call s:F.msg('No regions selected.', 0)           | return | endif
     if !s:X()    | call vm#operators#cursors('y', v:count, register) | return | endif
+    if !s:min(1) | call s:F.msg('No regions selected.', 0)           | return | endif
 
     "invalid register
     if register == "_" | call s:F.msg('Invalid register.', 1) | return | endif
