@@ -168,9 +168,15 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1, 0)<cr>
     nnoremap        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:VM.last_visual[0], g:VM.last_visual[1])<cr>
 
+    inoremap <expr> <Plug>(VM-Insert-Arrow-w)          <sid>Insert('w')
+    inoremap <expr> <Plug>(VM-Insert-Arrow-b)          <sid>Insert('b')
+    inoremap <expr> <Plug>(VM-Insert-Arrow-W)          <sid>Insert('W')
+    inoremap <expr> <Plug>(VM-Insert-Arrow-B)          <sid>Insert('B')
+    inoremap <expr> <Plug>(VM-Insert-Arrow-e)          <sid>Insert('e')
+    inoremap <expr> <Plug>(VM-Insert-Arrow-ge)         <sid>Insert('ge')
+    inoremap <expr> <Plug>(VM-Insert-Arrow-E)          <sid>Insert('E')
+    inoremap <expr> <Plug>(VM-Insert-Arrow-gE)         <sid>Insert('gE')
     inoremap <expr> <Plug>(VM-Insert-Left-Arrow)       <sid>Insert('h')
-    inoremap <expr> <Plug>(VM-Insert-Down-Arrow)       <sid>Insert('j')
-    inoremap <expr> <Plug>(VM-Insert-Up-Arrow)         <sid>Insert('k')
     inoremap <expr> <Plug>(VM-Insert-Right-Arrow)      <sid>Insert('l')
     inoremap <expr> <Plug>(VM-Insert-Return)           <sid>Insert('cr')
     inoremap <expr> <Plug>(VM-Insert-Del)              <sid>Insert('x')
@@ -224,10 +230,14 @@ fun! s:Insert(key)
     elseif a:key ==? 'x'        "x/X
         "only join undo if there's been a change
         return "\<esc>".u.":call vm#icmds#x('".a:key."')\<cr>".i
-    elseif index(split('hjkl^', '\zs'), a:key) >= 0
+    elseif index(split('hlwbWBeE', '\zs'), a:key) >= 0
+        return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
+    elseif a:key ==? 'ge'
         return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
     elseif a:key == '$'
         return "\<esc>".u.":call b:VM_Selection.Insert.key('A')\<cr>"
+    elseif a:key == '^'
+        return "\<esc>".u.":call b:VM_Selection.Insert.key('I')\<cr>"
     elseif a:key == 'p'         "c-v
         return "\<esc>".u.":call vm#icmds#paste()\<cr>".i
     elseif a:key == 'cw'        "c-w

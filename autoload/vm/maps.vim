@@ -262,10 +262,18 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Maps.edit_start() dict
-    imap <silent> <nowait> <buffer> <Up>            <Plug>(VM-Insert-Up-Arrow)
-    imap <silent> <nowait> <buffer> <Down>          <Plug>(VM-Insert-Down-Arrow)
+    imap <silent> <nowait> <buffer> <C-Right>       <Plug>(VM-Insert-Arrow-w)
+    imap <silent> <nowait> <buffer> <C-Left>        <Plug>(VM-Insert-Arrow-b)
+    imap <silent> <nowait> <buffer> <C-S-Right>     <Plug>(VM-Insert-Arrow-W)
+    imap <silent> <nowait> <buffer> <C-S-Left>      <Plug>(VM-Insert-Arrow-B)
+    imap <silent> <nowait> <buffer> <C-Up>          <Plug>(VM-Insert-Arrow-ge)
+    imap <silent> <nowait> <buffer> <C-Down>        <Plug>(VM-Insert-Arrow-e)
+    imap <silent> <nowait> <buffer> <C-S-Up>        <Plug>(VM-Insert-Arrow-gE)
+    imap <silent> <nowait> <buffer> <C-S-Down>      <Plug>(VM-Insert-Arrow-E)
     imap <silent> <nowait> <buffer> <Left>          <Plug>(VM-Insert-Left-Arrow)
     imap <silent> <nowait> <buffer> <Right>         <Plug>(VM-Insert-Right-Arrow)
+    imap <silent> <nowait> <buffer> <Up>            <nop>
+    imap <silent> <nowait> <buffer> <Down>          <nop>
     imap <silent> <nowait> <buffer> <CR>            <Plug>(VM-Insert-Return)
     imap <silent> <nowait> <buffer> <BS>            <Plug>(VM-Insert-BS)
     imap <silent> <nowait> <buffer> <C-v>           <Plug>(VM-Insert-Paste)
@@ -441,10 +449,18 @@ fun! s:Maps.edit_stop() dict
     for m in (s:ctr_i)
         exe "iunmap <buffer> <C-".m.">"
     endfor
+    iunmap <buffer> <C-Right>
+    iunmap <buffer> <C-Left>
+    iunmap <buffer> <C-S-Right>
+    iunmap <buffer> <C-S-Left>
+    iunmap <buffer> <C-Up>
+    iunmap <buffer> <C-Down>
+    iunmap <buffer> <C-S-Up>
+    iunmap <buffer> <C-S-Down>
+    iunmap <buffer> <Left>
+    iunmap <buffer> <Right>
     iunmap <buffer> <Up>
     iunmap <buffer> <Down>
-    iunmap <buffer> <Right>
-    iunmap <buffer> <Left>
     iunmap <buffer> <CR>
     iunmap <buffer> <BS>
     silent! nunmap <buffer> <M-o>
