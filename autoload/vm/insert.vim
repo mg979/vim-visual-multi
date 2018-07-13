@@ -80,6 +80,11 @@ fun! s:Insert.start(append) dict
     let I = self
     let I._index = get(I, '_index', -1)
 
+    if !s:v.insert && g:VM_dynamic_synmaxcol && s:v.index > g:VM_dynamic_synmaxcol
+        let scol = 40 - s:v.index + g:VM_dynamic_synmaxcol
+        let &synmaxcol = scol>1? scol : 1
+    endif
+
     if s:v.insert
         let R = s:G.select_region(I.index)
     elseif g:VM_pick_first_after_n_cursors && len(s:R()) > g:VM_pick_first_after_n_cursors
@@ -197,6 +202,7 @@ fun! s:Insert.stop() dict
 
     "reindent all and adjust cursors position, only if filetype allows
     let &indentkeys = s:v.indentkeys
+    let &synmaxcol = s:v.synmaxcol
     if !empty(&ft)
 
         if index(g:VM_no_reindent_filetype, &ft) >= 0

@@ -40,6 +40,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldhls           = &hls
     let s:v.oldcase          = [&smartcase, &ignorecase]
     let s:v.indentkeys       = &indentkeys
+    let s:v.synmaxcol        = &synmaxcol
 
     "nvim clipboard default
     if has('nvim')
@@ -135,6 +136,7 @@ fun! vm#reset(...)
     let &lz          = s:v.oldlz
     let &ch          = s:v.oldch
     let &hls         = s:v.oldhls
+    let &synmaxcol   = s:v.synmaxcol
     let &indentkeys  = s:v.indentkeys
     if has('nvim') | let &clipboard = s:v.clipboard | endif
     call vm#commands#regex_reset()
