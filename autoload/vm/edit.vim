@@ -259,23 +259,25 @@ endfun
 
 let s:Edit.extra_spaces = {}
 
-fun! s:Edit.extra_spaces.remove() dict
+fun! s:Edit.extra_spaces.remove(...) dict
     "remove the extra space only if it comes after r.b, and it's just before \n
     for i in s:v.extra_spaces
-        let r = s:R()[i]
-        call cursor(r.L, r.b<col([r.L, '$'])-1? r.b+1 : r.b)
-        while line('.') == r.L && s:F.char_under_cursor() ==# ' '
-            normal! x
-        endwhile
+        let l = s:R()[i].L + (a:0? a:1 : 0)
+        if getline(l)[-1:-1] ==# ' '
+            call cursor(l, 1)
+            silent! undojoin
+            normal! $x
+        endif
     endfor
     let s:v.extra_spaces = []
 endfun
 
-fun! s:Edit.extra_spaces.add(r) dict
+fun! s:Edit.extra_spaces.add(r, ...) dict
     "add space if empty line(>) or eol(=)
+    "a:0 is called by insert c-w, that requires an additional extra space
     let L = getline(a:r.L)
-    if a:r.b > len(L) || (a:r.b == len(L) && L[-1:-1] != ' ')
-        call setline(a:r.L, L.' ')
+    if a:r.b > len(L) || (a:r.b == len(L) && (L[-1:-1] != ' ' || a:0))
+        call setline(a:r.L, a:0? L.'  ' : L.' ')
         call add(s:v.extra_spaces, a:r.index)
     endif
 endfun

@@ -100,9 +100,9 @@ fun! vm#icmds#cw()
 
     for r in s:R()
         if s:eol(r)
-            call s:V.Edit.extra_spaces.add(r)
-            call r.bytes([1+n,1+n])
-            let n += 1
+            call s:V.Edit.extra_spaces.add(r, 1)
+            call r.bytes([2+n,2+n])
+            let n += 2
         endif
     endfor
     call vm#operators#select(1, 1, 'b')
@@ -164,6 +164,7 @@ fun! vm#icmds#return()
     endfor
     normal ^
     silent! undojoin
+    call s:V.Edit.extra_spaces.remove(-1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
