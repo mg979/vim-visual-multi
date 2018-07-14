@@ -279,6 +279,7 @@ fun! s:Maps.edit_start() dict
     imap <silent> <nowait> <buffer> <C-v>           <Plug>(VM-Insert-Paste)
     imap <silent> <nowait> <buffer> <C-w>           <Plug>(VM-Insert-CtrlW)
     imap <silent> <nowait> <buffer> <C-d>           <Plug>(VM-Insert-Del)
+    imap <silent> <nowait> <buffer> <Del>           <Plug>(VM-Insert-Del)
     imap <silent> <nowait> <buffer> <C-a>           <Plug>(VM-Insert-CtrlA)
     imap <silent> <nowait> <buffer> <C-e>           <Plug>(VM-Insert-CtrlE)
     imap <silent> <nowait> <buffer> <C-b>           <Plug>(VM-Insert-Left-Arrow)
@@ -463,6 +464,7 @@ fun! s:Maps.edit_stop() dict
     iunmap <buffer> <Down>
     iunmap <buffer> <CR>
     iunmap <buffer> <BS>
+    iunmap <buffer> <Del>
     silent! nunmap <buffer> <M-o>
     silent! nunmap <buffer> <del>
     silent! nunmap <buffer> <C-t>

@@ -273,7 +273,7 @@ endfun
 fun! s:Edit.extra_spaces.add(r) dict
     "add space if empty line(>) or eol(=)
     let L = getline(a:r.L)
-    if a:r.b >= len(L)
+    if a:r.b > len(L) || (a:r.b == len(L) && L[-1:-1] != ' ')
         call setline(a:r.L, L.' ')
         call add(s:v.extra_spaces, a:r.index)
     endif

@@ -29,7 +29,6 @@ fun! s:Edit.delete(X, register, count, process) dict
     if !a:X     "ask for motion
         call vm#operators#cursors('d', a:count, a:register) | return | endif
 
-    call s:G.merge_regions()
     let size = s:size() | let change = 0 | let text = s:G.regions_text()
     let ix = s:G.select_region_at_pos('.').index
 
