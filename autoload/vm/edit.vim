@@ -18,6 +18,7 @@ fun! vm#edit#init()
 
     let s:v.use_register = s:v.def_reg
     let s:v.new_text     = ''
+    let s:v.old_text     = ''
     let s:v.W            = []
     let s:v.storepos     = []
     let s:v.insert_marks = {}
@@ -26,7 +27,7 @@ fun! vm#edit#init()
     let s:can_multiline  = 0
 
     call vm#icmds#init()
-    return extend(s:Edit, vm#ecmds#init())
+    return extend(s:Edit, vm#ecmds1#init())
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -179,7 +180,7 @@ endfun
 fun! s:special(cmd, r, args)
     "Some commands need special adjustments while being processed.
 
-    if a:args[0] ==#'del'
+    if a:args[0] ==# 'del'
         "<del> key deletes \n if executed at eol
         call a:r.bytes([s:change, s:change])
         call cursor(a:r.l, a:r.a)
@@ -189,7 +190,7 @@ fun! s:special(cmd, r, args)
         return 1
 
     elseif a:args[0] ==# 'd'
-        "store deleted text so that it can all be put in the register
+        "PROBABLY UNUSED: store deleted text so that it can all be put in the register
         call a:r.bytes([s:change, s:change])
         call cursor(a:r.l, a:r.a)
         exe a:cmd
@@ -247,7 +248,7 @@ fun! s:Edit.post_process(reselect, ...) dict
     "clear highlight now, then update regions
     call clearmatches()
 
-    "update, restore position and clear var
+    "update, restore position and clear vars
     let pos = empty(s:v.storepos)? '.' : s:v.storepos
     call s:G.update_and_select_region(pos) | let s:v.storepos = []
 endfun

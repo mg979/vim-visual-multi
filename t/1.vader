@@ -1,0 +1,66 @@
+Before (set clipboard):
+  let @" = "TEST"
+  let g:VM.registers.t = ['t1', 't2', 't3']
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Given (Text):
+  let let let
+  let let let
+  let let let
+
+Do (paste unnamed):
+  \<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>p\<esc>
+
+Expect:
+  TEST TEST TEST
+  TEST TEST TEST
+  TEST TEST TEST
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Given (Text):
+  bet bet bet
+  bet bet bet
+  bet bet bet
+
+Do (paste 't' VM register, repeat with unnamed):
+  \<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>"tp\<esc>
+  \<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>p\<esc>
+
+Expect:
+  t1 t2 t3
+  TEST TEST TEST
+  TEST TEST TEST
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Given (Text):
+  bet bet bet
+  bet bet bet
+  bet bet bet
+
+Do (extend 3 cursors down, $~):
+  3\<M-C-Down>$~\<esc>
+
+Expect:
+  BET BET BET
+  BET BET BET
+  BET BET BET
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Given (Text):
+  ret ret ret
+  ret ret ret
+  ret ret ret
+
+Do (append numbers with _ separator, then ~):
+  \<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>\<C-d>
+  zN_\<cr>~\<esc>
+
+Expect:
+  RET_1 RET_2 RET_3
+  RET_4 RET_5 RET_6
+  RET_7 RET_8 RET_9
+

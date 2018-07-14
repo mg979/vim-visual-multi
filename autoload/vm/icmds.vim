@@ -115,7 +115,7 @@ endfun
 fun! vm#icmds#paste()
     call s:G.select_region(-1)
     let s:v.restart_insert = 1
-    call s:V.Edit.paste(1, 1, 1)
+    call s:V.Edit.paste(1, 1, 1, '"')
     let s:v.restart_insert = 0
     call s:G.select_region(s:V.Insert.index)
 endfun
