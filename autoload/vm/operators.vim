@@ -221,8 +221,14 @@ fun! vm#operators#cursors(op, n, register)
         elseif s:ia(c)                       | echon c | let M .= c
             let c = nr2char(getchar())       | echon c | let M .= c | break
 
-        elseif a:op ==# 'c' && c==#'s'       | echon c | let M .= c
+        elseif a:op ==# 'c' && c==?'s'       | echon c | let M .= c
             let c = nr2char(getchar())       | echon c | let M .= c
+            let c = nr2char(getchar())       | echon c | let M .= c | break
+
+        elseif a:op ==# 'y' && c==?'s'       | echon c | let M .= c
+            let c = nr2char(getchar())       | echon c | let M .= c
+            if s:ia(c)
+                let c = nr2char(getchar())   | echon c | let M .= c | endif
             let c = nr2char(getchar())       | echon c | let M .= c | break
 
         elseif a:op ==# 'd' && c==#'s'       | echon c | let M .= c
@@ -267,6 +273,10 @@ fun! vm#operators#cursors(op, n, register)
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
     elseif a:op ==# 'y'
+
+        "ys surround
+        if M[:1] ==? 'ys' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
+
         call s:G.change_mode()
 
         "what comes after 'y'; check for 'yy'
@@ -298,7 +308,7 @@ fun! vm#operators#cursors(op, n, register)
     elseif a:op ==# 'c'
 
         "cs surround
-        if M[:1] ==# 'cs' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
+        if M[:1] ==? 'cs' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
 
         "what comes after 'c'; check for 'cc'
         let S = substitute(M, r, '', '')
