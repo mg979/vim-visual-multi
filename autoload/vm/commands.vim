@@ -473,13 +473,14 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#from_visual_selection(subtract)
+fun! vm#commands#from_visual(t)
     let mode = visualmode()
     call s:check_extend_default(1)
     let s:v.silence = 1
 
-    if a:subtract | call vm#visual#subtract(mode)
-    else          | call vm#visual#add(mode)
+    if a:t ==# 'subtract' | call vm#visual#subtract(mode)
+    elseif a:t ==# 'add'  | call vm#visual#add(mode)
+    else                  | call vm#visual#cursors(mode)
     endif
 endfun
 

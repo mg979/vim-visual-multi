@@ -7,10 +7,6 @@ fun! vm#visual#add(mode)
 
     if a:mode ==# 'v'     | call s:vchar()
     elseif a:mode ==# 'V' | call s:vline()
-
-        call s:G.split_lines()
-        call s:G.remove_empty_lines()
-
     else
         let w = s:vblock()
         if w | exe "normal ".w."l" | endif
@@ -18,6 +14,12 @@ fun! vm#visual#add(mode)
 
     call s:remove_group(0)
     call s:G.rebuild_from_map()
+
+    if a:mode ==# 'V'
+        call s:G.split_lines()
+        call s:G.remove_empty_lines()
+    endif
+
     call s:G.update_and_select_region(0, s:v.IDs_list[-1])
     if w | call s:F.toggle_option('block_mode', 0) | endif
 endfun
@@ -37,6 +39,32 @@ fun! vm#visual#subtract(mode)
 
     call s:remove_group(1)
     call s:G.rebuild_from_map()
+    call s:G.update_and_select_region(0, s:v.IDs_list[-1])
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#visual#cursors(mode)
+    """Create cursors, one for each line of the visual selection."""
+
+    call s:create_group()
+
+    "convert to visual block, if not V
+    if a:mode ==# 'v' | exe "normal! \<C-v>" | endif
+
+    if a:mode ==# 'V' | call s:vline()
+    else              | call s:vblock()
+    endif
+
+    call s:remove_group(0)
+    call s:G.rebuild_from_map()
+
+    if a:mode ==# 'V'
+        call s:G.split_lines()
+        call s:G.remove_empty_lines()
+    endif
+
+    call s:G.change_mode()
     call s:G.update_and_select_region(0, s:v.IDs_list[-1])
 endfun
 

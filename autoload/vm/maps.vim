@@ -45,7 +45,7 @@ fun! vm#maps#permanent()
         nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
         nmap <silent> <C-d>       <Plug>(VM-Find-Under)
         xmap <silent> <C-d>       <Plug>(VM-Find-Subword-Under)
-        xmap <silent> <M-a>       <Plug>(VM-Add-Visual)
+        xmap <silent> <M-a>       <Plug>(VM-Visual-Add)
     endif
 
     if g:VM_default_mappings
@@ -64,6 +64,7 @@ fun! vm#maps#permanent()
         nmap <silent> <M-k>      <Plug>(VM-Add-Cursor-Up)
 
         xmap <silent> <M-j>      <Plug>(VM-Find-Operator)
+        xmap <silent> <M-k>      <Plug>(VM-Visual-Cursors)
     endif
 
     if g:VM_mouse_mappings
@@ -217,7 +218,7 @@ fun! s:Maps.start() dict
 
     nmap     <silent> <nowait> <buffer> <M-j>       <Plug>(VM-Add-Cursor-Down)
     nmap     <silent> <nowait> <buffer> <M-k>       <Plug>(VM-Add-Cursor-Up)
-    xmap     <silent> <nowait> <buffer> <M-s>       <Plug>(VM-Subtract-Visual)
+    xmap     <silent> <nowait> <buffer> <M-s>       <Plug>(VM-Visual-Subtract)
 
     "select/find operators
     nmap     <silent>          <buffer> s           <Plug>(VM-Select-All-Operator)
@@ -516,6 +517,7 @@ fun! s:Maps.default_stop() dict
         xunmap <M-A>
         xunmap <M-a>
         xunmap <M-j>
+        xunmap <M-k>
         nunmap <M-j>
         nunmap <M-k>
     endif
