@@ -1,15 +1,9 @@
-"commands to add/subtract visual selection
+"commands to add/subtract regions with visual selection
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#visual#add(mode)
 
-    let s:V = b:VM_Selection
-    let s:v = s:V.Vars
-    let s:G = s:V.Global
-    let s:F = s:V.Funcs
-    let w   = 0
-
-    call s:create_group()
+    let w = s:create_group()
 
     if a:mode ==# 'v'     | call s:vchar()
     elseif a:mode ==# 'V' | call s:vline()
@@ -23,6 +17,7 @@ fun! vm#visual#add(mode)
     endif
 
     call s:remove_group(0)
+    call s:G.rebuild_from_map()
     call s:G.update_and_select_region(0, s:v.IDs_list[-1])
     if w | call s:F.toggle_option('block_mode', 0) | endif
 endfun
@@ -79,6 +74,11 @@ endfun
 
 fun! s:create_group()
     "use a temporary regions group, so that it won't interfere with previous regions
+    let s:V = b:VM_Selection
+    let s:v = s:V.Vars
+    let s:G = s:V.Global
+    let s:F = s:V.Funcs
+
     let s:old_group = s:v.active_group
     let s:v.active_group = -1
     let s:V.Groups[-1] = []

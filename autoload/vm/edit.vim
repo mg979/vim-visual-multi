@@ -262,6 +262,10 @@ let s:Edit.extra_spaces = {}
 fun! s:Edit.extra_spaces.remove(...) dict
     "remove the extra space only if it comes after r.b, and it's just before \n
     for i in s:v.extra_spaces
+
+        "region has been removed for some reason(merge, ...)
+        if i >= len(s:R()) | continue | endif
+
         let l = s:R()[i].L + (a:0? a:1 : 0)
         if getline(l)[-1:-1] ==# ' '
             call cursor(l, 1)
