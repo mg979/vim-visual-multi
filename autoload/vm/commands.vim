@@ -250,13 +250,18 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#ctrld()
+fun! vm#commands#ctrld(count)
     call s:init(1, 0, 0)
 
     if !s:X() && s:is_r()
         normal siw
     else
-        call vm#commands#find_under(0, 1, 0, 1)
+        let s:v.silence = 1
+        for i in range(a:count)
+            call vm#commands#find_under(0, 1, 0, 1, 1)
+        endfor
+        let s:v.silence = 0
+        call s:F.count_msg(0)
     endif
 endfun
 
@@ -277,7 +282,7 @@ fun! vm#commands#find_under(visual, whole, inclusive, ...)
     call s:Search.add()
     let R = s:G.new_region()
     if R.h && !s:v.multiline | call s:F.toggle_option('multiline') | endif
-    call s:F.count_msg(1)
+    call s:F.count_msg(0)
     return (a:0 && a:visual)? vm#commands#find_next(0, 0) : s:check_overlap(R)
 endfun
 
@@ -327,7 +332,7 @@ fun! s:get_next()
     if s:X()
         silent keepjumps normal! ngny`]
         let R = s:G.new_region()
-        call s:F.count_msg(1)
+        call s:F.count_msg(0)
     else
         silent keepjumps normal! ngny`[
         let R = vm#commands#add_cursor_at_word(0, 0)

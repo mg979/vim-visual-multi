@@ -29,17 +29,17 @@ fun! vm#plugs#init()
     xnoremap        <Plug>(VM-Visual-Subtract)         :<c-u>call vm#commands#from_visual('subtract')<cr>
     nnoremap        <Plug>(VM-Remove-Empty-Lines)      :<c-u>call vm#commands#remove_empty_lines()<cr>
 
-    nnoremap        <Plug>(VM-Find-Under)              :call vm#commands#ctrld()<cr>
+    nnoremap        <Plug>(VM-Find-Under)              :<c-u>call vm#commands#ctrld(v:count1)<cr>
     xnoremap        <Plug>(VM-Find-Subword-Under)      y:call vm#commands#find_under(1, 0, 0, 1)<cr>`]
-    nnoremap        <Plug>(VM-Find-I-Word)             :call vm#commands#find_under(0, 0, 0)<cr>
-    nnoremap        <Plug>(VM-Find-A-Word)             :call vm#commands#find_under(0, 0, 1)<cr>
-    nnoremap        <Plug>(VM-Find-I-Whole-Word)       :call vm#commands#find_under(0, 1, 0)<cr>
-    nnoremap        <Plug>(VM-Find-A-Whole-Word)       :call vm#commands#find_under(0, 1, 1)<cr>
+    nnoremap        <Plug>(VM-Find-I-Word)             :<c-u>call vm#commands#find_under(0, 0, 0)<cr>
+    nnoremap        <Plug>(VM-Find-A-Word)             :<c-u>call vm#commands#find_under(0, 0, 1)<cr>
+    nnoremap        <Plug>(VM-Find-I-Whole-Word)       :<c-u>call vm#commands#find_under(0, 1, 0)<cr>
+    nnoremap        <Plug>(VM-Find-A-Whole-Word)       :<c-u>call vm#commands#find_under(0, 1, 1)<cr>
     xnoremap        <Plug>(VM-Find-A-Subword)          y:call vm#commands#find_under(1, 0, 0)<cr>`]
     xnoremap        <Plug>(VM-Find-A-Whole-Subword)    y:call vm#commands#find_under(1, 1, 0)<cr>`]
 
-    nnoremap        <Plug>(VM-Star)                    :call <sid>Star(1)<cr>
-    nnoremap        <Plug>(VM-Hash)                    :call <sid>Star(2)<cr>
+    nnoremap        <Plug>(VM-Star)                    :<c-u>call <sid>Star(1)<cr>
+    nnoremap        <Plug>(VM-Hash)                    :<c-u>call <sid>Star(2)<cr>
     xnoremap        <Plug>(VM-Star)                    y:call <sid>Star(3)<cr>`]
     xnoremap        <Plug>(VM-Hash)                    y:call <sid>Star(4)<cr>`]
 
