@@ -129,6 +129,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-J)                  :<C-u>call b:VM_Selection.Edit.run_normal('J', 0, v:count1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-Edit-~)                  :<C-u>call b:VM_Selection.Edit.run_normal('~', 0, 1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-Edit-Del)                :call b:VM_Selection.Edit.del_key()<cr>
+    nnoremap        <Plug>(VM-Edit-Dot)                :call b:VM_Selection.Edit.dot()<cr>
     nnoremap        <Plug>(VM-Edit-a-Append)           :<C-u>call b:VM_Selection.Insert.key('a')<cr>
     nnoremap        <Plug>(VM-Edit-A-Append)           :<C-u>call b:VM_Selection.Insert.key('A')<cr>
     nnoremap        <Plug>(VM-Edit-i-Insert)           :<C-u>call b:VM_Selection.Insert.key('i')<cr>

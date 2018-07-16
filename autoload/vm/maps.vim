@@ -89,7 +89,7 @@ let s:leader   = split('ypPscx"', '\zs')
 let s:leader2  = []
 let s:fkeys    = ['2']
 let s:sfkeys   = ['2']
-let s:edit     = split('dcpPyxXraAiIOJDCY~', '\zs')
+let s:edit     = split('dcpPyxXraAiIOJDCY~.', '\zs')
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
@@ -286,6 +286,7 @@ fun! s:Maps.edit_start() dict
     imap <silent> <nowait> <buffer> <C-b>           <Plug>(VM-Insert-Left-Arrow)
     imap <silent> <nowait> <buffer> <C-f>           <Plug>(VM-Insert-Right-Arrow)
 
+    nmap <silent> <nowait> <buffer> .               <Plug>(VM-Edit-Dot)
     nmap <silent> <nowait> <buffer> i               <Plug>(VM-Edit-i-Insert)
     nmap <silent> <nowait> <buffer> I               <Plug>(VM-Edit-I-Insert)
     nmap <silent> <nowait> <buffer> a               <Plug>(VM-Edit-a-Append)

@@ -209,7 +209,6 @@ endfun
 
 fun! vm#operators#cursors(op, n, register)
     if s:X() | call s:G.change_mode() | endif
-    call s:F.Scroll.get()
 
     let reg = a:register | let r = "\"".reg | let hl1 = 'WarningMsg' | let hl2 = 'Label'
 
@@ -256,6 +255,8 @@ fun! vm#operators#cursors(op, n, register)
         else | echon ' ...Aborted'           | return  | endif
     endwhile
 
+    let s:v.dot = M
+
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "delete
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -291,6 +292,9 @@ fun! vm#operators#cursors(op, n, register)
 
         "ys surround
         if M[:1] ==? 'ys' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
+
+        "reset dot for yank command
+        let s:v.dot = ''
 
         call s:G.change_mode()
 
@@ -332,9 +336,9 @@ fun! vm#operators#cursors(op, n, register)
         let [S, N] = s:total_count(n, S)
         let C      = S[0]==#'c'
 
-        "convert w,W to e,E (if motions)
-        if     S ==# 'w' | let S = 'e'
-        elseif S ==# 'W' | let S = 'E' | endif
+        "convert w,W to e,E (if motions), also in dot
+        if     S ==# 'w' | let S = 'e' | call substitute(s:v.dot, 'w', 'e', '')
+        elseif S ==# 'W' | let S = 'E' | call substitute(s:v.dot, 'W', 'E', '') | endif
 
         "for c$, cc, ensure there is only one region per line
         if (S == '$' || S == 'c') | call s:G.one_region_per_line() | endif

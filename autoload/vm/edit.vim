@@ -146,6 +146,29 @@ fun! s:Edit.run_macro(replace) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Dot
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.dot() dict
+    let dot = s:v.dot
+    if !s:X() && !empty(dot)
+
+        if dot[0] ==? 'c' && dot[1] !=? 's'     "change -> delete + z.
+            let dot = 'd'.dot[1:]
+            exe "normal ".dot."z."
+
+        elseif dot[1] ==? 's'                   "surround needs run_normal()
+            call self.run_normal(dot, 1, 1, 0)
+
+        else
+            exe "normal ".dot
+        endif
+    else
+        normal z.
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Region processing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
