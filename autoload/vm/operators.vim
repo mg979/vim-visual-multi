@@ -10,6 +10,7 @@ fun! vm#operators#init()
     let s:Search  = s:V.Search
 
     let s:v.finding    = 0
+    let s:correct_word = 0
     let s:R            = { -> s:V.Regions      }
     let s:X            = { -> g:VM.extend_mode }
 endfun
@@ -81,10 +82,12 @@ fun! s:select(cmd)
     for r in Rs
         call cursor(r[0], r[1])
         exe "normal ".a:cmd
-        call s:G.get_region()
+        call s:check_word(s:G.get_region())
     endfor
+
     call s:V.Edit.after_macro(0)
-    let s:v.silence = 0
+    let s:v.silence    = 0
+    let s:correct_word = 0
 
     if !s:v.multiline
         for r in s:R()
@@ -95,6 +98,17 @@ fun! s:select(cmd)
 
     if empty(s:v.search) | let @/ = ''                      | endif
     if g:VM.oldupdate    | let &updatetime = g:VM.oldupdate | endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:check_word(R)
+    """For cursor motions w/W, exclude the last char, except if at eol."""
+    if s:correct_word
+        if a:R.b != col([a:R.L, '$'])-1
+            call a:R.bytes([0, -1])
+        endif
+    endif
 endfun
 
 
@@ -172,9 +186,9 @@ endfun
 " Operations at cursors (yank, delete, change)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:back = { c -> index(split('FTlb0^', '\zs'), c) >= 0      }
+let s:back = { c -> index(split('FTlbB0^', '\zs'), c) >= 0     }
 let s:ia   = { c -> index(['i', 'a'], c) >= 0                  }
-let s:all  = { c -> index(split('hlwebWEB$^0', '\zs'), c) >= 0 }
+let s:mono = { c -> index(split('hlwebWEB$^0', '\zs'), c) >= 0 }
 let s:find = { c -> index(split('fFtT', '\zs'), c) >= 0        }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -234,7 +248,7 @@ fun! vm#operators#cursors(op, n, register)
         elseif a:op ==# 'd' && c==#'s'       | echon c | let M .= c
             let c = nr2char(getchar())       | echon c | let M .= c | break
 
-        elseif s:all(c)                      | echon c | let M .= c | break
+        elseif s:mono(c)                     | echon c | let M .= c | break
         elseif a:op ==# 'd' && c==#'d'       | echon c | let M .= c | break
         elseif a:op ==# 'c' && c==#'c'       | echon c | let M .= c | break
         elseif a:op ==# 'y' && c==#'y'       | echon c | let M .= c | break
@@ -252,18 +266,19 @@ fun! vm#operators#cursors(op, n, register)
         if M[:1] ==# 'ds' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
 
         "what comes after 'd'; check for 'dd'
-        let S = substitute(M, r, '', '')
-        let S = substitute(S, '^\d*d\(.*\)$', '\1', '')
+        let S      = substitute(M, r, '', '')
+        let S      = substitute(S, '^\d*d\(.*\)$', '\1', '')
         let [S, N] = s:total_count(n, S)
-        let D = S[0]==#'d' | let back = s:back(S)
+        let D      = S[0]==#'d'
 
         "for D, d$, dd: ensure there is only one region per line
         if (S == '$' || S == 'd') | call s:G.one_region_per_line() | endif
 
         if D | call s:V.Edit.run_normal('dd', 0, 1, 0)
         else
+            let s:correct_word = S ==? 'w'
             call vm#operators#select(1, 1, N.S)
-            if back | exe "normal h" | endif
+            if s:back(S) | exe "normal h" | endif
             call s:V.Edit.delete(1, reg, 1, 1)
         endif
         call s:G.merge_regions()
@@ -280,10 +295,10 @@ fun! vm#operators#cursors(op, n, register)
         call s:G.change_mode()
 
         "what comes after 'y'; check for 'yy'
-        let S = substitute(M, r, '', '')
-        let S = substitute(S, '^\d*y\(.*\)$', '\1', '')
+        let S      = substitute(M, r, '', '')
+        let S      = substitute(S, '^\d*y\(.*\)$', '\1', '')
         let [S, N] = s:total_count(n, S)
-        let Y = S[0]==#'y' | let back = s:back(S)
+        let Y      = S[0]==#'y'
 
         "for Y, y$, yy, ensure there is only one region per line
         if (S == '$' || S == 'y') | call s:G.one_region_per_line() | endif
@@ -296,8 +311,9 @@ fun! vm#operators#cursors(op, n, register)
             call vm#commands#motion('l', 1, 0, 0)
             call feedkeys('y')
         else
+            let s:correct_word = S ==? 'w'
             call vm#operators#select(1, 1, N.S)
-            if back | exe "normal h" | endif
+            if s:back(S) | exe "normal h" | endif
             call feedkeys("\"".reg.'y')
         endif
 
@@ -311,10 +327,14 @@ fun! vm#operators#cursors(op, n, register)
         if M[:1] ==? 'cs' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
 
         "what comes after 'c'; check for 'cc'
-        let S = substitute(M, r, '', '')
-        let S = substitute(S, '^\d*c\(.*\)$', '\1', '')
+        let S      = substitute(M, r, '', '')
+        let S      = substitute(S, '^\d*c\(.*\)$', '\1', '')
         let [S, N] = s:total_count(n, S)
-        let C = S[0]==#'c' | let back = s:back(S)
+        let C      = S[0]==#'c'
+
+        "convert w,W to e,E (if motions)
+        if     S ==# 'w' | let S = 'e'
+        elseif S ==# 'W' | let S = 'E' | endif
 
         "for c$, cc, ensure there is only one region per line
         if (S == '$' || S == 'c') | call s:G.one_region_per_line() | endif
@@ -335,7 +355,7 @@ fun! vm#operators#cursors(op, n, register)
 
         else
             call vm#operators#select(1, 1, N.S)
-            if back | exe "normal h" | endif
+            if s:back(S) | exe "normal h" | endif
             call feedkeys("\"".reg.'c')
         endif
     endif
