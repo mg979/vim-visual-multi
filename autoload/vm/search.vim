@@ -165,6 +165,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Search.apply(s) dict
+    let s:v.search = a:s
+    let @/ = join(s:v.search, '\|')
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 fun! s:Search.case() dict
     if &smartcase              "smartcase        ->  case sensitive

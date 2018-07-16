@@ -84,7 +84,7 @@ let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+xvVnN@.<>', '\zs'), '"z".v:
 let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
 let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
 let s:cx_maps  = split('elLp', '\zs') + ['<F1>', '<F12>']
-let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a', 'z', 'r' ]
+let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a', 'z', 'r', 's' ]
 let s:leader   = split('ypPscx"', '\zs')
 let s:leader2  = []
 let s:fkeys    = ['2']
@@ -218,6 +218,8 @@ fun! s:Maps.start() dict
 
     nmap     <silent> <nowait> <buffer> <M-j>       <Plug>(VM-Add-Cursor-Down)
     nmap     <silent> <nowait> <buffer> <M-k>       <Plug>(VM-Add-Cursor-Up)
+
+    nmap     <silent> <nowait> <buffer> <M-s>       <Plug>(VM-Split-Regions)
     xmap     <silent> <nowait> <buffer> <M-s>       <Plug>(VM-Visual-Subtract)
 
     "select/find operators

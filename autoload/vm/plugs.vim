@@ -1,5 +1,5 @@
 let g:VM.select_motions = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E']
-let g:VM.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '$', '0', '^', '%']
+let g:VM.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '$', '0', '^', '%', 'ge', 'gE']
 let g:VM.find_motions   = ['f', 'F', 't', 'T']
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -27,6 +27,7 @@ fun! vm#plugs#init()
     xnoremap        <Plug>(VM-Visual-Cursors)          :<c-u>call vm#commands#from_visual('cursors')<cr>
     xnoremap        <Plug>(VM-Visual-Add)              :<c-u>call vm#commands#from_visual('add')<cr>
     xnoremap        <Plug>(VM-Visual-Subtract)         :<c-u>call vm#commands#from_visual('subtract')<cr>
+    nnoremap        <Plug>(VM-Split-Regions)           :<c-u>call vm#visual#split()<cr>
     nnoremap        <Plug>(VM-Remove-Empty-Lines)      :<c-u>call vm#commands#remove_empty_lines()<cr>
 
     nnoremap        <Plug>(VM-Find-Under)              :<c-u>call vm#commands#ctrld(v:count1)<cr>

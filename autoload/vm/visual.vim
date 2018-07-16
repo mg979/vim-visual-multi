@@ -68,6 +68,48 @@ fun! vm#visual#cursors(mode)
     call s:G.update_and_select_region(0, s:v.IDs_list[-1])
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#visual#split()
+    """Split regions with regex pattern."""
+    call s:init() | if !len(s:R()) | return | endif
+
+    echohl Type   | let pat = input('Pattern to remove > ') | echohl None
+    if empty(pat) | call s:F.msg('Command aborted.', 1)     | return | endif
+
+    let s = 'nczpW'                             "search method: accept at cursor position
+    let stop = s:R()[-1].L                      "stop at line of last region
+    call cursor(s:R()[0].l, s:R()[0].a)         "cursor at region 0, check for a match
+    if !search(pat, s, stop)
+        call s:F.msg("\t\tPattern not found", 1)
+        call s:G.select_region(s:v.index)
+        return | endif
+
+    call s:create_group()
+
+    "backup old patterns and create new regions
+    let oldsearch = s:v.search | let s:v.search = []
+    let @/ = pat               | call s:V.Search.get_slash_reg()
+
+    while 1
+        if !search(pat, s, stop) | break | endif
+        let pos = getpos('.')
+        silent! keepjumps normal! gny`]
+        call s:G.new_region()
+        if pos == getpos('.')
+            normal! n
+            if getpos('.')[1] > stop | break | endif
+        endif
+        let s = 'zpW'    "change search method: don't accept at cursor position
+    endwhile
+
+    "subtract regions and rebuild from map
+    call s:remove_group(1)
+    call s:G.rebuild_from_map()
+    call s:V.Search.apply(oldsearch)
+    call s:G.update_and_select_region()
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:vchar()
@@ -102,11 +144,7 @@ endfun
 
 fun! s:create_group()
     "use a temporary regions group, so that it won't interfere with previous regions
-    let s:V = b:VM_Selection
-    let s:v = s:V.Vars
-    let s:G = s:V.Global
-    let s:F = s:V.Funcs
-
+    call s:init()
     let s:old_group = s:v.active_group
     let s:v.active_group = -1
     let s:V.Groups[-1] = []
@@ -122,3 +160,13 @@ fun! s:remove_group(subtract)
     let s:v.active_group = s:old_group | call remove(s:V.Groups, -1)
     let s:v.silence = 0
 endfun
+
+fun! s:init()
+    "init script vars
+    let s:V = b:VM_Selection
+    let s:v = s:V.Vars
+    let s:G = s:V.Global
+    let s:F = s:V.Funcs
+    let s:R = { -> s:V.Regions }
+endfun
+
