@@ -145,7 +145,7 @@ fun! vm#operators#find(start, visual, ...)
     "set the cursor to the start of the yanked region, then find occurrences until end mark is met
     keepjumps normal! `]
     let endline = getpos('.')[1]
-    keepjumps normal! `[
+    keepjumps normal! `[h
 
     while 1
         if !search(join(s:v.search, '\|'), 'znp', endline) | break | endif

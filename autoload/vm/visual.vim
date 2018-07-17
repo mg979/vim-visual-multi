@@ -77,14 +77,15 @@ fun! vm#visual#split()
     echohl Type   | let pat = input('Pattern to remove > ') | echohl None
     if empty(pat) | call s:F.msg('Command aborted.', 1)     | return | endif
 
-    let s = 'nczpW'                             "search method: accept at cursor position
-    let stop = s:R()[-1].L                      "stop at line of last region
-    call cursor(s:R()[0].l, s:R()[0].a)         "cursor at region 0, check for a match
-    if !search(pat, s, stop)
+    let stop = s:R()[-1].L              "stop at line of last region
+    call s:F.Cursor(s:R()[0].A-2)       "cursor before region 0, check for a match
+    if !search(pat, 'nczW', stop)       "search method: accept at cursor position
         call s:F.msg("\t\tPattern not found", 1)
         call s:G.select_region(s:v.index)
         return | endif
 
+    let oldmap = copy(s:V.Bytes)
+    call vm#commands#erase_regions()
     call s:create_group()
 
     "backup old patterns and create new regions
@@ -92,18 +93,12 @@ fun! vm#visual#split()
     let @/ = pat               | call s:V.Search.get_slash_reg()
 
     while 1
-        if !search(pat, s, stop) | break | endif
-        let pos = getpos('.')
-        silent! keepjumps normal! gny`]
-        call s:G.new_region()
-        if pos == getpos('.')
-            normal! n
-            if getpos('.')[1] > stop | break | endif
-        endif
-        let s = 'zpW'    "change search method: don't accept at cursor position
+        if !search(pat, 'zn', stop) | break | endif
+        call vm#commands#find_next(0,0,1)
     endwhile
 
     "subtract regions and rebuild from map
+    call extend(s:V.Bytes, oldmap)
     call s:remove_group(1)
     call s:G.rebuild_from_map()
     call s:V.Search.apply(oldsearch)
