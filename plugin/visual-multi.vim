@@ -71,10 +71,11 @@ fun! <SID>VM_Init()
     endif
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 augroup plugin-visual-multi-start
     au!
     au VimEnter     * call <SID>VM_Init()
-    au BufEnter     * let b:VM_Selection = {}
     if has('nvim')
         au TextYankPost * call vm#operators#after_yank()
     else

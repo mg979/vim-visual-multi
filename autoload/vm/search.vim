@@ -25,11 +25,13 @@ let s:Search = {}
 
 fun! s:Search.get_pattern(register, regex) dict
     let t = getreg(a:register)
+    let p = t
     if !a:regex
-        let symbol = len(t) == 1 && match(t, '\W') >= 0
         let t = self.escape_pattern(t)
-        if s:v.whole_word && !symbol | let t = '\<'.t.'\>' | endif | endif
-    return t
+        let p = s:v.whole_word? '\<'.t.'\>' : t
+        let p = search(p, 'nzc')? p : t
+    endif
+    return p
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -128,10 +130,9 @@ endfun
 
 fun! s:Search.validate() dict
     """Check whether the current search is valid, if not, clear the search."""
-    if s:v.eco | return | endif
+    if s:v.eco || empty(s:v.search) | return | endif
 
     let @/ = join(s:v.search, '\|')
-    if empty(@/) | return | endif
 
     "pattern found, ok
     if search(@/, 'cnw') | return | endif
@@ -140,6 +141,7 @@ fun! s:Search.validate() dict
         let i = 0
         for p in s:v.search
             if !search(@/, 'cnw') | call remove(s:v.search, i) | break | endif
+            let i += 1
         endfor | break
     endwhile
     let @/ = join(s:v.search, '\|')

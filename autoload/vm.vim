@@ -217,13 +217,15 @@ fun! s:VM_cursor_moved()
 endfun
 
 fun! s:buffer_leave()
-    if !empty(get(b:, 'VM_Selection', {}))
+    if !empty(get(b:, 'VM_Selection', {})) && !b:VM_Selection.Vars.insert
         call vm#reset(1)
     endif
 endfun
 
 fun! s:buffer_enter()
-    let b:VM_Selection = {}
+    if empty(get(b:, 'VM_Selection', {}))
+        let b:VM_Selection = {}
+    endif
 endfun
 
 fun! s:set_reg()
