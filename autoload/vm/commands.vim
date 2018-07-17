@@ -549,17 +549,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#end_back(fast, this, ...)
-    if s:sublime()      | call s:init(0, 1, 1)     | call s:G.new_cursor() | endif
-    if s:F.no_regions() | return                   | endif
-    if a:0 && !s:X()    | let g:VM.extend_mode = 1 | endif
-
-    let s:v.motion = a:fast? 'BBW' : 'bbbe'
-    call s:call_motion(a:this)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! vm#commands#merge_to_beol(eol, this)
     if s:F.no_regions() | return                  | endif
     if s:X()            | call s:G.change_mode()  | endif

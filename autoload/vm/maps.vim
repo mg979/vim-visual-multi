@@ -1,6 +1,13 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 "Initialize
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+let s:Maps = {}
+let s:maps = {}
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#maps#init()
     let s:V = b:VM_Selection
@@ -8,94 +15,30 @@ fun! vm#maps#init()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 "Global mappings
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#maps#default()
-
-    if g:VM_s_mappings
-        nmap <silent> s]         <Plug>(VM-Find-I-Word)
-        nmap <silent> s[         <Plug>(VM-Find-A-Word)
-        nmap <silent> s}         <Plug>(VM-Find-I-Whole-Word)
-        nmap <silent> s{         <Plug>(VM-Find-A-Word)
-        xmap <silent> s]         <Plug>(VM-Find-A-Subword)
-        xmap <silent> s[         <Plug>(VM-Find-A-Whole-Subword)
-    endif
-
-    if !g:VM_permanent_mappings
-        call vm#maps#permanent()
-    endif
+    """This function is run at vim start, or when mappings must be re-enabled.
+    """Permanent mappings are loaded if they haven't been already.
+    let s:maps = s:load_maps()
+    if g:VM_s_mappings          | call s:assign(s:maps.permanent.s, 0) | endif
+    if !g:VM_permanent_mappings | call vm#maps#permanent()             | endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#maps#permanent()
-    if g:VM_sublime_mappings
-        nmap <silent> <M-C-Down>  <Plug>(VM-Select-Cursor-Down)
-        nmap <silent> <M-C-Up>    <Plug>(VM-Select-Cursor-Up)
-        nmap <silent> <S-Down>    <Plug>(VM-Select-j)
-        nmap <silent> <S-Up>      <Plug>(VM-Select-k)
-        nmap <silent> <S-Right>   <Plug>(VM-Select-l)
-        nmap <silent> <S-Left>    <Plug>(VM-Select-h)
-        nmap <silent> <C-S-Right> <Plug>(VM-Select-w)
-        nmap <silent> <C-S-Left>  <Plug>(VM-Select-b)
-        nmap <silent> <C-S-Down>  <Plug>(VM-Select-Line-Down)
-        nmap <silent> <C-S-Up>    <Plug>(VM-Select-Line-Up)
-        nmap <silent> <M-C-Right> <Plug>(VM-Select-E)
-        nmap <silent> <M-C-Left>  <Plug>(VM-Fast-Back)
-        nmap <silent> <C-d>       <Plug>(VM-Find-Under)
-        xmap <silent> <C-d>       <Plug>(VM-Find-Subword-Under)
-        xmap <silent> <M-a>       <Plug>(VM-Visual-Add)
-    endif
-
-    if g:VM_default_mappings
-
-        nmap <silent> gs         <Plug>(VM-Select-Operator)
-        nmap <silent> gr         <Plug>(VM-Erase-Regions)
-
-        nmap <silent> g<space>   <Plug>(VM-Add-Cursor-At-Pos)
-        nmap <silent> g<cr>      <Plug>(VM-Add-Cursor-At-Word)
-        nmap <silent> g/         <Plug>(VM-Start-Regex-Search)
-        xmap <silent> g/         <Plug>(VM-Start-Visual-Search)
-
-        nmap <silent> <M-A>      <Plug>(VM-Select-All)
-        xmap <silent> <M-A>      <Plug>(VM-Select-All)
-        nmap <silent> <M-j>      <Plug>(VM-Add-Cursor-Down)
-        nmap <silent> <M-k>      <Plug>(VM-Add-Cursor-Up)
-
-        xmap <silent> <M-j>      <Plug>(VM-Find-Operator)
-        xmap <silent> <M-k>      <Plug>(VM-Visual-Cursors)
-    endif
-
-    if g:VM_mouse_mappings
-        nmap <silent> <C-LeftMouse>      <Plug>(VM-Mouse-Cursor)
-        nmap <silent> <C-RightMouse>     <Plug>(VM-Mouse-Word)
-        nmap <silent> <M-C-RightMouse>   <Plug>(VM-Mouse-Column)
-    endif
+    """This function is run at vim start.
+    if g:VM_sublime_mappings | call s:assign(s:maps.permanent.sublime, 0) | endif
+    if g:VM_default_mappings | call s:assign(s:maps.permanent.default, 0) | endif
+    if g:VM_mouse_mappings   | call s:assign(s:maps.permanent.mouse, 0)   | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:NVIM = has('gui_running') || has('nvim')
-
-let s:simple   = split('nNqQU*#o[]{}?/:uMSsmR', '\zs')
-
-let s:zeta     = ['Z', 'z0n', 'z0N'] + map(split('z-+xvVnN@.<>', '\zs'), '"z".v:val')
-let s:ctr_maps = ['h', 'l', 'w', 'c', 'z' ]
-let s:ctr_i    = ['w', 'a', 'e', 'v', 'f', 'b', 'd', ]
-let s:cx_maps  = split('elLp', '\zs') + ['<F1>', '<F12>']
-let s:alt_maps = ['j', 'k', 'q', 'm', 'd', 'a', 'z', 'r', 's' ]
-let s:leader   = split('ypPscx"', '\zs')
-let s:leader2  = []
-let s:fkeys    = ['2']
-let s:sfkeys   = ['2']
-let s:edit     = split('dcpPyxXraAiIOJDCY~.', '\zs')
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps init
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-let s:Maps = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -116,6 +59,7 @@ fun! s:Maps.mappings(activate, ...) dict
         for m in keys(s:remaps)
             exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Remap-Motion-".s:remaps[m].")"
         endfor
+
     elseif !a:activate && g:VM.mappings_enabled
         call self.end()
         call self.default_stop()
@@ -139,117 +83,23 @@ endfun
 
 fun! s:Maps.start() dict
 
-    if g:VM_sublime_mappings
-        nmap     <silent> <nowait> <buffer> <C-s>  <Plug>(VM-Skip-Region)
-        nmap     <silent> <nowait> <buffer> <F2>   <Plug>(VM-Goto-Next)
-        nmap     <silent> <nowait> <buffer> <S-F2> <Plug>(VM-Goto-Prev)
-    endif
+    if g:VM_sublime_mappings | call s:assign(s:maps.buffer.sublime, 1) | endif
+    if g:VM_s_mappings       | call s:assign(s:maps.buffer.s, 1)       | endif
 
     nmap              <nowait> <buffer> :          <Plug>(VM-:)
     nmap              <nowait> <buffer> /          <Plug>(VM-/)
     nmap              <nowait> <buffer> ?          <Plug>(VM-?)
-
-    "basic mappings
-    nmap     <silent> <nowait> <buffer> <Tab>      <Plug>(VM-Switch-Mode)
-    nmap     <silent> <nowait> <buffer> <BS>       <Plug>(VM-Toggle-Block)
-    nmap     <silent> <nowait> <buffer> <CR>       <Plug>(VM-Toggle-Only-This-Region)
-
-    nmap     <silent> <nowait> <buffer> o          <Plug>(VM-Invert-Direction)
-    nmap     <silent> <nowait> <buffer> q          <Plug>(VM-Skip-Region)
-    nmap     <silent> <nowait> <buffer> Q          <Plug>(VM-Remove-Region)
-    nmap     <silent> <nowait> <buffer> <M-q>      <Plug>(VM-Remove-Last-Region)
-    nmap     <silent> <nowait> <buffer> <M-m>      <Plug>(VM-Merge-Regions)
-    nmap     <silent> <nowait> <buffer> M          <Plug>(VM-Toggle-Multiline)
-    nmap     <silent> <nowait> <buffer> u          <Plug>(VM-Undo)
-    nmap     <silent> <nowait> <buffer> U          <Plug>(VM-Undo-Visual)
     nnoremap <silent> <nowait> <buffer> n          n
     nnoremap <silent> <nowait> <buffer> N          N
 
-    "movement / selection
-
-    if !g:VM_s_mappings
-        nmap     <silent> <nowait> <buffer> s]         <Plug>(VM-Find-I-Word)
-        nmap     <silent> <nowait> <buffer> s[         <Plug>(VM-Find-A-Word)
-        nmap     <silent> <nowait> <buffer> s}         <Plug>(VM-Find-I-Whole-Word)
-        nmap     <silent> <nowait> <buffer> s{         <Plug>(VM-Find-A-Whole-Word)
-        xmap     <silent> <nowait> <buffer> s]         <Plug>(VM-Find-A-Subword)
-        xmap     <silent> <nowait> <buffer> s[         <Plug>(VM-Find-A-Whole-Subword)
-    endif
-
-    nmap     <silent> <nowait> <buffer> ]          <Plug>(VM-Find-Next)
-    nmap     <silent> <nowait> <buffer> [          <Plug>(VM-Find-Prev)
-    nmap     <silent> <nowait> <buffer> }          <Plug>(VM-Goto-Next)
-    nmap     <silent> <nowait> <buffer> {          <Plug>(VM-Goto-Prev)
-
-    nmap     <silent> <nowait> <buffer> *          <Plug>(VM-Star)
-    nmap     <silent> <nowait> <buffer> #          <Plug>(VM-Hash)
-    xmap     <silent> <nowait> <buffer> *          <Plug>(VM-Star)
-    xmap     <silent> <nowait> <buffer> #          <Plug>(VM-Hash)
-
-    nmap     <silent> <nowait> <buffer> <S-End>    <Plug>(VM-Merge-To-Eol)
-    nmap     <silent> <nowait> <buffer> <S-Home>   <Plug>(VM-Merge-To-Bol)
-
-    "case conversion
-    nmap     <silent> <nowait> <buffer> <leader>c  <Plug>(VM-Case-Conversion-Menu)
-
-    "search
-    nmap     <silent> <nowait> <buffer> <leader>s  <Plug>(VM-Search-Menu)
-    nmap     <silent> <nowait> <buffer> <M-r>      <Plug>(VM-Rewrite-Last-Search)
-
-    "utility
-    nmap     <silent> <nowait> <buffer> <leader>x  <Plug>(VM-Tools-Menu)
-    nmap     <silent> <nowait> <buffer> <C-x><F1>  <Plug>(VM-Show-Help)
-    nmap              <nowait> <buffer> <leader>"  <Plug>(VM-Show-Registers)
-    nmap     <silent> <nowait> <buffer> <C-x>e     <Plug>(VM-Remove-Empty-Lines)
-    nmap     <silent> <nowait> <buffer> <C-x>p     <Plug>(VM-Filter-Regions)
-    nmap     <silent> <nowait> <buffer> <C-x>l     <Plug>(VM-Filter-Lines)
-    nmap     <silent> <nowait> <buffer> <C-x>L     <Plug>(VM-Filter-Lines-Strip)
-    nmap     <silent> <nowait> <buffer> <c-x><F12> <Plug>(VM-Toggle-Debug)
-
-    "ctrl
-    nmap     <silent> <nowait> <buffer> <c-c>      <Plug>(VM-Case-Setting)
-    nmap     <silent> <nowait> <buffer> <c-w>      <Plug>(VM-Toggle-Whole-Word)
-
-
-    call s:arrows()
-
-    nmap     <silent> <nowait> <buffer> <C-h>       <Plug>(VM-This-Motion-h)
-    nmap     <silent> <nowait> <buffer> <C-l>       <Plug>(VM-This-Motion-l)
-
-    nmap     <silent> <nowait> <buffer> <M-j>       <Plug>(VM-Add-Cursor-Down)
-    nmap     <silent> <nowait> <buffer> <M-k>       <Plug>(VM-Add-Cursor-Up)
-
-    nmap     <silent> <nowait> <buffer> <M-s>       <Plug>(VM-Split-Regions)
-    xmap     <silent> <nowait> <buffer> <M-s>       <Plug>(VM-Visual-Subtract)
-
-    "select/find operators
-    nmap     <silent>          <buffer> s           <Plug>(VM-Select-All-Operator)
-    nmap     <silent> <nowait> <buffer> m           <Plug>(VM-Find-Operator)
-
-    "shrink/enlarge
-    nmap     <silent> <nowait> <buffer> z-          <Plug>(VM-Motion-Shrink)
-    nmap     <silent> <nowait> <buffer> z+          <Plug>(VM-Motion-Enlarge)
-
-    "normal/ex/visual
-    nmap     <silent> <nowait> <buffer> S           <Plug>(VM-Run-Surround)
-    nmap              <nowait> <buffer> zz          <Plug>(VM-Run-Normal)
-    nmap     <silent> <nowait> <buffer> Z           <Plug>(VM-Run-Last-Normal)
-    nmap              <nowait> <buffer> zv          <Plug>(VM-Run-Visual)
-    nmap     <silent> <nowait> <buffer> zV          <Plug>(VM-Run-Last-Visual)
-    nmap     <silent> <nowait> <buffer> <M-z>       <Plug>(VM-Run-Last-Visual)
-    nmap              <nowait> <buffer> zx          <Plug>(VM-Run-Ex)
-    nmap     <silent> <nowait> <buffer> <C-z>       <Plug>(VM-Run-Last-Ex)
-    nmap     <silent> <nowait> <buffer> z@          <Plug>(VM-Run-Macro)
-    nmap     <silent> <nowait> <buffer> z.          <Plug>(VM-Run-Dot)
-    nmap     <silent> <nowait> <buffer> z<          <Plug>(VM-Align-Char)
-    nmap     <silent> <nowait> <buffer> z>          <Plug>(VM-Align-Regex)
-    nmap              <nowait> <buffer> zn          <Plug>(VM-Numbers)
-    nmap     <silent> <nowait> <buffer> zN          <Plug>(VM-Numbers-Append)
-    nmap              <nowait> <buffer> z0n         <Plug>(VM-Zero-Numbers)
-    nmap     <silent> <nowait> <buffer> z0N         <Plug>(VM-Zero-Numbers-Append)
-
-    "edit
-    call self.edit_start()
+    call s:assign(s:maps.buffer.basic, 1)
+    call s:assign(s:maps.buffer.select, 1)
+    call s:assign(s:maps.buffer.utility, 1)
+    call s:assign(s:maps.buffer.commands, 1)
+    call s:assign(s:maps.buffer.zeta, 1)
+    call s:assign(s:maps.buffer.arrows, 1)
+    call s:assign(s:maps.buffer.insert, 1, 'Insert-')
+    call s:assign(s:maps.buffer.edit, 1, 'Edit-')
 
     "custom commands
     let cm = g:VM_custom_commands
@@ -257,271 +107,128 @@ fun! s:Maps.start() dict
         exe "nmap <silent> <nowait> <buffer> ".cm[m][0]." <Plug>(VM-".m.")"
     endfor
 
-    "double leader
-    "nmap     <silent> <nowait> <buffer> <leader><leader>@ <Plug>(VM-Run-Macro-Replace)
-
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Maps.edit_start() dict
-    imap <silent> <nowait> <buffer> <C-Right>       <Plug>(VM-Insert-Arrow-w)
-    imap <silent> <nowait> <buffer> <C-Left>        <Plug>(VM-Insert-Arrow-b)
-    imap <silent> <nowait> <buffer> <C-S-Right>     <Plug>(VM-Insert-Arrow-W)
-    imap <silent> <nowait> <buffer> <C-S-Left>      <Plug>(VM-Insert-Arrow-B)
-    imap <silent> <nowait> <buffer> <C-Up>          <Plug>(VM-Insert-Arrow-ge)
-    imap <silent> <nowait> <buffer> <C-Down>        <Plug>(VM-Insert-Arrow-e)
-    imap <silent> <nowait> <buffer> <C-S-Up>        <Plug>(VM-Insert-Arrow-gE)
-    imap <silent> <nowait> <buffer> <C-S-Down>      <Plug>(VM-Insert-Arrow-E)
-    imap <silent> <nowait> <buffer> <Left>          <Plug>(VM-Insert-Left-Arrow)
-    imap <silent> <nowait> <buffer> <Right>         <Plug>(VM-Insert-Right-Arrow)
-    imap <silent> <nowait> <buffer> <Up>            <nop>
-    imap <silent> <nowait> <buffer> <Down>          <nop>
-    imap <silent> <nowait> <buffer> <CR>            <Plug>(VM-Insert-Return)
-    imap <silent> <nowait> <buffer> <BS>            <Plug>(VM-Insert-BS)
-    imap <silent> <nowait> <buffer> <C-v>           <Plug>(VM-Insert-Paste)
-    imap <silent> <nowait> <buffer> <C-w>           <Plug>(VM-Insert-CtrlW)
-    imap <silent> <nowait> <buffer> <C-d>           <Plug>(VM-Insert-Del)
-    imap <silent> <nowait> <buffer> <Del>           <Plug>(VM-Insert-Del)
-    imap <silent> <nowait> <buffer> <C-a>           <Plug>(VM-Insert-CtrlA)
-    imap <silent> <nowait> <buffer> <C-e>           <Plug>(VM-Insert-CtrlE)
-    imap <silent> <nowait> <buffer> <C-b>           <Plug>(VM-Insert-Left-Arrow)
-    imap <silent> <nowait> <buffer> <C-f>           <Plug>(VM-Insert-Right-Arrow)
-
-    nmap <silent> <nowait> <buffer> .               <Plug>(VM-Edit-Dot)
-    nmap <silent> <nowait> <buffer> i               <Plug>(VM-Edit-i-Insert)
-    nmap <silent> <nowait> <buffer> I               <Plug>(VM-Edit-I-Insert)
-    nmap <silent> <nowait> <buffer> a               <Plug>(VM-Edit-a-Append)
-    nmap <silent> <nowait> <buffer> A               <Plug>(VM-Edit-A-Append)
-    nmap <silent> <nowait> <buffer> c               <Plug>(VM-Edit-c-Change)
-    nmap <silent> <nowait> <buffer> C               <Plug>(VM-Edit-C-Change)
-    nmap <silent> <nowait> <buffer> O               <Plug>(VM-Edit-o-New-Line)
-    nmap <silent> <nowait> <buffer> <M-o>           <Plug>(VM-Edit-O-New-Line)
-    nmap <silent> <nowait> <buffer> x               <Plug>(VM-Edit-x)
-    nmap <silent> <nowait> <buffer> X               <Plug>(VM-Edit-X)
-    nmap <silent> <nowait> <buffer> J               <Plug>(VM-Edit-J)
-    nmap <silent> <nowait> <buffer> D               <Plug>(VM-Edit-D)
-    nmap <silent> <nowait> <buffer> Y               <Plug>(VM-Edit-Y)
-    nmap <silent> <nowait> <buffer> ~               <Plug>(VM-Edit-~)
-    nmap <silent> <nowait> <buffer> <del>           <Plug>(VM-Edit-Del)
-    nmap <silent> <nowait> <buffer> r               <Plug>(VM-Edit-Replace)
-    nmap <silent> <nowait> <buffer> R               <Plug>(VM-Edit-Replace-Pattern)
-    nmap <silent> <nowait> <buffer> d               <Plug>(VM-Edit-Delete)
-    nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
-    nmap <silent> <nowait> <buffer> <leader>y       <Plug>(VM-Edit-Soft-Yank)
-    nmap <silent> <nowait> <buffer> <C-t>           <Plug>(VM-Edit-Transpose)
-    nmap <silent> <nowait> <buffer> <M-d>           <Plug>(VM-Edit-Duplicate)
-    nmap <silent> <nowait> <buffer> <M-a>           <Plug>(VM-Align)
-
-    nmap <silent> <nowait> <buffer> p               <Plug>(VM-Edit-p-Paste-Regions)
-    nmap <silent> <nowait> <buffer> P               <Plug>(VM-Edit-P-Paste-Regions)
-    nmap <silent> <nowait> <buffer> <leader>p       <Plug>(VM-Edit-p-Paste-Normal)
-    nmap <silent> <nowait> <buffer> <leader>P       <Plug>(VM-Edit-P-Paste-Normal)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:arrows()
-    nmap     <silent> <nowait> <buffer> <M-C-Down>  <Plug>(VM-Select-Cursor-Down)
-    nmap     <silent> <nowait> <buffer> <M-C-Up>    <Plug>(VM-Select-Cursor-Up)
-    nmap     <silent> <nowait> <buffer> <C-S-Down>  <Plug>(VM-Select-Line-Down)
-    nmap     <silent> <nowait> <buffer> <C-S-Up>    <Plug>(VM-Select-Line-Up)
-
-    nmap     <silent> <nowait> <buffer> <C-Down>    <Plug>(VM-Find-Next)
-    nmap     <silent> <nowait> <buffer> <C-Up>      <Plug>(VM-Find-Prev)
-    nmap     <silent> <nowait> <buffer> <M-Down>    <Plug>(VM-Goto-Next)
-    nmap     <silent> <nowait> <buffer> <M-Up>      <Plug>(VM-Goto-Prev)
-
-    nmap     <silent> <nowait> <buffer> <S-Down>    <Plug>(VM-Select-j)
-    nmap     <silent> <nowait> <buffer> <S-Up>      <Plug>(VM-Select-k)
-    nmap     <silent> <nowait> <buffer> <S-Right>   <Plug>(VM-Select-l)
-    nmap     <silent> <nowait> <buffer> <S-Left>    <Plug>(VM-Select-h)
-    nmap     <silent> <nowait> <buffer> <M-Right>   <Plug>(VM-This-Select-l)
-    nmap     <silent> <nowait> <buffer> <M-Left>    <Plug>(VM-This-Select-h)
-
-    nmap     <silent> <nowait> <buffer> <C-Right>   <Plug>(VM-Select-e)
-    nmap     <silent> <nowait> <buffer> <C-Left>    <Plug>(VM-End-Back)
-    nmap     <silent> <nowait> <buffer> <C-S-Right> <Plug>(VM-Select-w)
-    nmap     <silent> <nowait> <buffer> <C-S-Left>  <Plug>(VM-Select-b)
-    nmap     <silent> <nowait> <buffer> <M-C-Right> <Plug>(VM-Select-E)
-    nmap     <silent> <nowait> <buffer> <M-C-Left>  <Plug>(VM-Fast-Back)
-    nmap     <silent> <nowait> <buffer> <M-S-Right> <Plug>(VM-Edit-Shift-Right)
-    nmap     <silent> <nowait> <buffer> <M-S-Left>  <Plug>(VM-Edit-Shift-Left)
-endfun
-
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Buffer maps remove
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Maps.end() dict
-    for m in (s:simple + s:zeta)
-        exe "nunmap <buffer> ".m
-    endfor
-
-    for m in (s:alt_maps)
-        exe "nunmap <buffer> <M-".m.">"
-    endfor
-
-    for m in (s:ctr_maps)
-        exe "nunmap <buffer> <C-".m.">"
-    endfor
-
-    for m in (s:fkeys)
-        exe "nunmap <buffer> <F".m.">"
-    endfor
-
-    for m in (s:sfkeys)
-        exe "nunmap <buffer> <S-F".m.">"
-    endfor
-
-    for m in (s:cx_maps)
-        exe "nunmap <buffer> <C-x>".m
-    endfor
-
-    call self.edit_stop()
-
-    for m in (s:leader)
-        exe "nunmap <buffer> <leader>".m
-    endfor
+    if g:VM_sublime_mappings | call s:unmap(s:maps.buffer.sublime, 1) | endif
+    if g:VM_s_mappings       | call s:unmap(s:maps.buffer.s, 1)       | endif
+    call s:unmap(s:maps.buffer.basic, 1)
+    call s:unmap(s:maps.buffer.select, 1)
+    call s:unmap(s:maps.buffer.utility, 1)
+    call s:unmap(s:maps.buffer.commands, 1)
+    call s:unmap(s:maps.buffer.zeta, 1)
+    call s:unmap(s:maps.buffer.arrows, 1)
+    call s:unmap(s:maps.buffer.insert, 1)
+    call s:unmap(s:maps.buffer.edit, 1)
 
     let cm = g:VM_custom_commands
     for m in keys(cm)
         exe "silent! nunmap <buffer>".cm[m][0]
     endfor
 
-    if g:VM_sublime_mappings
-        nunmap <buffer> <C-s>
-    endif
-
-    call s:arrows_end()
-
-    if !g:VM_s_mappings
-        nunmap <buffer> s]
-        nunmap <buffer> s[
-        nunmap <buffer> s}
-        nunmap <buffer> s{
-        xunmap <buffer> s]
-        xunmap <buffer> s[
-    endif
-
-    nunmap <buffer> <Tab>
-    nunmap <buffer> <BS>
-    nunmap <buffer> <CR>
-
-    xunmap <buffer> *
-    xunmap <buffer> #
-    xunmap <buffer> <M-s>
-
-    nunmap <buffer> <S-End>
-    nunmap <buffer> <S-Home>
-
+    nunmap <buffer> :
+    nunmap <buffer> /
+    nunmap <buffer> ?
+    nunmap <buffer> n
+    nunmap <buffer> N
     silent! cunmap <buffer> <cr>
     silent! cunmap <buffer> <esc>
-endfun
-
-fun! s:arrows_end()
-    nunmap <buffer> <M-C-Down>
-    nunmap <buffer> <M-C-Up>
-    nunmap <buffer> <C-Down>
-    nunmap <buffer> <C-Up>
-    nunmap <buffer> <C-S-Down>
-    nunmap <buffer> <C-S-Up>
-    nunmap <buffer> <M-Down>
-    nunmap <buffer> <M-Up>
-    nunmap <buffer> <S-Right>
-    nunmap <buffer> <S-Left>
-    nunmap <buffer> <M-Right>
-    nunmap <buffer> <M-Left>
-    nunmap <buffer> <S-Down>
-    nunmap <buffer> <S-Up>
-    nunmap <buffer> <C-Right>
-    nunmap <buffer> <C-Left>
-    nunmap <buffer> <C-S-Right>
-    nunmap <buffer> <C-S-Left>
-    nunmap <buffer> <M-C-Right>
-    nunmap <buffer> <M-C-Left>
-    nunmap <buffer> <M-S-Right>
-    nunmap <buffer> <M-S-Left>
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Maps.edit_stop() dict
-    for m in (s:edit)
-        exe "silent! nunmap <buffer> ".m
-    endfor
-    for m in (s:ctr_i)
-        exe "iunmap <buffer> <C-".m.">"
-    endfor
-    iunmap <buffer> <C-Right>
-    iunmap <buffer> <C-Left>
-    iunmap <buffer> <C-S-Right>
-    iunmap <buffer> <C-S-Left>
-    iunmap <buffer> <C-Up>
-    iunmap <buffer> <C-Down>
-    iunmap <buffer> <C-S-Up>
-    iunmap <buffer> <C-S-Down>
-    iunmap <buffer> <Left>
-    iunmap <buffer> <Right>
-    iunmap <buffer> <Up>
-    iunmap <buffer> <Down>
-    iunmap <buffer> <CR>
-    iunmap <buffer> <BS>
-    iunmap <buffer> <Del>
-    silent! nunmap <buffer> <M-o>
-    silent! nunmap <buffer> <del>
-    silent! nunmap <buffer> <C-t>
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Maps.default_stop() dict
 
-    if g:VM_s_mappings
-
-        nunmap s]
-        nunmap s[
-        nunmap s}
-        nunmap s{
-        xunmap s]
-        xunmap s[
-    endif
+    if g:VM_s_mappings         | call s:unmap(s:maps.permanent.s, 0) | endif
 
     if g:VM_permanent_mappings | return | endif
 
-    if g:VM_sublime_mappings
-        nunmap <M-C-Down>
-        nunmap <M-C-Up>
-        nunmap <S-Down>
-        nunmap <S-Up>
-        nunmap <S-Right>
-        nunmap <S-Left>
-        nunmap <C-S-Right>
-        nunmap <C-S-Left>
-        nunmap <C-S-Down>
-        nunmap <C-S-Up>
-        nunmap <M-C-Right>
-        nunmap <M-C-Left>
-        nunmap <C-d>
-        xunmap <C-d>
-    endif
-
-    if g:VM_default_mappings
-
-        nunmap gs
-        nunmap gr
-
-        nunmap g<space>
-        nunmap g<cr>
-        nunmap g/
-
-        nunmap <M-A>
-        xunmap <M-A>
-        xunmap <M-a>
-        xunmap <M-j>
-        xunmap <M-k>
-        nunmap <M-j>
-        nunmap <M-k>
-    endif
+    if g:VM_sublime_mappings | call s:unmap(s:maps.permanent.sublime, 0) | endif
+    if g:VM_default_mappings | call s:unmap(s:maps.permanent.default, 0) | endif
+    if g:VM_mouse_mappings   | call s:unmap(s:maps.permanent.mouse, 0)   | endif
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" Map dicts functions
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:load_maps()
+    """Load the mappings dictionary and integrate custom mappings."""
+    if g:VM.mappings_loaded | return s:maps | endif
+    let g:VM.mappings_loaded = 1
+
+    let g:VM_maps             = {
+                \"utility"  : {},
+                \"commands" : {},
+                \"zeta"     : {},
+                \"arrows"   : {},
+                \"insert"   : {},
+                \"edit"     : {},
+                \"s"        : {},
+                \"mouse"    : {},
+                \"default"  : {},
+                \"sublime"  : {},
+                \"basic"    : {},
+                \"select"   : {},
+                \}
+
+    if exists('*VM_init_maps') | call VM_init_maps() | endif
+    let maps = {}
+
+    let maps.permanent = vm#maps#all#permanent()
+    for section in keys(g:VM_maps)
+        for key in keys(g:VM_maps[section])
+            silent! let maps.permanent[section][key][0] = g:VM_maps[section][key]
+        endfor
+    endfor
+
+    let maps.buffer = vm#maps#all#buffer()
+    for section in keys(g:VM_maps)
+        for key in keys(g:VM_maps[section])
+            silent! let maps.buffer[section][key][0] = g:VM_maps[section][key]
+        endfor
+    endfor
+
+    return maps
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:assign(dict, buffer, ...)
+    """Assign mappings from dictionary."""
+    let M = a:dict
+    for key in keys(M)
+        let k = M[key][0]
+        if empty(k) | continue | endif
+        let p = (a:0? a:1 : '') . substitute(key, ' ', '-', 'g')
+        let m = M[key][1]
+        let _ = a:buffer? '<buffer>' : ''
+        let _ .= M[key][2]? '<silent>' : ''
+        let _ .= M[key][3]? '<nowait> ' : ' '
+        exe m."map "._.k.' <Plug>(VM-'.p.")"
+    endfor
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:unmap(dict, buffer)
+    """Unmap mappings from dictionary."""
+    let M = a:dict
+    for key in keys(M)
+        let k = M[key][0]
+        if empty(k) | continue | endif
+        let m = M[key][1]
+        let b = a:buffer? ' <buffer> ' : ' '
+        exe "silent! "m."unmap".b.k
+    endfor
+endfun
+
+

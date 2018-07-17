@@ -14,6 +14,7 @@ fun! <SID>VM_Init()
     let g:VM.extend_mode      = 0
     let g:VM.selecting        = 0
     let g:VM.mappings_enabled = 0
+    let g:VM.mappings_loaded  = 0
     let g:VM.last_ex          = ''
     let g:VM.last_normal      = ''
     let g:VM.last_visual      = ''
@@ -26,7 +27,6 @@ fun! <SID>VM_Init()
     let g:VM_mouse_mappings                   = get(g:, 'VM_mouse_mappings', 0)
     let g:VM_permanent_mappings               = get(g:, 'VM_permanent_mappings', 1)
     let g:VM_s_mappings                       = get(g:, 'VM_s_mappings', 0)
-    let g:VM_custom_mappings                  = get(g:, 'VM_custom_mappings', 0)
 
     let g:VM_custom_noremaps                  = get(g:, 'VM_custom_noremaps', {})
     let g:VM_custom_remaps                    = get(g:, 'VM_custom_remaps', {})
@@ -42,6 +42,7 @@ fun! <SID>VM_Init()
     let g:VM_autoremove_empty_lines           = get(g:, 'VM_autoremove_empty_lines', 0)
     let g:VM_pick_first_after_n_cursors       = get(g:, 'VM_pick_first_after_n_cursors', 0)
     let g:VM_dynamic_synmaxcol                = get(g:, 'VM_dynamic_synmaxcol', 20)
+    let g:VM_no_meta_mappings                 = get(g:, 'VM_no_meta_mappings', has('nvim') || has('gui_running') ? 0 : 1)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Reindentation after insert mode
