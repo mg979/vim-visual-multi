@@ -1,4 +1,4 @@
-let g:VM.select_motions = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E']
+let g:VM.select_motions = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', 'ge', 'gE', 'BBW']
 let g:VM.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '$', '0', '^', '%', 'ge', 'gE']
 let g:VM.find_motions   = ['f', 'F', 't', 'T']
 
@@ -10,8 +10,8 @@ fun! vm#plugs#init()
     nmap  <silent>  <Plug>(VM-Select-Operator)         :<c-u>call vm#operators#select(0, 0)<cr>y
     nnoremap        <Plug>(VM-Select-All-Operator)     :<c-u>call vm#operators#select(1, v:count)<cr>
 
-    nmap <expr> <silent>  <Plug>(VM-Find-Operator)           vm#operators#find(1, 0)
-    xmap <expr> <silent>  <Plug>(VM-Find-Operator)           vm#operators#find(1, 1)
+    nmap <expr> <silent>  <Plug>(VM-Find-Operator)     vm#operators#find(1, 0)
+    xmap <expr> <silent>  <Plug>(VM-Visual Find)       vm#operators#find(1, 1)
 
     nnoremap        <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0)<cr>
     nnoremap        <Plug>(VM-Add-Cursor-At-Word)      :call vm#commands#add_cursor_at_word(1, 1)<cr>
@@ -23,7 +23,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Select-Line-Up)          :call vm#commands#expand_line(0)<cr>
 
     nnoremap        <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
-    xnoremap        <Plug>(VM-Select-All)              y:call vm#commands#find_all(1, 0, 0)<cr>`]
+    xnoremap        <Plug>(VM-Visual-All)              y:call vm#commands#find_all(1, 0, 0)<cr>`]
     xnoremap        <Plug>(VM-Visual-Cursors)          :<c-u>call vm#commands#from_visual('cursors')<cr>
     xnoremap        <Plug>(VM-Visual-Add)              :<c-u>call vm#commands#from_visual('add')<cr>
     xnoremap        <Plug>(VM-Visual-Subtract)         :<c-u>call vm#commands#from_visual('subtract')<cr>
@@ -41,8 +41,8 @@ fun! vm#plugs#init()
 
     nnoremap        <Plug>(VM-Star)                    :<c-u>call <sid>Star(1)<cr>
     nnoremap        <Plug>(VM-Hash)                    :<c-u>call <sid>Star(2)<cr>
-    xnoremap        <Plug>(VM-Star)                    y:call <sid>Star(3)<cr>`]
-    xnoremap        <Plug>(VM-Hash)                    y:call <sid>Star(4)<cr>`]
+    xnoremap        <Plug>(VM-Visual-Star)             y:call <sid>Star(3)<cr>`]
+    xnoremap        <Plug>(VM-Visual-Hash)             y:call <sid>Star(4)<cr>`]
 
     nnoremap        <Plug>(VM-Toggle-Mappings)         :call b:VM_Selection.Maps.mappings_toggle()<cr>
     nnoremap        <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline', 1)<cr>
@@ -114,11 +114,8 @@ fun! vm#plugs#init()
         exe "nnoremap <Plug>(VM-".m.") ".cm[m][1]
     endfor
 
-    nnoremap        <Plug>(VM-Fast-Back)               :call vm#commands#end_back(1, 0, 1)<cr>
-    nnoremap        <Plug>(VM-End-Back)                :call vm#commands#end_back(0, 0, 1)<cr>
-
-    nnoremap        <Plug>(VM-Motion-Shrink)           :call vm#commands#shrink_or_enlarge(1, 0)<cr>
-    nnoremap        <Plug>(VM-Motion-Enlarge)          :call vm#commands#shrink_or_enlarge(0, 0)<cr>
+    nnoremap        <Plug>(VM-Shrink)                  :call vm#commands#shrink_or_enlarge(1, 0)<cr>
+    nnoremap        <Plug>(VM-Enlarge)                 :call vm#commands#shrink_or_enlarge(0, 0)<cr>
     nnoremap        <Plug>(VM-Merge-To-Eol)            :call vm#commands#merge_to_beol(1, 0)<cr>
     nnoremap        <Plug>(VM-Merge-To-Bol)            :call vm#commands#merge_to_beol(0, 0)<cr>
 
@@ -131,16 +128,18 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-~)                  :<C-u>call b:VM_Selection.Edit.run_normal('~', 0, 1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-Edit-Del)                :call b:VM_Selection.Edit.del_key()<cr>
     nnoremap        <Plug>(VM-Edit-Dot)                :call b:VM_Selection.Edit.dot()<cr>
-    nnoremap        <Plug>(VM-Edit-a-Append)           :<C-u>call b:VM_Selection.Insert.key('a')<cr>
-    nnoremap        <Plug>(VM-Edit-A-Append)           :<C-u>call b:VM_Selection.Insert.key('A')<cr>
-    nnoremap        <Plug>(VM-Edit-i-Insert)           :<C-u>call b:VM_Selection.Insert.key('i')<cr>
-    nnoremap        <Plug>(VM-Edit-I-Insert)           :<C-u>call b:VM_Selection.Insert.key('I')<cr>
-    nnoremap        <Plug>(VM-Edit-o-New-Line)         :<C-u>call b:VM_Selection.Insert.key('o')<cr>
-    nnoremap        <Plug>(VM-Edit-O-New-Line)         :<C-u>call b:VM_Selection.Insert.key('O')<cr>
+    nnoremap        <Plug>(VM-Edit-Increase)           :<C-u>call b:VM_Selection.Edit.run_normal('<c-a>', 0, v:count1, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-Decrease)           :<C-u>call b:VM_Selection.Edit.run_normal('<c-x>', 0, v:count1, 0)<cr>
+    nnoremap        <Plug>(VM-Edit-a)                  :<C-u>call b:VM_Selection.Insert.key('a')<cr>
+    nnoremap        <Plug>(VM-Edit-A)                  :<C-u>call b:VM_Selection.Insert.key('A')<cr>
+    nnoremap        <Plug>(VM-Edit-i)                  :<C-u>call b:VM_Selection.Insert.key('i')<cr>
+    nnoremap        <Plug>(VM-Edit-I)                  :<C-u>call b:VM_Selection.Insert.key('I')<cr>
+    nnoremap        <Plug>(VM-Edit-o)                  :<C-u>call b:VM_Selection.Insert.key('o')<cr>
+    nnoremap        <Plug>(VM-Edit-O)                  :<C-u>call b:VM_Selection.Insert.key('O')<cr>
+    nnoremap        <Plug>(VM-Edit-c)                  :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1, v:register)<cr>
+    nnoremap        <Plug>(VM-Edit-C)                  :<C-u>call vm#operators#cursors('c', 0, v:register)<cr>$
     nnoremap        <Plug>(VM-Edit-Delete)             :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, v:register, v:count1, 1)<cr>
     nnoremap        <Plug>(VM-Edit-Delete-Exit)        :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, v:register, v:count1, 1)<cr>:call vm#reset()<cr>
-    nnoremap        <Plug>(VM-Edit-c-Change)           :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1, v:register)<cr>
-    nnoremap        <Plug>(VM-Edit-C-Change)           :<C-u>call vm#operators#cursors('c', 0, v:register)<cr>$
     nnoremap        <Plug>(VM-Edit-Replace)            :<C-u>call b:VM_Selection.Edit.replace()<cr>
     nnoremap        <Plug>(VM-Edit-Replace-Pattern)    :<C-u>call b:VM_Selection.Edit.replace_pattern()<cr>
     nnoremap        <Plug>(VM-Edit-p-Paste-Regions)    :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 1, g:VM.extend_mode, v:register)<cr>
@@ -148,11 +147,11 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Edit-p-Paste-Normal)     :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 0, g:VM.extend_mode, v:register)<cr>
     nnoremap        <Plug>(VM-Edit-P-Paste-Normal)     :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 0, g:VM.extend_mode, v:register)<cr>
     nnoremap <expr> <Plug>(VM-Edit-Yank)               <SID>Yank(1)
-    nnoremap <expr> <Plug>(VM-Edit-Soft-Yank)          <SID>Yank(0)
-    nnoremap        <Plug>(VM-Edit-Shift-Right)        :call b:VM_Selection.Edit.shift(1)<cr>
-    nnoremap        <Plug>(VM-Edit-Shift-Left)         :call b:VM_Selection.Edit.shift(0)<cr>
-    nnoremap        <Plug>(VM-Edit-Transpose)          :call b:VM_Selection.Edit.transpose()<cr>
-    nnoremap        <Plug>(VM-Edit-Duplicate)          :call b:VM_Selection.Edit.duplicate()<cr>
+
+    nnoremap        <Plug>(VM-Shift-Right)             :call b:VM_Selection.Edit.shift(1)<cr>
+    nnoremap        <Plug>(VM-Shift-Left)              :call b:VM_Selection.Edit.shift(0)<cr>
+    nnoremap        <Plug>(VM-Transpose)               :call b:VM_Selection.Edit.transpose()<cr>
+    nnoremap        <Plug>(VM-Duplicate)               :call b:VM_Selection.Edit.duplicate()<cr>
 
     nnoremap        <Plug>(VM-Align)                   :<C-u>call b:VM_Selection.Edit.align()<cr>
     nnoremap        <Plug>(VM-Align-Char)              :<C-u>call vm#commands#align_char(v:count1)<cr>
@@ -162,7 +161,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Zero-Numbers)            :<C-u>call b:VM_Selection.Edit.numbers(v:count, 0)<cr>
     nnoremap        <Plug>(VM-Zero-Numbers-Append)     :<C-u>call b:VM_Selection.Edit.numbers(v:count, 1)<cr>
     nnoremap        <Plug>(VM-Run-Dot)                 :<C-u>call b:VM_Selection.Edit.run_normal('.', 0, v:count1, 0)<cr>
-    nnoremap        <Plug>(VM-Run-Surround)            :call b:VM_Selection.Edit.surround()<cr>
+    nnoremap        <Plug>(VM-Surround)                :call b:VM_Selection.Edit.surround()<cr>
     nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
     nnoremap        <Plug>(VM-Run-Ex)                  :<C-u>call b:VM_Selection.Edit.run_ex(v:count1)<cr>
     nnoremap        <Plug>(VM-Run-Last-Ex)             :<C-u>call b:VM_Selection.Edit.run_ex(v:count1, g:VM.last_ex)<cr>
@@ -181,13 +180,18 @@ fun! vm#plugs#init()
     inoremap <expr> <Plug>(VM-Insert-Arrow-gE)         <sid>Insert('gE')
     inoremap <expr> <Plug>(VM-Insert-Left-Arrow)       <sid>Insert('h')
     inoremap <expr> <Plug>(VM-Insert-Right-Arrow)      <sid>Insert('l')
+    inoremap <expr> <Plug>(VM-Insert-Up-Arrow)         <sid>Insert('h')
+    inoremap <expr> <Plug>(VM-Insert-Down-Arrow)       <sid>Insert('l')
     inoremap <expr> <Plug>(VM-Insert-Return)           <sid>Insert('cr')
-    inoremap <expr> <Plug>(VM-Insert-Del)              <sid>Insert('x')
     inoremap <expr> <Plug>(VM-Insert-BS)               <sid>Insert('X')
     inoremap <expr> <Plug>(VM-Insert-Paste)            <sid>Insert('p')
     inoremap <expr> <Plug>(VM-Insert-CtrlW)            <sid>Insert('cw')
+    inoremap <expr> <Plug>(VM-Insert-CtrlD)            <sid>Insert('x')
+    inoremap <expr> <Plug>(VM-Insert-Del)              <sid>Insert('x')
     inoremap <expr> <Plug>(VM-Insert-CtrlA)            <sid>Insert('^')
     inoremap <expr> <Plug>(VM-Insert-CtrlE)            <sid>Insert('$')
+    inoremap <expr> <Plug>(VM-Insert-CtrlB)            <sid>Insert('h')
+    inoremap <expr> <Plug>(VM-Insert-CtrlF)            <sid>Insert('l')
 
     "Cmdline
     nnoremap <expr> <Plug>(VM-:)                       vm#commands#regex_reset(':')
@@ -249,7 +253,9 @@ fun! s:Insert(key)
 endfun
 
 fun! s:Yank(hard)
-    if empty(b:VM_Selection.Global.is_region_at_pos('.')) | let b:VM_Selection.Vars.yanked = 1 | return 'y' | endif
+    if empty(b:VM_Selection.Global.is_region_at_pos('.'))
+        let b:VM_Selection.Vars.yanked = 1 | return 'y'
+    endif
     return ":\<C-u>call b:VM_Selection.Edit.yank(".a:hard.", 0, 0, 1)\<cr>"
 endfun
 
