@@ -61,8 +61,8 @@ fun! vm#maps#all#permanent()
     endif
 
     if !g:VM_sublime_mappings
-        let maps.default['Find Under']         = ['<C-n>',       'n', 1, 1],
-        let maps.default['Find Subword Under'] = ['<C-n>',       'x', 1, 1],
+        let maps.default['Find Under']         = ['<C-n>',       'n', 1, 1]
+        let maps.default['Find Subword Under'] = ['<C-n>',       'x', 1, 1]
     endif
     return maps
 endfun
