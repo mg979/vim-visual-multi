@@ -43,6 +43,7 @@ fun! <SID>VM_Init()
     let g:VM_pick_first_after_n_cursors       = get(g:, 'VM_pick_first_after_n_cursors', 0)
     let g:VM_dynamic_synmaxcol                = get(g:, 'VM_dynamic_synmaxcol', 20)
     let g:VM_no_meta_mappings                 = get(g:, 'VM_no_meta_mappings', has('nvim') || has('gui_running') ? 0 : 1)
+    let g:VM_leader_mappings                  = get(g:, 'VM_leader_mappings', 1)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Reindentation after insert mode
@@ -67,9 +68,6 @@ fun! <SID>VM_Init()
 
     call vm#plugs#init()
     call vm#maps#default()
-    if g:VM_permanent_mappings
-        call vm#maps#permanent()
-    endif
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -94,7 +94,7 @@ fun! s:select(cmd)
             if r.h | call s:F.toggle_option('multiline') | break | endif
         endfor | endif
 
-    nmap <silent> <nowait> <buffer> y               <Plug>(VM-Edit-Yank)
+    nmap <silent> <nowait> <buffer> y               <Plug>(VM-Yank)
 
     if empty(s:v.search) | let @/ = ''                      | endif
     if g:VM.oldupdate    | let &updatetime = g:VM.oldupdate | endif
@@ -178,7 +178,7 @@ fun! vm#operators#after_yank()
         endif
 
         if g:VM.oldupdate | let &updatetime = g:VM.oldupdate | endif
-        nmap <silent> <nowait> <buffer> y <Plug>(VM-Edit-Yank)
+        nmap <silent> <nowait> <buffer> y <Plug>(VM-Yank)
     endif
 endfun
 

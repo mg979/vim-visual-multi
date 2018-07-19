@@ -112,12 +112,6 @@ fun! vm#init_buffer(empty, ...)
     set lz
     let &ch = get(g:, 'VM_cmdheight', 2)
 
-    if !has('nvim') && !has('gui_running')
-        nnoremap <silent> <nowait> <buffer> <esc><esc> <esc><esc>
-    endif
-    nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
-    nmap     <silent> <nowait> <buffer> <Space>    <Plug>(VM-Toggle-Mappings)
-
     call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
 
     let g:VM.is_active = 1
@@ -143,7 +137,7 @@ fun! vm#reset(...)
     call vm#commands#regex_reset()
     call s:V.Funcs.restore_regs()
     call s:V.Maps.mappings(0, 1)
-    call vm#maps#default()
+    call vm#maps#reset()
     call vm#comp#reset()
     call vm#augroup(1)
     call vm#au_cursor(1)
@@ -151,12 +145,6 @@ fun! vm#reset(...)
     let g:VM.is_active = 0
     let g:VM.extend_mode = 0
     let g:VM.selecting = 0
-
-    silent! nunmap <buffer> <Space>
-    silent! nunmap <buffer> <esc>
-    if !has('nvim') && !has('gui_running')
-        silent! nunmap <buffer> <esc><esc>
-    endif
 
     "exiting manually
     if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif

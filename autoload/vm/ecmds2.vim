@@ -81,7 +81,7 @@ fun! s:Edit.surround() dict
     endif
     call self.post_process(1, 0)
 
-    nmap <silent> <nowait> <buffer> S <Plug>(VM-Run-Surround)
+    nmap <silent> <nowait> <buffer> S <Plug>(VM-Surround)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
