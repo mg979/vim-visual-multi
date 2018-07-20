@@ -140,7 +140,19 @@ fun! s:build_permanent_maps()
     let g:VM_maps   = get(g:, 'VM_maps', {})
     let g:VM.maps   = {'permanent': [], 'buffer': []}
     let g:VM.unmaps = []
+    let g:VM.help   = {}
     let maps        = vm#maps#all#permanent()
+
+    "prevent <Space> to be used as leader inside VM
+    let s:leader = ''
+    let g:VM_leader = get(g:, 'VM_leader', '')
+    if !empty(g:VM_leader) && g:VM_leader !=? '<Space>'
+        let s:leader = escape(g:VM_leader, '\')
+    elseif g:mapleader ==? '<Space>' || g:VM_leader ==? '<Space>'
+        let s:leader = '\'
+    else
+        let s:leader = g:mapleader
+    endif
 
     "integrate custom maps
     for key in keys(g:VM_maps)
@@ -181,13 +193,24 @@ fun! s:build_buffer_maps()
     for key in keys(maps)
         call add(g:VM.unmaps, s:unmap(maps[key], 1))
     endfor
+
+    "extra help plugs
+    let g:VM.help['Toggle Mappings'] = '<Space>'
+    let g:VM.help['Exit VM'] = '<Esc>'
 endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:assign(plug, key, buffer, ...)
     """Create a map command that will be executed."""
     let k = a:key[0]
     if empty(k) | return '' | endif
+
+    if !empty(s:leader)
+        let k = substitute(k, '<leader>', s:leader, '')
+    endif
+
+    let g:VM.help[a:plug] = k
     let p = substitute(a:plug, ' ', '-', 'g')
     let m = a:key[1]
     let _ = a:buffer? '<buffer>' : ''

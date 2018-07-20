@@ -104,7 +104,7 @@ fun! vm#maps#all#buffer()
                 \"Goto Next":               ['}',         'n', 1, 1],
                 \"Goto Prev":               ['{',         'n', 1, 1],
                 \"Invert Direction":        ['o',         'n', 1, 1],
-                \"Skip Region":             ['q',         'n', 1, 1],
+                \"q Skip":                  ['q',         'n', 1, 1],
                 \"Remove Region":           ['Q',         'n', 1, 1],
                 \"Remove Last Region":      ['<M-q>',     'n', 1, 1],
                 \"Star":                    ['*',         'n', 1, 1],
@@ -115,8 +115,6 @@ fun! vm#maps#all#buffer()
                 \"Merge To Bol":            ['<S-Home>',  'n', 1, 1],
                 \"Select All Operator":     ['s',         "n", 1, 0],
                 \"Find Operator":           ["m",         'n', 1, 1],
-                \"This Motion h":           ['<C-h>',     'n', 1, 1],
-                \"This Motion l":           ['<C-l>',     'n', 1, 1],
                 \"Add Cursor Down":         ['<M-j>',     'n', 1, 1],
                 \"Add Cursor Up":           ['<M-k>',     'n', 1, 1],
                 \})

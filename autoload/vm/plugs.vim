@@ -62,7 +62,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Case-Conversion-Menu)    :call b:VM_Selection.Case.menu()<cr>
 
     nnoremap        <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex(1)<cr>:call <SID>Mode()<cr>/
-    xnoremap        <Plug>(VM-Start-Visual-Search)     :call vm#commands#find_by_regex(2)<cr>:call <SID>Mode()<cr>/
+    xnoremap        <Plug>(VM-Visual-Regex)            :call vm#commands#find_by_regex(2)<cr>:call <SID>Mode()<cr>/
     nnoremap        <Plug>(VM-Show-Regions-Info)       :call b:VM_Selection.Funcs.regions_contents()<cr>
     nnoremap        <Plug>(VM-Show-Registers)          :call b:VM_Selection.Funcs.show_registers()<cr>
     nnoremap        <Plug>(VM-Tools-Menu)              :call b:VM_Selection.Funcs.tools_menu()<cr>
@@ -81,6 +81,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Find-Next)               :call vm#commands#find_next(0, 0)<cr>
     nnoremap        <Plug>(VM-Find-Prev)               :call vm#commands#find_prev(0, 0)<cr>
     nnoremap        <Plug>(VM-Skip-Region)             :call vm#commands#skip(0)<cr>
+    nnoremap        <Plug>(VM-q-Skip)                  :call vm#commands#skip(0)<cr>
     nnoremap        <Plug>(VM-Remove-Region)           :call vm#commands#skip(1)<cr>
     nnoremap        <Plug>(VM-Remove-Last-Region)      :call b:VM_Selection.Global.remove_last_region()<cr>
     nnoremap        <Plug>(VM-Undo-Visual)             :call vm#commands#undo()<cr>
@@ -200,7 +201,7 @@ fun! vm#plugs#init()
 
     "mouse
     nmap            <Plug>(VM-Mouse-Cursor)            <LeftMouse>g<Space>
-    nmap            <Plug>(VM-Mouse-Word)              <LeftMouse><C-d>
+    nmap            <Plug>(VM-Mouse-Word)              <LeftMouse><Plug>(VM-Find-Under)
     nmap            <Plug>(VM-Mouse-Column)            :call vm#commands#mouse_column()<cr>
 endfun
 
