@@ -196,8 +196,12 @@ fun! s:Global.update_and_select_region(...) dict
     else
         let R = self.select_region(0) | endif
 
-    call s:F.count_msg(0)
-    return R
+    if g:VM_exit_on_1_cursor_left && len(s:R()) == 1
+        call vm#reset()
+    else
+        call s:F.count_msg(0)
+        return R
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -214,8 +218,13 @@ fun! s:Global.update_map_and_select_region(...) dict
     call self.reset_byte_map(1)
     call self.update_highlight()
     let R = self.select_region_at_pos(a:0? a:1 : '.')
-    call s:F.count_msg(0)
-    return R
+
+    if g:VM_exit_on_1_cursor_left && len(s:R()) == 1
+        call vm#reset()
+    else
+        call s:F.count_msg(0)
+        return R
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

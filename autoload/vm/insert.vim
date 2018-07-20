@@ -80,7 +80,9 @@ fun! s:Insert.start(append) dict
     let I = self
     let I._index = get(I, '_index', -1)
 
-    if !s:v.insert && g:VM_dynamic_synmaxcol && s:v.index > g:VM_dynamic_synmaxcol
+    if !s:v.insert && g:VM_disable_syntax_in_imode
+        let &synmaxcol = 1
+    elseif !s:v.insert && g:VM_dynamic_synmaxcol && s:v.index > g:VM_dynamic_synmaxcol
         let scol = 40 - s:v.index + g:VM_dynamic_synmaxcol
         let &synmaxcol = scol>1? scol : 1
     endif
