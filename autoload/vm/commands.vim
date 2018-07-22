@@ -359,7 +359,7 @@ endfun
 
 fun! s:navigate(force, dir)
     if a:force && s:v.nav_direction != a:dir
-        call s:F.msg('Reversed direction.', 1)
+        call s:F.count_msg(0, ['Reversed direction. ', 'WarningMsg'])
         let s:v.nav_direction = a:dir
         return s:keep_block()
     elseif a:force || @/==''

@@ -41,6 +41,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldcase          = [&smartcase, &ignorecase]
     let s:v.indentkeys       = &indentkeys
     let s:v.synmaxcol        = &synmaxcol
+    let s:v.oldmatches       = getmatches()
 
     "nvim clipboard default
     if has('nvim')
@@ -138,7 +139,7 @@ fun! vm#reset(...)
     call s:V.Funcs.restore_regs()
     call s:V.Maps.mappings(0, 1)
     call vm#maps#reset()
-    call vm#comp#reset()
+    let matches = vm#comp#reset()
     call vm#augroup(1)
     call vm#au_cursor(1)
     let b:VM_Selection = {}
@@ -150,6 +151,7 @@ fun! vm#reset(...)
     if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif
 
     call clearmatches()
+    call setmatches(matches)
     call garbagecollect()
 endfun
 

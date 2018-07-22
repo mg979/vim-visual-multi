@@ -88,7 +88,8 @@ fun! s:Insert.start(append) dict
     endif
 
     if s:v.insert
-        let R = s:G.select_region(I.index)
+        let i = I.index >= len(s:R())? len(s:R())-1 : I.index
+        let R = s:G.select_region(i)
     elseif g:VM_pick_first_after_n_cursors && len(s:R()) > g:VM_pick_first_after_n_cursors
         let self._index = s:v.index
         let R = s:G.select_region(0)
