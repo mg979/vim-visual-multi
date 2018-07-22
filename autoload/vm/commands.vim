@@ -222,6 +222,9 @@ fun! vm#commands#find_by_regex(mode)
     if !g:VM.is_active | call s:init(0, 0, 1) | endif
     let s:v.using_regex = a:mode
 
+    "if visual regex, reposition cursor to the beginning of the selection
+    if a:mode == 2 | exe "normal! `<" | endif
+
     "store reg and position, to check if the search will be aborted
     let s:regex_pos = getpos('.') | let s:regex_reg = @/
 

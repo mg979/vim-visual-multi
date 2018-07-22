@@ -34,7 +34,7 @@ endfun
 " Ex commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_normal(cmd, recursive, count, maps) dict
+fun! s:Edit.run_normal(cmd, recursive, count, maps, ...) dict
 
     "-----------------------------------------------------------------------
 
@@ -59,6 +59,7 @@ fun! s:Edit.run_normal(cmd, recursive, count, maps) dict
     call self.before_macro(a:maps)
 
     if a:cmd ==? 'x' | call s:bs_del(a:cmd)
+    elseif a:0       | call self._process(0, a:1)
     else             | call self._process(s:cmd) | endif
 
     let g:VM.last_normal = [cmd, a:recursive]

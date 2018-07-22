@@ -175,8 +175,9 @@ fun! s:Region.remove() dict
     call remove(s:v.IDs_list, index(s:v.IDs_list, self.id))
 
     if len(s:R()) | call s:G.update_indices()
-    else          | let s:v.index = -1
-    endif
+    else          | let s:v.index = -1          | endif
+
+    if s:v.index >= len(s:R()) | let s:v.index = len(s:R()) - 1 | endif
     return self
 endfun
 

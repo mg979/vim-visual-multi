@@ -338,9 +338,10 @@ fun! s:Global.remove_last_region(...) dict
         endif
     endfor
 
-    if !len(s:R()) | call s:F.count_msg(0) | return | endif
-
-    call self.select_region(s:v.index)
+    if len(s:R())       "reselect previous region
+        let i = a:0? r.index-1 : s:v.index
+        call self.select_region(i)
+    endif
     call s:F.count_msg(0)
 endfun
 
