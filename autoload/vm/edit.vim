@@ -201,33 +201,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:special(cmd, r, args)
-    "Some commands need special adjustments while being processed.
-
-    if a:args[0] ==# 'del'
-        "<del> key deletes \n if executed at eol
-        call a:r.bytes([s:change, s:change])
-        call cursor(a:r.l, a:r.a)
-        if a:r.a == col([a:r.l, '$']) - 1 | normal! Jx
-        else                              | normal! x
-        endif
-        return 1
-
-    elseif a:args[0] ==# 'd'
-        "PROBABLY UNUSED: store deleted text so that it can all be put in the register
-        call a:r.bytes([s:change, s:change])
-        call cursor(a:r.l, a:r.a)
-        exe a:cmd
-        if s:v.use_register != "_"
-            call add(s:v.deleted_text, getreg(s:v.use_register))
-        endif
-        return 1
-
-    endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:Edit.process_visual(cmd) dict
     let size = s:size()                 | let change = 0
     let s:v.storepos = getpos('.')[1:2] | let s:v.eco = 1
@@ -275,6 +248,45 @@ fun! s:Edit.post_process(reselect, ...) dict
     "update, restore position and clear vars
     let pos = empty(s:v.storepos)? '.' : s:v.storepos
     call s:G.update_and_select_region(pos) | let s:v.storepos = []
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Special processing
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.special(cmd, ...) dict
+    if a:0 | let s:v.merge = 1 | endif
+    call self.before_macro(0)
+    call self._process(0, a:cmd)
+    call s:G.merge_regions()
+    call self.after_macro(0)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:special(cmd, r, args)
+    "Some commands need special adjustments while being processed.
+
+    if a:args[0] ==# 'del'
+        "<del> key deletes \n if executed at eol
+        call a:r.bytes([s:change, s:change])
+        call cursor(a:r.l, a:r.a)
+        if a:r.a == col([a:r.l, '$']) - 1 | normal! Jx
+        else                              | normal! x
+        endif
+        return 1
+
+    elseif a:args[0] ==# 'd'
+        "PROBABLY UNUSED: store deleted text so that it can all be put in the register
+        call a:r.bytes([s:change, s:change])
+        call cursor(a:r.l, a:r.a)
+        exe a:cmd
+        if s:v.use_register != "_"
+            call add(s:v.deleted_text, getreg(s:v.use_register))
+        endif
+        return 1
+
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -193,16 +193,22 @@ let s:find = { c -> index(split('fFtT', '\zs'), c) >= 0        }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:total_count(n, S)
-    let S = a:S | let n = a:n
+fun! s:reorder_cmd(M, r, n, op)
+    """Reorder command, so that the exact count is found.
+    "remove register
+    let S = substitute(a:M, a:r, '', '')
+    "what comes after operator
+    let S = substitute(S, '^\d*'.a:op.'\(.*\)$', '\1', '')
 
+    "count that comes after operator
     let x = match(S, '\d') >= 0? substitute(S, '\D', '', 'g') : 0
     if x | let S = substitute(S, x, '', '') | endif
 
     "final count
+    let n = a:n
     let N = x? n*x : n>1? n : 1 | let N = N>1? N : ''
 
-    return [S, N]
+    return [S, N, S[0]==#a:op]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -247,10 +253,8 @@ fun! vm#operators#cursors(op, n, register)
         elseif a:op ==# 'd' && c==#'s'       | echon c | let M .= c
             let c = nr2char(getchar())       | echon c | let M .= c | break
 
-        elseif s:mono(c)                     | echon c | let M .= c | break
-        elseif a:op ==# 'd' && c==#'d'       | echon c | let M .= c | break
-        elseif a:op ==# 'c' && c==#'c'       | echon c | let M .= c | break
-        elseif a:op ==# 'y' && c==#'y'       | echon c | let M .= c | break
+        elseif s:mono(c)                     | let M .= c | break
+        elseif a:op ==# c                    | let M .= c | break
 
         else | echon ' ...Aborted'           | return  | endif
     endwhile
@@ -266,11 +270,8 @@ fun! vm#operators#cursors(op, n, register)
         "ds surround
         if M[:1] ==# 'ds' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
 
-        "what comes after 'd'; check for 'dd'
-        let S      = substitute(M, r, '', '')
-        let S      = substitute(S, '^\d*d\(.*\)$', '\1', '')
-        let [S, N] = s:total_count(n, S)
-        let D      = S[0]==#'d'
+        "reorder command; D = 'dd'
+        let [S, N, D] = s:reorder_cmd(M, r, n, 'd')
 
         "for D, d$, dd: ensure there is only one region per line
         if (S == '$' || S == 'd') | call s:G.one_region_per_line() | endif
@@ -298,11 +299,8 @@ fun! vm#operators#cursors(op, n, register)
 
         call s:G.change_mode()
 
-        "what comes after 'y'; check for 'yy'
-        let S      = substitute(M, r, '', '')
-        let S      = substitute(S, '^\d*y\(.*\)$', '\1', '')
-        let [S, N] = s:total_count(n, S)
-        let Y      = S[0]==#'y'
+        "reorder command; Y = 'yy'
+        let [S, N, Y] = s:reorder_cmd(M, r, n, 'y')
 
         "for Y, y$, yy, ensure there is only one region per line
         if (S == '$' || S == 'y') | call s:G.one_region_per_line() | endif
@@ -330,11 +328,8 @@ fun! vm#operators#cursors(op, n, register)
         "cs surround
         if M[:1] ==? 'cs' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
 
-        "what comes after 'c'; check for 'cc'
-        let S      = substitute(M, r, '', '')
-        let S      = substitute(S, '^\d*c\(.*\)$', '\1', '')
-        let [S, N] = s:total_count(n, S)
-        let C      = S[0]==#'c'
+        "reorder command; C = 'cc'
+        let [S, N, C] = s:reorder_cmd(M, r, n, 'c')
 
         "convert w,W to e,E (if motions), also in dot
         if     S ==# 'w' | let S = 'e' | call substitute(s:v.dot, 'w', 'e', '')

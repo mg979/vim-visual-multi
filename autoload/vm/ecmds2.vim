@@ -86,17 +86,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.del_key() dict
-    "if !s:min(1) | return | endif
-
-    call self.before_macro(0)
-    call self._process(0, 'del')
-    call s:G.merge_regions()
-    call self.after_macro(0)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:Edit.transpose() dict
     if !s:min(2)                           | return         | endif
     let rlines = s:G.lines_with_regions(0) | let inline = 1 | let n = 0

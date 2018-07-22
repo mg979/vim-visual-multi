@@ -127,7 +127,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-X)                       :<C-u>call b:VM_Selection.Edit.run_normal('X', 0, v:count1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-J)                       :<C-u>call b:VM_Selection.Edit.run_normal('J', 0, v:count1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-~)                       :<C-u>call b:VM_Selection.Edit.run_normal('~', 0, 1, 0)<cr>:silent! undojoin<cr>
-    nnoremap        <Plug>(VM-Del)                     :call b:VM_Selection.Edit.del_key()<cr>
+    nnoremap        <Plug>(VM-Del)                     :call b:VM_Selection.Edit.special('del')<cr>
     nnoremap        <Plug>(VM-Dot)                     :call b:VM_Selection.Edit.dot()<cr>
     nnoremap        <Plug>(VM-Increase)                :<C-u>call b:VM_Selection.Edit.run_normal('<c-a>', 0, v:count1, 0)<cr>
     nnoremap        <Plug>(VM-Decrease)                :<C-u>call b:VM_Selection.Edit.run_normal('<c-x>', 0, v:count1, 0)<cr>
