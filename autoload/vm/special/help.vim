@@ -13,19 +13,20 @@ fun! s:dict()
                   \'Select Line Down',                  'Skip Region',
                   \'Select Line Up',                    'Find I Word',
                   \'Find A Word',                       'Find I Whole Word',
-                  \'Find A Subword',                    'Find A Whole Subword',
                   \]
 
   let cursors   = ['Add Cursor At Pos',                 'Select Cursor Down',
                   \'Add Cursor At Word',                'Select Cursor Up',
-                  \'Merge To Eol',                      '',
-                  \'Merge To Bol',                      '',
+                  \'Add Cursor Down',                   'Merge To Eol',
+                  \'Add Cursor Up',                     'Merge To Bol',
                   \]
 
-  let visual    = ['Visual Regex',                      'Visual Select All',
+  let visual    = ['Find Subword Under',                'Visual All',
                   \'Visual Add',                        'Visual Find',
-                  \'Visual Cursors',                    'Visual Star',
-                  \'Visual Hash',                       'Visual Subtract',
+                  \'Visual Subtract',                   'Visual Star',
+                  \'Visual Cursors',                    'Visual Hash',
+                  \'Find A Subword',                    'Find A Whole Subword',
+                  \'Visual Regex',
                   \]
 
   let operators = ['Select Operator',                   'Select All Operator',
@@ -46,19 +47,50 @@ fun! s:dict()
                   \'Decrease',                          'Split Regions',
                   \]
 
-  let tools     = ['Change Case Setting',               'Toggle Whole Word',
-                  \'Show Registers',                    'Search Menu',
-                  \'Show Help',                         'Tools Menu',
-                  \'Case Conversion Menu',              'Toggle Debug',
-                  \'Rewrite Last Search',               '',
+  let mouse     = ['Mouse Cursor',                      '',
+                  \'Mouse Word',                        '',
+                  \'Mouse Column',                      '',
                   \]
 
-  let special   = ['Toggle Mappings',                   'Toggle Block Mode',
+  let tools     = ['Show Registers',                    'Rewrite Last Search',
+                  \'Search Menu',                       'Tools Menu',
+                  \'Case Conversion Menu',              'Toggle Debug',
+                  \]
+
+  let special   = ['Toggle Mappings',                   'Toggle Block',
                   \'Switch Mode',                       'Toggle Only This Region',
                   \'Case Setting',                      'Toggle Whole Word',
                   \'Invert Direction',                  'Toggle Multiline',
                   \]
 
+  let edit      = ['D',                       'Y',
+                  \'x',                       'X',
+                  \'J',                       '~',
+                  \'Del',                     'Dot',
+                  \'a',                       'A',
+                  \'i',                       'I',
+                  \'o',                       'O',
+                  \'c',                       'C',
+                  \'Yank',                    'Replace',
+                  \'Delete',                  'Replace Pattern',
+                  \'p Paste Regions',         'p Paste Normal',
+                  \'P Paste Regions',         'P Paste Normal',
+                  \]
+
+  let insert    = ['I Arrow w',               'I Arrow b',
+                  \'I Arrow W',               'I Arrow B',
+                  \'I Arrow ge',              'I Arrow e',
+                  \'I Arrow gE',              'I Arrow E',
+                  \'I Left Arrow',            'I Right Arrow',
+                  \'I Up Arrow',              'I Down Arrow',
+                  \'I Return',                'I BS',
+                  \'I Paste',                 'I CtrlW',
+                  \'I CtrlD',                 'I Del',
+                  \'I CtrlA',                 'I CtrlE',
+                  \'I CtrlB',                 'I CtrlF',
+                  \]
+
+  let arrows    = []
   let others    = []
 
   for p in sort(keys(g:VM.help))
@@ -67,14 +99,18 @@ fun! s:dict()
     elseif index(visual, p) >= 0
     elseif index(operators, p) >= 0
     elseif index(commands, p) >= 0
+    elseif match(g:VM.help[p], '\-Up\|\-Down\|\-Left\|\-Right') >= 0
+      call add(arrows, p)
     elseif index(tools, p) >= 0
+    elseif index(insert, p) >= 0
+    elseif index(edit, p) >= 0
     elseif index(special, p) >= 0
     else
       call add(others, p)
     endif
   endfor
 
-  return {'regions': regions, 'cursors': cursors, 'visual': visual, 'operators': operators, 'commands': commands, 'tools': tools, 'special': special, 'others': others}
+  return {'regions': regions, 'cursors': cursors, 'visual': visual, 'operators': operators, 'commands': commands, 'tools': tools, 'mouse': mouse, 'arrows': arrows, 'insert': insert, 'edit': edit, 'special': special, 'others': others}
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -99,20 +135,26 @@ fun! vm#special#help#show()
         \["\n".__."\n"."   Cursors        ".sp."\n\n", "cursors"],
         \["\n".__."\n"."   Operators      ".sp."\n\n", "operators"],
         \["\n".__."\n"."   Visual         ".sp."\n\n", "visual"],
+        \["\n".__."\n"."   Mouse          ".sp."\n\n", "mouse"],
+        \["\n".__."\n"."   Arrows         ".sp."\n\n", "arrows"],
         \["\n".__."\n"."   Special        ".sp."\n\n", "special"],
         \["\n".__."\n"."   Commands       ".sp."\n\n", "commands"],
         \["\n".__."\n"."   Tools          ".sp."\n\n", "tools"],
+        \["\n".__."\n"."   Edit           ".sp."\n\n", "edit"],
+        \["\n".__."\n"."   Insert         ".sp."\n\n", "insert"],
         \["\n".__."\n"."   All Others     ".sp."\n\n", "others"],
         \]
 
-  echohl Special    | echo "1. "          | echohl Type | echon "Regions, Operators, Visual"
-  echohl Special    | echo "2. "          | echohl Type | echon "Special, Commands, Menus"
-  echohl Special    | echo "3. "          | echohl Type | echon "All others"
+  echohl Special    | echo "1. "          | echohl Type | echon "Regions, Cursors, Operators, Visual"
+  echohl Special    | echo "2. "          | echohl Type | echon "Mouse, Arrows"
+  echohl Special    | echo "3. "          | echohl Type | echon "Special, Commands, Menus"
+  echohl Special    | echo "4. "          | echohl Type | echon "Edit, Insert, Others"
   echohl WarningMsg | echo "\nEnter an option > "       | let ask = nr2char(getchar())      | echohl None
 
   if ask == '1'     | redraw! | let show_groups = groups[:3]
-  elseif ask == '2' | redraw! | let show_groups = groups[4:-2]
-  elseif ask == '3' | redraw! | let show_groups = groups[-1:-1]
+  elseif ask == '2' | redraw! | let show_groups = groups[4:5]
+  elseif ask == '3' | redraw! | let show_groups = groups[6:8]
+  elseif ask == '4' | redraw! | let show_groups = groups[-3:-1]
   else              | return  | endif
 
   let D = s:dict()
@@ -144,8 +186,8 @@ let s:plugs = {
       \"Select All":              ["Select All",                 ""],
       \"Add Cursor Down":         ["Add Cursor Down",            "in cursor mode"],
       \"Add Cursor Up":           ["Add Cursor Up",              "in cursor mode"],
-      \"Visual Regex":            ["Visual Regex",               "add regions with regex in visual selection"],
-      \"Visual All":              ["Visual Select All",          "subwords accepted"],
+      \"Visual Regex":            ["Find By Regex",              "add regions with regex in visual selection"],
+      \"Visual All":              ["Select All",                 "subwords accepted"],
       \"Visual Add":              ["Visual Add",                 "create a region from visual selection"],
       \"Visual Find":             ["Visual Find",                "find current patterns in visual selection"],
       \"Visual Cursors":          ["Visual Cursors",             "create cursors along visual selection"],
@@ -235,28 +277,28 @@ let s:plugs = {
       \"Zero Numbers Append":     ["Append Numbers from 0",      "with optional separator, count from 0"],
       \"Shrink":                  ["Shrink",                     "reduce selection(s) width by 1 from the sides"],
       \"Enlarge":                 ["Enlarge",                    "increase selection(s) width by 1 from the sides"],
-      \"I-Arrow w":               ["(Insert Mode) w",            ""],
-      \"I-Arrow b":               ["(Insert Mode) b",            ""],
-      \"I-Arrow W":               ["(Insert Mode) W",            ""],
-      \"I-Arrow B":               ["(Insert Mode) B",            ""],
-      \"I-Arrow ge":              ["(Insert Mode) ge",           ""],
-      \"I-Arrow e":               ["(Insert Mode) e",            ""],
-      \"I-Arrow gE":              ["(Insert Mode) gE",           ""],
-      \"I-Arrow E":               ["(Insert Mode) E",            ""],
-      \"I-Left Arrow":            ["(Insert Mode) Left",         ""],
-      \"I-Right Arrow":           ["(Insert Mode) Right",        ""],
-      \"I-Up Arrow":              ["(Insert Mode) Up",           "currently moves left"],
-      \"I-Down Arrow":            ["(Insert Mode) Down",         "currently moves right"],
-      \"I-Return":                ["(Insert Mode) Return",       ""],
-      \"I-BS":                    ["(Insert Mode) Backspace",    ""],
-      \"I-Paste":                 ["(Insert Mode) Paste",        "using VM unnamed register"],
-      \"I-CtrlW":                 ["(Insert Mode) CtrlW",        "as ctrl-w"],
-      \"I-CtrlD":                 ["(Insert Mode) CtrlD",        "same as delete"],
-      \"I-Del":                   ["(Insert Mode) Del",          ""],
-      \"I-CtrlA":                 ["(Insert Mode) CtrlA",        "moves to the beginning of the line"],
-      \"I-CtrlE":                 ["(Insert Mode) CtrlE",        "moves to the end of the line"],
-      \"I-CtrlB":                 ["(Insert Mode) CtrlB",        "like left arrow"],
-      \"I-CtrlF":                 ["(Insert Mode) CtrlF",        "like right arrow"],
+      \"I Arrow w":               ["(I) w",                      "move as by motion"],
+      \"I Arrow b":               ["(I) b",                      "move as by motion"],
+      \"I Arrow W":               ["(I) W",                      "move as by motion"],
+      \"I Arrow B":               ["(I) B",                      "move as by motion"],
+      \"I Arrow ge":              ["(I) ge",                     "move as by motion"],
+      \"I Arrow e":               ["(I) e",                      "move as by motion"],
+      \"I Arrow gE":              ["(I) gE",                     "move as by motion"],
+      \"I Arrow E":               ["(I) E",                      "move as by motion"],
+      \"I Left Arrow":            ["(I) Left",                   ""],
+      \"I Right Arrow":           ["(I) Right",                  ""],
+      \"I Up Arrow":              ["(I) Up",                     "currently moves left"],
+      \"I Down Arrow":            ["(I) Down",                   "currently moves right"],
+      \"I Return":                ["(I) Return",                 ""],
+      \"I BS":                    ["(I) Backspace",              ""],
+      \"I Paste":                 ["(I) Paste",                  "using VM unnamed register"],
+      \"I CtrlW":                 ["(I) CtrlW",                  "as ctrl-w"],
+      \"I CtrlD":                 ["(I) CtrlD",                  "same as delete"],
+      \"I Del":                   ["(I) Del",                    ""],
+      \"I CtrlA":                 ["(I) CtrlA",                  "moves to the beginning of the line"],
+      \"I CtrlE":                 ["(I) CtrlE",                  "moves to the end of the line"],
+      \"I CtrlB":                 ["(I) CtrlB",                  "same as left arrow"],
+      \"I CtrlF":                 ["(I) CtrlF",                  "same as right arrow"],
       \"D":                       ["D",                          ""],
       \"Y":                       ["Y",                          ""],
       \"x":                       ["x",                          ""],
@@ -265,8 +307,8 @@ let s:plugs = {
       \"~":                       ["~",                          ""],
       \"Del":                     ["Del",                        ""],
       \"Dot":                     ["Dot command",                "cursor mode only"],
-      \"Increase":                ["Increase Numbers",           "like ctrl-a at cursors"],
-      \"Decrease":                ["Decrease Numbers",           "like ctrl-x at cursors"],
+      \"Increase":                ["Increase Numbers",           "same as ctrl-a at cursors"],
+      \"Decrease":                ["Decrease Numbers",           "same as ctrl-x at cursors"],
       \"a":                       ["a",                          ""],
       \"A":                       ["A",                          ""],
       \"i":                       ["i",                          ""],
@@ -275,13 +317,13 @@ let s:plugs = {
       \"O":                       ["O",                          ""],
       \"c":                       ["c",                          ""],
       \"C":                       ["C",                          ""],
-      \"Delete":                  ["Delete Selection",           ""],
+      \"Delete":                  ["Delete",                     "both vim and VM registers"],
       \"Replace":                 ["Replace",                    "just as 'r'"],
       \"Replace Pattern":         ["Replace Pattern",            "regex substitution in all regions"],
-      \"p Paste Regions":         ["p Paste",                    "accepts both vim and VM registers"],
-      \"P Paste Regions":         ["P Paste",                    "accepts both vim and VM registers"],
+      \"p Paste Regions":         ["p Paste",                    "both vim and VM registers"],
+      \"P Paste Regions":         ["P Paste",                    "both vim and VM registers"],
       \"p Paste Normal":          ["p Paste [vim]",              "force pasting from vim register"],
       \"P Paste Normal":          ["P Paste [vim]",              "force pasting from vim register"],
-      \"Yank":                    ["Yank",                       "accepts both vim and VM registers"],
+      \"Yank":                    ["Yank",                       "both vim and VM registers"],
       \}
 
