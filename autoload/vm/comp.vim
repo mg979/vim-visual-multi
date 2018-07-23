@@ -47,7 +47,7 @@ fun! vm#comp#reset()
     for plugin in keys(s:plugins)
         let p = s:plugins[plugin]
 
-        if !has_key(p, 'var')
+        if !exists(p.var)
             continue
 
         elseif has_key(p, 'ft') && &ft == p.ft  "specific for plugin filetype
