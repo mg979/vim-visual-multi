@@ -172,9 +172,7 @@ fun! vm#operators#after_yank()
             "select operator
             call s:G.get_region()
             let R = s:G.select_region_at_pos('.')
-
-            if R.h && !s:v.multiline
-                call s:F.toggle_option('multiline') | endif
+            call s:G.check_mutliline(0, R)
         endif
 
         if g:VM.oldupdate | let &updatetime = g:VM.oldupdate | endif

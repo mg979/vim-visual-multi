@@ -284,7 +284,7 @@ fun! vm#commands#find_under(visual, whole, inclusive, ...)
 
     call s:Search.add()
     let R = s:G.new_region()
-    if R.h && !s:v.multiline | call s:F.toggle_option('multiline') | endif
+    call s:G.check_mutliline(0, R)
     call s:F.count_msg(0)
     return (a:0 && a:visual)? vm#commands#find_next(0, 0) : s:check_overlap(R)
 endfun

@@ -203,21 +203,11 @@ fun! s:Insert.stop() dict
     call s:V.Edit.post_process(0,0)
     set hlsearch
 
-    "reindent all and adjust cursors position, only if filetype allows
     let &indentkeys = s:v.indentkeys
     let &synmaxcol = s:v.synmaxcol
-    if !empty(&ft)
 
-        if index(g:VM_no_reindent_filetype, &ft) >= 0
-
-        elseif g:VM_reindent_all_filetypes && index(vm#comp#reindents(), &ft) == -1
-            call s:V.Edit.run_normal('==', 0, 1, 0)
-
-        elseif index(g:VM_reindent_filetype, &ft) >= 0
-            call s:V.Edit.run_normal('==', 0, 1, 0)
-
-        endif
-    endif
+    "reindent all and adjust cursors position, only if filetype/optioons allow
+    if s:do_reindent() | call s:V.Edit.run_normal('==', 0, 1, 0) | endif
 
     if g:VM_reselect_first_insert
         call s:G.select_region(0)
@@ -349,6 +339,17 @@ fun! s:get_inserted_text(a, b)
     call cursor(pos[0], pos[1]+1)
     normal! `]`[y`]`]
     return getreg(s:v.def_reg)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:do_reindent()
+    """Check if lines must be reindented when exiting insert mode.
+    if empty(&ft) | return | endif
+
+    return index(vm#comp#no_reindents(), &ft) < 0 &&
+                \ index(g:VM_reindent_filetype, &ft) >= 0 ||
+                \ g:VM_reindent_all_filetypes
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

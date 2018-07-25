@@ -110,7 +110,7 @@ endfun
 fun! s:vchar()
     "characterwise
     silent keepjumps normal! `<y`>`]
-    call s:G.new_region()
+    call s:G.check_mutliline(0, s:G.new_region())
 endfun
 
 fun! s:vline()
@@ -140,9 +140,10 @@ endfun
 fun! s:create_group()
     "use a temporary regions group, so that it won't interfere with previous regions
     call s:init()
-    let s:old_group = s:v.active_group
+    let s:old_group      = s:v.active_group
+    let s:v.no_search    = 1
     let s:v.active_group = -1
-    let s:V.Groups[-1] = []
+    let s:V.Groups[-1]   = []
 endfun
 
 fun! s:remove_group(subtract)

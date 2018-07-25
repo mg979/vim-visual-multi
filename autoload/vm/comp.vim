@@ -64,6 +64,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " don't reindent for filetypes
 
-fun! vm#comp#reindents()
+fun! vm#comp#no_reindents()
     return g:VM_no_reindent_filetype + ['ctrlsf']
 endfun

@@ -37,8 +37,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:update_search(p)
+    """Update search patterns, unless s:v.no_search is set.
+    if s:v.no_search | return | endif
 
-    if index(s:v.search, a:p) < 0   "not in list
+    if !empty(a:p) && index(s:v.search, a:p) < 0   "not in list
         call insert(s:v.search, a:p)
     endif
 

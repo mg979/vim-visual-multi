@@ -323,6 +323,7 @@ fun! s:Global.reset_vars() dict
 
     let s:v.auto = 0    | let s:v.eco = 0
     let s:v.multi_find = 0
+    let s:v.no_search = 0
     call s:F.restore_reg()
 endfun
 
@@ -378,10 +379,22 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.regions_text()
-  """Return a lsit with all regions' contents."""
-  let t = []
-  for r in self.regions() | call add(t, r.txt) | endfor
-  return t
+    """Return a list with all regions' contents."""
+    let t = []
+    for r in self.regions() | call add(t, r.txt) | endfor
+    return t
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.check_mutliline(all, ...) dict
+    """Check if multiline must be enabled."""
+
+    for r in a:0? [a:1] : s:R()
+        if r.h && !s:v.multiline
+            call s:F.toggle_option('multiline') | break
+        endif
+    endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

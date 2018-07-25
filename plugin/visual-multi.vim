@@ -79,7 +79,7 @@ endfun
 augroup plugin-visual-multi-start
     au!
     au VimEnter     * call <SID>VM_Init()
-    if has('nvim') || has('patch8.0.1394')
+    if has('nvim')
         au TextYankPost * call vm#operators#after_yank()
     else
         au CursorMoved  * call vm#operators#after_yank()
