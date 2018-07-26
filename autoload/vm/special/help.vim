@@ -12,7 +12,8 @@ fun! s:dict()
                   \'Remove Last Region',                'Remove Region',
                   \'Select Line Down',                  'Skip Region',
                   \'Select Line Up',                    'Find I Word',
-                  \'Find A Word',                       'Find I Whole Word',
+                  \'Seek Down',                         'Find A Word',
+                  \'Seek Up',                           'Find I Whole Word',
                   \]
 
   let cursors   = ['Add Cursor At Pos',                 'Select Cursor Down',
@@ -45,6 +46,11 @@ fun! s:dict()
                   \'Transpose',                         'Merge Regions',
                   \'Increase',                          'Duplicate',
                   \'Decrease',                          'Split Regions',
+                  \]
+
+  let fkeys     = ['Show Help',                         '',
+                  \'F2 Prev',                           '',
+                  \'F3 Next',                           '',
                   \]
 
   let mouse     = ['Mouse Cursor',                      '',
@@ -94,23 +100,36 @@ fun! s:dict()
   let others    = []
 
   for p in sort(keys(g:VM.help))
-    if index(regions, p) >= 0
-    elseif index(cursors, p) >= 0
-    elseif index(visual, p) >= 0
+    let other = 0
+    let ins = 0
+
+    if     index(regions,   p) >= 0
+    elseif index(cursors,   p) >= 0
+    elseif index(visual,    p) >= 0
     elseif index(operators, p) >= 0
-    elseif index(commands, p) >= 0
-    elseif match(g:VM.help[p], '\-Up\|\-Down\|\-Left\|\-Right') >= 0
-      call add(arrows, p)
-    elseif index(tools, p) >= 0
-    elseif index(insert, p) >= 0
-    elseif index(edit, p) >= 0
-    elseif index(special, p) >= 0
+    elseif index(commands,  p) >= 0
+    elseif index(fkeys,     p) >= 0
+    elseif index(mouse,     p) >= 0
+    elseif index(tools,     p) >= 0
+    elseif index(insert,    p) >= 0
+      let ins = 1
+    elseif index(edit,      p) >= 0
+    elseif index(special,   p) >= 0
     else
+      let other = 1
+    endif
+
+    if !ins && match(g:VM.help[p], '\-\<Up\>\|\-\<Down\>\|\-\<Left\>\|\-\<Right\>') >= 0
+      let other = 0
+      call add(arrows, p)
+    endif
+
+    if other
       call add(others, p)
     endif
   endfor
 
-  return {'regions': regions, 'cursors': cursors, 'visual': visual, 'operators': operators, 'commands': commands, 'tools': tools, 'mouse': mouse, 'arrows': arrows, 'insert': insert, 'edit': edit, 'special': special, 'others': others}
+  return {'regions': regions, 'cursors': cursors, 'visual': visual, 'operators': operators, 'commands': commands, 'tools': tools, 'mouse': mouse, 'fkeys': fkeys, 'arrows': arrows, 'insert': insert, 'edit': edit, 'special': special, 'others': others}
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -135,6 +154,7 @@ fun! vm#special#help#show()
         \["\n".__."\n"."   Cursors        ".sp."\n\n", "cursors"],
         \["\n".__."\n"."   Operators      ".sp."\n\n", "operators"],
         \["\n".__."\n"."   Visual         ".sp."\n\n", "visual"],
+        \["\n".__."\n"."   F keys         ".sp."\n\n", "fkeys"],
         \["\n".__."\n"."   Mouse          ".sp."\n\n", "mouse"],
         \["\n".__."\n"."   Arrows         ".sp."\n\n", "arrows"],
         \["\n".__."\n"."   Special        ".sp."\n\n", "special"],
@@ -146,14 +166,14 @@ fun! vm#special#help#show()
         \]
 
   echohl Special    | echo "1. "          | echohl Type | echon "Regions, Cursors, Operators, Visual"
-  echohl Special    | echo "2. "          | echohl Type | echon "Mouse, Arrows"
+  echohl Special    | echo "2. "          | echohl Type | echon "F keys, Mouse, Arrows"
   echohl Special    | echo "3. "          | echohl Type | echon "Special, Commands, Menus"
   echohl Special    | echo "4. "          | echohl Type | echon "Edit, Insert, Others"
   echohl WarningMsg | echo "\nEnter an option > "       | let ask = nr2char(getchar())      | echohl None
 
   if ask == '1'     | redraw! | let show_groups = groups[:3]
-  elseif ask == '2' | redraw! | let show_groups = groups[4:5]
-  elseif ask == '3' | redraw! | let show_groups = groups[6:8]
+  elseif ask == '2' | redraw! | let show_groups = groups[4:6]
+  elseif ask == '3' | redraw! | let show_groups = groups[7:9]
   elseif ask == '4' | redraw! | let show_groups = groups[-3:-1]
   else              | return  | endif
 
@@ -165,7 +185,8 @@ fun! vm#special#help#show()
     let i = 0
     "iterate s:dict chosen groups and print keys / desctiptions / notes
     for plug in D[dict_key]
-      if !has_key(g:VM.help, plug) | continue | endif
+      if !has_key(g:VM.help, plug)   | continue
+      elseif !has_key(s:plugs, plug) | let s:plugs[plug] = [plug, ""] | endif
       let Map  = g:VM.help[plug]
       let Desc = s:plugs[plug][0]
       let Note = s:plugs[plug][1]
@@ -199,8 +220,8 @@ let s:plugs = {
       \"Select h":                ["Extend Left",                ""],
       \"Select w":                ["Extend (w)",                 ""],
       \"Select b":                ["Extend (b)",                 ""],
-      \"Select Line Down":        ["Select Line Down",           "like Visual Line"],
-      \"Select Line Up":          ["Select Line Up",             "like Visual Line"],
+      \"Select Line Down":        ["Select Line Down",           "like Visual Line 'j'"],
+      \"Select Line Up":          ["Select Line Up",             "like Visual Line 'k'"],
       \"Select E":                ["Extend (E)",                 ""],
       \"Select BBW":              ["Extend (BBW)",               ""],
       \"Select e":                ["Extend (e)",                 ""],
@@ -221,6 +242,10 @@ let s:plugs = {
       \"Find Prev":               ["Find previous",              "always upwards"],
       \"Goto Next":               ["Goto Next",                  ""],
       \"Goto Prev":               ["Goto Prev",                  ""],
+      \"F3 Next":                 ["Goto Next",                  ""],
+      \"F2 Prev":                 ["Goto Prev",                  ""],
+      \"Seek Up":                 ["Seek Up",                    "scroll the page up, and select a region"],
+      \"Seek Down":               ["Seek Down",                  "scroll the page down, and select a region"],
       \"Toggle Mappings":         ["Toggle Mappings",            "disable VM mappings, except Space and Escape"],
       \"Exit VM":                 ["Exit VM",                    ""],
       \"Switch Mode":             ["Switch Mode",                "toggle cursor/extend mode"],
@@ -240,10 +265,10 @@ let s:plugs = {
       \"Select Operator":         ["Select Operator",            "accepts motions and text objects"],
       \"Select All Operator":     ["Select All Operator",        "applies the select operator to all cursors"],
       \"Find Operator":           ["Find Operator",              "matches patterns in motion/text object"],
-      \"This Motion h":           ["Extend Left This Region",    ""],
-      \"This Motion l":           ["Extend Right This Region",   ""],
-      \"This Select h":           ["Extend Left This Region",    "will create a new region if there is none"],
-      \"This Select l":           ["Extend Right This Region",   "will create a new region if there is none"],
+      \"This Motion h":           ["Extend This Left",           ""],
+      \"This Motion l":           ["Extend This Right",          ""],
+      \"This Select h":           ["Extend This Left",           "will create a new region if there is none"],
+      \"This Select l":           ["Extend This Right",          "will create a new region if there is none"],
       \"Tools Menu":              ["Tools Menu",                 ""],
       \"Show Help":               ["Show Help",                  ""],
       \"Show Registers":          ["Show Registers",             ""],

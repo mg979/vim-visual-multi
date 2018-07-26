@@ -86,8 +86,8 @@ fun! vm#maps#all#buffer()
     "sublime
     call extend(maps, {
                 \"Skip Region":             ['<C-s>',      'n', 1, 1],
-                \"Goto Next":               ['<F2>',       'n', 1, 1],
-                \"Goto Prev":               ['<S-F2>',     'n', 1, 1],
+                \"F3 Next":                 ['<F3>',       'n', 1, 1],
+                \"F2 Prev":                 ['<F2>',       'n', 1, 1],
                 \})
 
     "basic
@@ -103,6 +103,8 @@ fun! vm#maps#all#buffer()
                 \"Find Prev":               ['[',         'n', 1, 1],
                 \"Goto Next":               ['}',         'n', 1, 1],
                 \"Goto Prev":               ['{',         'n', 1, 1],
+                \"Seek Up":                 ['<C-b>',     'n', 1, 1],
+                \"Seek Down":               ['<C-f>',     'n', 1, 1],
                 \"Invert Direction":        ['o',         'n', 1, 1],
                 \"q Skip":                  ['q',         'n', 1, 1],
                 \"Remove Region":           ['Q',         'n', 1, 1],

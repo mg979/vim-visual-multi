@@ -72,14 +72,18 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Filter-Lines-Strip)      :call vm#special#commands#filter_lines(1)<cr>
     nnoremap        <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
     nnoremap        <Plug>(VM-Switch-Mode)             :call b:VM_Selection.Global.change_mode(1)<cr>
-    nnoremap        <Plug>(VM-Reset)                   :call vm#reset()<cr><esc>
+    nnoremap        <Plug>(VM-Reset)                   :<c-u>call vm#reset()<cr><esc>
     nnoremap        <Plug>(VM-Undo)                    u:call b:VM_Selection.Global.update_regions()<cr>
 
     nnoremap        <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction(1)<cr>
     nnoremap        <Plug>(VM-Goto-Next)               :call vm#commands#find_next(0, 1)<cr>
     nnoremap        <Plug>(VM-Goto-Prev)               :call vm#commands#find_prev(0, 1)<cr>
+    nnoremap        <Plug>(VM-F3-Next)                 :call vm#commands#find_next(0, 1)<cr>
+    nnoremap        <Plug>(VM-F2-Prev)                 :call vm#commands#find_prev(0, 1)<cr>
     nnoremap        <Plug>(VM-Find-Next)               :call vm#commands#find_next(0, 0)<cr>
     nnoremap        <Plug>(VM-Find-Prev)               :call vm#commands#find_prev(0, 0)<cr>
+    nnoremap        <Plug>(VM-Seek-Up)                 :call vm#commands#seek_up()<cr>
+    nnoremap        <Plug>(VM-Seek-Down)               :call vm#commands#seek_down()<cr>
     nnoremap        <Plug>(VM-Skip-Region)             :call vm#commands#skip(0)<cr>
     nnoremap        <Plug>(VM-q-Skip)                  :call vm#commands#skip(0)<cr>
     nnoremap        <Plug>(VM-Remove-Region)           :call vm#commands#skip(1)<cr>
