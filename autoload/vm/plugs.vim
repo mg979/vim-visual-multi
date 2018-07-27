@@ -251,7 +251,7 @@ fun! s:Insert(key)
     elseif a:key == '^'
         return "\<esc>".u.":call b:VM_Selection.Insert.key('I')\<cr>"
     elseif a:key == 'p'         "c-v
-        return "\<esc>".u.":call vm#icmds#paste()\<cr>".i
+        return "\<esc>".u.":call vm#icmds#paste()\<cr>".a
     elseif a:key == 'cw'        "c-w
         return "\<esc>".u.":call vm#icmds#cw()\<cr>".i
     endif

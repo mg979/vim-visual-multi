@@ -256,7 +256,7 @@ endfun
 fun! vm#commands#ctrld(count)
     call s:init(1, 0, 0)
 
-    if !s:X() && s:is_r()
+    if (!s:X() || s:G.all_empty()) && s:is_r()
         normal siw
     else
         let s:v.silence = 1

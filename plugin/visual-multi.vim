@@ -25,7 +25,7 @@ fun! <SID>VM_Init()
 
     let g:VM_live_editing                     = get(g:, 'VM_live_editing', 1)
     let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
-    let g:VM_sublime_mappings                 = get(g:, 'VM_sublime_mappings', 1)
+    let g:VM_sublime_mappings                 = get(g:, 'VM_sublime_mappings', 0)
     let g:VM_mouse_mappings                   = get(g:, 'VM_mouse_mappings', 0)
     let g:VM_permanent_mappings               = get(g:, 'VM_permanent_mappings', 1)
     let g:VM_extended_mappings                = get(g:, 'VM_extended_mappings', 0)

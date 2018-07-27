@@ -111,45 +111,11 @@ fun! s:Edit.paste(before, vm, reselect, register, ...) dict
 
     if X | call self.delete(1, "_", 1, 0) | endif
 
-    if s:v.insert | call self.insert_paste()
-    else          | call self.block_paste(a:before) | endif
+    call self.block_paste(a:before)
 
     let s:v.W = self.store_widths(s:v.new_text)
     call self.post_process((X? 1 : a:reselect), !a:before)
     let s:v.old_text = ''
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Edit.insert_paste() dict
-    let size = s:size() | let change = 0 | let text = copy(s:v.new_text) | let s:v.eco = 1
-
-    for r in s:R()
-        if !empty(text)
-            call r.bytes([change, change])
-            call cursor(r.l, r.a)
-            let s = remove(text, 0)
-            call s:F.set_reg(s)
-
-            let before = r.a!=col([r.L, '$'])-1? 1 : 0
-
-            if before | normal! P
-            else      | normal! p
-            endif
-
-            if !before
-                call r.update_cursor([r.l, col([r.l, '$'])])
-                call setline(r.l, getline(r.l).' ')
-                call r.bytes([1,1])
-            else
-                let s = len(s)
-                call r.bytes([s, s])
-            endif
-
-            let change = s:size() - size
-        else | break | endif
-    endfor
-    call s:F.restore_reg()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
