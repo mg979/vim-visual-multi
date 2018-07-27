@@ -13,7 +13,7 @@ fun! s:dict()
                   \'Select Line Down',                  'Skip Region',
                   \'Select Line Up',                    'Find I Word',
                   \'Seek Down',                         'Find A Word',
-                  \'Seek Up',                           'Find I Whole Word',
+                  \'Seek Up',                           '',
                   \]
 
   let cursors   = ['Add Cursor At Pos',                 'Select Cursor Down',
@@ -232,7 +232,6 @@ let s:plugs = {
       \"Find Subword Under":      ["Select Subword",             "without word boundaries"],
       \"Find I Word":             ["Select Inner Word",          "without word boundaries"],
       \"Find A Word":             ["Select Around Word",         ""],
-      \"Find I Whole Word":       ["Select Inner Whole Word",    ""],
       \"Find A Subword":          ["Select A Subword",           ""],
       \"Find A Whole Subword":    ["Select A Whole Subword",     ""],
       \"Mouse Cursor":            ["Mouse Cursor",               "create a cursor at position"],

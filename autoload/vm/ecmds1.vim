@@ -214,7 +214,12 @@ fun! s:Edit.replace_pattern() dict
     let ix = s:v.index | call s:F.Scroll.get()
     echohl Type
     let pat = input('Pattern to replace > ') | if empty(pat)  | call s:F.msg('Command aborted.', 1) | return | endif
-    let repl = input('Replacement > ')       | if empty(repl) | call s:F.msg('Command aborted.', 1) | return | endif
+    let repl = input('Replacement > ')
+    if empty(repl)
+        call s:F.msg('Hit Enter for an empty replacement... ', 1)
+        let confirm = nr2char(getchar())
+        if confirm != "\<cr>" | call s:F.msg('Command aborted.', 1) | return | endif
+    endif
     echohl None
     let text = s:G.regions_text() | let T = []
     for t in text

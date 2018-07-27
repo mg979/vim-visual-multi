@@ -38,12 +38,11 @@ fun! vm#maps#all#permanent()
                 \"Find Subword Under":      ['<C-d>',       'x', 1, 1],
                 \} : {})
 
-    call extend(maps, g:VM_s_mappings? {
-                \"Find I Word":             ['s]',        'n', 1, 1],
-                \"Find A Word":             ['s[',        'n', 1, 1],
-                \"Find I Whole Word":       ['s}',        'n', 1, 1],
-                \"Find A Subword":          ['s]',        'x', 1, 1],
-                \"Find A Whole Subword":    ['s[',        'x', 1, 1],
+    call extend(maps, g:VM_extended_mappings? {
+                \"Find I Word":             ['gw',        'n', 1, 1],
+                \"Find A Word":             ['gW',        'n', 1, 1],
+                \"Find A Subword":          ['gw',        'x', 1, 1],
+                \"Find A Whole Subword":    ['gW',        'x', 1, 1],
                 \} : {})
 
     call extend(maps, g:VM_mouse_mappings? {
@@ -76,11 +75,10 @@ fun! vm#maps#all#buffer()
 
     "s
     call extend(maps, {
-                \"Find I Word":             ['s]',        'n', 1, 1],
-                \"Find A Word":             ['s[',        'n', 1, 1],
-                \"Find I Whole Word":       ['s}',        'n', 1, 1],
-                \"Find A Subword":          ['s]',        'x', 1, 1],
-                \"Find A Whole Subword":    ['s[',        'x', 1, 1],
+                \"Find I Word":             ['gw',        'n', 1, 1],
+                \"Find A Word":             ['gW',        'n', 1, 1],
+                \"Find A Subword":          ['gw',        'x', 1, 1],
+                \"Find A Whole Subword":    ['gW',        'x', 1, 1],
                 \})
 
     "sublime

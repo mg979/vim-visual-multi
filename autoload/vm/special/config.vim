@@ -9,7 +9,7 @@ fun! vm#special#config#start()
             \['Default mappings',              "VM_default_mappings"],
             \['Sublime mappings',              "VM_sublime_mappings"],
             \['Mouse mappings',                "VM_mouse_mappings"],
-            \['"s" mappings',                  "VM_s_mappings"],
+            \['Extended mappings',             "VM_extended_mappings"],
             \['Reselect first insert',         "VM_reselect_first_insert"],
             \['Reselect first always',         "VM_reselect_first_always"],
             \['Case setting',                  "VM_case_setting"],
@@ -68,7 +68,7 @@ fun! vm#special#config#generate()
         \'let g:VM_default_mappings           = '.g:VM_default_mappings,
         \'let g:VM_sublime_mappings           = '.g:VM_sublime_mappings,
         \'let g:VM_mouse_mappings             = '.g:VM_mouse_mappings,
-        \'let g:VM_s_mappings                 = '.g:VM_s_mappings,
+        \'let g:VM_extended_mappings          = '.g:VM_extended_mappings,
         \'let g:VM_no_meta_mappings           = '.g:VM_no_meta_mappings,
         \'let g:VM_reselect_first_insert      = '.g:VM_reselect_first_insert,
         \'let g:VM_reselect_first_always      = '.g:VM_reselect_first_always,
@@ -99,7 +99,7 @@ fun! vm#special#config#help()
   echo "g:VM_default_mappings"
   echo "g:VM_sublime_mappings"
   echo "g:VM_mouse_mappings"
-  echo "g:VM_s_mappings"
+  echo "g:VM_extended_mappings"
   echohl None
   echo "\nThese settings enable/disable the relative mappings sets.\n\n"
 
