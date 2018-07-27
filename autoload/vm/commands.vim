@@ -256,8 +256,8 @@ endfun
 fun! vm#commands#ctrld(count)
     call s:init(1, 0, 0)
 
-    if (!s:X() || s:G.all_empty()) && s:is_r()
-        normal siw
+    if !s:X() && s:is_r()
+        call vm#operators#select(1, 1, "iw")
     else
         let s:v.silence = 1
         for i in range(a:count)

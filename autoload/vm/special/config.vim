@@ -95,53 +95,43 @@ fun! vm#special#config#help()
   let _ = "-------------------------------------"
   echohl WarningMsg | echo _._._."\n" | echohl None
 
-  echohl Special
-  echo "g:VM_default_mappings"
-  echo "g:VM_sublime_mappings"
-  echo "g:VM_mouse_mappings"
-  echo "g:VM_extended_mappings"
-  echohl None
-  echo "\nThese settings enable/disable the relative mappings sets.\n\n"
+  echohl Special | echo "g:VM_default_mappings\t\t\t"  | echohl None | echon "this should be enabled for basic mappings to work."
+  echohl Special | echo "g:VM_sublime_mappings\t\t\t"  | echohl None | echon "Sublime Text-like mappings."
+  echohl Special | echo "g:VM_mouse_mappings\t\t\t"    | echohl None | echon "mouse mappings."
+  echohl Special | echo "g:VM_extended_mappings\t\t\t" | echohl None | echon "additional gw/gW mappings.\n\n"
+
+  echohl WarningMsg | echo _._._."\n" | echohl None
+
+  echohl Special | echo "g:VM_no_meta_mappings\t\t\t"  | echohl None | echon "if enabled, some mappings are replaced with others that don't use the Alt key.\n\n"
 
   echohl WarningMsg | echo _._._."\n" | echohl None
 
   echohl Special
-  echo "g:VM_no_meta_mappings"
-  echohl None
-  echo "\nThis setting enables/disables meta(Alt) mappings. If disabled, some mappings are replaced with others that don't use the Alt key.\n\n"
+  echohl Special | echo "g:VM_reselect_first_insert\t\t" | echohl None | echon "reselect first cursor after most commands."
+  echohl Special | echo "g:VM_reselect_first_always\t\t" | echohl None | echon "reselect first cursor after exiting insert mode.\n\n"
 
   echohl WarningMsg | echo _._._."\n" | echohl None
 
-  echohl Special
-  echo "g:VM_reselect_first_insert"
-  echo "g:VM_reselect_first_always"
-  echohl None
-  echo "\nThese settings control which region/cursor is reselected, after performing an operation. If both are disabled, the last selected cursor is reselected.\n\n"
+  echohl Special | echo "g:VM_case_setting"
+  echohl None | echon "\t\t\tThis setting controls case matching: 'smart' -> 'sensitive' -> 'ignore'\n\n"
 
   echohl WarningMsg | echo _._._."\n" | echohl None
 
-  echohl Special
-  echo "g:VM_case_setting"
-  echohl None
-  echo "\nThis setting controls case matching: 'smart' -> 'sensitive' -> 'ignore'\n\n"
-
-  echohl WarningMsg | echo _._._."\n" | echohl None
-
+  echo "Performance-related settings for insert mode. Type :help 'synmaxcol' for more info.\n\n"
   echohl Special | echo "g:VM_pick_first_after_n_cursors"
-  echohl None | echon ": can improve performance when there are lots of cursors, but you may not like to be brought to the first cursor and back."
+  echohl None | echon "\t\tcan improve performance when there are lots of cursors, but you may not like to be brought to the first cursor and back."
   echohl Special | echo "g:VM_dynamic_synmaxcol"
-  echohl None | echon ": when this number of cursors is reached, when entering insert mode, syntax highlightin max column will be gradually decreased."
+  echohl None | echon "\t\t\twhen this number of cursors is reached, when entering insert mode, syntax highlightin max column will be gradually decreased."
   echohl Special | echo "g:VM_disable_syntax_in_imode"
-  echohl None | echon ": drops synmaxcol to 1, while in insert mode. The most radical solution.\n"
+  echohl None | echon "\t\tdrops synmaxcol to 1, while in insert mode. The most radical solution.\n\n"
   echohl None
-  echo "\nPerformance-related settings for insert mode. Type :help 'synmaxcol' if you need to know what it is.\n\n"
 
   echohl WarningMsg | echo _._._."\n" | echohl None
 
+  echohl Special | echo "g:VM_exit_on_1_cursor_left" | echohl None | echon "\t\tIf enabled, VM automatically exits when there is one cursor left."
+
   echohl Special
-  echo "g:VM_exit_on_1_cursor_left"
   echohl None
-  echo "\nIf enabled, VM automatically exits when there is one cursor left. Also useful to use VM selection methods as a replacement for regular visual mode, if you feel like it.\n\n"
 
   echohl WarningMsg | echo "\nPress a key to go back\n" | echohl None
   call getchar()

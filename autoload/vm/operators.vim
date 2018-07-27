@@ -211,10 +211,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#operators#cursors(op, n, register)
+fun! vm#operators#cursors(op, n, register, ...)
     if s:X() | call s:G.change_mode() | endif
 
     let reg = a:register | let r = "\"".reg | let hl1 = 'WarningMsg' | let hl2 = 'Label'
+
+    "shortcut for command in a:1
+    if a:0 | call vm#operators#process(a:op, a:1, reg, 0) | return | endif
 
     let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
                 \ a:op==#'c'? [['Change ', hl1], ['([n] c/w/e/b/$...) ?  ',   hl2]] :
@@ -257,6 +260,14 @@ fun! vm#operators#cursors(op, n, register)
         else | echon ' ...Aborted'           | return  | endif
     endwhile
 
+    call vm#operators#process(a:op, M, reg, n)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#operators#process(op, M, reg, n)
+    if s:X() | call s:G.change_mode() | endif
+    let M = a:M | let reg = a:reg | let r = '"'.reg | let n = a:n
     let s:v.dot = M
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

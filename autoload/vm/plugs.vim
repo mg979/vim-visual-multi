@@ -125,8 +125,8 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Merge-To-Bol)            :call vm#commands#merge_to_beol(0, 0)<cr>
 
     "Edit commands
-    nnoremap        <Plug>(VM-D)                       :<C-u>call vm#operators#cursors('d', 0, v:register)<cr>$
-    nnoremap        <Plug>(VM-Y)                       :<C-u>call vm#operators#cursors('y', 0, v:register)<cr>$
+    nnoremap        <Plug>(VM-D)                       :<C-u>call vm#operators#cursors('d', 0, v:register, 'd$')<cr>
+    nnoremap        <Plug>(VM-Y)                       :<C-u>call vm#operators#cursors('y', 0, v:register, 'y$')<cr>
     nnoremap        <Plug>(VM-x)                       :<C-u>call b:VM_Selection.Edit.run_normal('x', 0, v:count1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-X)                       :<C-u>call b:VM_Selection.Edit.run_normal('X', 0, v:count1, 0)<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-J)                       :<C-u>call b:VM_Selection.Edit.run_normal('J', 0, v:count1, 0)<cr>:silent! undojoin<cr>
@@ -142,7 +142,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-o)                       :<C-u>call b:VM_Selection.Insert.key('o')<cr>
     nnoremap        <Plug>(VM-O)                       :<C-u>call b:VM_Selection.Insert.key('O')<cr>
     nnoremap        <Plug>(VM-c)                       :<C-u>call b:VM_Selection.Edit.change(g:VM.extend_mode, v:count1, v:register)<cr>
-    nnoremap        <Plug>(VM-C)                       :<C-u>call vm#operators#cursors('c', 0, v:register)<cr>$
+    nnoremap        <Plug>(VM-C)                       :<C-u>call vm#operators#cursors('c', 0, v:register, 'c$')<cr>
     nnoremap        <Plug>(VM-Delete)                  :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, v:register, v:count1, 1)<cr>
     nnoremap        <Plug>(VM-Delete-Exit)             :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, v:register, v:count1, 1)<cr>:call vm#reset()<cr>
     nnoremap        <Plug>(VM-Replace)                 :<C-u>call b:VM_Selection.Edit.replace()<cr>
