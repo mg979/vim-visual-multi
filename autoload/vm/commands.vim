@@ -659,34 +659,38 @@ endfun
 " Cycle regions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:seek_select(i)
+    normal! z.
+    call s:G.select_region(a:i)
+endfun
+
 fun! vm#commands#seek_down()
     if !len(s:R()) | return | endif
 
-    let start = getpos('.')[1]
     exe "normal! \<C-f>"
     let end = getpos('.')[1]
     for r in s:R()
         if r.l >= end
-            call s:G.select_region(r.index)
+            call s:seek_select(r.index)
             return
         endif
     endfor
-    call s:G.select_region(len(s:R()) - 1)
+    call s:seek_select(len(s:R()) - 1)
 endfun
 
 fun! vm#commands#seek_up()
     if !len(s:R()) | return | endif
 
-    let start = getpos('.')[1]
     exe "normal! \<C-b>"
     let end = getpos('.')[1]
-    for r in s:R()
-        if r.l >= end && r.l <= start
-            call s:G.select_region(r.index)
+
+    for r in reverse(copy(s:R()))
+        if r.l <= end
+            call s:seek_select(r.index)
             return
         endif
     endfor
-    call s:G.select_region(0)
+    call s:seek_select(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

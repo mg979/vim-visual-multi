@@ -62,6 +62,21 @@ fun! vm#comp#reset()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#comp#add_line()
+    """Ensure a line is added with these text objects, while changing in cursor mode.
+
+    let l = []
+    if exists('g:loaded_textobj_indent')
+        let l += ['ii', 'ai', 'iI', 'aI']
+    endif
+    if exists('g:loaded_textobj_function')
+        let l += ['if', 'af', 'iF', 'aF']
+    endif
+    return l
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " don't reindent for filetypes
 
 fun! vm#comp#no_reindents()

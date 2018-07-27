@@ -40,8 +40,8 @@ fun! vm#operators#select(all, count, ...)
     let s = ''                     | let n = ''
     let x = a:count>1? a:count : 1 | echo "Selecting: ".(x>1? x : '')
 
-    let l:Single = { c -> index(split('webWEB$0^hjkl', '\zs'), c) >= 0 }
-    let l:Double = { c -> index(split('iaftFT', '\zs'), c) >= 0    }
+    let l:Single = { c -> index(split('webWEB$0^hjkl(){}', '\zs'), c) >= 0 }
+    let l:Double = { c -> index(split('iaftFTg', '\zs'), c) >= 0           }
 
     while 1
         let c = nr2char(getchar())
@@ -184,10 +184,10 @@ endfun
 " Operations at cursors (yank, delete, change)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:back = { c -> index(split('FTlbB0^', '\zs'), c) >= 0     }
-let s:ia   = { c -> index(['i', 'a'], c) >= 0                  }
-let s:mono = { c -> index(split('hlwebWEB$^0', '\zs'), c) >= 0 }
-let s:find = { c -> index(split('fFtT', '\zs'), c) >= 0        }
+let s:back   = { c -> index(split('FTlbB0^{(', '\zs'), c) >= 0       }
+let s:ia     = { c -> index(['i', 'a'], c) >= 0                      }
+let s:single = { c -> index(split('hlwebWEB$^0{}()', '\zs'), c) >= 0 }
+let s:double = { c -> index(split('fFtTg', '\zs'), c) >= 0           }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -232,7 +232,7 @@ fun! vm#operators#cursors(op, n, register)
     while 1
         let c = nr2char(getchar())
         if str2nr(c) > 0                     | echon c | let M .= c
-        elseif s:find(c)                     | echon c | let M .= c
+        elseif s:double(c)                   | echon c | let M .= c
             let c = nr2char(getchar())       | echon c | let M .= c | break
 
         elseif s:ia(c)                       | echon c | let M .= c
@@ -251,7 +251,7 @@ fun! vm#operators#cursors(op, n, register)
         elseif a:op ==# 'd' && c==#'s'       | echon c | let M .= c
             let c = nr2char(getchar())       | echon c | let M .= c | break
 
-        elseif s:mono(c)                     | let M .= c | break
+        elseif s:single(c)                     | let M .= c | break
         elseif a:op ==# c                    | let M .= c | break
 
         else | echon ' ...Aborted'           | return  | endif
@@ -344,6 +344,11 @@ fun! vm#operators#cursors(op, n, register)
             call vm#commands#motion('^', 1, 0, 0)
             call s:V.Edit.delete(1, reg, 1, 0)
             call s:V.Insert.key('a')
+
+        elseif index(['ip', 'ap'] + vm#comp#add_line(), S) >= 0
+            call vm#operators#select(1, 1, N.S)
+            call s:V.Edit.delete(1, reg, 1, 0)
+            call s:V.Insert.key('O')
 
         elseif S=='$'
             call vm#operators#select(1, 1, 's$')
