@@ -29,7 +29,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.key(type) dict
-    call s:F.Scroll.get()
 
     if a:type ==# 'I'
         call vm#commands#merge_to_beol(0, 0)

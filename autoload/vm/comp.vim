@@ -1,22 +1,42 @@
 "script to handle compatibility issues with other plugins
 
-let s:plugins = {
+let s:plugins = extend({
                 \'ctrlsf':    {
-                                \'ft': 'ctrlsf',
-                                \'func': 'call ctrlsf#buf#ToggleMap(1)',
+                                \'ft': ['ctrlsf'],
+                                \'maps': 'call ctrlsf#buf#ToggleMap(1)',
+                                \'matches': 1,
                                 \'var': 'g:ctrlsf_loaded'},
                 \'AutoPairs': {
-                                \'func': 'call AutoPairsInit()',
-                                \'var': 'b:autopairs_enabled'},
-                \}
+                                \'maps': 'call AutoPairsInit()',
+                                \'enable': 'let b:autopairs_enabled = 1',
+                                \'disable': 'let b:autopairs_enabled = 0',
+                                \'var': 'b:autopairs_enabled'}
+                \}, get(g:, 'VM_plugins_compatibilty', {}))
+
+"specific for plugin filetype / restore highlight matches
+let s:ftype           = { p -> has_key(p, 'ft') && index(p.ft, &ft) >= 0 }
+let s:noftype         = { p -> !has_key(p, 'ft') || empty(p.ft) }
+let s:restore_matches = { p -> has_key(p, 'matches') && p.matches }
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#init()
     """Set variables according to plugin needs."""
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
+
     if exists('g:loaded_youcompleteme')
         let g:VM_use_first_cursor_in_line = 1
     endif
+
+    for plugin in keys(s:plugins)
+        let p = s:plugins[plugin]
+
+        if has_key(p, 'disable')
+            if s:ftype(p)       | exe p.disable
+            elseif s:noftype(p) | exe p.disable | endif
+        endif
+    endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -43,20 +63,23 @@ fun! vm#comp#reset()
         call deoplete#custom#buffer_option('auto_complete', v:true)
     endif
 
-    "restore plugins mappings if necessary
+    "restore plugins functionality if necessary
     for plugin in keys(s:plugins)
         let p = s:plugins[plugin]
 
         if !exists(p.var)
             continue
 
-        elseif has_key(p, 'ft') && &ft == p.ft  "specific for plugin filetype
-            exe p.func
-            let oldmatches = s:v.oldmatches
+        elseif has_key(p, 'maps')
+            if s:ftype(p)       | exe p.maps
+            elseif s:noftype(p) | exe p.maps | endif | endif
 
-        elseif !has_key(p, 'ft')
-            exe p.func
-        endif
+        if s:restore_matches(p)
+            let oldmatches = s:v.oldmatches | endif
+
+        if has_key(p, 'enable')
+            if s:ftype(p)       | exe p.enable
+            elseif s:noftype(p) | exe p.enable | endif | endif
     endfor
     return oldmatches
 endfun

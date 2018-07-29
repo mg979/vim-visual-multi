@@ -1,5 +1,13 @@
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"Key -> plug:
+"       'Select Operator' ->    <Plug>(VM-Select-Operator)
+
+"Contents of lists:
+"       [0]: mapping
+"       [1]: mode
+"       [2]: silent
+"       [3]: nowait
 
 fun! vm#maps#all#permanent()
     """Default permanent mappings dictionary."""

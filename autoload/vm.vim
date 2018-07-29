@@ -1,11 +1,8 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Initialize
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" b:VM_Selection (= s:V) contains Regions, Matches, Vars (= s:v = plugin variables)
-
-" s:Global holds the Global class methods
-" s:Regions contains the regions with their contents
-" s:v.matches contains the current matches as read with getmatches()
+" b:VM_Selection (= s:V) contains Regions, Vars (= s:v = plugin variables),
+" function classes (Global, Funcs, Edit, Search, Insert, etc)
 
 fun! vm#init_buffer(empty, ...)
     """If already initialized, return current instance."""
