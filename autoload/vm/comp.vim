@@ -32,7 +32,10 @@ fun! vm#comp#init()
     for plugin in keys(s:plugins)
         let p = s:plugins[plugin]
 
-        if has_key(p, 'disable')
+        if !exists(p.var)
+            continue
+
+        elseif has_key(p, 'disable')
             if s:ftype(p)       | exe p.disable
             elseif s:noftype(p) | exe p.disable | endif
         endif
