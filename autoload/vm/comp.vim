@@ -74,15 +74,16 @@ fun! vm#comp#reset()
             continue
 
         elseif has_key(p, 'maps')
-            if s:ftype(p)       | exe p.maps
-            elseif s:noftype(p) | exe p.maps | endif | endif
+            if s:ftype(p) || s:noftype(p) | exe p.maps | endif
+        endif
 
         if s:restore_matches(p)
-            let oldmatches = s:v.oldmatches | endif
+            if s:ftype(p) || s:noftype(p) | let oldmatches = s:v.oldmatches | endif
+        endif
 
         if has_key(p, 'enable')
-            if s:ftype(p)       | exe p.enable
-            elseif s:noftype(p) | exe p.enable | endif | endif
+            if s:ftype(p) || s:noftype(p) | exe p.enable | endif
+        endif
     endfor
     return oldmatches
 endfun

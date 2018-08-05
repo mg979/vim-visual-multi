@@ -499,13 +499,25 @@ fun! vm#commands#mouse_column()
     let start = getpos('.')[1:2]
     exe "normal! \<LeftMouse>"
     let end = getpos('.')[1:2]
-    let w = start[1] - end[1]
 
-    call cursor(start[0], start[1])
     let s:v.silence = 1
-    while getpos('.')[1] < end[0]
-        call vm#commands#add_cursor_down(0, 1)
-    endwhile
+    if start[0] < end[0]
+        call cursor(start[0], start[1])
+        while getpos('.')[1] < end[0]
+            call vm#commands#add_cursor_down(0, 1)
+        endwhile
+        if getpos('.')[1] > end[0]
+            call vm#commands#skip(1)
+        endif
+    else
+        call cursor(start[0], start[1])
+        while getpos('.')[1] > end[0]
+            call vm#commands#add_cursor_up(0, 1)
+        endwhile
+        if getpos('.')[1] < end[0]
+            call vm#commands#skip(1)
+        endif
+    endif
     let s:v.silence = 0
     call s:F.count_msg(0)
 endfun

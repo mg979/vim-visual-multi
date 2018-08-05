@@ -61,6 +61,7 @@ fun! s:dict()
   let tools     = ['Show Registers',                    'Rewrite Last Search',
                   \'Search Menu',                       'Tools Menu',
                   \'Case Conversion Menu',              'Toggle Debug',
+                  \'Show Infoline',
                   \]
 
   let special   = ['Toggle Mappings',                   'Toggle Block',
@@ -278,6 +279,7 @@ let s:plugs = {
       \"Search Menu":             ["Search Menu",                ""],
       \"Rewrite Last Search":     ["Rewrite Last Search",        "update last search pattern to match current region"],
       \"Toggle Multiline":        ["Toggle Multiline",           "will force one region per line, when disabling"],
+      \"Show Infoline":           ["Show Infoline",              ""],
       \"Surround":                ["Surround",                   ""],
       \"Merge Regions":           ["Merge Regions",              ""],
       \"Transpose":               ["Transpose",                  ""],

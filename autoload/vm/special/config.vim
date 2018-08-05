@@ -6,18 +6,19 @@ fun! vm#special#config#start()
 
   redraw!
   let opt = [
-            \['Default mappings',              "VM_default_mappings"],
-            \['Sublime mappings',              "VM_sublime_mappings"],
-            \['Mouse mappings',                "VM_mouse_mappings"],
-            \['Extended mappings',             "VM_extended_mappings"],
-            \['Reselect first insert',         "VM_reselect_first_insert"],
-            \['Reselect first always',         "VM_reselect_first_always"],
-            \['Case setting',                  "VM_case_setting"],
-            \['Pick first after n cursors',    "VM_pick_first_after_n_cursors"],
-            \['Dynamic synmaxcol',             "VM_dynamic_synmaxcol"],
-            \['Disable syntax in insert-mode', "VM_disable_syntax_in_imode"],
-            \['No meta mappings',              "VM_no_meta_mappings"],
-            \['Auto-exit with 1 cursor left',  "VM_exit_on_1_cursor_left"],
+            \['Default mappings',               "VM_default_mappings"],
+            \['Sublime mappings',               "VM_sublime_mappings"],
+            \['Mouse mappings',                 "VM_mouse_mappings"],
+            \['Extended mappings',              "VM_extended_mappings"],
+            \['Reselect first insert',          "VM_reselect_first_insert"],
+            \['Reselect first always',          "VM_reselect_first_always"],
+            \['Case setting',                   "VM_case_setting"],
+            \['Pick first after n cursors',     "VM_pick_first_after_n_cursors"],
+            \['Dynamic synmaxcol',              "VM_dynamic_synmaxcol"],
+            \['Disable syntax in insert-mode',  "VM_disable_syntax_in_imode"],
+            \['No meta mappings',               "VM_no_meta_mappings"],
+            \['Auto-exit with 1 cursor left',   "VM_exit_on_1_cursor_left"],
+            \['Manual infoline',                "VM_manual_infoline"],
             \]
 
   echohl Special    | echo "\nvim-visual-multi configuration. Select an option you want to change, or '?' for help.\n\n"
@@ -77,6 +78,7 @@ fun! vm#special#config#generate()
         \'let g:VM_dynamic_synmaxcol          = '.g:VM_dynamic_synmaxcol,
         \'let g:VM_disable_syntax_in_imode    = '.g:VM_disable_syntax_in_imode,
         \'let g:VM_exit_on_1_cursor_left      = '.g:VM_exit_on_1_cursor_left,
+        \'let g:VM_manual_infoline            = '.g:VM_manual_infoline,
         \'',
         \'"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""',
         \'',
@@ -129,6 +131,7 @@ fun! vm#special#config#help()
   echohl WarningMsg | echo _._._."\n" | echohl None
 
   echohl Special | echo "g:VM_exit_on_1_cursor_left" | echohl None | echon "\t\tIf enabled, VM automatically exits when there is one cursor left."
+  echohl Special | echo "g:VM_manual_infoline"       | echohl None | echon "\t\t\tDon't show the infoline, only call it manually (default <leader>l)."
 
   echohl Special
   echohl None

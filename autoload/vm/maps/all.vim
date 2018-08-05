@@ -8,6 +8,12 @@
 "       [1]: mode
 "       [2]: silent
 "       [3]: nowait
+"
+" When adding a new mapping, the following is required:
+"       1. add a <Plug> with a command
+"       2. add the reformatted plug name in this file (permanent or buffer section)
+"       3. update the help file: an entry in s:plugs is necessary
+"       4. in the help file, add an entry in a section of s:dict to assign a category
 
 fun! vm#maps#all#permanent()
     """Default permanent mappings dictionary."""
@@ -138,6 +144,7 @@ fun! vm#maps#all#buffer()
                 \"Case Conversion Menu":    ['<leader>c', 'n', 1, 1],
                 \"Search Menu":             ['<leader>S', 'n', 1, 1],
                 \"Rewrite Last Search":     ['<leader>r', 'n', 1, 1],
+                \"Show Infoline":           ['<leader>l', 'n', 0, 1],
                 \"Toggle Multiline":        ['M',         'n', 1, 1],
                 \})
 

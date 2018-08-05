@@ -48,6 +48,7 @@ fun! <SID>VM_Init()
     let g:VM_no_meta_mappings                 = get(g:, 'VM_no_meta_mappings', has('nvim') || has('gui_running') ? 0 : 1)
     let g:VM_leader_mappings                  = get(g:, 'VM_leader_mappings', 1)
     let g:VM_exit_on_1_cursor_left            = get(g:, 'VM_exit_on_1_cursor_left', 0)
+    let g:VM_manual_infoline                  = get(g:, 'VM_manual_infoline', 0)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Reindentation after insert mode
