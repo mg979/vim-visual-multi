@@ -29,6 +29,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.key(type) dict
+    call vm#comp#icmds()  "compatibility tweaks
 
     if a:type ==# 'I'
         call vm#commands#merge_to_beol(0, 0)

@@ -144,6 +144,7 @@ fun! s:create_group()
     let s:v.no_search    = 1
     let s:v.active_group = -1
     let s:V.Groups[-1]   = []
+    let s:v.eco = 1
 endfun
 
 fun! s:remove_group(subtract)

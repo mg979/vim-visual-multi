@@ -23,7 +23,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Select-Line-Up)          :call vm#commands#expand_line(0)<cr>
 
     nnoremap        <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
-    xnoremap        <Plug>(VM-Visual-All)              y:call vm#commands#find_all(1, 0, 0)<cr>`]
+    xnoremap <expr> <Plug>(VM-Visual-All)              <sid>Visual('all')
     xnoremap        <Plug>(VM-Visual-Cursors)          :<c-u>call vm#commands#from_visual('cursors')<cr>
     xnoremap        <Plug>(VM-Visual-Add)              :<c-u>call vm#commands#from_visual('add')<cr>
     xnoremap        <Plug>(VM-Visual-Subtract)         :<c-u>call vm#commands#from_visual('subtract')<cr>
@@ -31,18 +31,18 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Remove-Empty-Lines)      :<c-u>call vm#commands#remove_empty_lines()<cr>
 
     nnoremap        <Plug>(VM-Find-Under)              :<c-u>call vm#commands#ctrld(v:count1)<cr>
-    xnoremap        <Plug>(VM-Find-Subword-Under)      y:call vm#commands#find_under(1, 0, 0, 1)<cr>`]
+    xnoremap <expr> <Plug>(VM-Find-Subword-Under)      <sid>Visual('under')
     nnoremap        <Plug>(VM-Find-I-Word)             :<c-u>call vm#commands#find_under(0, 0, 0)<cr>
     nnoremap        <Plug>(VM-Find-A-Word)             :<c-u>call vm#commands#find_under(0, 0, 1)<cr>
     nnoremap        <Plug>(VM-Find-I-Whole-Word)       :<c-u>call vm#commands#find_under(0, 1, 0)<cr>
     nnoremap        <Plug>(VM-Find-A-Whole-Word)       :<c-u>call vm#commands#find_under(0, 1, 1)<cr>
-    xnoremap        <Plug>(VM-Find-A-Subword)          y:call vm#commands#find_under(1, 0, 0)<cr>`]
-    xnoremap        <Plug>(VM-Find-A-Whole-Subword)    y:call vm#commands#find_under(1, 1, 0)<cr>`]
+    xnoremap <expr> <Plug>(VM-Find-A-Subword)          <sid>Visual('subw')
+    xnoremap <expr> <Plug>(VM-Find-A-Whole-Subword)    <sid>Visual('wsubw')
 
     nnoremap        <Plug>(VM-Star)                    :<c-u>call <sid>Star(1)<cr>
     nnoremap        <Plug>(VM-Hash)                    :<c-u>call <sid>Star(2)<cr>
-    xnoremap        <Plug>(VM-Visual-Star)             y:call <sid>Star(3)<cr>`]
-    xnoremap        <Plug>(VM-Visual-Hash)             y:call <sid>Star(4)<cr>`]
+    xnoremap <expr> <Plug>(VM-Visual-Star)             <sid>Visual('star')
+    xnoremap <expr> <Plug>(VM-Visual-Hash)             <sid>Visual('hash')
 
     nnoremap        <Plug>(VM-Toggle-Mappings)         :call b:VM_Selection.Maps.mappings_toggle()<cr>
     nnoremap        <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline', 1)<cr>
@@ -230,8 +230,6 @@ fun! s:Star(type)
 endfun
 
 fun! s:Insert(key)
-    call vm#comp#icmds()  "compatibility tweaks
-
     let b:VM_Selection.Vars.restart_insert = 1
     let i = ":call b:VM_Selection.Insert.key('i')\<cr>"
     let a = ":call b:VM_Selection.Insert.key('a')\<cr>"
@@ -269,3 +267,18 @@ fun! s:Mode()
     call b:VM_Selection.Funcs.msg([["Enter regex".mode.":", 'WarningMsg'], ["\n/", 'None']], 1)
 endfun
 
+fun! s:Visual(cmd)
+    """Restore register after a visual yank."""
+    if !g:VM.is_active
+        let g:VM.visual_reg = ['"', getreg('"'), getregtype('"')]
+        let r = "g:VM.visual_reg[0], g:VM.visual_reg[1], g:VM.visual_reg[2]"
+        let r = ":let b:VM_Selection.Vars.oldreg = g:VM.visual_reg\<cr>:call setreg(".r.")\<cr>"
+    else
+        let r = ''
+    endif
+    return a:cmd == 'all'  ? "y:call vm#commands#find_all(1, 0, 0)\<cr>".r."`]" :
+         \ a:cmd == 'under'? "y:call vm#commands#find_under(1, 0, 0, 1)\<cr>".r."`]" :
+         \ a:cmd == 'subw' ? "y:call vm#commands#find_under(1, 0, 0)\<cr>".r."`]" :
+         \ a:cmd == 'wsubw'? "y:call vm#commands#find_under(1, 1, 0)\<cr>".r."`]" :
+         \ a:cmd == 'star' ? "y:call <sid>Star(3)\<cr>".r."`]" : "y:call <sid>Star(4)\<cr>".r."`]"
+endfun

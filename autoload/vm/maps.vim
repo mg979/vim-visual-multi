@@ -148,7 +148,7 @@ fun! s:build_permanent_maps()
     let g:VM_leader = get(g:, 'VM_leader', '')
     if !empty(g:VM_leader) && g:VM_leader !=? '<Space>'
         let s:leader = escape(g:VM_leader, '\')
-    elseif g:mapleader ==? '<Space>' || g:VM_leader ==? '<Space>'
+    elseif !exists('g:mapleader') || g:mapleader ==? '<Space>' || g:VM_leader ==? '<Space>'
         let s:leader = '\'
     else
         let s:leader = g:mapleader

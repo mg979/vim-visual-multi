@@ -319,6 +319,7 @@ endfun
 
 fun! s:Global.reset_vars() dict
     """Reset variables during final regions update.
+    "Note: this eco/auto check is old and seems wrong. Keeping for now but it should go
     if !( s:v.eco || s:v.auto ) | return | endif
 
     let s:v.auto = 0    | let s:v.eco = 0

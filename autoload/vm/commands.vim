@@ -652,7 +652,7 @@ endfun
 fun! s:after_move(R)
     let s:v.direction = a:R.dir
     let s:v.only_this = 0
-    let s:v.restore_scroll = 1
+    let s:v.restore_scroll = !s:v.insert
 
     if s:always_from_back() | call vm#commands#invert_direction() | endif
 
