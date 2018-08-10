@@ -4,7 +4,8 @@
 let g:loaded_visual_multi = 1
 let b:VM_Selection        = {}
 
-command! VMConfig call vm#special#config#start()
+com!                                                  VMConfig call vm#special#config#start()
+com! -nargs=1 -complete=customlist,vm#themes#complete VMTheme  call vm#themes#load(<q-args>)
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -58,19 +59,9 @@ fun! <SID>VM_Init()
     let g:VM_no_reindent_filetype             = get(g:, 'VM_no_reindent_filetype', ['text', 'markdown'])
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "Set up highlighting
+    "Set up highlighting, plugs, mappings
 
-    let g:VM_Selection_hl                     = get(g:, 'VM_Selection_hl',     'Visual')
-    let g:VM_Mono_Cursor_hl                   = get(g:, 'VM_Mono_Cursor_hl',   'DiffChange')
-    let g:VM_Ins_Mode_hl                      = get(g:, 'VM_Ins_Mode_hl',      'Pmenu')
-    let g:VM_Normal_Cursor_hl                 = get(g:, 'VM_Normal_Cursor_hl', 'DiffAdd')
-    let g:VM_Message_hl                       = get(g:, 'VM_Message_hl',       'WarningMsg')
-
-    exe "highlight link MultiCursor ".g:VM_Normal_Cursor_hl
-
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "Global mappings
-
+    call vm#themes#init()
     call vm#plugs#init()
     call vm#maps#default()
 endfun

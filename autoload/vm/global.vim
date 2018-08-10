@@ -126,13 +126,13 @@ fun! s:Global.update_cursor_highlight(...) dict
     highlight clear MultiCursor
 
     if s:v.insert
-        exe "highlight link MultiCursor ".g:VM_Ins_Mode_hl
+        highlight link MultiCursor VM_Insert
 
     elseif !s:X() && self.all_empty()
-        exe "highlight link MultiCursor ".g:VM_Mono_Cursor_hl
+        highlight link MultiCursor VM_Mono
 
     else
-        exe "highlight link MultiCursor ".g:VM_Normal_Cursor_hl
+        highlight link MultiCursor VM_Cursor
     endif
 endfun
 
