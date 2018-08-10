@@ -174,7 +174,7 @@ fun! s:Funcs.msg(text, force) dict
     elseif s:v.silence && !a:force | return | endif
 
     if type(a:text) == v:t_string
-        exe "echohl" g:VM_Message_hl
+        exe "echohl" g:VM.hi.message
         echon a:text
         echohl None | return | endif
 

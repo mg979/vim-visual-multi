@@ -5,13 +5,13 @@ let g:loaded_visual_multi = 1
 let b:VM_Selection        = {}
 
 com!                                                  VMConfig call vm#special#config#start()
-com! -nargs=1 -complete=customlist,vm#themes#complete VMTheme  call vm#themes#load(<q-args>)
+com! -nargs=? -complete=customlist,vm#themes#complete VMTheme  call vm#themes#load(<q-args>)
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! <SID>VM_Init()
 
-    let g:VM = {}
+    let g:VM = { 'hi': {} }
 
     let g:VM.is_active        = 0
     let g:VM.extend_mode      = 0
@@ -59,7 +59,18 @@ fun! <SID>VM_Init()
     let g:VM_no_reindent_filetype             = get(g:, 'VM_no_reindent_filetype', ['text', 'markdown'])
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "Set up highlighting, plugs, mappings
+    "Set up highlighting
+
+    let g:VM.hi.extend                        = get(g:, 'VM_Selection_hl',     'Visual')
+    let g:VM.hi.mono                          = get(g:, 'VM_Mono_Cursor_hl',   'DiffChange')
+    let g:VM.hi.insert                        = get(g:, 'VM_Ins_Mode_hl',      'Pmenu')
+    let g:VM.hi.cursor                        = get(g:, 'VM_Normal_Cursor_hl', 'ToolbarLine')
+    let g:VM.hi.message                       = get(g:, 'VM_Message_hl',       'WarningMsg')
+
+    exe "highlight link MultiCursor ".g:VM.hi.cursor
+
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "Global mappings
 
     call vm#themes#init()
     call vm#plugs#init()

@@ -451,7 +451,7 @@ fun! s:Region.highlight() dict
 
     "build a list of highlight entries, one for each possible line
     for line in region
-        call add(R.matches.region, matchaddpos('VM_Extend', [line], 30))
+        call add(R.matches.region, matchaddpos(g:VM.hi.extend, [line], 30))
     endfor
     let R.matches.cursor = matchaddpos('MultiCursor', [cursor], 40)
 endfun

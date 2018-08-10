@@ -2,17 +2,31 @@ let s:Themes = {}
 
 fun! vm#themes#init()
   let default = &background == 'light' ? 'lightblue1' : 'blue1'
-  let theme = get(g:, 'VM_theme', default)
+  let theme = get(g:, 'VM_theme', 'default')
 
   silent! hi clear VM_Mono
   silent! hi clear VM_Cursor
   silent! hi clear VM_Extend
   silent! hi clear VM_Insert
-  exe "highlight VM_Mono"   s:Themes[theme].mono
-  exe "highlight VM_Cursor" s:Themes[theme].cursor
+  silent! hi clear MultiCursor
+
+  if theme == 'default'
+    let g:VM.hi.extend  = get(g:, 'VM_Selection_hl',     'Visual')
+    let g:VM.hi.mono    = get(g:, 'VM_Mono_Cursor_hl',   'DiffChange')
+    let g:VM.hi.insert  = get(g:, 'VM_Ins_Mode_hl',      'Pmenu')
+    let g:VM.hi.cursor  = get(g:, 'VM_Normal_Cursor_hl', 'ToolbarLine')
+    exe "highlight link MultiCursor ".g:VM.hi.cursor
+    return
+  endif
+
   exe "highlight VM_Extend" s:Themes[theme].extend
+  exe "highlight VM_Mono"   s:Themes[theme].mono
   exe "highlight VM_Insert" s:Themes[theme].insert
-  let g:VM_Message_hl = get(g:, 'VM_Message_hl', 'WarningMsg')
+  exe "highlight VM_Cursor" s:Themes[theme].cursor
+  let g:VM.hi.extend  = 'VM_Extend'
+  let g:VM.hi.mono    = 'VM_Mono'
+  let g:VM.hi.insert  = 'VM_Insert'
+  let g:VM.hi.cursor  = 'VM_Cursor'
   highlight link MultiCursor VM_Cursor
 endfun
 
@@ -20,9 +34,11 @@ endfun
 
 fun! vm#themes#load(theme)
   """Load a theme."""
-  if empty(a:theme) | echo "Theme name required" | return
-  elseif index(keys(s:Themes), a:theme) < 0 | echo "No such theme." | return | endif
-  let g:VM_theme = a:theme
+  if empty(a:theme)
+    let g:VM_theme = 'default'
+    echo 'Theme set to default'
+  elseif index(keys(s:Themes), a:theme) < 0 | echo "No such theme."      | return
+  else                                      | let g:VM_theme = a:theme   | endif
   call vm#themes#init()
 endfun
 
@@ -41,7 +57,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "old mono #F2C38F
 "missing: grey(see neodark), acqua/lightacqua(see seoul)
-let s:Themes.blue1 = {
+let s:Themes.iceblue = {
       \ 'type':   "dark",
       \ 'extend': "ctermbg=24  guibg=#005f87",
       \ 'cursor': "ctermbg=31  guibg=#0087af ctermfg=237 guifg=#3a3a3a",
@@ -49,17 +65,17 @@ let s:Themes.blue1 = {
       \ 'mono':   "ctermbg=180 guibg=#dfaf87 ctermfg=235 guifg=#262626",
       \}
 
-let s:Themes.blue2 = {
+let s:Themes.ocean = {
       \ 'type':   "dark",
       \ 'extend': "ctermbg=25  guibg=#005faf",
-      \ 'cursor': "ctermbg=39  guibg=#00afff ctermfg=239 guifg=#4e4e4e",
+      \ 'cursor': "ctermbg=39  guibg=#87afff ctermfg=239 guifg=#4e4e4e",
       \ 'insert': "ctermbg=239 guibg=#4c4e50",
       \ 'mono':   "ctermbg=186 guibg=#dfdf87 ctermfg=239 guifg=#4e4e4e",
       \}
 
-let s:Themes.blue3 = {
+let s:Themes.neon = {
       \ 'type':   "dark",
-      \ 'extend': "ctermbg=26  guibg=#005fdf",
+      \ 'extend': "ctermfg=109 guifg=#89afaf ctermbg=26  guibg=#005fdf",
       \ 'cursor': "ctermbg=39  guibg=#00afff ctermfg=239 guifg=#4e4e4e",
       \ 'insert': "ctermbg=239 guibg=#4c4e50",
       \ 'mono':   "ctermbg=221 guibg=#ffdf5f ctermfg=239 guifg=#4e4e4e",
@@ -81,20 +97,36 @@ let s:Themes.lightblue2 = {
       \ 'mono':   "ctermbg=167 guibg=#df5f5f ctermfg=253 guifg=#dadada cterm=bold term=bold gui=bold",
       \}
 
-let s:Themes.purple1 = {
+let s:Themes.pray = {
       \ 'type':   "dark",
       \ 'extend': "ctermbg=60  guibg=#544a65",
       \ 'cursor': "ctermbg=103 guibg=#8787af ctermfg=54  guifg=#5f0087",
       \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermbg=135 guibg=#af5fff ctermfg=235 guifg=#262626",
+      \ 'mono':   "ctermbg=141 guibg=#af87ff ctermfg=235 guifg=#262626",
       \}
 
-let s:Themes.purple2 = {
+let s:Themes.nord = {
       \ 'type':   "dark",
-      \ 'extend': "ctermbg=60  guibg=#5f5f87",
-      \ 'cursor': "ctermbg=103 guibg=#8787af ctermfg=239 guifg=#4e4e4e",
+      \ 'extend': "ctermbg=239 guibg=#434C5E",
+      \ 'cursor': "ctermbg=245 guibg=#8a8a8a ctermfg=24 guifg=#005f87",
       \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermbg=135 guibg=#af5fff ctermfg=235 guifg=#262626",
+      \ 'mono':   "ctermfg=0 ctermbg=9 guifg=#141617 guibg=#AF5F5F",
+      \}
+
+let s:Themes.codedark = {
+      \ 'type':   "dark",
+      \ 'extend': "ctermbg=242 guibg=#264F78",
+      \ 'cursor': "ctermbg=239 ctermfg=252 guifg=#C5D4DD guibg=#6A7D89",
+      \ 'insert': "ctermbg=239 guibg=#4c4e50",
+      \ 'mono':   "ctermfg=0 ctermbg=9 guifg=#141617 guibg=#AF5F5F",
+      \}
+
+let s:Themes.spacegray = {
+      \ 'type':   "dark",
+      \ 'extend': "ctermbg=237 guibg=#404040",
+      \ 'cursor': "ctermbg=242 guibg=Grey50 ctermfg=239 guifg=#4e4e4e",
+      \ 'insert': "ctermbg=239 guibg=#4c4e50",
+      \ 'mono':   "ctermfg=0 ctermbg=9 guifg=#141617 guibg=#AF5F5F",
       \}
 
 let s:Themes.lightpurple1 = {
