@@ -22,7 +22,6 @@ fun! <SID>VM_Init()
     let g:VM.last_normal      = ''
     let g:VM.last_visual      = ''
     let g:VM.oldupdate        = has('nvim')? 0 : &updatetime
-    let g:VM.registers        = {'"': []}
 
     let g:VM_live_editing                     = get(g:, 'VM_live_editing', 1)
     let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
@@ -50,6 +49,7 @@ fun! <SID>VM_Init()
     let g:VM_leader_mappings                  = get(g:, 'VM_leader_mappings', 1)
     let g:VM_exit_on_1_cursor_left            = get(g:, 'VM_exit_on_1_cursor_left', 0)
     let g:VM_manual_infoline                  = get(g:, 'VM_manual_infoline', 0)
+    let g:VM_persistent_registers             = get(g:, 'VM_persistent_registers', 0)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Reindentation after insert mode
@@ -75,9 +75,17 @@ fun! <SID>VM_Init()
     call vm#themes#init()
     call vm#plugs#init()
     call vm#maps#default()
+
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    "Registers
+
+    call s:vm_regs()
+    let g:VM.registers = s:vm_regs_from_json()
 endfun
 
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Autocommands
 
 augroup plugin-visual-multi-start
     au!
@@ -89,6 +97,38 @@ augroup plugin-visual-multi-start
         au CursorHold   * call vm#operators#after_yank()
     endif
 augroup END
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"VM registers
+
+fun! s:vm_regs()
+    if !g:VM_persistent_registers | return | endif
+
+    let is_win = has('win32') || has ('win64')
+    let sep    = is_win ? '\' : '/'
+    let vmfile = is_win ? '_VM_registers' : '.VM_registers'
+    let home   = !empty(get(g:, 'VM_vimhome', '')) ? g:VM_vimhome :
+               \ exists('$VIMHOME')                ? $VIMHOME :
+               \ is_win                            ? '~/vimfiles' : "~/vim"
+
+    let g:VM.regs_file = home.sep.vmfile
+    if isdirectory(home) && !filereadable(g:VM.regs_file)
+        call writefile(['{}'], g:VM.regs_file)
+    endif
+endfun
+
+fun! s:vm_regs_from_json()
+    if !g:VM_persistent_registers || !filereadable(g:VM.regs_file)
+        return {'"': []} | endif
+    let regs = json_decode(readfile(g:VM.regs_file)[0])
+    let regs['"'] = []
+    return regs
+endfun
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"python section
 
 if !has('python3') | finish | endif
 

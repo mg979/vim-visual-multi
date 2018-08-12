@@ -102,6 +102,27 @@ fun! s:Funcs.get_regs_1_9() dict
     return regs
 endfun
 
+fun! s:Funcs.vm_regs_to_json() dict
+    if !filereadable(g:VM.regs_file) | return | endif
+    let regs = copy(g:VM.registers)
+    unlet regs['"']
+    return json_encode(regs)
+endfun
+
+fun! s:Funcs.vm_regs_from_json() dict
+    if !get(g:, 'VM_persistent_registers', 0) || !filereadable(g:VM.regs_file)
+        return {'"': []} | endif
+    let regs = json_decode(readfile(g:VM.regs_file)[0])
+    let regs['"'] = []
+    return regs
+endfun
+
+fun! s:Funcs.save_vm_regs() dict
+  if get(g:, 'VM_persistent_registers', 0) && filereadable(g:VM.regs_file)
+    call writefile([self.vm_regs_to_json()], g:VM.regs_file)
+  endif
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.set_reg(text) dict

@@ -135,6 +135,7 @@ fun! vm#reset(...)
     let &indentkeys  = s:v.indentkeys
     if has('nvim') | let &clipboard = s:v.clipboard | endif
     call vm#commands#regex_reset()
+    call s:V.Funcs.save_vm_regs()
     call s:V.Funcs.restore_regs()
     call s:V.Maps.mappings(0, 1)
     call vm#maps#reset()
