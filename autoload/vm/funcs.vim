@@ -279,13 +279,21 @@ endfun
 
 function! s:Funcs.pad(t, n)
     if len(a:t) > a:n
-        return a:t[:(a:n-1)]."…"
+        return a:t[:(a:n-3)]."… "
     else
         let spaces = a:n - len(a:t)
         let spaces = printf("%".spaces."s", "")
         return a:t.spaces
     endif
 endfunction
+
+fun! s:Funcs.repeat_char(c) dict
+  let s = ''
+  for i in range(&columns - 20)
+    let s .= a:c
+  endfor
+  return s
+endfun
 
 fun! s:Funcs.regions_contents() dict
     echohl WarningMsg | echo "Index\tID\tA\tB\tw\tl / L\t\ta / b\t\t"

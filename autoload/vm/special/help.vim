@@ -99,6 +99,7 @@ fun! s:dict()
                   \]
 
   let arrows    = []
+  let leader    = []
   let others    = []
 
   for p in sort(keys(g:VM.help))
@@ -124,6 +125,9 @@ fun! s:dict()
     if !ins && match(g:VM.help[p], '\-\<Up\>\|\-\<Down\>\|\-\<Left\>\|\-\<Right\>') >= 0
       let other = 0
       call add(arrows, p)
+    elseif !ins && match(g:VM.help[p], g:VM.leader) >= 0
+      let other = 0
+      call add(leader, p)
     endif
 
     if other
@@ -131,15 +135,17 @@ fun! s:dict()
     endif
   endfor
 
-  return {'regions': regions, 'cursors': cursors, 'visual': visual, 'operators': operators, 'commands': commands, 'tools': tools, 'mouse': mouse, 'fkeys': fkeys, 'arrows': arrows, 'insert': insert, 'edit': edit, 'special': special, 'others': others}
+  return {'regions': regions, 'cursors': cursors, 'visual': visual, 'operators': operators, 'commands': commands, 'tools': tools, 'mouse': mouse, 'fkeys': fkeys, 'arrows': arrows, 'insert': insert, 'edit': edit, 'special': special, 'leader': sort(leader), 'others': others}
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:Pad = { t, n -> b:VM_Selection.Funcs.pad(t, n) }
+let s:Sep = { c    -> b:VM_Selection.Funcs.repeat_char(c) }
 
 fun! s:Txt(i, m)
-  let p = match(a:m, '"') >= 0? 21 : 20
+  let n = &columns > 180 ? 18 : 20
+  let p = match(a:m, '"') >= 0? n+1 : n
   let p = match(a:m, '\') >= 0? p+1 : p
   return (a:i%2? 'echon "' : 'echo "').s:Pad(escape(a:m, '"\'), p).'"'
 endfun
@@ -147,35 +153,35 @@ endfun
 
 fun! vm#special#help#show()
 
-  let _  = "=========="
-  let __ = _._._._._._._._._._._._._._._._._._
-  let sp = '                                                                                 '
+  let _  = "\n".b:VM_Selection.Funcs.repeat_char("=")."\n"
+  let sp = b:VM_Selection.Funcs.repeat_char(" ")
 
   let groups = [
-        \["\n".__."\n"."   Regions        ".sp."\n\n", "regions"],
-        \["\n".__."\n"."   Cursors        ".sp."\n\n", "cursors"],
-        \["\n".__."\n"."   Operators      ".sp."\n\n", "operators"],
-        \["\n".__."\n"."   Visual         ".sp."\n\n", "visual"],
-        \["\n".__."\n"."   F keys         ".sp."\n\n", "fkeys"],
-        \["\n".__."\n"."   Mouse          ".sp."\n\n", "mouse"],
-        \["\n".__."\n"."   Arrows         ".sp."\n\n", "arrows"],
-        \["\n".__."\n"."   Special        ".sp."\n\n", "special"],
-        \["\n".__."\n"."   Commands       ".sp."\n\n", "commands"],
-        \["\n".__."\n"."   Tools          ".sp."\n\n", "tools"],
-        \["\n".__."\n"."   Edit           ".sp."\n\n", "edit"],
-        \["\n".__."\n"."   Insert         ".sp."\n\n", "insert"],
-        \["\n".__."\n"."   All Others     ".sp."\n\n", "others"],
+        \[ _."   Regions        "."\n\n", "regions"],
+        \[ _."   Cursors        "."\n\n", "cursors"],
+        \[ _."   Operators      "."\n\n", "operators"],
+        \[ _."   Visual         "."\n\n", "visual"],
+        \[ _."   F keys         "."\n\n", "fkeys"],
+        \[ _."   Mouse          "."\n\n", "mouse"],
+        \[ _."   Arrows         "."\n\n", "arrows"],
+        \[ _."   Leader         "."\n\n", "leader"],
+        \[ _."   Special        "."\n\n", "special"],
+        \[ _."   Commands       "."\n\n", "commands"],
+        \[ _."   Tools          "."\n\n", "tools"],
+        \[ _."   Edit           "."\n\n", "edit"],
+        \[ _."   Insert         "."\n\n", "insert"],
+        \[ _."   All Others     "."\n\n", "others"],
         \]
 
   echohl Special    | echo "1. "          | echohl Type | echon "Regions, Cursors, Operators, Visual"
-  echohl Special    | echo "2. "          | echohl Type | echon "F keys, Mouse, Arrows"
+  echohl Special    | echo "2. "          | echohl Type | echon "F keys, Mouse, Arrows, Leader"
   echohl Special    | echo "3. "          | echohl Type | echon "Special, Commands, Menus"
   echohl Special    | echo "4. "          | echohl Type | echon "Edit, Insert, Others"
   echohl WarningMsg | echo "\nEnter an option > "       | let ask = nr2char(getchar())      | echohl None
 
   if ask == '1'     | redraw! | let show_groups = groups[:3]
-  elseif ask == '2' | redraw! | let show_groups = groups[4:6]
-  elseif ask == '3' | redraw! | let show_groups = groups[7:9]
+  elseif ask == '2' | redraw! | let show_groups = groups[4:7]
+  elseif ask == '3' | redraw! | let show_groups = groups[8:10]
   elseif ask == '4' | redraw! | let show_groups = groups[-3:-1]
   else              | return  | endif
 
@@ -193,8 +199,8 @@ fun! vm#special#help#show()
       let Desc = s:plugs[plug][0]
       let Note = s:plugs[plug][1]
       echohl Special | exe s:Txt(i, Map)
-      echohl Type    | echon s:Pad(Desc, 25)
-      echohl None    | echon s:Pad(Note, 50)
+      echohl Type    | echon s:Pad(Desc, &columns > 180 ? 25 : 30)
+      echohl None    | if &columns > 180 | echon s:Pad(Note, 50) | endif
       let i += 1
     endfor
     echo "\n"
@@ -203,8 +209,8 @@ endfun
 
 let s:plugs = {
       \"Erase Regions":           ["Erase Regions",              ""],
-      \"Add Cursor At Pos":       ["Add Cursor At Position",     "create a cursor at current position"],
-      \"Add Cursor At Word":      ["Add Cursor At Word",         "create a cursor at current word, adding a pattern"],
+      \"Add Cursor At Pos":       ["Add Cursor At Position",     "cursor at current position"],
+      \"Add Cursor At Word":      ["Add Cursor At Word",         "cursor at current word, adding a pattern"],
       \"Start Regex Search":      ["Start Regex Search",         "add regions with a regex pattern"],
       \"Select All":              ["Select All",                 ""],
       \"Add Cursor Down":         ["Add Cursor Down",            "in cursor mode"],
@@ -247,7 +253,7 @@ let s:plugs = {
       \"F2 Prev":                 ["Goto Prev",                  ""],
       \"Seek Up":                 ["Seek Up",                    "scroll the page up, and select a region"],
       \"Seek Down":               ["Seek Down",                  "scroll the page down, and select a region"],
-      \"Toggle Mappings":         ["Toggle Mappings",            "disable VM mappings, except Space and Escape"],
+      \"Toggle Mappings":         ["Toggle Mappings",            "disable VM mappings, except Space and Esc"],
       \"Exit VM":                 ["Exit VM",                    ""],
       \"Switch Mode":             ["Switch Mode",                "toggle cursor/extend mode"],
       \"Toggle Block":            ["Toggle Block Mode",          ""],
@@ -264,7 +270,7 @@ let s:plugs = {
       \"Merge To Eol":            ["Merge to EOL",               "collapse cursors to end of line"],
       \"Merge To Bol":            ["Merge to BOL",               "collapse cursors to indent level"],
       \"Select Operator":         ["Select Operator",            "accepts motions and text objects"],
-      \"Select All Operator":     ["Select All Operator",        "applies the select operator to all cursors"],
+      \"Select All Operator":     ["Select All Operator",        "applies to all cursors"],
       \"Find Operator":           ["Find Operator",              "matches patterns in motion/text object"],
       \"This Motion h":           ["Extend This Left",           ""],
       \"This Motion l":           ["Extend This Right",          ""],
@@ -274,19 +280,19 @@ let s:plugs = {
       \"Show Help":               ["Show Help",                  ""],
       \"Show Registers":          ["Show Registers",             ""],
       \"Toggle Debug":            ["Toggle Debug",               ""],
-      \"Case Setting":            ["Change Case Setting",        "cycle case settings (smart, ignore, noignore)"],
-      \"Toggle Whole Word":       ["Toggle Whole Word",          "toggle word boundaries for most recent pattern"],
+      \"Case Setting":            ["Change Case Setting",        "cycle case settings"],
+      \"Toggle Whole Word":       ["Toggle Whole Word",          "toggle word boundaries"],
       \"Case Conversion Menu":    ["Case Conversion Menu",       ""],
       \"Search Menu":             ["Search Menu",                ""],
-      \"Rewrite Last Search":     ["Rewrite Last Search",        "update last search pattern to match current region"],
-      \"Toggle Multiline":        ["Toggle Multiline",           "will force one region per line, when disabling"],
+      \"Rewrite Last Search":     ["Rewrite Last Search",        "update search pattern to match region"],
+      \"Toggle Multiline":        ["Toggle Multiline",           "force one region per line, when disabling"],
       \"Show Infoline":           ["Show Infoline",              ""],
       \"Surround":                ["Surround",                   ""],
       \"Merge Regions":           ["Merge Regions",              ""],
       \"Transpose":               ["Transpose",                  ""],
       \"Duplicate":               ["Duplicate",                  ""],
       \"Align":                   ["Align at Column",            "simple alignment at highest cursors column"],
-      \"Split Regions":           ["Split Regions",              ""],
+      \"Split Regions":           ["Split Regions",              "subtract regex from all regions"],
       \"Visual Subtract":         ["Visual Subtract",            "subtract visual selection from regions"],
       \"Run Normal":              ["Run Normal Command",         ""],
       \"Run Last Normal":         ["Run Last Normal Command",    ""],
@@ -302,8 +308,8 @@ let s:plugs = {
       \"Numbers Append":          ["Append Numbers",             "with optional separator, count from 1"],
       \"Zero Numbers":            ["Prepend Numbers from 0",     "with optional separator, count from 0"],
       \"Zero Numbers Append":     ["Append Numbers from 0",      "with optional separator, count from 0"],
-      \"Shrink":                  ["Shrink",                     "reduce selection(s) width by 1 from the sides"],
-      \"Enlarge":                 ["Enlarge",                    "increase selection(s) width by 1 from the sides"],
+      \"Shrink":                  ["Shrink",                     "by 1 from both sides"],
+      \"Enlarge":                 ["Enlarge",                    "by 1 from both sides"],
       \"I Arrow w":               ["(I) w",                      "move as by motion"],
       \"I Arrow b":               ["(I) b",                      "move as by motion"],
       \"I Arrow W":               ["(I) W",                      "move as by motion"],
@@ -340,8 +346,8 @@ let s:plugs = {
       \"A":                       ["A",                          ""],
       \"i":                       ["i",                          ""],
       \"I":                       ["I",                          ""],
-      \"o":                       ["o",                          ""],
-      \"O":                       ["O",                          ""],
+      \"o":                       ["o",                          "as 'o' in normal mode"],
+      \"O":                       ["O",                          "as 'O' in normal mode"],
       \"c":                       ["c",                          ""],
       \"C":                       ["C",                          ""],
       \"Delete":                  ["Delete",                     "both vim and VM registers"],
@@ -350,8 +356,8 @@ let s:plugs = {
       \"Transform Regions":       ["Transform Regions",          "transform regions with expression"],
       \"p Paste Regions":         ["p Paste",                    "both vim and VM registers"],
       \"P Paste Regions":         ["P Paste",                    "both vim and VM registers"],
-      \"p Paste Normal":          ["p Paste [vim]",              "force pasting from vim register"],
-      \"P Paste Normal":          ["P Paste [vim]",              "force pasting from vim register"],
+      \"p Paste Normal":          ["p Paste [vimreg]",           "force pasting from vim register"],
+      \"P Paste Normal":          ["P Paste [vimreg]",           "force pasting from vim register"],
       \"Yank":                    ["Yank",                       "both vim and VM registers"],
       \}
 

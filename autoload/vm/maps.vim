@@ -144,14 +144,13 @@ fun! s:build_permanent_maps()
     let maps        = vm#maps#all#permanent()
 
     "prevent <Space> to be used as leader inside VM
-    let s:leader = ''
-    let g:VM_leader = get(g:, 'VM_leader', '')
-    if !empty(g:VM_leader) && g:VM_leader !=? '<Space>'
-        let s:leader = escape(g:VM_leader, '\')
-    elseif !exists('g:mapleader') || g:mapleader ==? '<Space>' || g:VM_leader ==? '<Space>'
-        let s:leader = '\'
+    let g:VM.leader = get(g:, 'VM_leader', '')
+    if !empty(g:VM.leader) && g:VM.leader !=? '<Space>'
+        let g:VM.leader = escape(g:VM.leader, '\')
+    elseif !exists('g:mapleader') || g:mapleader ==? '<Space>' || g:VM.leader ==? '<Space>'
+        let g:VM.leader = '\'
     else
-        let s:leader = g:mapleader
+        let g:VM.leader = g:mapleader
     endif
 
     "integrate custom maps
@@ -206,8 +205,8 @@ fun! s:assign(plug, key, buffer, ...)
     let k = a:key[0]
     if empty(k) | return '' | endif
 
-    if !empty(s:leader)
-        let k = substitute(k, '<leader>', s:leader, '')
+    if !empty(g:VM.leader)
+        let k = substitute(k, '<leader>', g:VM.leader, '')
     endif
 
     let g:VM.help[a:plug] = k
