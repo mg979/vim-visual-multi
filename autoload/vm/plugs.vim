@@ -148,6 +148,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Delete-Exit)             :<C-u>call b:VM_Selection.Edit.delete(g:VM.extend_mode, v:register, v:count1, 1)<cr>:call vm#reset()<cr>
     nnoremap        <Plug>(VM-Replace)                 :<C-u>call b:VM_Selection.Edit.replace()<cr>
     nnoremap        <Plug>(VM-Replace-Pattern)         :<C-u>call b:VM_Selection.Edit.replace_pattern()<cr>
+    nnoremap        <Plug>(VM-Transform-Regions)       :<C-u>call b:VM_Selection.Edit.replace_expression()<cr>
     nnoremap        <Plug>(VM-p-Paste-Regions)         :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 1, g:VM.extend_mode, v:register)<cr>
     nnoremap        <Plug>(VM-P-Paste-Regions)         :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 1, g:VM.extend_mode, v:register)<cr>
     nnoremap        <Plug>(VM-p-Paste-Normal)          :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 0, g:VM.extend_mode, v:register)<cr>

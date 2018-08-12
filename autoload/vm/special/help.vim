@@ -82,6 +82,7 @@ fun! s:dict()
                   \'Delete',                  'Replace Pattern',
                   \'p Paste Regions',         'p Paste Normal',
                   \'P Paste Regions',         'P Paste Normal',
+                  \'Transform Regions',
                   \]
 
   let insert    = ['I Arrow w',               'I Arrow b',
@@ -346,6 +347,7 @@ let s:plugs = {
       \"Delete":                  ["Delete",                     "both vim and VM registers"],
       \"Replace":                 ["Replace",                    "just as 'r'"],
       \"Replace Pattern":         ["Replace Pattern",            "regex substitution in all regions"],
+      \"Transform Regions":       ["Transform Regions",          "transform regions with expression"],
       \"p Paste Regions":         ["p Paste",                    "both vim and VM registers"],
       \"P Paste Regions":         ["P Paste",                    "both vim and VM registers"],
       \"p Paste Normal":          ["p Paste [vim]",              "force pasting from vim register"],

@@ -252,6 +252,7 @@ fun! vm#maps#all#buffer()
                 \"Delete":                  ['d',           'n', 1, 1],
                 \"Replace":                 ['r',           'n', 1, 1],
                 \"Replace Pattern":         ['R',           'n', 1, 1],
+                \"Transform Regions":       ['<leader>e',   'n', 1, 1],
                 \"p Paste Regions":         ['p',           'n', 1, 1],
                 \"P Paste Regions":         ['P',           'n', 1, 1],
                 \"p Paste Normal":          ['<leader>p',   'n', 1, 1],
