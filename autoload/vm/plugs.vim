@@ -149,11 +149,12 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Replace)                 :<C-u>call b:VM_Selection.Edit.replace()<cr>
     nnoremap        <Plug>(VM-Replace-Pattern)         :<C-u>call b:VM_Selection.Edit.replace_pattern()<cr>
     nnoremap        <Plug>(VM-Transform-Regions)       :<C-u>call b:VM_Selection.Edit.replace_expression()<cr>
-    nnoremap        <Plug>(VM-p-Paste-Regions)         :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 1, g:VM.extend_mode, v:register)<cr>
-    nnoremap        <Plug>(VM-P-Paste-Regions)         :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 1, g:VM.extend_mode, v:register)<cr>
-    nnoremap        <Plug>(VM-p-Paste-Normal)          :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 0, g:VM.extend_mode, v:register)<cr>
-    nnoremap        <Plug>(VM-P-Paste-Normal)          :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 0, g:VM.extend_mode, v:register)<cr>
-    nnoremap <expr> <Plug>(VM-Yank)                    <SID>Yank(1)
+    nnoremap        <Plug>(VM-p-Paste-Regions)         :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 0, g:VM.extend_mode, v:register)<cr>
+    nnoremap        <Plug>(VM-P-Paste-Regions)         :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 0, g:VM.extend_mode, v:register)<cr>
+    nnoremap        <Plug>(VM-p-Paste-Normal)          :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 0), 1, g:VM.extend_mode, v:register)<cr>
+    nnoremap        <Plug>(VM-P-Paste-Normal)          :call b:VM_Selection.Edit.paste((g:VM.extend_mode? 1 : 1), 1, g:VM.extend_mode, v:register)<cr>
+    nnoremap <expr> <Plug>(VM-Yank)                    <SID>Yank(0)
+    nnoremap <expr> <Plug>(VM-Yank-Hard)               <SID>Yank(1)
 
     nnoremap        <Plug>(VM-Move-Right)              :call b:VM_Selection.Edit.shift(1)<cr>
     nnoremap        <Plug>(VM-Move-Left)               :call b:VM_Selection.Edit.shift(0)<cr>

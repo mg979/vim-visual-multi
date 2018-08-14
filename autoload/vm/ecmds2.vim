@@ -110,7 +110,7 @@ fun! s:Edit.transpose() dict
     if !inline
         let t = remove(g:VM.registers[s:v.def_reg], 0)
         call add(g:VM.registers[s:v.def_reg], t)
-        call self.paste(1, 1, 1, '"')
+        call self.paste(1, 0, 1, '"')
         return | endif
 
     "inline transpositions
@@ -119,7 +119,7 @@ fun! s:Edit.transpose() dict
         call insert(g:VM.registers[s:v.def_reg], t, rlines[l][0])
     endfor
     call self.delete(1, "_", 0, 0)
-    call self.paste(1, 1, 1, '"')
+    call self.paste(1, 0, 1, '"')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -150,11 +150,11 @@ fun! s:Edit.shift(dir) dict
 
     call self.yank(0, 1, 1)
     if a:dir
-        call self.paste(0, 1, 1, '"')
+        call self.paste(0, 0, 1, '"')
     else
         call self.delete(1, "_", 0, 0)
         call vm#commands#motion('h', 1, 0, 0)
-        call self.paste(1, 1, 1, '"')
+        call self.paste(1, 0, 1, '"')
     endif
 endfun
 
@@ -180,15 +180,13 @@ fun! s:Edit._numbers(start, stop, step, sep, app) dict
     if len(text) < len(s:R()) | let text += map(range(len(s:R()) - len(text)), '""') | endif
 
     if s:X() && a:app
-        let g:VM.registers['"'] = map(copy(s:R()), '(v:val.txt).text[v:key]')
-        call self.paste(1, 1, 1, '"')
+        call self.fill_register('"', map(copy(s:R()), '(v:val.txt).text[v:key]'), 0)
     elseif s:X()
-        let g:VM.registers['"'] = map(copy(s:R()), 'text[v:key].(v:val.txt)')
-        call self.paste(1, 1, 1, '"')
+        call self.fill_register('"', map(copy(s:R()), 'text[v:key].(v:val.txt)'), 0)
     else
-        let g:VM.registers['"'] = text
-        call self.paste(1, 1, 0, '"')
+        call self.fill_register('"', text, 0)
     endif
+    normal p
 endfun
 
 fun! s:Edit.numbers(start, app) dict

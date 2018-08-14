@@ -258,6 +258,7 @@ fun! vm#maps#all#buffer()
                 \"p Paste Normal":          ['<leader>p',   'n', 1, 1],
                 \"P Paste Normal":          ['<leader>P',   'n', 1, 1],
                 \"Yank":                    ['y',           'n', 1, 1],
+                \"Yank Hard":               ['<leader>y',   'n', 1, 1],
                 \})
 
     if g:VM_no_meta_mappings

@@ -32,8 +32,8 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     "invalid register
     if register == "_" | call s:F.msg('Invalid register.', 1) | return | endif
 
-    "write custom and vim registers
-    let [text, type] = self.fill_register(register)
+    "write custom and possibly vim registers.
+    let [text, type] = self.fill_register(register, s:G.regions_text(), a:hard)
 
     "restore default register if a different register was provided
     if register !=# s:v.def_reg | call s:F.restore_reg() | endif
@@ -42,10 +42,9 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     let s:v.use_register = s:v.def_reg
 
     "overwrite the old saved register if yanked using default register
-    if a:hard && register ==# s:v.def_reg
+    if register ==# s:v.def_reg
         let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type]
-    elseif a:hard
-        call setreg(register, join(text, "\n"), type) | endif
+    endif
 
     if !a:silent
         call s:F.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
@@ -82,8 +81,8 @@ fun! s:Edit.delete(X, register, count, process) dict
         let change = s:size() - size
     endfor
 
-    "write custom and vim registers
-    call self.fill_register(a:register, s:v.old_text)
+    "write custom registers
+    call self.fill_register(a:register, s:v.old_text, 0)
 
     call s:G.change_mode()
     call s:G.select_region(ix)
@@ -97,16 +96,16 @@ endfun
 " Paste
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.paste(before, vm, reselect, register, ...) dict
+fun! s:Edit.paste(before, vim_reg, reselect, register, ...) dict
     let X                = s:X()
     let s:v.use_register = a:register
-    let vim_reg          = !a:vm || !has_key(g:VM.registers, a:register) ||
+    let vim_reg          = a:vim_reg || !has_key(g:VM.registers, a:register) ||
                            \empty(g:VM.registers[a:register])
 
     if empty(s:v.old_text) | let s:v.old_text = s:G.regions_text() | endif
 
     if a:0         | let s:v.new_text = a:1
-    elseif vim_reg | let s:v.new_text = s:default_text()
+    elseif vim_reg | let s:v.new_text = s:default_text(a:vim_reg)
     else           | let s:v.new_text = s:fill_text(g:VM.registers[a:register]) | endif
 
     if X | call self.delete(1, "_", 1, 0) | endif
@@ -191,7 +190,7 @@ fun! s:Edit.replace_pattern() dict
     for t in text
         call add(T, substitute(t, pat, repl, 'g'))
     endfor
-    call self.fill_register('"', T)
+    call self.fill_register('"', T, 0)
     normal p
     call s:G.select_region(ix)
 endfun
@@ -222,7 +221,7 @@ fun! s:Edit.replace_expression() dict
     for r in s:R()
         call add(T, eval(expr))
     endfor
-    call self.fill_register('"', T)
+    call self.fill_register('"', T, 0)
     normal p
     call s:G.select_region(ix)
 endfun
@@ -247,7 +246,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:default_text()
+fun! s:default_text(as_block)
     "fill the content to paste with the default register
     let text = []
     let block = char2nr(getregtype(s:v.use_register)[0]) == 22
@@ -257,9 +256,12 @@ fun! s:default_text()
         let width   = getregtype(s:v.use_register)[1:]
         let content = split(getreg(s:v.use_register), "\n")
 
-        for t in range(len(content))
-            while len(content[t]) < width | let content[t] .= ' ' | endwhile
-        endfor
+        "ensure all regions have the same width, fill the rest with spaces
+        if a:as_block
+            for t in range(len(content))
+                while len(content[t]) < width | let content[t] .= ' ' | endwhile
+            endfor
+        endif
 
         call s:fill_text(content)
 
@@ -303,16 +305,18 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.fill_register(reg, ...) dict
-    "Write custom and vim registers.
+fun! s:Edit.fill_register(reg, text, hard) dict
+    "Write custom and possibly vim registers.
     if a:reg == "_" | return | endif
 
-    let text = a:0? a:1 : s:G.regions_text()
+    let text = a:text
     let maxw = max(map(copy(text), 'len(v:val)'))
 
     let g:VM.registers[a:reg] = text
     let type = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
-    call setreg(a:reg, join(text, "\n"), type)
+    if a:hard || a:reg ==# s:v.def_reg
+        call setreg(a:reg, join(text, "\n"), type)
+    endif
     return [text, type]
 endfun
 
