@@ -60,7 +60,7 @@ endfun
 let s:Themes.iceblue = {
       \ 'type':   "dark",
       \ 'extend': "ctermbg=24  guibg=#005f87",
-      \ 'cursor': "ctermbg=31  guibg=#0087af ctermfg=237 guifg=#3a3a3a",
+      \ 'cursor': "ctermbg=31  guibg=#0087af ctermfg=237 guifg=#87dfff",
       \ 'insert': "ctermbg=239 guibg=#4c4e50",
       \ 'mono':   "ctermbg=180 guibg=#dfaf87 ctermfg=235 guifg=#262626",
       \}

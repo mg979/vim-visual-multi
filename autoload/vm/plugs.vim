@@ -261,7 +261,10 @@ fun! s:Yank(hard)
     if empty(b:VM_Selection.Global.is_region_at_pos('.'))
         let b:VM_Selection.Vars.yanked = 1 | return 'y'
     endif
-    return ":\<C-u>call b:VM_Selection.Edit.yank(".a:hard.", 0, 0, 1)\<cr>"
+    let hard = a:hard && !g:VM_overwrite_vim_registers ||
+             \ !a:hard && g:VM_overwrite_vim_registers
+
+    return ":\<C-u>call b:VM_Selection.Edit.yank(".hard.", 0, 0, 1)\<cr>"
 endfun
 
 fun! s:Mode()

@@ -38,16 +38,6 @@ Shift regions left and right (M-S-\<\>)
 ![Imgur](https://i.imgur.com/Q7EF8YI.gif)
 
 -------
-Edit test: join lines(J), change motion at cursors, append(a), visual command at cursors 
-
-![Imgur](https://i.imgur.com/2QKCaYv.gif)
-
--------
-Place cursors at words:
-
-![Imgur](https://i.imgur.com/swo5zHd.gif)
-
--------
 Select inside/around brackets/quotes/etc:
 
 ![Imgur](https://i.imgur.com/Nn9d0NS.gif)
@@ -68,12 +58,7 @@ Find words under cursor, add new words (patterns stack), navigate regions, skip 
 ![Imgur](https://i.imgur.com/8MmJbD0.gif)
 
 -------
-Select all
-
-![Imgur](https://i.imgur.com/7kPW9Vi.gif)
-
--------
-Normal/Ex commands at cursors
+Normal/Visual/Ex commands at cursors
 
 ![Imgur](https://i.imgur.com/5aiQscj.gif)
 
@@ -83,12 +68,7 @@ Macros. Shorter lines are skipped when adding cursors above/below.
 ![Imgur](https://i.imgur.com/3IsZzF3.gif)
 
 -------
-Another macro example that uses vim-sneak and vim-surround
-
-![Imgur](https://i.imgur.com/Uyqyux0.gif)
-
--------
-First editing functions: yank, delete, paste from register, paste block from yanked regions
+Some editing functions: yank, delete, paste from register, paste block from yanked regions
 
 ![Imgur](https://i.imgur.com/0jRkVdp.gif)
 

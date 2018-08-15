@@ -90,6 +90,7 @@ fun! vm#init_buffer(empty, ...)
     call vm#region#init()
     call vm#commands#init()
     call vm#operators#init()
+    call vm#themes#init()
     call vm#comp#init()
     call vm#special#commands#init()
 

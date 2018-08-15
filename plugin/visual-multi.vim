@@ -50,6 +50,7 @@ fun! <SID>VM_Init()
     let g:VM_exit_on_1_cursor_left            = get(g:, 'VM_exit_on_1_cursor_left', 0)
     let g:VM_manual_infoline                  = get(g:, 'VM_manual_infoline', 0)
     let g:VM_persistent_registers             = get(g:, 'VM_persistent_registers', 0)
+    let g:VM_overwrite_vim_registers          = get(g:, 'VM_overwrite_vim_registers', 0)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Reindentation after insert mode

@@ -105,8 +105,8 @@ fun! s:Edit.paste(before, vim_reg, reselect, register, ...) dict
     if empty(s:v.old_text) | let s:v.old_text = s:G.regions_text() | endif
 
     if a:0         | let s:v.new_text = a:1
-    elseif vim_reg | let s:v.new_text = s:default_text(a:vim_reg)
-    else           | let s:v.new_text = s:fill_text(g:VM.registers[a:register]) | endif
+    elseif vim_reg | let s:v.new_text = self.convert_vimreg(a:vim_reg)
+    else           | let s:v.new_text = s:fix_regions_text(g:VM.registers[a:register]) | endif
 
     if X | call self.delete(1, "_", 1, 0) | endif
 
@@ -232,8 +232,8 @@ endfun
 " Helper functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:fill_text(replacement)
-    "Ensure there are enough elements for all regions
+fun! s:fix_regions_text(replacement)
+    """Ensure there are enough elements for all regions.
     let L = a:replacement
     let i = len(s:R()) - len(L)
 
@@ -246,8 +246,8 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:default_text(as_block)
-    "fill the content to paste with the default register
+fun! s:Edit.convert_vimreg(as_block) dict
+    """Fill the content to paste with the chosen vim register.
     let text = []
     let block = char2nr(getregtype(s:v.use_register)[0]) == 22
 
@@ -263,7 +263,7 @@ fun! s:default_text(as_block)
             endfor
         endif
 
-        call s:fill_text(content)
+        call s:fix_regions_text(content)
 
         for n in range(len(s:R()))
             call add(text, content[n])
@@ -290,7 +290,7 @@ fun! s:Edit.store_widths(...)
     endif
 
     "mismatching blocks must be corrected
-    if use_list | call s:fill_text(list) | endif
+    if use_list | call s:fix_regions_text(list) | endif
 
     for r in s:R()
         "if using list, w must be len[i]-1, but always >= 0, set it to 0 if empty
@@ -306,7 +306,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.fill_register(reg, text, hard) dict
-    "Write custom and possibly vim registers.
+    """Write custom and possibly vim registers.
     if a:reg == "_" | return | endif
 
     let text = a:text
@@ -314,7 +314,9 @@ fun! s:Edit.fill_register(reg, text, hard) dict
 
     let g:VM.registers[a:reg] = text
     let type = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
-    if a:hard || a:reg ==# s:v.def_reg
+
+    "vim register is overwritten if unnamed, or if hard yank
+    if a:reg ==# s:v.def_reg || a:hard
         call setreg(a:reg, join(text, "\n"), type)
     endif
     return [text, type]
