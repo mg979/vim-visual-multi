@@ -119,6 +119,7 @@ endfun
 fun! vm#operators#find(start, visual, ...)
 
     if a:start
+        let s:from_visual = a:visual
         if !g:VM.is_active
             call s:init()
             if a:visual
@@ -145,17 +146,28 @@ fun! vm#operators#find(start, visual, ...)
     "set the cursor to the start of the yanked region, then find occurrences until end mark is met
     keepjumps normal! `]
     let endline = getpos('.')[1]
+    let endcol = getpos('.')[2]
     keepjumps normal! `[h
+    let startcol = getpos('.')[2]
+
+    let vblock = s:from_visual && visualmode() == "\<C-v>"
 
     while 1
         if !search(join(s:v.search, '\|'), 'znp', endline) | break | endif
         let R = vm#commands#find_next(0, 0, 1)
         if empty(R)
-            if s:v.index >= 0 | let s:v.index -= 1 | endif
-            break | endif
+            if s:v.index >= 0 | let s:v.index -= 1 | endif | break
+        elseif vblock && ( R.a < startcol || R.a > endcol )
+            call R.remove()
+        endif
     endwhile
 
-    call s:G.update_map_and_select_region()
+    if !len(s:R())
+        call s:F.msg('No matches found. Exiting VM.', 0)
+        call vm#reset(1)
+    else
+        call s:G.update_map_and_select_region()
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -436,9 +436,9 @@ fun! vm#commands#skip(just_remove)
         endif
 
     elseif s:v.nav_direction
-        call vm#commands#find_next(1, 0)
+        return vm#commands#find_next(1, 0)
     else
-        call vm#commands#find_prev(1, 0)
+        return vm#commands#find_prev(1, 0)
     endif
 endfun
 
