@@ -23,7 +23,7 @@ endfun
 fun! s:init(whole, empty, extend_mode)
     if a:extend_mode | let g:VM.extend_mode = 1 | endif
 
-    "return if already initialized
+    "return true if already initialized
     if g:VM.is_active
         call s:F.Scroll.get()
         if s:v.using_regex | call vm#commands#regex_reset() | endif
@@ -526,15 +526,10 @@ endfun
 " Motion commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:sublime = { -> !g:VM.is_active && g:VM_sublime_mappings }
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! vm#commands#motion(motion, count, select, this)
 
-    "start if sublime mappings are set;
-    "reselect region on motion unless a:this (eg M-<> adds a new region)
-    if s:sublime()          | call s:init(0, 1, 1)     | call s:G.new_cursor()
+    "create cursor if needed
+    if !g:VM.is_active      | call s:init(0, 1, 1)     | call s:G.new_cursor()
     elseif s:F.no_regions() || ( a:this && !s:is_r() ) | call s:G.new_cursor() | endif
 
     "-----------------------------------------------------------------------

@@ -15,68 +15,103 @@
 "       3. update the help file: an entry in s:plugs is necessary
 "       4. in the help file, add an entry in a section of s:dict to assign a category
 
+let s:base = {
+            \"Select Operator":         ['', 'n', 1, 1],
+            \"Erase Regions":           ['', 'n', 1, 1],
+            \"Add Cursor At Pos":       ['', 'n', 1, 1],
+            \"Add Cursor At Word":      ['', 'n', 1, 1],
+            \"Start Regex Search":      ['', 'n', 1, 1],
+            \"Select All":              ['', 'n', 1, 1],
+            \"Add Cursor Down":         ['', 'n', 1, 1],
+            \"Add Cursor Up":           ['', 'n', 1, 1],
+            \"Visual Regex":            ['', 'x', 1, 1],
+            \"Visual All":              ['', 'x', 1, 1],
+            \"Visual Add":              ['', 'x', 1, 1],
+            \"Visual Find":             ['', 'x', 1, 1],
+            \"Visual Cursors":          ['', 'x', 1, 1],
+            \"Find Under":              ['', 'n', 1, 1],
+            \"Find Subword Under":      ['', 'x', 1, 1],
+            \"Select Cursor Down":      ['', 'n', 1, 1],
+            \"Select Cursor Up":        ['', 'n', 1, 1],
+            \"Select j":                ['', 'n', 1, 1],
+            \"Select k":                ['', 'n', 1, 1],
+            \"Select l":                ['', 'n', 1, 1],
+            \"Select h":                ['', 'n', 1, 1],
+            \"Select w":                ['', 'n', 1, 1],
+            \"Select b":                ['', 'n', 1, 1],
+            \"Select Line Down":        ['', 'n', 1, 1],
+            \"Select Line Up":          ['', 'n', 1, 1],
+            \"Select E":                ['', 'n', 1, 1],
+            \"Select BBW":              ['', 'n', 1, 1],
+            \"Find I Word":             ['', 'n', 1, 1],
+            \"Find A Word":             ['', 'n', 1, 1],
+            \"Find A Subword":          ['', 'x', 1, 1],
+            \"Find A Whole Subword":    ['', 'x', 1, 1],
+            \"Mouse Cursor":            ['', 'n', 1, 1],
+            \"Mouse Word":              ['', 'n', 1, 1],
+            \"Mouse Column":            ['', 'n', 1, 1],
+            \}
+
 fun! vm#maps#all#permanent()
     """Default permanent mappings dictionary."""
-    let maps = {}
+    let maps = s:base
 
-    call extend(maps, g:VM_default_mappings? {
-                \"Select Operator":         ['gs',        'n', 1, 1],
-                \"Erase Regions":           ['gr',        'n', 1, 1],
-                \"Add Cursor At Pos":       ['g<space>',  'n', 1, 1],
-                \"Add Cursor At Word":      ['g<cr>',     'n', 1, 1],
-                \"Start Regex Search":      ['g/',        'n', 1, 1],
-                \"Select All":              ['<M-A>',     'n', 1, 1],
-                \"Add Cursor Down":         ['<M-j>',     'n', 1, 1],
-                \"Add Cursor Up":           ['<M-k>',     'n', 1, 1],
-                \"Visual Regex":            ['g/',        'x', 1, 1],
-                \"Visual All":              ['<M-A>',     'x', 1, 1],
-                \"Visual Add":              ['<M-a>',     'x', 1, 1],
-                \"Visual Find":             ['<C-f>',     'x', 1, 1],
-                \"Visual Cursors":          ['<C-c>',     'x', 1, 1],
-                \} : {})
+    if g:VM_default_mappings
+        let maps["Select Operator"][0]          = 'gs'
+        let maps["Erase Regions"][0]            = 'gr'
+        let maps["Add Cursor At Pos"][0]        = 'g<space>'
+        let maps["Add Cursor At Word"][0]       = 'g<cr>'
+        let maps["Start Regex Search"][0]       = 'g/'
+        let maps["Select All"][0]               = '<M-A>'
+        let maps["Add Cursor Down"][0]          = '<M-j>'
+        let maps["Add Cursor Up"][0]            = '<M-k>'
+        let maps["Visual Regex"][0]             = 'g/'
+        let maps["Visual All"][0]               = '<M-A>'
+        let maps["Visual Add"][0]               = '<M-a>'
+        let maps["Visual Find"][0]              = '<C-f>'
+        let maps["Visual Cursors"][0]           = '<C-c>'
+        let maps["Find Under"][0]               = '<C-n>'
+        let maps["Find Subword Under"][0]       = '<C-n>'
+    endif
 
-    call extend(maps, g:VM_sublime_mappings? {
-                \"Select Cursor Down":      ['<M-C-Down>',  'n', 1, 1],
-                \"Select Cursor Up":        ['<M-C-Up>',    'n', 1, 1],
-                \"Select j":                ['<S-Down>',    'n', 1, 1],
-                \"Select k":                ['<S-Up>',      'n', 1, 1],
-                \"Select l":                ['<S-Right>',   'n', 1, 1],
-                \"Select h":                ['<S-Left>',    'n', 1, 1],
-                \"Select w":                ['<C-S-Right>', 'n', 1, 1],
-                \"Select b":                ['<C-S-Left>',  'n', 1, 1],
-                \"Select Line Down":        ['<C-S-Down>',  'n', 1, 1],
-                \"Select Line Up":          ['<C-S-Up>',    'n', 1, 1],
-                \"Select E":                ['<M-C-Right>', 'n', 1, 1],
-                \"Select BBW":              ['<M-C-Left>',  'n', 1, 1],
-                \"Find Under":              ['<C-d>',       'n', 1, 1],
-                \"Find Subword Under":      ['<C-d>',       'x', 1, 1],
-                \} : {})
+    if g:VM_sublime_mappings
+        let maps["Select Cursor Down"][0]       = '<M-C-Down>'
+        let maps["Select Cursor Up"][0]         = '<M-C-Up>'
+        let maps["Select j"][0]                 = '<S-Down>'
+        let maps["Select k"][0]                 = '<S-Up>'
+        let maps["Select l"][0]                 = '<S-Right>'
+        let maps["Select h"][0]                 = '<S-Left>'
+        let maps["Select w"][0]                 = '<C-S-Right>'
+        let maps["Select b"][0]                 = '<C-S-Left>'
+        let maps["Select Line Down"][0]         = '<C-S-Down>'
+        let maps["Select Line Up"][0]           = '<C-S-Up>'
+        let maps["Select E"][0]                 = '<M-C-Right>'
+        let maps["Select BBW"][0]               = '<M-C-Left>'
+        let maps["Find Under"][0]               = '<C-d>'
+        let maps["Find Subword Under"][0]       = '<C-d>'
+    endif
 
-    call extend(maps, g:VM_extended_mappings? {
-                \"Find I Word":             ['gw',        'n', 1, 1],
-                \"Find A Word":             ['gW',        'n', 1, 1],
-                \"Find A Subword":          ['gw',        'x', 1, 1],
-                \"Find A Whole Subword":    ['gW',        'x', 1, 1],
-                \} : {})
+    if g:VM_extended_mappings
+        let maps["Find I Word"][0]              = 'gw'
+        let maps["Find A Word"][0]              = 'gW'
+        let maps["Find A Subword"][0]           = 'gw'
+        let maps["Find A Whole Subword"][0]     = 'gW'
+    endif
 
-    call extend(maps, g:VM_mouse_mappings? {
-                \"Mouse Cursor":            ['<C-LeftMouse>',    'n', 1, 1],
-                \"Mouse Word":              ['<C-RightMouse>',   'n', 1, 1],
-                \"Mouse Column":            ['<M-C-RightMouse>', 'n', 1, 1],
-                \} : {})
+    if g:VM_mouse_mappings
+        let maps["Mouse Cursor"][0]             = '<C-LeftMouse>'
+        let maps["Mouse Word"][0]               = '<C-RightMouse>'
+        let maps["Mouse Column"][0]             = '<M-C-RightMouse>'
+    endif
 
     if g:VM_no_meta_mappings
-        let maps['Select All'][0]      = '<leader>A'
-        let maps['Visual All'][0]      = '<leader>A'
-        let maps['Add Cursor Down'][0] = '<C-Down>'
-        let maps['Add Cursor Up'][0]   = '<C-Up>'
-        let maps['Visual Add'][0]      = '<C-a>'
+        let maps['Select All'][0]               = '<leader>A'
+        let maps['Visual All'][0]               = '<leader>A'
+        let maps['Add Cursor Down'][0]          = '<C-Down>'
+        let maps['Add Cursor Up'][0]            = '<C-Up>'
+        let maps['Visual Add'][0]               = '<C-a>'
     endif
 
-    if !g:VM_sublime_mappings
-        let maps['Find Under']         = ['<C-n>',       'n', 1, 1]
-        let maps['Find Subword Under'] = ['<C-n>',       'x', 1, 1]
-    endif
     return maps
 endfun
 
