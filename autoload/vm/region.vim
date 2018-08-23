@@ -60,7 +60,7 @@ fun! vm#region#new(cursor, ...)
     else
         let i = 0
         for r in s:R()
-            if r.A > R.A
+            if r.A >= R.A
                 call insert(s:R(), R, i)
                 break
             endif

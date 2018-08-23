@@ -57,10 +57,16 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.new_cursor(...) dict
-    """Create a new cursor if there is't already a region."""
+    """Create a new cursor if there isn't already a region.
 
-    let R = self.is_region_at_pos('.')
-    if empty(R) | let R = vm#region#new(1) | endif
+    "if creating a single cursor at position, allow more cursors
+    if a:0 && get(g:, 'VM_allow_more_cursors_in_place', 1)
+        " call b:VM_Selection.Maps.mappings(0, 1)
+        let R = vm#region#new(1)
+    else
+        let R = self.is_region_at_pos('.')
+        if empty(R) | let R = vm#region#new(1) | endif
+    endif
 
     let s:v.matches = getmatches()
     return R
@@ -80,6 +86,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.change_mode(...) dict
+    if !s:X() | call self.merge_cursors() | endif
     let g:VM.extend_mode = !s:X()
 
     let ix = s:v.index

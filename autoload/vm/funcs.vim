@@ -339,18 +339,18 @@ endfun
 
 fun! s:Funcs.external_funcs(maps, restore)
     if a:restore
-        if exists('*VM_after_auto')       | call VM_after_auto()     | endif
+        if exists('*VM_after_auto')      | call VM_after_auto()   | endif
         call s:V.Maps.mappings(1)
         if a:maps
-            if exists('*VM_after_macro') | call VM_after_macro()     | endif
+            if exists('*VM_after_macro') | call VM_after_macro()  | endif
         endif
         return
     endif
 
-    if exists('*VM_before_auto')      | call VM_before_auto()        | endif
+    if exists('*VM_before_auto')         | call VM_before_auto()  | endif
     if a:maps
-        if g:VM.mappings_enabled      | call s:V.Maps.mappings(0, 1) | endif
-        if exists('*VM_before_macro') | call VM_before_macro()       | endif
+        call s:V.Maps.mappings(0)
+        if exists('*VM_before_macro')    | call VM_before_macro() | endif
     endif
 endfun
 

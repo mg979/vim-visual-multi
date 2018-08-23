@@ -46,19 +46,20 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Maps.mappings(activate, ...) dict
+    """Extra arg is to reactivate permanent mappings, when disabling.
     if a:activate && !g:VM.mappings_enabled
         let g:VM.mappings_enabled = 1
         call self.start()
 
     elseif !a:activate && g:VM.mappings_enabled
         let g:VM.mappings_enabled = 0
-        call self.end()
+        call self.end(a:0)
     endif
 endfun
 
 fun! s:Maps.mappings_toggle() dict
     let activate = !g:VM.mappings_enabled
-    call self.mappings(activate)
+    call self.mappings(activate, 1)
     call s:V.Funcs.count_msg(1)
 endfun
 
@@ -102,7 +103,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Maps.end() dict
+fun! s:Maps.end(keep_permanent) dict
     for m in g:VM.unmaps | exe m | endfor
 
     for m in (g:VM.motions + g:VM.find_motions)
@@ -125,6 +126,10 @@ fun! s:Maps.end() dict
     nunmap <buffer> N
     silent! cunmap <buffer> <cr>
     silent! cunmap <buffer> <esc>
+
+    if a:keep_permanent
+        for m in g:VM.maps.permanent | exe m | endfor
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

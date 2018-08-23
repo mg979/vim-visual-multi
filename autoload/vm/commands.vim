@@ -96,7 +96,7 @@ endfun
 fun! vm#commands#add_cursor_at_pos(extend)
     call s:check_extend_default(a:extend)
     call s:Block.stop()
-    call s:G.new_cursor()
+    call s:G.new_cursor(1)
     call s:F.count_msg(1)
 endfun
 
