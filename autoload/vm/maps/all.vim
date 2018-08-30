@@ -304,6 +304,8 @@ fun! vm#maps#all#buffer()
         let maps['Run Last Visual'][0]    = 'zV'
         let maps['Add Cursor Down'][0]    = '<C-Down>'
         let maps['Add Cursor Up'][0]      = '<C-Up>'
+        let maps['Move Right'][0]         = '<C-l>'
+        let maps['Move Left'][0]          = '<C-h>'
     endif
 
     return maps
