@@ -131,7 +131,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "python section
 
-if !has('python3') | finish | endif
+if !has('python3') || has('nvim') | finish | endif
 
 let s:root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 

@@ -58,9 +58,7 @@ fun! vm#maps#all#permanent()
 
     if g:VM_default_mappings
         let maps["Select Operator"][0]          = 'gs'
-        let maps["Erase Regions"][0]            = 'gr'
         let maps["Add Cursor At Pos"][0]        = 'g<space>'
-        let maps["Add Cursor At Word"][0]       = 'g<cr>'
         let maps["Start Regex Search"][0]       = 'g/'
         let maps["Select All"][0]               = '<M-A>'
         let maps["Add Cursor Down"][0]          = '<M-j>'
@@ -109,7 +107,7 @@ fun! vm#maps#all#permanent()
         let maps['Visual All'][0]               = '<leader>A'
         let maps['Add Cursor Down'][0]          = '<C-Down>'
         let maps['Add Cursor Up'][0]            = '<C-Up>'
-        let maps['Visual Add'][0]               = '<C-a>'
+        let maps['Visual Add'][0]               = '<leader>a'
     endif
 
     return maps
@@ -300,7 +298,7 @@ fun! vm#maps#all#buffer()
         let maps['Remove Last Region'][0] = '<C-q>'
         let maps['Add Cursor Down'][0]    = '<C-Down>'
         let maps['Add Cursor Up'][0]      = '<C-Up>'
-        let maps['Visual Subtract'][0]    = '<C-s>'
+        let maps['Visual Subtract'][0]    = '<leader>s'
         let maps['Run Last Visual'][0]    = 'zV'
         let maps['Add Cursor Down'][0]    = '<C-Down>'
         let maps['Add Cursor Up'][0]      = '<C-Up>'

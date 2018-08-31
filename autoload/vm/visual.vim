@@ -18,8 +18,14 @@ fun! vm#visual#add(mode)
     if a:mode ==# 'V'
         call s:G.split_lines()
         call s:G.remove_empty_lines()
+    elseif a:mode ==# 'v'
+        let h = 0
+        for r in s:R()
+            if r.h | let h = 1 | break | endif
+        endfor
     endif
 
+    if h | let s:v.multiline = 1 | endif
     call s:G.update_and_select_region(0, s:v.IDs_list[-1])
     if w | call s:F.toggle_option('block_mode', 0) | endif
 endfun
