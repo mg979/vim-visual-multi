@@ -51,6 +51,7 @@ fun! <SID>VM_Init()
     let g:VM_manual_infoline                  = get(g:, 'VM_manual_infoline', 0)
     let g:VM_persistent_registers             = get(g:, 'VM_persistent_registers', 0)
     let g:VM_overwrite_vim_registers          = get(g:, 'VM_overwrite_vim_registers', 0)
+    let g:VM_highlight_matches                = get(g:, 'VM_highlight_matches', 1)
 
     """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
     "Reindentation after insert mode
@@ -91,6 +92,7 @@ endfun
 augroup plugin-visual-multi-start
     au!
     au VimEnter     * call <SID>VM_Init()
+    au ColorScheme  * call vm#themes#init()
     if has('nvim')
         au TextYankPost * call vm#operators#after_yank()
     else

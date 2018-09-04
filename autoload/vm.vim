@@ -90,7 +90,6 @@ fun! vm#init_buffer(empty, ...)
     call vm#region#init()
     call vm#commands#init()
     call vm#operators#init()
-    call vm#themes#init()
     call vm#comp#init()
     call vm#special#commands#init()
 
@@ -113,6 +112,13 @@ fun! vm#init_buffer(empty, ...)
     set lz
     let &ch = get(g:, 'VM_cmdheight', 2)
 
+    if g:VM_highlight_matches
+        hi clear Search
+        exe g:VM.Search
+        if !v:hlsearch
+            call feedkeys(":let v:hlsearch = v:true\<CR>", 'n')
+        endif
+    endif
     call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
 
     let g:VM.is_active = 1
@@ -150,6 +156,11 @@ fun! vm#reset(...)
 
     "exiting manually
     if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif
+
+    if g:VM_highlight_matches
+        hi clear Search
+        exe "hi! Search" g:VM.search_hi
+    endif
 
     call clearmatches()
     call setmatches(matches)

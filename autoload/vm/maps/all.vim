@@ -107,7 +107,7 @@ fun! vm#maps#all#permanent()
         let maps['Visual All'][0]               = '<leader>A'
         let maps['Add Cursor Down'][0]          = '<C-Down>'
         let maps['Add Cursor Up'][0]            = '<C-Up>'
-        let maps['Visual Add'][0]               = '<leader>a'
+        let maps['Visual Add'][0]               = '<C-a>'
     endif
 
     return maps
@@ -298,7 +298,7 @@ fun! vm#maps#all#buffer()
         let maps['Remove Last Region'][0] = '<C-q>'
         let maps['Add Cursor Down'][0]    = '<C-Down>'
         let maps['Add Cursor Up'][0]      = '<C-Up>'
-        let maps['Visual Subtract'][0]    = '<leader>s'
+        let maps['Visual Subtract'][0]    = '<C-s>'
         let maps['Run Last Visual'][0]    = 'zV'
         let maps['Add Cursor Down'][0]    = '<C-Down>'
         let maps['Add Cursor Up'][0]      = '<C-Up>'

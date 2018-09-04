@@ -28,6 +28,15 @@ fun! vm#themes#init()
   let g:VM.hi.insert  = 'VM_Insert'
   let g:VM.hi.cursor  = 'VM_Cursor'
   highlight link MultiCursor VM_Cursor
+  if g:VM_highlight_matches
+    redir => out
+    silent! highlight Search
+    redir END
+    let g:VM.search_hi = substitute(out, '^.*xxx ', '', '')
+    let g:VM_Search = get(g:, 'VM_Search', 'underline')
+    let g:VM.Search = g:VM_Search == 'underline' ? 'hi Search term=underline cterm=underline gui=underline' :
+          \           g:VM_Search == 'red'       ? 'hi Search ctermfg=196 guifg=#ff0000' : g:VM_Search
+  endif
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
