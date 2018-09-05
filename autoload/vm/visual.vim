@@ -4,6 +4,7 @@
 fun! vm#visual#add(mode)
 
     let w = s:create_group()
+    let h = 0
 
     if a:mode ==# 'v'     | call s:vchar()
     elseif a:mode ==# 'V' | call s:vline()
@@ -19,7 +20,6 @@ fun! vm#visual#add(mode)
         call s:G.split_lines()
         call s:G.remove_empty_lines()
     elseif a:mode ==# 'v'
-        let h = 0
         for r in s:R()
             if r.h | let h = 1 | break | endif
         endfor
