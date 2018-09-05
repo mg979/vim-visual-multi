@@ -198,10 +198,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#regex_done()
-    let visual = s:v.using_regex == 2
+    let s:v.visual_regex = s:v.using_regex == 2
     call vm#commands#regex_reset()
 
-    if visual
+    if s:v.visual_regex
         call s:Search.get_slash_reg()
         let g:VM.selecting = 1 | let s:v.finding = 1
         silent keepjumps normal! gvy

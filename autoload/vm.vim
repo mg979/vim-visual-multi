@@ -78,6 +78,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.dot              = ''
     let s:v.no_search        = 0
     let s:v.no_msg           = g:VM_manual_infoline
+    let s:v.visual_regex     = 0
 
     let s:V.Global     = vm#global#init()
     let s:V.Search     = vm#search#init()

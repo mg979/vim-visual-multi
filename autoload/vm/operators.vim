@@ -119,7 +119,6 @@ endfun
 fun! vm#operators#find(start, visual, ...)
 
     if a:start
-        let s:from_visual = a:visual
         if !g:VM.is_active
             call s:init()
             if a:visual
@@ -150,7 +149,7 @@ fun! vm#operators#find(start, visual, ...)
     keepjumps normal! `[h
     let startcol = getpos('.')[2]
 
-    let vblock = s:from_visual && visualmode() == "\<C-v>"
+    let vblock = a:visual && visualmode() == "\<C-v>"
 
     while 1
         if !search(join(s:v.search, '\|'), 'znp', endline) | break | endif
@@ -179,7 +178,8 @@ fun! vm#operators#after_yank()
         "find operator
         if s:v.finding
             let s:v.finding = 0
-            call vm#operators#find(0, 0)
+            call vm#operators#find(0, s:v.visual_regex)
+            let s:v.visual_regex = 0
         else
             "select operator
             call s:G.get_region()
