@@ -114,13 +114,18 @@ fun! vm#init_buffer(empty, ...)
     let &ch = get(g:, 'VM_cmdheight', 2)
 
     if g:VM_highlight_matches
+        if !has_key(g:VM, 'Search')
+            call vm#themes#init()
+        endif
         hi clear Search
         exe g:VM.Search
         if !v:hlsearch
             call feedkeys(":let v:hlsearch = v:true\<CR>", 'n')
         endif
     endif
-    call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
+    if !g:VM_manual_infoline
+        call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
+    endif
 
     let g:VM.is_active = 1
     return s:V
@@ -160,7 +165,7 @@ fun! vm#reset(...)
 
     if g:VM_highlight_matches
         hi clear Search
-        exe "hi! Search" g:VM.search_hi
+        exe "hi! Search ".g:VM.search_hi
     endif
 
     call clearmatches()

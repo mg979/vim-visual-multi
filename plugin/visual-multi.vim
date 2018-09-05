@@ -1,4 +1,11 @@
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" File:         visual-multi.vim
+" Description:  multiple selections in vim
+" Mantainer:    Gianmaria Bajo <mg1979.git@gmail.com>
+" Url:          https://github.com/mg979/vim-visual-multi
+" Licence:      The MIT License (MIT)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 "Initialize variables
 
 let g:loaded_visual_multi = 1
