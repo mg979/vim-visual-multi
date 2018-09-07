@@ -115,7 +115,7 @@ fun! vm#init_buffer(empty, ...)
     set nofoldenable
     let &ch = get(g:, 'VM_cmdheight', 2)
 
-    if g:VM_highlight_matches
+    if !empty(g:VM_highlight_matches)
         if !has_key(g:VM, 'Search')
             call vm#themes#init()
         endif
@@ -163,7 +163,7 @@ fun! vm#reset(...)
     "exiting manually
     if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif
 
-    if g:VM_highlight_matches
+    if !empty(g:VM_highlight_matches)
         hi clear Search
         exe "hi! Search ".g:VM.search_hi
     endif
