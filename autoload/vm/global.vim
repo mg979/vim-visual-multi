@@ -551,7 +551,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " python section (functions here will overwrite previous ones)
 
-if !has('python3') | finish | endif
+if !g:VM_use_python | finish | endif
 
 fun! s:Global.rebuild_from_map(...) dict
     python3 vm.merge_regions()

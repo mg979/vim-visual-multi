@@ -136,20 +136,3 @@ fun! s:vm_regs_from_json()
     return regs
 endfun
 
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"python section
-
-if !has('python3') || get(g:, 'VM_no_python', has('nvim')) | finish | endif
-
-let s:root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
-
-python3 << EOF
-import sys
-from os.path import normpath, join
-import vim
-root_dir = vim.eval('s:root_dir')
-python_root_dir = normpath(join(root_dir, '..', 'python'))
-sys.path.insert(0, python_root_dir)
-import vm
-EOF

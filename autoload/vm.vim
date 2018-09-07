@@ -121,9 +121,6 @@ fun! vm#init_buffer(empty, ...)
         endif
         hi clear Search
         exe g:VM.Search
-        if !v:hlsearch
-            call feedkeys(":let v:hlsearch = v:true\<CR>", 'n')
-        endif
     endif
     if !g:VM_manual_infoline
         call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
@@ -246,5 +243,25 @@ fun! s:set_reg()
     let s:v.oldreg = s:V.Funcs.get_reg(v:register)
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"python section
 
+if !has('python3')
+    let g:VM_use_python = 0
+    finish
+endif
+
+let g:VM_use_python = get(g:, 'VM_use_python', !has('nvim'))
+if !g:VM_use_python | finish | endif
+
+let s:root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+
+python3 << EOF
+import sys
+from os.path import normpath, join
+import vim
+root_dir = vim.eval('s:root_dir')
+python_root_dir = normpath(join(root_dir, '..', 'python'))
+sys.path.insert(0, python_root_dir)
+import vm
+EOF
