@@ -90,6 +90,11 @@ fun! <SID>VM_Init()
 
     call s:vm_regs()
     let g:VM.registers = s:vm_regs_from_json()
+
+    if !v:hlsearch
+        call feedkeys(":let v:hlsearch = v:true\<CR>:redraw!\<cr>", 'n')
+        set nohlsearch
+    endif
 endfun
 
 
