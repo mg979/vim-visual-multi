@@ -27,6 +27,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldreg           = s:V.Funcs.get_reg()
     let s:v.oldregs_1_9      = s:V.Funcs.get_regs_1_9()
     let s:v.oldsearch        = [getreg("/"), getregtype("/")]
+    let s:v.oldfold          = &foldenable
     let @/                   = a:empty? '' : @/
 
     "store old vars
@@ -111,6 +112,7 @@ fun! vm#init_buffer(empty, ...)
     set virtualedit=onemore
     set ww=h,l,<,>
     set lz
+    set nofoldenable
     let &ch = get(g:, 'VM_cmdheight', 2)
 
     if g:VM_highlight_matches
@@ -146,6 +148,7 @@ fun! vm#reset(...)
     let &hls         = s:v.oldhls
     let &synmaxcol   = s:v.synmaxcol
     let &indentkeys  = s:v.indentkeys
+    let &foldenable  = s:v.oldfold
     if has('nvim') | let &clipboard = s:v.clipboard | endif
     call vm#commands#regex_reset()
     call s:V.Funcs.save_vm_regs()

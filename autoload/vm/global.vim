@@ -61,7 +61,9 @@ fun! s:Global.new_cursor(...) dict
 
     "if creating a single cursor at position, allow more cursors
     if a:0 && get(g:, 'VM_allow_more_cursors_in_place', 1)
-        " call b:VM_Selection.Maps.mappings(0, 1)
+        if get(g:, 'VM_disable_mappings_when_placing_single_cursors', 0)
+            call b:VM_Selection.Maps.mappings(0, 1)
+        endif
         let R = vm#region#new(1)
     else
         let R = self.is_region_at_pos('.')
@@ -86,7 +88,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.change_mode(...) dict
-    if !s:X() | call self.merge_cursors() | endif
+    " merge cursors if transitioning from cursor mode, but
+    " reset direction transitioning from extend mode
+    if !s:X() | call self.merge_cursors()
+    else      | let s:v.direction = 1 | endif
+
     let g:VM.extend_mode = !s:X()
 
     let ix = s:v.index
