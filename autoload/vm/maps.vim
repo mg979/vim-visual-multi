@@ -150,9 +150,9 @@ fun! s:build_permanent_maps()
 
     "prevent <Space> to be used as leader inside VM
     let g:VM.leader = get(g:, 'VM_leader', '')
-    if !empty(g:VM.leader) && g:VM.leader !=? '<Space>'
+    if !empty(g:VM.leader) && g:VM.leader !=? "\<Space>"
         let g:VM.leader = escape(g:VM.leader, '\')
-    elseif !exists('g:mapleader') || g:mapleader ==? '<Space>' || g:VM.leader ==? '<Space>'
+    elseif !exists('g:mapleader') || g:mapleader ==? "\<Space>" || g:VM.leader ==? "\<Space>"
         let g:VM.leader = '\'
     else
         let g:VM.leader = g:mapleader
