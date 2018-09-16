@@ -81,7 +81,7 @@ fun! s:Maps.start() dict
     nnoremap <silent> <nowait> <buffer> N          N
 
     for m in (g:VM.motions + g:VM.find_motions)
-        exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".m.")"
+        exe "nmap <silent> <buffer> ".m." <Plug>(VM-Motion-".m.")"
     endfor
     for m in keys(s:noremaps)
         exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".s:noremaps[m].")"

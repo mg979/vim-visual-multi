@@ -76,15 +76,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.default_reg() dict
-    if has('nvim') | return "\"" | endif
-    let clipboard_flags = split(&clipboard, ',')
-    if index(clipboard_flags, 'unnamedplus') >= 0
-        return "+"
-    elseif index(clipboard_flags, 'unnamed') >= 0
-        return "*"
-    else
-        return "\""
-    endif
+    return "\""
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

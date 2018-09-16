@@ -40,12 +40,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.indentkeys       = &indentkeys
     let s:v.synmaxcol        = &synmaxcol
     let s:v.oldmatches       = getmatches()
-
-    "nvim clipboard default
-    if has('nvim')
-        let s:v.clipboard = &clipboard
-        set clipboard=
-    endif
+    let s:v.clipboard        = &clipboard
 
     "init new vars
 
@@ -109,6 +104,9 @@ fun! vm#init_buffer(empty, ...)
         set ignorecase
     endif
 
+    "force use of unnamed register
+    set clipboard=
+
     set virtualedit=onemore
     set ww=h,l,<,>
     set lz
@@ -146,7 +144,7 @@ fun! vm#reset(...)
     let &synmaxcol   = s:v.synmaxcol
     let &indentkeys  = s:v.indentkeys
     let &foldenable  = s:v.oldfold
-    if has('nvim') | let &clipboard = s:v.clipboard | endif
+    let &clipboard   = s:v.clipboard
     call vm#commands#regex_reset()
     call s:V.Funcs.save_vm_regs()
     call s:V.Funcs.restore_regs()
