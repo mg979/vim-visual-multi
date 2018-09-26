@@ -165,6 +165,13 @@ fun! s:Funcs.Scroll.get(...) dict
     let s:v.winline = winline()
 endfun
 
+fun! s:Funcs.Scroll.force(line) dict
+    """Restore arbitrary winline().
+    let s:v.restore_scroll = 1
+    let s:v.winline = a:line
+    call self.restore()
+endfun
+
 fun! s:Funcs.Scroll.restore(...) dict
     """Restore viewport position when done."""
     if s:v.restore_scroll | let s:v.restore_scroll = 0 | else | return | endif

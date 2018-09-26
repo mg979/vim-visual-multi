@@ -62,6 +62,7 @@ fun! s:Edit.delete(X, register, count, process) dict
     if !a:X     "ask for motion
         call vm#operators#cursors('d', a:count, a:register) | return | endif
 
+    let winline      = winline()
     let size         = s:size()
     let change       = 0
     let ix           = s:G.select_region_at_pos('.').index
@@ -90,6 +91,7 @@ fun! s:Edit.delete(X, register, count, process) dict
     if a:process         | call self.post_process(0) | endif
     if a:register == "_" | call s:F.restore_reg()    | endif
     let s:v.old_text = ''
+    call s:F.Scroll.force(winline)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
