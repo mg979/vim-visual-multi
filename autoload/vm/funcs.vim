@@ -308,6 +308,11 @@ fun! s:Funcs.repeat_char(c) dict
   return s
 endfun
 
+fun! s:Funcs.redraw() dict
+    if !has('gui_running') | redraw!
+    endif
+endfun
+
 fun! s:Funcs.regions_contents() dict
     echohl WarningMsg | echo "Index\tID\tA\tB\tw\tl / L\t\ta / b\t\t"
                 \ "--- Pattern ---\t"
@@ -354,10 +359,10 @@ fun! s:Funcs.tools_menu()
     echohl Directory  | echo "Enter an option: "                                                         | echohl None
     let c = nr2char(getchar())
     if c ==# '"'
-        redraw!
+        call self.redraw()
         call self.show_registers()
     elseif c ==# 'i'
-        redraw!
+        call self.redraw()
         call self.regions_contents()
     elseif c ==# 'p'
         call feedkeys("\<cr>", 'n')

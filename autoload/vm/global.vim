@@ -305,7 +305,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.remove_empty_lines()
+fun! s:Global.remove_empty_lines() dict
     """Remove regions that consist of the endline marker only."""
     for r in self.regions()
         if r.a == 1 && r.A == r.B && col([r.l, '$']) == 1
@@ -392,7 +392,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.regions_text()
+fun! s:Global.regions_text() dict
     """Return a list with all regions' contents."""
     let t = []
     for r in self.regions() | call add(t, r.txt) | endfor
@@ -502,7 +502,7 @@ endfun
 " Merging regions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.merge_cursors()
+fun! s:Global.merge_cursors() dict
     """Merge overlapping cursors."""
 
     let ids_to_remove = [] | let last_A = 0 | let pos = getpos('.')[1:2]

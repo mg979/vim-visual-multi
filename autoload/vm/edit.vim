@@ -143,7 +143,6 @@ fun! s:Edit.run_macro(replace) dict
 
     call self.process()
     call self.after_macro(0)
-    "redraw!
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

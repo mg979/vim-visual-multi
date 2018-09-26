@@ -27,7 +27,6 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldreg           = s:V.Funcs.get_reg()
     let s:v.oldregs_1_9      = s:V.Funcs.get_regs_1_9()
     let s:v.oldsearch        = [getreg("/"), getregtype("/")]
-    let s:v.oldfold          = &foldenable
     let @/                   = a:empty? '' : @/
 
     "store old vars
@@ -93,6 +92,11 @@ fun! vm#init_buffer(empty, ...)
     call vm#augroup(0)
     call vm#au_cursor(0)
 
+    " disable folding, but keep winline
+    call s:V.Funcs.Scroll.get(1)
+    let s:v.oldfold = &foldenable
+    call s:V.Funcs.Scroll.restore()
+
     if g:VM_case_setting ==? 'smart'
         set smartcase
         set ignorecase
@@ -143,7 +147,6 @@ fun! vm#reset(...)
     let &hls         = s:v.oldhls
     let &synmaxcol   = s:v.synmaxcol
     let &indentkeys  = s:v.indentkeys
-    let &foldenable  = s:v.oldfold
     let &clipboard   = s:v.clipboard
     call vm#commands#regex_reset()
     call s:V.Funcs.save_vm_regs()
@@ -153,6 +156,13 @@ fun! vm#reset(...)
     let matches = vm#comp#reset()
     call vm#augroup(1)
     call vm#au_cursor(1)
+
+    " reenable folding, but keep winline and open current fold
+    call s:V.Funcs.Scroll.get(1)
+    let &foldenable  = s:v.oldfold
+    normal! zv
+    call s:V.Funcs.Scroll.restore()
+
     let b:VM_Selection = {}
     let g:VM.is_active = 0
     let g:VM.extend_mode = 0
