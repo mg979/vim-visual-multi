@@ -216,8 +216,8 @@ fun! vm#maps#all#buffer()
     call extend(maps, {
                 \"Select Cursor Down":      ['<M-C-Down>',  'n', 1, 1],
                 \"Select Cursor Up":        ['<M-C-Up>',    'n', 1, 1],
-                \"Select Line Down":        ['<C-S-Down>',  'n', 1, 1],
-                \"Select Line Up":          ['<C-S-Up>',    'n', 1, 1],
+                \"Select Line Down":        ['',            'n', 1, 1],
+                \"Select Line Up":          ['',            'n', 1, 1],
                 \"Add Cursor Down":         ['',            'n', 1, 1],
                 \"Add Cursor Up":           ['',            'n', 1, 1],
                 \"Select j":                ['<S-Down>',    'n', 1, 1],
@@ -226,12 +226,12 @@ fun! vm#maps#all#buffer()
                 \"Select h":                ['<S-Left>',    'n', 1, 1],
                 \"This Select l":           ['<M-Right>',   'n', 1, 1],
                 \"This Select h":           ['<M-Left>',    'n', 1, 1],
-                \"Select e":                ['<C-Right>',   'n', 1, 1],
-                \"Select ge":               ['<C-Left>',    'n', 1, 1],
-                \"Select w":                ['<C-S-Right>', 'n', 1, 1],
-                \"Select b":                ['<C-S-Left>',  'n', 1, 1],
-                \"Select E":                ['<M-C-Right>', 'n', 1, 1],
-                \"Select BBW":              ['<M-C-Left>',  'n', 1, 1],
+                \"Select e":                ['',            'n', 1, 1],
+                \"Select ge":               ['',            'n', 1, 1],
+                \"Select w":                ['',            'n', 1, 1],
+                \"Select b":                ['',            'n', 1, 1],
+                \"Select E":                ['',            'n', 1, 1],
+                \"Select BBW":              ['',            'n', 1, 1],
                 \"Move Right":              ['<M-S-Right>', 'n', 1, 1],
                 \"Move Left":               ['<M-S-Left>',  'n', 1, 1],
                 \})
@@ -293,6 +293,17 @@ fun! vm#maps#all#buffer()
                 \"Yank":                    ['y',           'n', 1, 1],
                 \"Yank Hard":               ['<leader>y',   'n', 1, 1],
                 \})
+
+    if g:VM_sublime_mappings
+        let maps["Select e"][0]                 = '<C-Right>'
+        let maps["Select ge"][0]                = '<C-Left>'
+        let maps["Select w"][0]                 = '<C-S-Right>'
+        let maps["Select b"][0]                 = '<C-S-Left>'
+        let maps["Select Line Down"][0]         = '<C-S-Down>'
+        let maps["Select Line Up"][0]           = '<C-S-Up>'
+        let maps["Select E"][0]                 = '<M-C-Right>'
+        let maps["Select BBW"][0]               = '<M-C-Left>'
+    endif
 
     if g:VM_no_meta_mappings
         let maps['Remove Last Region'][0] = '<C-q>'
