@@ -93,8 +93,9 @@ fun! <SID>VM_Init()
 
     "Initialize v:hlsearch so that match highlight works from the start
     if get(g:, 'VM_init_hls_at_start', 0) && !v:hlsearch
-        let s = ":let v:hlsearch = v:true\<CR>"
-        let s .= g:VM_init_hls_at_start == 2 ? ":redraw!\<cr>" : ""
+        let s = ":let v:hlsearch = v:true"
+        let s .= g:VM_init_hls_at_start == 2 ? " | redraw!" : ""
+        let s .= "\<cr>:call histdel(':', -1)\<cr>"
         call feedkeys(s, 'n')
         set nohlsearch
     endif
