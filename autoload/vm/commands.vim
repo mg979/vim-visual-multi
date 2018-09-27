@@ -65,7 +65,7 @@ endfun
 
 fun! s:set_vcol()
     if (!s:v.vertical_col || (col('.') > 1 && s:v.vertical_col > 1))
-        let s:v.vertical_col = col('.')
+        let s:v.vertical_col = virtcol('.')
     endif
 endfun
 

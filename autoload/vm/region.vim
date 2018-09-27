@@ -233,7 +233,7 @@ fun! s:Region.move(...) dict
     let s:motion = a:0? a:1 : s:v.motion
 
     "set vertical column if motion is j or k
-    if s:vertical() && !s:v.vertical_col | let s:v.vertical_col = col('.')
+    if s:vertical() && !s:v.vertical_col | let s:v.vertical_col = virtcol('.')
     elseif !s:vertical()                 | let s:v.vertical_col = 0 | endif
 
     if !s:X()
