@@ -80,6 +80,9 @@ fun! s:Insert.start(append) dict
     let I = self
     let I._index = get(I, '_index', -1)
 
+    " get winline when insert mode is entered the first time
+    if !exists('s:v.winline_insert') | let s:v.winline_insert = winline() | endif
+
     if !s:v.insert && g:VM_disable_syntax_in_imode
         let &synmaxcol = 1
     elseif !s:v.insert && g:VM_dynamic_synmaxcol && s:v.index > g:VM_dynamic_synmaxcol
@@ -100,6 +103,9 @@ fun! s:Insert.start(append) dict
     else
         let R = s:G.select_region_at_pos('.')
     endif
+
+    " restore winline anyway, because it could have been auto-restarted
+    call s:F.Scroll.force(s:v.winline_insert)
 
     let I.index     = R.index
     let I.begin     = [R.l, R.a]
@@ -216,6 +222,10 @@ fun! s:Insert.stop() dict
     else
         call s:G.select_region(self.index)
     endif
+
+    " now insert mode has really ended, restore winline and clear variable
+    call s:F.Scroll.force(s:v.winline_insert)
+    unlet s:v.winline_insert
 endfun
 
 

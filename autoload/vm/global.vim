@@ -192,11 +192,11 @@ fun! s:Global.update_and_select_region(...) dict
     call self.update_regions()
 
     "a region is going to be reselected:
-    "   !a:0            ->      position '.'
-    "   a:0 == 1        ->      position a:1
+    "   !a:0      ->  position '.'
+    "   a:0 == 1  ->  position a:1
     "   a:0 > 1
-    "           a:1     ->      index == a:2
-    "           !a:1    ->      index of region with id == a:2
+    "             ->  (1, index)
+    "             ->  (0, id)
 
     if !g:VM_reselect_first_always
         if a:0 > 1
