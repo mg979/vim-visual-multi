@@ -90,15 +90,6 @@ fun! <SID>VM_Init()
 
     call s:vm_regs()
     let g:VM.registers = s:vm_regs_from_json()
-
-    "Initialize v:hlsearch so that match highlight works from the start
-    if get(g:, 'VM_init_hls_at_start', 0) && !v:hlsearch
-        let s = ":let v:hlsearch = v:true"
-        let s .= g:VM_init_hls_at_start == 2 ? " | redraw!" : ""
-        let s .= "\<cr>:call histdel(':', -1)\<cr>"
-        call feedkeys(s, 'n')
-        set nohlsearch
-    endif
 endfun
 
 
