@@ -492,6 +492,20 @@ fun! vm#commands#from_visual(t)
     endif
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#remove_every_n_regions(count)
+  """Remove every n regions, given by [count] (min 2).
+  let R = s:R() | let i = 1 | let cnt = a:count < 2 ? 2 : a:count
+  for n in range(1, len(R))
+      if n % cnt == 0
+          call R[n-i].remove()
+          let i += 1
+      endif
+  endfor
+  call s:G.update_and_select_region(1, 0)
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#mouse_column()

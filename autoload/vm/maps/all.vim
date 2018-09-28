@@ -154,6 +154,7 @@ fun! vm#maps#all#buffer()
                 \"q Skip":                  ['q',         'n', 1, 1],
                 \"Remove Region":           ['Q',         'n', 1, 1],
                 \"Remove Last Region":      ['<M-q>',     'n', 1, 1],
+                \"Remove Every n Regions":  ['<leader>R', 'n', 1, 1],
                 \"Star":                    ['*',         'n', 1, 1],
                 \"Hash":                    ['#',         'n', 1, 1],
                 \"Visual Star":             ['*',         'x', 1, 1],

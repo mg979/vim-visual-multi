@@ -224,7 +224,9 @@ fun! s:Insert.stop() dict
     endif
 
     " now insert mode has really ended, restore winline and clear variable
-    call s:F.Scroll.force(s:v.winline_insert)
+    if !g:VM_reselect_first_insert
+        call s:F.Scroll.force(s:v.winline_insert)
+    endif
     unlet s:v.winline_insert
 endfun
 

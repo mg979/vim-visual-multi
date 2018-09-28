@@ -262,6 +262,7 @@ let s:plugs = {
       \"q Skip":                  ["Skip Region",                "and find next in the current direction"],
       \"Invert Direction":        ["Invert Direction",           "as 'o' in visual mode"],
       \"Remove Region":           ["Remove Region",              "and go back to previous"],
+      \"Remove Every n Regions":  ["Remove Every n Regions",     "n is [count], min 2 if no count given"],
       \"Remove Last Region":      ["Remove Last Region",         "removes the bottom-most region"],
       \"Star":                    ["Star",                       "select inner word, case sensitive"],
       \"Hash":                    ["Hash",                       "select around word, case sensitive"],

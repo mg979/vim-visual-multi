@@ -88,6 +88,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-q-Skip)                  :call vm#commands#skip(0)<cr>
     nnoremap        <Plug>(VM-Remove-Region)           :call vm#commands#skip(1)<cr>
     nnoremap        <Plug>(VM-Remove-Last-Region)      :call b:VM_Selection.Global.remove_last_region()<cr>
+    nnoremap        <Plug>(VM-Remove-Every-n-Regions)  :<c-u>call vm#commands#remove_every_n_regions(v:count)<cr>
     nnoremap        <Plug>(VM-Undo-Visual)             :call vm#commands#undo()<cr>
     nnoremap        <Plug>(VM-Show-Infoline)           :call b:VM_Selection.Funcs.count_msg(2)<cr>
 
