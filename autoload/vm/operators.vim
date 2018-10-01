@@ -196,7 +196,7 @@ endfun
 " Operations at cursors (yank, delete, change)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:back   = { c -> index(split('FTlbB0^{(', '\zs'), c) >= 0       }
+let s:back   = { c -> index(split('FTlbB0^{(', '\zs'), c[0]) >= 0    }
 let s:ia     = { c -> index(['i', 'a'], c) >= 0                      }
 let s:single = { c -> index(split('hlwebWEB$^0{}()', '\zs'), c) >= 0 }
 let s:double = { c -> index(split('fFtTg', '\zs'), c) >= 0           }
@@ -253,6 +253,9 @@ fun! vm#operators#cursors(op, n, register, ...)
         elseif s:ia(c)                       | echon c | let M .= c
             let c = nr2char(getchar())       | echon c | let M .= c | break
 
+        elseif a:op ==# 'c' && c==?'r'       | echon c | let M .= c
+            let c = nr2char(getchar())       | echon c | let M .= c | break
+
         elseif a:op ==# 'c' && c==?'s'       | echon c | let M .= c
             let c = nr2char(getchar())       | echon c | let M .= c
             let c = nr2char(getchar())       | echon c | let M .= c | break
@@ -266,7 +269,7 @@ fun! vm#operators#cursors(op, n, register, ...)
         elseif a:op ==# 'd' && c==#'s'       | echon c | let M .= c
             let c = nr2char(getchar())       | echon c | let M .= c | break
 
-        elseif s:single(c)                     | let M .= c | break
+        elseif s:single(c)                   | let M .= c | break
         elseif a:op ==# c                    | let M .= c | break
 
         else | echon ' ...Aborted'           | return  | endif
@@ -348,6 +351,9 @@ fun! vm#operators#process(op, M, reg, n)
 
         "cs surround
         if M[:1] ==? 'cs' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
+
+        "cr coerce (vim-abolish)
+        if M[:1] ==? 'cr' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
 
         "reorder command; C = 'cc'
         let [S, N, C] = s:reorder_cmd(M, r, n, 'c')
