@@ -197,11 +197,18 @@ fun! s:Global.update_and_select_region(...) dict
     "   a:0 > 1
     "             ->  (1, index)
     "             ->  (0, id)
+    let nR = len(s:R())
 
     if !g:VM_reselect_first_always
-        if a:0 > 1
-            if a:1 | let R = self.select_region(a:2)
-            else   | let R = self.select_region(s:F.region_with_id(a:2).index)
+        if exists('s:v.restore_index')
+            let i = s:v.restore_index >= nR? nR - 1 : s:v.restore_index
+            let R = self.select_region(i)
+        elseif a:0 > 1
+            if a:1
+                let i = a:2 >= nR? nR - 1 : a:2
+                let R = self.select_region(i)
+            else
+                let R = self.select_region(s:F.region_with_id(a:2).index)
             endif
         else
             let R = self.select_region_at_pos(a:0? a:1 : '.')
@@ -209,7 +216,7 @@ fun! s:Global.update_and_select_region(...) dict
     else
         let R = self.select_region(0) | endif
 
-    if g:VM_exit_on_1_cursor_left && len(s:R()) == 1
+    if g:VM_exit_on_1_cursor_left && nR == 1
         call vm#reset()
     else
         call s:F.count_msg(0)

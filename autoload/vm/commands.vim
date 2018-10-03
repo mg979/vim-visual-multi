@@ -718,9 +718,18 @@ endfun
 " Align
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! vm#commands#align()
+    let s:v.restore_index = s:v.index
+    let winline = winline()
+    call s:V.Edit.align()
+    call s:F.Scroll.force(winline)
+endfun
+
 fun! vm#commands#align_char(count)
     if s:X() | call s:G.change_mode() | endif
 
+    let s:v.restore_index = s:v.index
+    let winline      = winline()
     let n = a:count | let s = n>1? 's' : ''
     echohl Label    | echo 'Align with '.n.' char'.s.' > '   | echohl None
 
@@ -750,6 +759,7 @@ fun! vm#commands#align_char(count)
         let s = 'zp'    "change search method: don't accept at cursor position
     endwhile
     let s:v.silence = 0
+    call s:F.Scroll.force(winline)
     call s:F.count_msg(0)
     return
 endfun
@@ -758,6 +768,8 @@ endfun
 
 fun! vm#commands#align_regex()
     if s:X() | call s:G.change_mode() | endif
+    let s:v.restore_index = s:v.index
+    let winline      = winline()
 
     echohl Label | let rx = input('Align with regex > ')   | echohl None
     if empty(rx) | echohl WarningMsg | echon ' ...Aborted' | return  | endif
@@ -769,6 +781,7 @@ fun! vm#commands#align_regex()
         call r.update_cursor([r.l, getpos('.')[2]])
     endfor
     call s:V.Edit.align()
+    call s:F.Scroll.force(winline)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

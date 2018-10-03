@@ -162,7 +162,7 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Transpose)               :call b:VM_Selection.Edit.transpose()<cr>
     nnoremap        <Plug>(VM-Duplicate)               :call b:VM_Selection.Edit.duplicate()<cr>
 
-    nnoremap        <Plug>(VM-Align)                   :<C-u>call b:VM_Selection.Edit.align()<cr>
+    nnoremap        <Plug>(VM-Align)                   :<C-u>call vm#commands#align()<cr>
     nnoremap        <Plug>(VM-Align-Char)              :<C-u>call vm#commands#align_char(v:count1)<cr>
     nnoremap        <Plug>(VM-Align-Regex)             :<C-u>call vm#commands#align_regex()<cr>
     nnoremap        <Plug>(VM-Numbers)                 :<C-u>call b:VM_Selection.Edit.numbers(v:count1, 0)<cr>
