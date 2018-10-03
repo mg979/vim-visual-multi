@@ -505,6 +505,33 @@ fun! s:Global.split_lines() dict
     endfor
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.filter_by_expression(exp) dict
+  """Filter out regions that don't match an expression."""
+  let ids_to_remove = []
+  let exp = s:F.get_expr(a:exp)
+  try
+    for r in s:R()
+      if !eval(exp)
+        call add(ids_to_remove, r.id)
+      endif
+    endfor
+  catch
+    echohl ErrorMsg | echo "\tinvalid expression" | echohl None | return
+  endtry
+  call self.remove_regions_by_id(ids_to_remove)
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.remove_regions_by_id(list)
+  """Remove a list of regions by id."""
+  for id in a:list
+      call s:F.region_with_id(id).remove()
+  endfor
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Merging regions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -519,9 +546,7 @@ fun! s:Global.merge_cursors() dict
         let last_A = r.A
     endfor
 
-    for id in ids_to_remove
-        call s:F.region_with_id(id).remove()
-    endfor
+    call self.remove_regions_by_id(ids_to_remove)
 
     let s:v.silence = 0
     return self.update_and_select_region(pos)

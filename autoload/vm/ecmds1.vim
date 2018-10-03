@@ -201,16 +201,6 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:get_expr(x)
-    let l:Has = { x, c -> match(x, '%'.c ) >= 0 }
-    let N = len(s:R()) | let x = a:x
-
-    if l:Has(x, 't') | let x = substitute(x, '%t', 'r.txt', 'g') | endif
-    if l:Has(x, 'i') | let x = substitute(x, '%i', 'r.index', 'g') | endif
-    if l:Has(x, 'n') | let x = substitute(x, '%n', N, 'g') | endif
-    return x
-endfun
-
 fun! s:Edit.replace_expression() dict
     """Replace all regions with the result of an expression."""
     if !s:X() | return | endif
@@ -219,7 +209,7 @@ fun! s:Edit.replace_expression() dict
     echohl Type    | let expr = input('Expression > ', '', 'expression') | echohl None
     if empty(expr) | call s:F.msg('Command aborted.', 1) | return | endif
 
-    let T = [] | let expr = s:get_expr(expr)
+    let T = [] | let expr = s:F.get_expr(expr)
     for r in s:R()
         call add(T, eval(expr))
     endfor

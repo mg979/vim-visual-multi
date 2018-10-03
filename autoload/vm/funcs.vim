@@ -153,6 +153,34 @@ fun! s:Funcs.region_with_id(id) dict
     return {}
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.syntax(pos)
+  """Find syntax element at position."""
+  if type(a:pos) == v:t_list    "list [line, col]
+    let line = a:pos[0]
+    let col = a:pos[1]
+  else                          "position ('.', ...)
+    let line = line(a:pos)
+    let col = col(a:pos)
+  endif
+  return synIDattr(synID(line, col, 1),"name")
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.get_expr(x) dict
+  let l:Has = { x, c -> match(x, '%'.c ) >= 0 }
+  let l:Sub = { x, a, b -> substitute(x, a, b, 'g') }
+  let N = len(s:R()) | let x = a:x
+
+  if l:Has(x, 't')   | let x = l:Sub(x, '%t', 'r.txt')                    | endif
+  if l:Has(x, 'i')   | let x = l:Sub(x, '%i', 'r.index')                  | endif
+  if l:Has(x, 'n')   | let x = l:Sub(x, '%n', N)                          | endif
+  if l:Has(x, 'syn') | let x = l:Sub(x, '%syn', 's:F.syntax([r.l, r.a])') | endif
+  return x
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Keep viewport position
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -355,33 +383,6 @@ fun! s:Funcs.external_funcs(maps, restore)
     if a:maps
         call s:V.Maps.mappings(0)
         if exists('*VM_before_macro')    | call VM_before_macro() | endif
-    endif
-endfun
-
-fun! s:Funcs.tools_menu()
-    echohl WarningMsg | echo '"    - ' | echohl Type | echon "Show VM registers"                         | echohl None
-    echohl WarningMsg | echo "i    - " | echohl Type | echon "Show regions info"                         | echohl None
-    echohl WarningMsg | echo "p    - " | echohl Type | echon "Paste regions contents in a new buffer"    | echohl None
-    echohl WarningMsg | echo "l(L) - " | echohl Type | echon "Filter lines with regions (strip indent)"  | echohl None
-    echohl Directory  | echo "Enter an option: "                                                         | echohl None
-    let c = nr2char(getchar())
-    if c ==# '"'
-        call self.redraw()
-        call self.show_registers()
-    elseif c ==# 'i'
-        call self.redraw()
-        call self.regions_contents()
-    elseif c ==# 'p'
-        call feedkeys("\<cr>", 'n')
-        call vm#special#commands#filter_regions()
-    elseif c ==# 'l'
-        call feedkeys("\<cr>", 'n')
-        call vm#special#commands#filter_lines(0)
-    elseif c == 'L'
-        call feedkeys("\<cr>", 'n')
-        call vm#special#commands#filter_lines(1)
-    else
-        call feedkeys("\<cr>", 'n')
     endif
 endfun
 
