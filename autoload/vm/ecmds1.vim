@@ -29,9 +29,6 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     if !s:X()    | call vm#operators#cursors('y', v:count, register) | return | endif
     if !s:min(1) | call s:F.msg('No regions selected.', 0)           | return | endif
 
-    "invalid register
-    if register == "_" | call s:F.msg('Invalid register.', 1) | return | endif
-
     "write custom and possibly vim registers.
     let [text, type] = self.fill_register(register, s:G.regions_text(), a:hard)
 
@@ -40,11 +37,6 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
 
     "reset temp register
     let s:v.use_register = s:v.def_reg
-
-    "overwrite the old saved register if yanked using default register
-    if register ==# s:v.def_reg
-        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type]
-    endif
 
     if !a:silent
         call s:F.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
@@ -55,7 +47,7 @@ endfun
 " Delete
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.delete(X, register, count, process) dict
+fun! s:Edit.delete(X, register, count, hard) dict
     """Delete the selected text and change to cursor mode.
     if !s:v.direction | call vm#commands#invert_direction() | endif
 
@@ -82,14 +74,14 @@ fun! s:Edit.delete(X, register, count, process) dict
         let change = s:size() - size
     endfor
 
-    "write custom registers
-    call self.fill_register(a:register, s:v.old_text, 0)
+    "write custom and possibly vim registers.
+    call self.fill_register(a:register, s:v.old_text, a:hard)
 
     call s:G.change_mode()
     call s:G.select_region(ix)
 
-    if a:process         | call self.post_process(0) | endif
-    if a:register == "_" | call s:F.restore_reg()    | endif
+    if a:hard            | call self.extra_spaces.remove() | endif
+    if a:register == "_" | call s:F.restore_reg()          | endif
     let s:v.old_text = ''
     call s:F.Scroll.force(winline)
 endfun
@@ -180,7 +172,8 @@ fun! s:Edit.replace_pattern() dict
 
     let ix = s:v.index | call s:F.Scroll.get()
     echohl Type
-    let pat = input('Pattern to replace > ') | if empty(pat)  | call s:F.msg('Command aborted.', 1) | return | endif
+    let pat = input('Pattern to replace > ')
+    if empty(pat)  | call s:F.msg('Command aborted.', 1) | return | endif
     let repl = input('Replacement > ')
     if empty(repl)
         call s:F.msg('Hit Enter for an empty replacement... ', 1)
@@ -310,6 +303,9 @@ fun! s:Edit.fill_register(reg, text, hard) dict
     "vim register is overwritten if unnamed, or if hard yank
     if a:reg ==# s:v.def_reg || a:hard
         call setreg(a:reg, join(text, "\n"), type)
+        if a:hard   "also overwrite the old saved register
+            let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type]
+        endif
     endif
     return [text, type]
 endfun
