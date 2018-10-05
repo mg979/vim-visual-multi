@@ -252,7 +252,7 @@ fun! s:move_cursor(r)
     exe "keepjumps normal! ".s:motion
 
     "keep line or column
-    if s:vertical()       | call s:vertical_col(a:r)
+    if s:vertical()       | call s:keep_vertical_col(a:r)
     elseif !s:v.multiline | call s:keep_line(a:r, line('.')) | endif
 
     call a:r.update_cursor(getpos('.')[1:2])
@@ -272,7 +272,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:vertical_col(r)
+fun! s:keep_vertical_col(r)
     """Keep the vertical column if moving vertically."""
     let vcol    = s:v.vertical_col
     let ln      = line('.')
@@ -294,7 +294,7 @@ fun! s:move_region(r)
     call cursor(r.cur_ln(), r.cur_col())
     exe "keepjumps normal! ".s:motion
 
-    if s:vertical()       | call s:vertical_col(r) | endif
+    if s:vertical()       | call s:keep_vertical_col(r) | endif
 
     "check the line
     let nl = line('.')

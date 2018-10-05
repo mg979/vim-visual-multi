@@ -64,7 +64,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:set_vcol()
-    if (!s:v.vertical_col || (col('.') > 1 && s:v.vertical_col > 1))
+    let is_tab = s:F.char_under_cursor() == "\t"
+    let vcol   = s:v.vertical_col
+
+    if !is_tab && ( !vcol || ( col('.') > 1 && vcol > 1 ) )
         let s:v.vertical_col = virtcol('.')
     endif
 endfun
