@@ -241,9 +241,6 @@ fun! s:Edit.post_process(reselect, ...) dict
     "remove extra spaces that may have been added
     call self.extra_spaces.remove()
 
-    "clear highlight now, then update regions
-    call clearmatches()
-
     "update, restore position and clear vars
     let pos = empty(s:v.storepos)? '.' : s:v.storepos
     call s:G.update_and_select_region(pos) | let s:v.storepos = []

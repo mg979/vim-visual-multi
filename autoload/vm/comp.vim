@@ -13,10 +13,10 @@ let s:plugins = extend({
                                 \'var': 'b:autopairs_enabled'}
                 \}, get(g:, 'VM_plugins_compatibilty', {}))
 
-"specific for plugin filetype / restore highlight matches
+"specific for plugin filetype
 let s:ftype           = { p -> has_key(p, 'ft') && index(p.ft, &ft) >= 0 }
 let s:noftype         = { p -> !has_key(p, 'ft') || empty(p.ft) }
-let s:restore_matches = { p -> has_key(p, 'matches') && p.matches }
+let s:restore_matches = { p -> s:v.clearmatches && has_key(p, 'matches') && p.matches }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -28,6 +28,8 @@ fun! vm#comp#init()
     if exists('g:loaded_youcompleteme')
         let g:VM_use_first_cursor_in_line = 1
     endif
+
+    call s:check_clearmatches()
 
     for plugin in keys(s:plugins)
         let p = s:plugins[plugin]
@@ -88,6 +90,14 @@ fun! vm#comp#reset()
     return oldmatches
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#comp#exit()
+    """Called last on VM exit."""
+    call s:restore_indentLine()
+    if exists('*VM_Exit') | call VM_Exit() | endif
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#add_line()
@@ -108,4 +118,24 @@ endfun
 
 fun! vm#comp#no_reindents()
     return g:VM_no_reindent_filetype + ['ctrlsf']
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" indentLine plugin
+
+fun! s:check_clearmatches()
+    let il = exists('g:indentLine_loaded') &&
+                \ exists('b:indentLine_ConcealOptionSet') &&
+                \ b:indentLine_ConcealOptionSet
+    let s:v.clearmatches = get(g:, 'VM_clear_buffer_hl', !il)
+    if il && s:v.clearmatches
+        let b:VM_indentLine = 1
+    endif
+endfun
+
+fun! s:restore_indentLine()
+    if exists('b:VM_indentLine')
+        IndentLinesEnable
+        unlet b:VM_indentLine
+    endif
 endfun

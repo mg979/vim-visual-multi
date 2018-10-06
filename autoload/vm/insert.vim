@@ -83,11 +83,14 @@ fun! s:Insert.start(append) dict
     " get winline when insert mode is entered the first time
     if !exists('s:v.winline_insert') | let s:v.winline_insert = winline() | endif
 
-    if !s:v.insert && g:VM_disable_syntax_in_imode
-        let &synmaxcol = 1
-    elseif !s:v.insert && g:VM_dynamic_synmaxcol && s:v.index > g:VM_dynamic_synmaxcol
-        let scol = 40 - s:v.index + g:VM_dynamic_synmaxcol
-        let &synmaxcol = scol>1? scol : 1
+    " check synmaxcol settings
+    if !s:v.insert
+        if g:VM_disable_syntax_in_imode
+            let &synmaxcol = 1
+        elseif g:VM_dynamic_synmaxcol && s:v.index > g:VM_dynamic_synmaxcol
+            let scol = 40 - s:v.index + g:VM_dynamic_synmaxcol
+            let &synmaxcol = scol>1? scol : 1
+        endif
     endif
 
     if s:v.insert
@@ -116,7 +119,8 @@ fun! s:Insert.start(append) dict
     let s:C         = { -> I.cursors }
     let I.col       = getpos('.')[2]
 
-    call clearmatches()
+    " remove regular regions highlight
+    call s:G.remove_highlight()
 
     for r in s:R()
         let C = s:Cursor.new(r.A, r.l, r.a)
@@ -189,7 +193,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.stop() dict
-    call self.auto_end() | let i = 0
+    call self.clear_hi() | call self.auto_end() | let i = 0
 
     for r in s:R()
         let c = self.cursors[i]
@@ -228,6 +232,15 @@ fun! s:Insert.stop() dict
         call s:F.Scroll.force(s:v.winline_insert)
     endif
     unlet s:v.winline_insert
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Insert.clear_hi() dict
+    """Clear cursors highlight.
+    for c in self.cursors
+        call matchdelete(c.hl)
+    endfor
 endfun
 
 

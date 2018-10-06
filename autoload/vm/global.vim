@@ -30,7 +30,6 @@ fun! s:Global.new_region() dict
     if empty(R) | let R = vm#region#new(0) | endif
 
     if !s:v.eco
-        let s:v.matches = getmatches()
         call self.select_region(R.index)
         call s:V.Search.check_pattern()
         call s:F.restore_reg() | endif
@@ -49,7 +48,6 @@ fun! s:Global.get_region() dict
 
     call s:V.Search.add()
     let R = vm#region#new(0)
-    let s:v.matches = getmatches()
     call s:F.restore_reg()
     return R
 endfun
@@ -69,8 +67,6 @@ fun! s:Global.new_cursor(...) dict
         let R = self.is_region_at_pos('.')
         if empty(R) | let R = vm#region#new(1) | endif
     endif
-
-    let s:v.matches = getmatches()
     return R
 endfun
 
@@ -126,7 +122,6 @@ fun! s:Global.update_highlight(...) dict
         call r.update_highlight()
     endfor
 
-    let s:v.matches = getmatches()
     call self.update_cursor_highlight()
 endfun
 
@@ -146,6 +141,19 @@ fun! s:Global.update_cursor_highlight(...) dict
 
     else
         exe "highlight link MultiCursor ".g:VM.hi.cursor
+    endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.remove_highlight() dict
+    """Remove all regions' highlight."""
+    if s:v.clearmatches
+        call clearmatches()
+    else
+        for r in s:R()
+            call r.remove_highlight()
+        endfor
     endif
 endfun
 
@@ -184,7 +192,10 @@ endfun
 fun! s:Global.update_and_select_region(...) dict
     """Update regions and select region at position, index or id."""
     if s:v.merge
-        let s:v.merge = 0 | return self.merge_regions() | endif
+        let s:v.merge = 0 | return self.merge_regions()
+    endif
+
+    call self.remove_highlight()
 
     call self.reset_byte_map(0)
     call self.reset_vars()
@@ -500,7 +511,6 @@ fun! s:Global.split_lines() dict
             else
                 call vm#region#new(0, R.L, R.L, 1, R.b)
             endif
-            let s:v.matches = getmatches()
         endfor
     endfor
 endfun

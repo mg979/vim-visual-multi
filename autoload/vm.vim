@@ -149,6 +149,7 @@ fun! vm#reset(...)
     let &indentkeys  = s:v.indentkeys
     let &clipboard   = s:v.clipboard
     call vm#commands#regex_reset()
+    call s:V.Global.remove_highlight()
     call s:V.Funcs.save_vm_regs()
     call s:V.Funcs.restore_regs()
     call s:V.Maps.mappings(0)
@@ -176,9 +177,11 @@ fun! vm#reset(...)
         exe "hi! Search ".g:VM.search_hi
     endif
 
-    call clearmatches()
-    call setmatches(matches)
+    if !empty(matches)
+        call setmatches(matches)
+    endif
     call garbagecollect()
+    call vm#comp#exit()
 endfun
 
 

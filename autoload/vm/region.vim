@@ -464,7 +464,8 @@ fun! s:Region.remove_highlight() dict
     let r       = self.matches.region
     let c       = self.matches.cursor
 
-    for m in r | silent! call matchdelete(m) | endfor | silent! call matchdelete(c)
+    for m in r | silent! call matchdelete(m) | endfor
+    silent! call matchdelete(c)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

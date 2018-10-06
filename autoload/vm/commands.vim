@@ -145,10 +145,10 @@ fun! vm#commands#erase_regions(...)
     "empty start
     if !g:VM.is_active | call s:init(0,1,0) | return | endif
 
+    call s:G.remove_highlight()
     let s:V.Regions = []
     let s:V.Bytes = {}
     let s:V.Groups = {}
-    call clearmatches()
     let s:v.index = -1
     call s:V.Block.stop()
     if a:0 | call s:F.count_msg(1) | endif
@@ -790,7 +790,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#undo()
-    call clearmatches()
+    call s:G.remove_highlight()
     echom b:VM_backup == b:VM_Selection
     let b:VM_Selection = copy(b:VM_backup)
     call s:G.update_highlight()
