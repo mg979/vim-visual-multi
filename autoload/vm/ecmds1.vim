@@ -38,6 +38,11 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     "reset temp register
     let s:v.use_register = s:v.def_reg
 
+    "overwrite the old saved register if yanked using default register
+    if register ==# s:v.def_reg
+        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type]
+    endif
+
     if !a:silent
         call s:F.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
     if a:0 | call s:G.change_mode() | endif

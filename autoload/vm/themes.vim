@@ -55,8 +55,8 @@ endfun
 fun! vm#themes#complete(A, L, P)
   let valid = []
   for k in keys(s:Themes)
-    if     &background=='light' && s:Themes[k].type != 'light'
-    elseif &background=='dark'  && s:Themes[k].type != 'dark'
+    if     &background=='light' && has_key(s:Themes[k], 'type') && s:Themes[k].type != 'light'
+    elseif &background=='dark'  && has_key(s:Themes[k], 'type') && s:Themes[k].type != 'dark'
     else
       call add(valid, k)
     endif
@@ -120,7 +120,7 @@ let s:Themes.nord = {
       \ 'extend': "ctermbg=239 guibg=#434C5E",
       \ 'cursor': "ctermbg=245 guibg=#8a8a8a ctermfg=24 guifg=#005f87",
       \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermfg=0 ctermbg=9 guifg=#141617 guibg=#AF5F5F",
+      \ 'mono':   "ctermfg=235 guifg=#262626 ctermbg=131 guibg=#AF5F5F",
       \}
 
 let s:Themes.codedark = {
@@ -128,7 +128,7 @@ let s:Themes.codedark = {
       \ 'extend': "ctermbg=242 guibg=#264F78",
       \ 'cursor': "ctermbg=239 ctermfg=252 guifg=#C5D4DD guibg=#6A7D89",
       \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermfg=0 ctermbg=9 guifg=#141617 guibg=#AF5F5F",
+      \ 'mono':   "ctermfg=235 guifg=#262626 ctermbg=131 guibg=#AF5F5F",
       \}
 
 let s:Themes.spacegray = {
@@ -136,7 +136,21 @@ let s:Themes.spacegray = {
       \ 'extend': "ctermbg=237 guibg=#404040",
       \ 'cursor': "ctermbg=242 guibg=Grey50 ctermfg=239 guifg=#4e4e4e",
       \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermfg=0 ctermbg=9 guifg=#141617 guibg=#AF5F5F",
+      \ 'mono':   "ctermfg=235 guifg=#262626 ctermbg=131 guibg=#AF5F5F",
+      \}
+
+let s:Themes.sand = {
+      \ 'extend': "ctermbg=143 ctermfg=0 guibg=darkkhaki guifg=black",
+      \ 'cursor': "ctermbg=64 guibg=olivedrab ctermfg=186 guifg=khaki",
+      \ 'insert': "ctermbg=239 guibg=#4c4e50",
+      \ 'mono':   "ctermfg=235 guifg=#262626 ctermbg=131 guibg=#AF5F5F",
+      \}
+
+let s:Themes.olive = {
+      \ 'extend': "ctermbg=3 guibg=olive ctermfg=0 guifg=black",
+      \ 'cursor': "ctermbg=64 guibg=olivedrab ctermfg=186 guifg=khaki",
+      \ 'insert': "ctermbg=239 guibg=#4c4e50",
+      \ 'mono':   "ctermfg=235 guifg=#262626 ctermbg=131 guibg=#AF5F5F",
       \}
 
 let s:Themes.lightpurple1 = {
