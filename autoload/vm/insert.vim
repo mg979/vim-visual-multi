@@ -238,9 +238,13 @@ endfun
 
 fun! s:Insert.clear_hi() dict
     """Clear cursors highlight.
-    for c in self.cursors
-        call matchdelete(c.hl)
-    endfor
+    if s:v.clearmatches
+        call clearmatches()
+    else
+        for c in self.cursors
+            call matchdelete(c.hl)
+        endfor
+    endif
 endfun
 
 

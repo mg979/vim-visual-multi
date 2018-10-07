@@ -93,9 +93,12 @@ fun! vm#init_buffer(empty, ...)
     call vm#au_cursor(0)
 
     " disable folding, but keep winline
-    call s:V.Funcs.Scroll.get(1)
-    let s:v.oldfold = &foldenable
-    call s:V.Funcs.Scroll.restore()
+    if &foldenable
+        call s:V.Funcs.Scroll.get(1)
+        let s:v.oldfold = 1
+        set nofoldenable
+        call s:V.Funcs.Scroll.restore()
+    endif
 
     if g:VM_case_setting ==? 'smart'
         set smartcase
@@ -159,10 +162,11 @@ fun! vm#reset(...)
     call vm#au_cursor(1)
 
     " reenable folding, but keep winline and open current fold
-    call s:V.Funcs.Scroll.get(1)
-    let &foldenable  = s:v.oldfold
-    normal! zv
-    call s:V.Funcs.Scroll.restore()
+    if exists('s:v.oldfold')
+        call s:V.Funcs.Scroll.get(1)
+        normal! zizv
+        call s:V.Funcs.Scroll.restore()
+    endif
 
     let b:VM_Selection = {}
     let g:VM.is_active = 0
