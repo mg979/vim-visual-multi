@@ -315,3 +315,11 @@ fun! s:Edit.fill_register(reg, text, hard) dict
     return [text, type]
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.replace_regions_with_text(text) dict
+  """Paste a custom list of strings into current regions.
+  call self.fill_register('"', a:text, 0)
+  normal p
+endfun
+

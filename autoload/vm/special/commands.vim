@@ -45,6 +45,16 @@ fun! vm#special#commands#menu()
     endif
 endfun
 
+"------------------------------------------------------------------------------
+
+fun! s:temp_buffer()
+    setlocal buftype=acwrite
+    setlocal bufhidden=wipe
+    setlocal noswapfile
+    setlocal nobuflisted
+    setlocal nomodified
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Filter lines
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -53,15 +63,16 @@ fun! vm#special#commands#filter_lines(strip)
     """Filter lines containing regions, and paste them in a new buffer.
     if !len(s:R()) | return | endif
 
-    let lines = sort(keys(s:G.lines_with_regions(0)))
+    let lines = sort(keys(s:G.lines_with_regions(0)), 'N')
     let txt = []
     for l in lines
-        exe "normal! ".l."ggyy"
-        call add(txt, getreg(s:F.default_reg()))
+        call add(txt, getline(l))
     endfor
     call vm#reset(1)
-    new
-    set buftype=nofile
+    let s:buf = bufnr("%")
+    noautocmd keepalt botright new! VM\ Filtered\ Lines
+    setlocal stl=VM\ Filtered\ Lines
+    let b:VM_lines = lines
     for t in txt
         if a:strip
             if match(t, '^\s') == 0 | let t = t[match(t, '\S'):] | endif
@@ -69,6 +80,26 @@ fun! vm#special#commands#filter_lines(strip)
         put = t
     endfor
     normal! ggdd
+    call s:temp_buffer()
+    autocmd BufWriteCmd <buffer> call s:save_lines(s:buf)
+endfun
+
+"------------------------------------------------------------------------------
+
+fun! s:save_lines(buf)
+    setlocal nomodified
+    if len(b:VM_lines) != line("$")
+        return s:F.msg("Number of lines doesn't match, aborting")
+    endif
+    let lnums = copy(b:VM_lines)
+    let lines = map(range(line("$")), 'getline(v:key + 1)')
+    quit
+    exe a:buf."b"
+    let i = 0
+    for l in lnums
+        call setline(l, lines[i])
+        let i += 1
+    endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -83,14 +114,36 @@ fun! vm#special#commands#regions_to_buffer()
     for r in s:R()
         let t = r.txt
         if t[-1:-1] != "\n" | let t .= "\n" | endif
-        call add(txt, r.txt) | endfor
+        call add(txt, r.txt)
+    endfor
     call vm#reset(1)
-    new
-    set buftype=nofile
+    let s:buf = bufnr("%")
+    noautocmd keepalt botright new! VM\ Filtered\ Regions
+    setlocal stl=VM\ Filtered\ Regions
+    let b:VM_regions = copy(s:R())
     for t in txt
         put = t
     endfor
     normal! ggdd
+    call s:temp_buffer()
+    autocmd BufWriteCmd <buffer> call s:save_regions(s:buf)
+endfun
+
+"------------------------------------------------------------------------------
+
+fun! s:save_regions(buf)
+    setlocal nomodified
+    if len(b:VM_regions) != line("$")
+        return s:F.msg("Number of lines doesn't match number of regions")
+    endif
+    let R = copy(b:VM_regions)
+    let lines = map(range(line("$")), 'getline(v:key + 1)')
+    quit
+    exe a:buf."b"
+    for r in R
+        call vm#region#new(0, r.l, r.L, r.a, r.b)
+    endfor
+    call s:V.Edit.replace_regions_with_text(lines)
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
