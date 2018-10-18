@@ -7,7 +7,7 @@ let g:VM.find_motions   = ['f', 'F', 't', 'T']
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#plugs#init()
-    nmap  <silent>  <Plug>(VM-Select-Operator)         :<c-u>call vm#operators#select(0, 0)<cr>y
+    nnoremap  <silent>  <Plug>(VM-Select-Operator)     :<c-u>call vm#operators#select(0, 0)<cr>y
     nnoremap        <Plug>(VM-Select-All-Operator)     :<c-u>call vm#operators#select(1, v:count)<cr>
 
     nmap <expr> <silent>  <Plug>(VM-Find-Operator)     vm#operators#find(1, 0)
