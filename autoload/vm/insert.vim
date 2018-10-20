@@ -184,7 +184,7 @@ fun! s:Insert.insert(...) dict
     let I.change = cur - pos
     let text     = getline(ln)[(pos-1):(cur-2)]
 
-    for l in keys(L)
+    for l in sort(keys(L), 'N')
         call L[l].update(I.change, text)
     endfor
     call cursor(ln, I.col)
