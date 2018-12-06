@@ -1,6 +1,5 @@
 #!/bin/env python3
 
-import glob
 from pathlib import Path, PurePath
 import sys
 import filecmp
@@ -27,14 +26,14 @@ def run_one_test(test):
     print("reproduce: ./test.py " + test)
     # input/output files
     try:
-        vimrc_path = Path('input/vimrc/', test + '.vim').resolve(strict=True)
+        vimrc_path = Path('tests/', test, 'vimrc.vim').resolve(strict=True)
     except FileNotFoundError:
-        vimrc_path = Path('input/vimrc/default.vim').resolve(strict=True)
+        vimrc_path = Path('default/', 'vimrc.vim').resolve(strict=True)
         print("using default vimrc")
-    command_path = Path('input/command/', test + '.py').resolve(strict=True)
-    in_file_path = Path('input/file/', test + '.txt').resolve(strict=True)
-    exp_out_file_path = Path('output/file/expected/', test + '.txt').resolve(strict=True)
-    gen_out_file_path = Path('output/file/generated/', test + '.txt').resolve()
+    command_path = Path('tests/', test, 'commands.py').resolve(strict=True)
+    in_file_path = Path('tests/', test, 'input_file.txt').resolve(strict=True)
+    exp_out_file_path = Path('tests/', test, 'expected_output_file.txt').resolve(strict=True)
+    gen_out_file_path = Path('tests/', test, 'generated_output_file.txt').resolve()
     # run test
     vim = vimrunner.Server(noplugin=False, vimrc=vimrc_path)
     client = vim.start()
@@ -51,11 +50,10 @@ def run_one_test(test):
 
 # execution
 failing_tests = []
-tests = [PurePath(c).name.replace('.py', '') for c in glob.iglob('input/command/*')]
+tests = [str(p).replace('tests/','') for p in Path('tests').glob('*')]
 if args.list:
     print("\n".join(tests))
 else:
-    Path('output/file/generated').mkdir(exist_ok=True)
     if args.test is not None:
         run_one_test(args.test)
     else:
