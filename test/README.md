@@ -1,12 +1,12 @@
 # How to Run:
 ## run all tests:
-./test.py
+    ./test.py
 
 ## run 1 test:
-./test.py [test]
+    ./test.py [test]
 
 ## list all tests
-./test.py -l
+    ./test.py -l
 
 # Add a Test
 ## add the following files:
