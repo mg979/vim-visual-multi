@@ -1,9 +1,10 @@
 #!/bin/env python3
 
+import argparse
 from pathlib import Path, PurePath
 import sys
+import shutil
 import filecmp
-import argparse
 import vimrunner
 
 # arg parsing
@@ -21,7 +22,6 @@ def print_banner(string):
 
 
 def run_one_test(test):
-    global failing_tests
     print_banner(test)
     print("reproduce: ./test.py " + test)
     # input/output files
@@ -35,34 +35,43 @@ def run_one_test(test):
     exp_out_file_path = Path('tests/', test, 'expected_output_file.txt').resolve(strict=True)
     gen_out_file_path = Path('tests/', test, 'generated_output_file.txt').resolve()
     # run test
-    vim = vimrunner.Server(noplugin=False, vimrc=vimrc_path)
+    # TODO: remove shutil.which once vimrunner is fixed
+    vim = vimrunner.Server(noplugin=False, vimrc=vimrc_path, executable=shutil.which('vim'))
     client = vim.start()
     client.edit(in_file_path)
     exec(open(command_path).read())
+    client.feedkeys('\<Esc>')
     client.feedkeys(':wq! %s\<CR>' % gen_out_file_path)
     # check results
     if filecmp.cmp(exp_out_file_path, gen_out_file_path):
         print("SUCCESS")
+        return True
     else:
-        failing_tests.append(test)
         print("FAIL")
+        return False
 
 
 # execution
-failing_tests = []
-tests = [str(p).replace('tests/','') for p in Path('tests').glob('*')]
-if args.list:
-    print("\n".join(tests))
-else:
-    if args.test is not None:
-        run_one_test(args.test)
+def main():
+    failing_tests = []
+    tests = [PurePath(str(p)).name for p in Path('tests').glob('*')]
+    if args.list:
+        print("\n".join(tests))
     else:
-        for test in tests:
-            run_one_test(test)
-    if failing_tests == []:
-        print_banner("summary: SUCCESS")
-    else:
-        print_banner("summary: FAIL")
-        print("the following tests failed:")
-        print("\n".join(failing_tests))
-        sys.exit(1)
+        if args.test is not None:
+            run_one_test(args.test)
+        else:
+            for test in tests:
+                if run_one_test(test) is False:
+                    failing_tests.append(test)
+        if failing_tests == []:
+            print_banner("summary: SUCCESS")
+        else:
+            print_banner("summary: FAIL")
+            print("the following tests failed:")
+            print("\n".join(failing_tests))
+            sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
