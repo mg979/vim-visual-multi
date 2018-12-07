@@ -56,58 +56,28 @@ fun! vm#maps#all#permanent()
     """Default permanent mappings dictionary."""
     let maps = s:base
 
+    " map <c-n> in any case
+    let maps["Find Under"][0]               = '<C-n>'
+    let maps["Find Subword Under"][0]       = '<C-n>'
+
     if g:VM_default_mappings
         let maps["Select Operator"][0]          = 'gs'
         let maps["Add Cursor At Pos"][0]        = 'g<space>'
         let maps["Start Regex Search"][0]       = 'g/'
-        let maps["Select All"][0]               = '<M-A>'
-        let maps["Add Cursor Down"][0]          = '<M-j>'
-        let maps["Add Cursor Up"][0]            = '<M-k>'
+        let maps["Select All"][0]               = '<leader>A'
+        let maps["Add Cursor Down"][0]          = '<C-Down>'
+        let maps["Add Cursor Up"][0]            = '<C-Up>'
         let maps["Visual Regex"][0]             = 'g/'
-        let maps["Visual All"][0]               = '<M-A>'
-        let maps["Visual Add"][0]               = '<M-a>'
+        let maps["Visual All"][0]               = '<leader>A'
+        let maps["Visual Add"][0]               = '<C-a>'
         let maps["Visual Find"][0]              = '<C-f>'
         let maps["Visual Cursors"][0]           = '<C-c>'
-        let maps["Find Under"][0]               = '<C-n>'
-        let maps["Find Subword Under"][0]       = '<C-n>'
-    endif
-
-    if g:VM_sublime_mappings
-        let maps["Select Cursor Down"][0]       = '<M-C-Down>'
-        let maps["Select Cursor Up"][0]         = '<M-C-Up>'
-        let maps["Select j"][0]                 = '<S-Down>'
-        let maps["Select k"][0]                 = '<S-Up>'
-        let maps["Select l"][0]                 = '<S-Right>'
-        let maps["Select h"][0]                 = '<S-Left>'
-        let maps["Select w"][0]                 = '<C-S-Right>'
-        let maps["Select b"][0]                 = '<C-S-Left>'
-        let maps["Select Line Down"][0]         = '<C-S-Down>'
-        let maps["Select Line Up"][0]           = '<C-S-Up>'
-        let maps["Select E"][0]                 = '<M-C-Right>'
-        let maps["Select BBW"][0]               = '<M-C-Left>'
-        let maps["Find Under"][0]               = '<C-d>'
-        let maps["Find Subword Under"][0]       = '<C-d>'
-    endif
-
-    if g:VM_extended_mappings
-        let maps["Find I Word"][0]              = 'gw'
-        let maps["Find A Word"][0]              = 'gW'
-        let maps["Find A Subword"][0]           = 'gw'
-        let maps["Find A Whole Subword"][0]     = 'gW'
     endif
 
     if g:VM_mouse_mappings
         let maps["Mouse Cursor"][0]             = '<C-LeftMouse>'
         let maps["Mouse Word"][0]               = '<C-RightMouse>'
         let maps["Mouse Column"][0]             = '<M-C-RightMouse>'
-    endif
-
-    if g:VM_no_meta_mappings
-        let maps['Select All'][0]               = '<leader>A'
-        let maps['Visual All'][0]               = '<leader>A'
-        let maps['Add Cursor Down'][0]          = '<C-Down>'
-        let maps['Add Cursor Up'][0]            = '<C-Up>'
-        let maps['Visual Add'][0]               = '<C-a>'
     endif
 
     return maps
