@@ -125,7 +125,7 @@ fun! vm#maps#all#buffer()
                 \"Invert Direction":        ['o',         'n', 1, 1],
                 \"q Skip":                  ['q',         'n', 1, 1],
                 \"Remove Region":           ['Q',         'n', 1, 1],
-                \"Remove Last Region":      ['<M-q>',     'n', 1, 1],
+                \"Remove Last Region":      ['<C-q>',     'n', 1, 1],
                 \"Remove Every n Regions":  [leader.'R',  'n', 1, 1],
                 \"Star":                    ['*',         'n', 1, 1],
                 \"Hash":                    ['#',         'n', 1, 1],
@@ -135,8 +135,8 @@ fun! vm#maps#all#buffer()
                 \"Merge To Bol":            ['<S-Home>',  'n', 1, 1],
                 \"Select All Operator":     ['s',         "n", 1, 0],
                 \"Find Operator":           ["m",         'n', 1, 1],
-                \"Add Cursor Down":         ['<M-j>',     'n', 1, 1],
-                \"Add Cursor Up":           ['<M-k>',     'n', 1, 1],
+                \"Add Cursor Down":         ['<C-Down>',  'n', 1, 1],
+                \"Add Cursor Up":           ['<C-Up>',    'n', 1, 1],
                 \})
 
     "utility
@@ -162,7 +162,7 @@ fun! vm#maps#all#buffer()
                 \"Duplicate":               [leader.'d',  'n', 1, 1],
                 \"Align":                   [leader.'a',  'n', 1, 1],
                 \"Split Regions":           [leader.'s',  'n', 1, 1],
-                \"Visual Subtract":         ['<M-s>',     'x', 1, 1],
+                \"Visual Subtract":         ['<C-s>',     'x', 1, 1],
                 \})
 
     "zeta
@@ -170,7 +170,7 @@ fun! vm#maps#all#buffer()
                 \"Run Normal":              ['zz',        'n', 0, 1],
                 \"Run Last Normal":         ['Z',         'n', 1, 1],
                 \"Run Visual":              ['zv',        'n', 0, 1],
-                \"Run Last Visual":         ['<M-z>',     'n', 1, 1],
+                \"Run Last Visual":         ['zV',        'n', 1, 1],
                 \"Run Ex":                  ['zx',        'n', 0, 1],
                 \"Run Last Ex":             ['<C-z>',     'n', 1, 1],
                 \"Run Macro":               ['z@',        'n', 1, 1],
@@ -266,29 +266,6 @@ fun! vm#maps#all#buffer()
                 \"Yank":                    ['y',           'n', 1, 1],
                 \"Yank Hard":               [leader.'y',    'n', 1, 1],
                 \})
-
-    if g:VM_sublime_mappings
-        let maps["Select e"][0]                 = '<C-Right>'
-        let maps["Select ge"][0]                = '<C-Left>'
-        let maps["Select w"][0]                 = '<C-S-Right>'
-        let maps["Select b"][0]                 = '<C-S-Left>'
-        let maps["Select Line Down"][0]         = '<C-S-Down>'
-        let maps["Select Line Up"][0]           = '<C-S-Up>'
-        let maps["Select E"][0]                 = '<M-C-Right>'
-        let maps["Select BBW"][0]               = '<M-C-Left>'
-    endif
-
-    if g:VM_no_meta_mappings
-        let maps['Remove Last Region'][0] = '<C-q>'
-        let maps['Add Cursor Down'][0]    = '<C-Down>'
-        let maps['Add Cursor Up'][0]      = '<C-Up>'
-        let maps['Visual Subtract'][0]    = '<C-s>'
-        let maps['Run Last Visual'][0]    = 'zV'
-        let maps['Add Cursor Down'][0]    = '<C-Down>'
-        let maps['Add Cursor Up'][0]      = '<C-Up>'
-        let maps['Move Right'][0]         = '<C-l>'
-        let maps['Move Left'][0]          = '<C-h>'
-    endif
 
     return maps
 endfun

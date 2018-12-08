@@ -7,16 +7,13 @@ fun! vm#special#config#start()
   redraw!
   let opt = [
             \['Default mappings',               "VM_default_mappings"],
-            \['Sublime mappings',               "VM_sublime_mappings"],
             \['Mouse mappings',                 "VM_mouse_mappings"],
-            \['Extended mappings',              "VM_extended_mappings"],
             \['Reselect first insert',          "VM_reselect_first_insert"],
             \['Reselect first always',          "VM_reselect_first_always"],
             \['Case setting',                   "VM_case_setting"],
             \['Pick first after n cursors',     "VM_pick_first_after_n_cursors"],
             \['Dynamic synmaxcol',              "VM_dynamic_synmaxcol"],
             \['Disable syntax in insert-mode',  "VM_disable_syntax_in_imode"],
-            \['No meta mappings',               "VM_no_meta_mappings"],
             \['Auto-exit with 1 cursor left',   "VM_exit_on_1_cursor_left"],
             \['Manual infoline',                "VM_manual_infoline"],
             \]
@@ -39,14 +36,14 @@ fun! vm#special#config#start()
 
   if o == '?'
     call vm#special#config#help() | return
-  elseif o == 6
+  elseif o == 4
     if g:VM_case_setting == 'smart'         | let g:VM_case_setting = 'sensitive'
     elseif g:VM_case_setting == 'sensitive' | let g:VM_case_setting = 'ignore'
     else                                    | let g:VM_case_setting = 'smart' | endif
-  elseif o == 7
+  elseif o == 5
     let new = input("\nEnter a new value for g:VM_pick_first_after_n_cursors (0 disables it) > ")
     if !empty(new) | let g:VM_pick_first_after_n_cursors = new | endif
-  elseif o == 8
+  elseif o == 6
     let new = input("\nEnter a new value for g:VM_dynamic_synmaxcol (0 disables it) > ")
     if !empty(new) | let g:VM_dynamic_synmaxcol = new | endif
   else
@@ -67,10 +64,7 @@ fun! vm#special#config#generate()
         \'" vim-visual-multi configuration',
         \'',
         \'let g:VM_default_mappings           = '.g:VM_default_mappings,
-        \'let g:VM_sublime_mappings           = '.g:VM_sublime_mappings,
         \'let g:VM_mouse_mappings             = '.g:VM_mouse_mappings,
-        \'let g:VM_extended_mappings          = '.g:VM_extended_mappings,
-        \'let g:VM_no_meta_mappings           = '.g:VM_no_meta_mappings,
         \'let g:VM_reselect_first_insert      = '.g:VM_reselect_first_insert,
         \'let g:VM_reselect_first_always      = '.g:VM_reselect_first_always,
         \'let g:VM_case_setting               = "'.g:VM_case_setting.'"',
@@ -98,13 +92,7 @@ fun! vm#special#config#help()
   echohl WarningMsg | echo _._._."\n" | echohl None
 
   echohl Special | echo "g:VM_default_mappings\t\t\t"  | echohl None | echon "this should be enabled for basic mappings to work."
-  echohl Special | echo "g:VM_sublime_mappings\t\t\t"  | echohl None | echon "Sublime Text-like mappings."
-  echohl Special | echo "g:VM_mouse_mappings\t\t\t"    | echohl None | echon "mouse mappings."
-  echohl Special | echo "g:VM_extended_mappings\t\t\t" | echohl None | echon "additional gw/gW mappings.\n\n"
-
-  echohl WarningMsg | echo _._._."\n" | echohl None
-
-  echohl Special | echo "g:VM_no_meta_mappings\t\t\t"  | echohl None | echon "if enabled, some mappings are replaced with others that don't use the Alt key.\n\n"
+  echohl Special | echo "g:VM_mouse_mappings\t\t\t"    | echohl None | echon "mouse mappings.\n\n"
 
   echohl WarningMsg | echo _._._."\n" | echohl None
 
