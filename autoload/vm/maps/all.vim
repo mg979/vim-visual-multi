@@ -55,6 +55,7 @@ let s:base = {
 fun! vm#maps#all#permanent()
     """Default permanent mappings dictionary."""
     let maps = s:base
+    let leader = g:VM.leader
 
     " map <c-n> in any case
     let maps["Find Under"][0]               = '<C-n>'
@@ -64,11 +65,11 @@ fun! vm#maps#all#permanent()
         let maps["Select Operator"][0]          = 'gs'
         let maps["Add Cursor At Pos"][0]        = 'g<space>'
         let maps["Start Regex Search"][0]       = 'g/'
-        let maps["Select All"][0]               = '<leader>A'
+        let maps["Select All"][0]               = leader.'A'
         let maps["Add Cursor Down"][0]          = '<C-Down>'
         let maps["Add Cursor Up"][0]            = '<C-Up>'
         let maps["Visual Regex"][0]             = 'g/'
-        let maps["Visual All"][0]               = '<leader>A'
+        let maps["Visual All"][0]               = leader.'A'
         let maps["Visual Add"][0]               = '<C-a>'
         let maps["Visual Find"][0]              = '<C-f>'
         let maps["Visual Cursors"][0]           = '<C-c>'
@@ -89,6 +90,7 @@ fun! vm#maps#all#buffer()
     """Default buffer mappings dictionary."""
 
     let maps = {}
+    let leader = g:VM.leader
 
     "s
     call extend(maps, {
@@ -124,7 +126,7 @@ fun! vm#maps#all#buffer()
                 \"q Skip":                  ['q',         'n', 1, 1],
                 \"Remove Region":           ['Q',         'n', 1, 1],
                 \"Remove Last Region":      ['<M-q>',     'n', 1, 1],
-                \"Remove Every n Regions":  ['<leader>R', 'n', 1, 1],
+                \"Remove Every n Regions":  [leader.'R',  'n', 1, 1],
                 \"Star":                    ['*',         'n', 1, 1],
                 \"Hash":                    ['#',         'n', 1, 1],
                 \"Visual Star":             ['*',         'x', 1, 1],
@@ -139,27 +141,27 @@ fun! vm#maps#all#buffer()
 
     "utility
     call extend(maps, {
-                \"Tools Menu":              ['<leader>x', 'n', 1, 1],
+                \"Tools Menu":              [leader.'x',  'n', 1, 1],
                 \"Show Help":               ['<F1>',      'n', 1, 1],
-                \"Show Registers":          ['<leader>"', 'n', 0, 1],
+                \"Show Registers":          [leader.'"',  'n', 0, 1],
                 \"Toggle Debug":            ['<C-x><F12>','n', 1, 1],
                 \"Case Setting":            ['<c-c>',     'n', 1, 1],
                 \"Toggle Whole Word":       ['<c-w>',     'n', 1, 1],
-                \"Case Conversion Menu":    ['<leader>c', 'n', 1, 1],
-                \"Search Menu":             ['<leader>S', 'n', 1, 1],
-                \"Rewrite Last Search":     ['<leader>r', 'n', 1, 1],
-                \"Show Infoline":           ['<leader>l', 'n', 0, 1],
+                \"Case Conversion Menu":    [leader.'c',  'n', 1, 1],
+                \"Search Menu":             [leader.'S',  'n', 1, 1],
+                \"Rewrite Last Search":     [leader.'r',  'n', 1, 1],
+                \"Show Infoline":           [leader.'l',  'n', 0, 1],
                 \"Toggle Multiline":        ['M',         'n', 1, 1],
                 \})
 
     "commands
     call extend(maps, {
                 \"Surround":                ['S',         'n', 1, 1],
-                \"Merge Regions":           ['<leader>m', 'n', 1, 1],
-                \"Transpose":               ['<leader>t', 'n', 1, 1],
-                \"Duplicate":               ['<leader>d', 'n', 1, 1],
-                \"Align":                   ['<leader>a', 'n', 1, 1],
-                \"Split Regions":           ['<leader>s', 'n', 1, 1],
+                \"Merge Regions":           [leader.'m',  'n', 1, 1],
+                \"Transpose":               [leader.'t',  'n', 1, 1],
+                \"Duplicate":               [leader.'d',  'n', 1, 1],
+                \"Align":                   [leader.'a',  'n', 1, 1],
+                \"Split Regions":           [leader.'s',  'n', 1, 1],
                 \"Visual Subtract":         ['<M-s>',     'x', 1, 1],
                 \})
 
@@ -249,20 +251,20 @@ fun! vm#maps#all#buffer()
                 \"A":                       ['A',           'n', 1, 1],
                 \"i":                       ['i',           'n', 1, 1],
                 \"I":                       ['I',           'n', 1, 1],
-                \"o":                       ['<leader>o',   'n', 1, 1],
-                \"O":                       ['<leader>O',   'n', 1, 1],
+                \"o":                       [leader.'o',    'n', 1, 1],
+                \"O":                       [leader.'O',    'n', 1, 1],
                 \"c":                       ['c',           'n', 1, 1],
                 \"C":                       ['C',           'n', 1, 1],
                 \"Delete":                  ['d',           'n', 1, 1],
                 \"Replace":                 ['r',           'n', 1, 1],
                 \"Replace Pattern":         ['R',           'n', 1, 1],
-                \"Transform Regions":       ['<leader>e',   'n', 1, 1],
+                \"Transform Regions":       [leader.'e',    'n', 1, 1],
                 \"p Paste Regions":         ['p',           'n', 1, 1],
                 \"P Paste Regions":         ['P',           'n', 1, 1],
-                \"p Paste Normal":          ['<leader>p',   'n', 1, 1],
-                \"P Paste Normal":          ['<leader>P',   'n', 1, 1],
+                \"p Paste Normal":          [leader.'p',    'n', 1, 1],
+                \"P Paste Normal":          [leader.'P',    'n', 1, 1],
                 \"Yank":                    ['y',           'n', 1, 1],
-                \"Yank Hard":               ['<leader>y',   'n', 1, 1],
+                \"Yank Hard":               [leader.'y',    'n', 1, 1],
                 \})
 
     if g:VM_sublime_mappings
