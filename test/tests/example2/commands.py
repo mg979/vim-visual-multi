@@ -1,4 +1,4 @@
-client.feedkeys('\<C-n>')
-client.feedkeys('\<C-n>')
-client.feedkeys('C')
-client.feedkeys('hello')
+keys('\<C-n>')
+keys('\<C-n>')
+keys('C')
+keys('hello')

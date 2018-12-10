@@ -1,3 +1,3 @@
-client.feedkeys('\<C-Down>\<C-Down>\<C-Down>')
-client.feedkeys('i')
-client.feedkeys('Hello')
+keys('\<C-Down>\<C-Down>\<C-Down>')
+keys('i')
+keys('Hello')
