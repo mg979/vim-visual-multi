@@ -1,3 +1,4 @@
+" DESCRIPTION: default vimrc (nocompatible)
 " needed by vimrunner
 function! VimrunnerPyEvaluateCommandOutput(command)
   redir => output
