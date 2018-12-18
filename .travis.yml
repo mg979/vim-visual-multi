@@ -1,4 +1,4 @@
 language: python
 python: "3.6"
-before_script: cd test
+before_script: cd vimrunner
 script: python3 test.py
