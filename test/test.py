@@ -27,22 +27,13 @@ def print_banner(string, f=None):
 ++ %s
 ++--------------------------------------------------------------""" % string, f)
 
-def vimrc_info(vimrc, type):
-    """Log the description if present inside the vimrc."""
-    with open(vimrc) as file:
-        v = file.readline()
-        if v[:14] == '" DESCRIPTION:':
-            return v[15:]
-        else:
-            return "using " + type + " vimrc"
-
 def get_vimrc(test, f):
     """Check if test-specific vimrc is present, or use default one."""
     try:
         vimrc = Path('tests/', test, 'vimrc.vim').resolve(strict=True)
-        output = vimrc_info(vimrc, 'test')
+        output = "using test vimrc"
     except FileNotFoundError:
-        vimrc, output = VIMRC, INFO
+        vimrc, output = VIMRC, "using default vimrc"
     log(output, f)
     return vimrc
 
@@ -93,20 +84,19 @@ def run_one_test(test, f=None, nvim=False):
     log("reproduce: ./test.py " + ("", "-n ")[nvim] + test, f)
     # input/output files
     paths = get_paths(test, f)
+    # remove previously generated file
+    if os.path.exists(paths["gen_out_file"]):
+        os.remove(paths["gen_out_file"])
     # run test
     run_core(paths, nvim)
     time.sleep(0.5)
     # check results
     if filecmp.cmp(paths["exp_out_file"], paths["gen_out_file"]):
         log("++ SUCCESS\n", f)
-        result = True
+        return True
     else:
         log("++ FAIL\n", f)
-        result = False
-    # remove generated file when done
-    if os.path.exists(paths["gen_out_file"]):
-        os.remove(paths["gen_out_file"])
-    return result
+        return False
 
 
 def main():
@@ -116,14 +106,12 @@ def main():
     parser.add_argument('test', nargs='?', help='run <test> only instead of running all tests')
     parser.add_argument('-n', '--nvim', action='store_true', help='run in neovim instead of vim')
     parser.add_argument('-l', '--list', action='store_true', help='list all tests')
-    parser.add_argument('-v', nargs=1, help='use specific vimrc as default')
     args = parser.parse_args()
 
-    # vim version and default vimrc/info
-    global VIM, VIMRC, INFO
+    # vim version and default vimrc
+    global VIM, VIMRC
     VIM = shutil.which('vim' if not args.nvim else 'nvim')
-    VIMRC = Path('default/', 'vimrc.vim' if not args.v else args.v[0] + '.vim').resolve(strict=True)
-    INFO = vimrc_info(VIMRC, 'default' if not args.v else args.v[0])
+    VIMRC = Path('default/', 'vimrc.vim').resolve(strict=True)
 
     # execution
     failing_tests = []
