@@ -33,7 +33,7 @@ def get_vimrc(test, f):
         vimrc = Path('tests/', test, 'vimrc.vim').resolve(strict=True)
         output = "using test vimrc"
     except FileNotFoundError:
-        vimrc, output = VIMRC, "using default vimrc"
+        vimrc, output = DEFAULT_VIMRC, "using default vimrc"
     log(output, f)
     return vimrc
 
@@ -109,9 +109,9 @@ def main():
     args = parser.parse_args()
 
     # vim version and default vimrc
-    global VIM, VIMRC
+    global VIM, DEFAULT_VIMRC
     VIM = shutil.which('vim' if not args.nvim else 'nvim')
-    VIMRC = Path('default/', 'vimrc.vim').resolve(strict=True)
+    DEFAULT_VIMRC = Path('default/', 'vimrc.vim').resolve(strict=True)
 
     # execution
     failing_tests = []
