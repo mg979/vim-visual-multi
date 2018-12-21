@@ -226,7 +226,7 @@ fun! vm#commands#find_by_regex(mode)
     let s:v.using_regex = a:mode
 
     "if visual regex, reposition cursor to the beginning of the selection
-    if a:mode == 2 | exe "normal! `<" | endif
+    if a:mode == 2 | exe "keepjumps normal! `<" | endif
 
     "store reg and position, to check if the search will be aborted
     let s:regex_pos = getpos('.') | let s:regex_reg = @/
@@ -303,16 +303,28 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     let s:v.eco = 1 | let s:v.multi_find = 1
     let seen = []
 
-    if !a:visual | let R = s:G.is_region_at_pos('.')
-        if empty(R) | let R = vm#commands#find_under(0, a:whole, a:inclusive) | endif
+    if !a:visual
+        let R = s:G.is_region_at_pos('.')
+        if empty(R)
+            let R = vm#commands#find_under(0, a:whole, a:inclusive)
+        endif
         call s:Search.check_pattern(R.pat)
     else
-        let R = vm#commands#find_under(1, a:whole, a:inclusive) | endif
+        let R = vm#commands#find_under(1, a:whole, a:inclusive)
+    endif
 
-    while index(seen, R.id) == -1
-        call add(seen, R.id)
-        let R = vm#commands#find_next(0, 0, 1)
+    let @/ = join(s:v.search, '\|')
+    let s:v.nav_direction = 1
+    call vm#commands#erase_regions()
+    let ows = &wrapscan
+    set nowrapscan
+    call s:get_next_all(1)
+    while 1
+        try   | call s:get_next_all(0)
+        catch | break
+        endtry
     endwhile
+    let &wrapscan = ows
 
     let s:v.restore_scroll = 1
     call s:G.update_map_and_select_region(pos)
@@ -322,14 +334,15 @@ endfun
 " Find next/previous
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:get_next_all()
+fun! s:get_next_all(first)
     "variant for multiple searches (find_all, find_op, ...)
-    silent keepjumps normal! ngny`]
+    if a:first | silent keepjumps normal! ggygn
+    else       | silent keepjumps normal! nygn
+    endif
     let R = s:G.new_region()
     if s:check_overlap(R, 1)
         let s:v.find_all_overlap = 1
     endif
-    let s:v.nav_direction = 1
     return R
 endfun
 
@@ -369,7 +382,8 @@ fun! s:navigate(force, dir)
         let i = a:dir? s:v.index+1 : s:v.index-1
         call s:G.select_region(i)
         call s:F.count_msg(1)
-        return s:keep_block() | endif
+        return s:keep_block()
+    endif
 endfun
 
 fun! s:skip()
@@ -386,7 +400,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav, ...)
-    if a:0 | return s:get_next_all() | endif       "multiple calls: shortcut and no message
+    if a:0 | return s:get_next_all(0) | endif  "multiple calls: shortcut and no message
 
     if ( a:nav || a:skip ) && s:F.no_regions()                          | return | endif
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
@@ -691,7 +705,7 @@ endfun
 fun! vm#commands#seek_down()
     if !len(s:R()) | return | endif
 
-    exe "normal! \<C-f>"
+    exe "keepjumps normal! \<C-f>"
     let end = getpos('.')[1]
     for r in s:R()
         if r.l >= end
@@ -705,7 +719,7 @@ endfun
 fun! vm#commands#seek_up()
     if !len(s:R()) | return | endif
 
-    exe "normal! \<C-b>"
+    exe "keepjumps normal! \<C-b>"
     let end = getpos('.')[1]
 
     for r in reverse(copy(s:R()))

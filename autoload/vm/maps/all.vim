@@ -55,59 +55,30 @@ let s:base = {
 fun! vm#maps#all#permanent()
     """Default permanent mappings dictionary."""
     let maps = s:base
+    let leader = g:VM.leader
+
+    " map <c-n> in any case
+    let maps["Find Under"][0]               = '<C-n>'
+    let maps["Find Subword Under"][0]       = '<C-n>'
 
     if g:VM_default_mappings
         let maps["Select Operator"][0]          = 'gs'
         let maps["Add Cursor At Pos"][0]        = 'g<space>'
         let maps["Start Regex Search"][0]       = 'g/'
-        let maps["Select All"][0]               = '<M-A>'
-        let maps["Add Cursor Down"][0]          = '<M-j>'
-        let maps["Add Cursor Up"][0]            = '<M-k>'
+        let maps["Select All"][0]               = leader.'A'
+        let maps["Add Cursor Down"][0]          = '<C-Down>'
+        let maps["Add Cursor Up"][0]            = '<C-Up>'
         let maps["Visual Regex"][0]             = 'g/'
-        let maps["Visual All"][0]               = '<M-A>'
-        let maps["Visual Add"][0]               = '<M-a>'
+        let maps["Visual All"][0]               = leader.'A'
+        let maps["Visual Add"][0]               = '<C-a>'
         let maps["Visual Find"][0]              = '<C-f>'
         let maps["Visual Cursors"][0]           = '<C-c>'
-        let maps["Find Under"][0]               = '<C-n>'
-        let maps["Find Subword Under"][0]       = '<C-n>'
-    endif
-
-    if g:VM_sublime_mappings
-        let maps["Select Cursor Down"][0]       = '<M-C-Down>'
-        let maps["Select Cursor Up"][0]         = '<M-C-Up>'
-        let maps["Select j"][0]                 = '<S-Down>'
-        let maps["Select k"][0]                 = '<S-Up>'
-        let maps["Select l"][0]                 = '<S-Right>'
-        let maps["Select h"][0]                 = '<S-Left>'
-        let maps["Select w"][0]                 = '<C-S-Right>'
-        let maps["Select b"][0]                 = '<C-S-Left>'
-        let maps["Select Line Down"][0]         = '<C-S-Down>'
-        let maps["Select Line Up"][0]           = '<C-S-Up>'
-        let maps["Select E"][0]                 = '<M-C-Right>'
-        let maps["Select BBW"][0]               = '<M-C-Left>'
-        let maps["Find Under"][0]               = '<C-d>'
-        let maps["Find Subword Under"][0]       = '<C-d>'
-    endif
-
-    if g:VM_extended_mappings
-        let maps["Find I Word"][0]              = 'gw'
-        let maps["Find A Word"][0]              = 'gW'
-        let maps["Find A Subword"][0]           = 'gw'
-        let maps["Find A Whole Subword"][0]     = 'gW'
     endif
 
     if g:VM_mouse_mappings
         let maps["Mouse Cursor"][0]             = '<C-LeftMouse>'
         let maps["Mouse Word"][0]               = '<C-RightMouse>'
         let maps["Mouse Column"][0]             = '<M-C-RightMouse>'
-    endif
-
-    if g:VM_no_meta_mappings
-        let maps['Select All'][0]               = '<leader>A'
-        let maps['Visual All'][0]               = '<leader>A'
-        let maps['Add Cursor Down'][0]          = '<C-Down>'
-        let maps['Add Cursor Up'][0]            = '<C-Up>'
-        let maps['Visual Add'][0]               = '<C-a>'
     endif
 
     return maps
@@ -119,6 +90,7 @@ fun! vm#maps#all#buffer()
     """Default buffer mappings dictionary."""
 
     let maps = {}
+    let leader = g:VM.leader
 
     "s
     call extend(maps, {
@@ -153,8 +125,8 @@ fun! vm#maps#all#buffer()
                 \"Invert Direction":        ['o',         'n', 1, 1],
                 \"q Skip":                  ['q',         'n', 1, 1],
                 \"Remove Region":           ['Q',         'n', 1, 1],
-                \"Remove Last Region":      ['<M-q>',     'n', 1, 1],
-                \"Remove Every n Regions":  ['<leader>R', 'n', 1, 1],
+                \"Remove Last Region":      ['<C-q>',     'n', 1, 1],
+                \"Remove Every n Regions":  [leader.'R',  'n', 1, 1],
                 \"Star":                    ['*',         'n', 1, 1],
                 \"Hash":                    ['#',         'n', 1, 1],
                 \"Visual Star":             ['*',         'x', 1, 1],
@@ -163,34 +135,34 @@ fun! vm#maps#all#buffer()
                 \"Merge To Bol":            ['<S-Home>',  'n', 1, 1],
                 \"Select All Operator":     ['s',         "n", 1, 0],
                 \"Find Operator":           ["m",         'n', 1, 1],
-                \"Add Cursor Down":         ['<M-j>',     'n', 1, 1],
-                \"Add Cursor Up":           ['<M-k>',     'n', 1, 1],
+                \"Add Cursor Down":         ['<C-Down>',  'n', 1, 1],
+                \"Add Cursor Up":           ['<C-Up>',    'n', 1, 1],
                 \})
 
     "utility
     call extend(maps, {
-                \"Tools Menu":              ['<leader>x', 'n', 1, 1],
+                \"Tools Menu":              [leader.'x',  'n', 1, 1],
                 \"Show Help":               ['<F1>',      'n', 1, 1],
-                \"Show Registers":          ['<leader>"', 'n', 0, 1],
+                \"Show Registers":          [leader.'"',  'n', 0, 1],
                 \"Toggle Debug":            ['<C-x><F12>','n', 1, 1],
                 \"Case Setting":            ['<c-c>',     'n', 1, 1],
                 \"Toggle Whole Word":       ['<c-w>',     'n', 1, 1],
-                \"Case Conversion Menu":    ['<leader>c', 'n', 1, 1],
-                \"Search Menu":             ['<leader>S', 'n', 1, 1],
-                \"Rewrite Last Search":     ['<leader>r', 'n', 1, 1],
-                \"Show Infoline":           ['<leader>l', 'n', 0, 1],
+                \"Case Conversion Menu":    [leader.'c',  'n', 1, 1],
+                \"Search Menu":             [leader.'S',  'n', 1, 1],
+                \"Rewrite Last Search":     [leader.'r',  'n', 1, 1],
+                \"Show Infoline":           [leader.'l',  'n', 0, 1],
                 \"Toggle Multiline":        ['M',         'n', 1, 1],
                 \})
 
     "commands
     call extend(maps, {
                 \"Surround":                ['S',         'n', 1, 1],
-                \"Merge Regions":           ['<leader>m', 'n', 1, 1],
-                \"Transpose":               ['<leader>t', 'n', 1, 1],
-                \"Duplicate":               ['<leader>d', 'n', 1, 1],
-                \"Align":                   ['<leader>a', 'n', 1, 1],
-                \"Split Regions":           ['<leader>s', 'n', 1, 1],
-                \"Visual Subtract":         ['<M-s>',     'x', 1, 1],
+                \"Merge Regions":           [leader.'m',  'n', 1, 1],
+                \"Transpose":               [leader.'t',  'n', 1, 1],
+                \"Duplicate":               [leader.'d',  'n', 1, 1],
+                \"Align":                   [leader.'a',  'n', 1, 1],
+                \"Split Regions":           [leader.'s',  'n', 1, 1],
+                \"Visual Subtract":         ['<C-s>',     'x', 1, 1],
                 \})
 
     "zeta
@@ -198,7 +170,7 @@ fun! vm#maps#all#buffer()
                 \"Run Normal":              ['zz',        'n', 0, 1],
                 \"Run Last Normal":         ['Z',         'n', 1, 1],
                 \"Run Visual":              ['zv',        'n', 0, 1],
-                \"Run Last Visual":         ['<M-z>',     'n', 1, 1],
+                \"Run Last Visual":         ['zV',        'n', 1, 1],
                 \"Run Ex":                  ['zx',        'n', 0, 1],
                 \"Run Last Ex":             ['<C-z>',     'n', 1, 1],
                 \"Run Macro":               ['z@',        'n', 1, 1],
@@ -279,44 +251,21 @@ fun! vm#maps#all#buffer()
                 \"A":                       ['A',           'n', 1, 1],
                 \"i":                       ['i',           'n', 1, 1],
                 \"I":                       ['I',           'n', 1, 1],
-                \"o":                       ['<leader>o',   'n', 1, 1],
-                \"O":                       ['<leader>O',   'n', 1, 1],
+                \"o":                       [leader.'o',    'n', 1, 1],
+                \"O":                       [leader.'O',    'n', 1, 1],
                 \"c":                       ['c',           'n', 1, 1],
                 \"C":                       ['C',           'n', 1, 1],
                 \"Delete":                  ['d',           'n', 1, 1],
                 \"Replace":                 ['r',           'n', 1, 1],
                 \"Replace Pattern":         ['R',           'n', 1, 1],
-                \"Transform Regions":       ['<leader>e',   'n', 1, 1],
+                \"Transform Regions":       [leader.'e',    'n', 1, 1],
                 \"p Paste Regions":         ['p',           'n', 1, 1],
                 \"P Paste Regions":         ['P',           'n', 1, 1],
-                \"p Paste Normal":          ['<leader>p',   'n', 1, 1],
-                \"P Paste Normal":          ['<leader>P',   'n', 1, 1],
+                \"p Paste Normal":          [leader.'p',    'n', 1, 1],
+                \"P Paste Normal":          [leader.'P',    'n', 1, 1],
                 \"Yank":                    ['y',           'n', 1, 1],
-                \"Yank Hard":               ['<leader>y',   'n', 1, 1],
+                \"Yank Hard":               [leader.'y',    'n', 1, 1],
                 \})
-
-    if g:VM_sublime_mappings
-        let maps["Select e"][0]                 = '<C-Right>'
-        let maps["Select ge"][0]                = '<C-Left>'
-        let maps["Select w"][0]                 = '<C-S-Right>'
-        let maps["Select b"][0]                 = '<C-S-Left>'
-        let maps["Select Line Down"][0]         = '<C-S-Down>'
-        let maps["Select Line Up"][0]           = '<C-S-Up>'
-        let maps["Select E"][0]                 = '<M-C-Right>'
-        let maps["Select BBW"][0]               = '<M-C-Left>'
-    endif
-
-    if g:VM_no_meta_mappings
-        let maps['Remove Last Region'][0] = '<C-q>'
-        let maps['Add Cursor Down'][0]    = '<C-Down>'
-        let maps['Add Cursor Up'][0]      = '<C-Up>'
-        let maps['Visual Subtract'][0]    = '<C-s>'
-        let maps['Run Last Visual'][0]    = 'zV'
-        let maps['Add Cursor Down'][0]    = '<C-Down>'
-        let maps['Add Cursor Up'][0]      = '<C-Up>'
-        let maps['Move Right'][0]         = '<C-l>'
-        let maps['Move Left'][0]          = '<C-h>'
-    endif
 
     return maps
 endfun

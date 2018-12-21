@@ -196,10 +196,10 @@ endfun
 " Operations at cursors (yank, delete, change)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:back   = { c -> index(split('FTlbB0^{(', '\zs'), c[0]) >= 0    }
-let s:ia     = { c -> index(['i', 'a'], c) >= 0                      }
-let s:single = { c -> index(split('hlwebWEB$^0{}()', '\zs'), c) >= 0 }
-let s:double = { c -> index(split('fFtTg', '\zs'), c) >= 0           }
+let s:back   = { c -> index(split('FTlbB0nN^{(', '\zs'), c[0]) >= 0     }
+let s:ia     = { c -> index(['i', 'a'], c) >= 0                         }
+let s:single = { c -> index(split('hlwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
+let s:double = { c -> index(split('fFtTg', '\zs'), c) >= 0              }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -209,6 +209,10 @@ fun! s:reorder_cmd(M, r, n, op)
     let S = substitute(a:M, a:r, '', '')
     "what comes after operator
     let S = substitute(S, '^\d*'.a:op.'\(.*\)$', '\1', '')
+
+    if S ==? 'n' && empty(@/)
+      let @/ = s:v.oldsearch[0]
+    endif
 
     "count that comes after operator
     let x = match(S, '\d') >= 0? substitute(S, '\D', '', 'g') : 0
@@ -369,7 +373,7 @@ fun! vm#operators#process(op, M, reg, n)
         let reg = reg != s:v.def_reg? reg : "_"
 
         if C
-            normal s$
+            call vm#operators#select(1, 1, '$')
             call vm#commands#motion('^', 1, 0, 0)
             call s:V.Edit.delete(1, reg, 1, 0)
             call s:V.Insert.key('a')
@@ -380,7 +384,7 @@ fun! vm#operators#process(op, M, reg, n)
             call s:V.Insert.key('O')
 
         elseif S=='$'
-            call vm#operators#select(1, 1, 's$')
+            call vm#operators#select(1, 1, '$')
             call s:V.Edit.delete(1, reg, 1, 0)
             call s:V.Insert.key('a')
 

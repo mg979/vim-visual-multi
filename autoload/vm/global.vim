@@ -166,7 +166,7 @@ fun! s:Global.all_empty() dict
 
     for r in s:R()
         if r.a != r.b
-            if !s:X() | call self.change_mode() | endif
+            if !s:X() | let g:VM.extend_mode = 1 | endif
             return 0  | endif
     endfor
     return 1

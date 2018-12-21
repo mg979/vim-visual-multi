@@ -162,22 +162,19 @@ endfun
 " Insert numbers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit._numbers(start, stop, step, sep, app) dict
-    let a = str2nr(a:start) | let b = str2nr(a:stop) | let s = str2nr(a:step) | let x = a:sep | let text = []
+fun! s:Edit._numbers(start, step, sep, app) dict
+    let start = str2nr(a:start)
+    let step = str2nr(a:step)
 
-    "reverse order if start>stop
-    if b >= a
-        let r = range(b-a+1)
-        if a:app  | let text = map(r , '( x.string(a + v:key * s) )')
-        else      | let text = map(r , '( string(a + v:key * s).x )') | endif
-    else
-        let r = range(a-b+1)
-        if a:app  | let text = map(r , '( x.string(a - v:key * s) )')
-        else      | let text = map(r , '( string(a - v:key * s).x )') | endif
-    endif
-
-    "ensure there is enough text
-    if len(text) < len(s:R()) | let text += map(range(len(s:R()) - len(text)), '""') | endif
+    let text = []
+    for n in range(len(s:R()))
+      if a:app
+          let t = a:sep . string(start + step * n)
+      else
+          let t = string(start + step * n) . a:sep
+      endif
+      call add(text, t)
+    endfor
 
     if s:X() && a:app
         call self.fill_register('"', map(copy(s:R()), '(v:val.txt).text[v:key]'), 0)
@@ -192,45 +189,35 @@ endfun
 fun! s:Edit.numbers(start, app) dict
     let X = s:X() | if !X | call s:G.change_mode() | endif
 
-    let text = []
+    " fill the command line with [count]/default_step
+    let x = input('Expression > ', a:start . '/1')
 
-    let l:Invalid = { -> s:F.msg('Invalid expression', 1) }
-    let l:N =       { x -> match(x, '\D')<0? 1 : 0 }
+    if empty(x) | return s:F.msg('Canceled', 1) | endif
 
-    let S = a:start
-    let x = S.'/'.( S-1+len(s:R()) ).'/1/'
-    let x = input('Expression > ', x)
+    "first char must be a digit or a negative sign
+    if match(x, '^\d') < 0 && match(x, '^\-') < 0
+        return s:F.msg('Invalid expression', 1)
+    endif
 
-    "first char must be a digit
-    if match(x, '^\d') < 0 | call l:Invalid() | return | endif
-
-    "match an expression separator
-    let char = match(x, '\D')
-    if char < 0  | let x = [x]
-    else         | let x = split(x, x[char]) | endif
-
+    "evaluate terms of the expression
+    let x = split(x, '/', 1)
+    if empty(x[len(x) - 1])
+        let x[len(x) - 1] = '/'
+    endif
     let n = len(x)
 
-    "invalid expressions
-    if ( n == 3 && !l:N(x[1]) ) ||
-      \( n == 4 && (!l:N(x[1])  || !l:N(x[2])) ) ||
-      \( n >  4 )
-        call l:Invalid() | return | endif
+    " true for a number, not for a separator
+    let l:Num = { x -> match(x, '^\d') >= 0 || match(x, '^\-\d') >= 0 }
 
-    "                                         start    stop     step   separ.   append?
-    if     n == 1        | call self._numbers(S,     S-1+x[0],   1,     '',     a:app)
+    "------------------------------------------- start  step   separ.   append?
+    if     n == 1        | call self._numbers (  x[0],   1,     '',     a:app  )
 
     elseif n == 2
 
-        if l:N(x[1])     | call self._numbers(S,     S-1+x[0],   x[1],  '',     a:app)
-        else             | call self._numbers(S,     S-1+x[0],   1,     x[1],   a:app) | endif
+        if l:Num(x[1])   | call self._numbers (  x[0],   x[1],  '',     a:app  )
+        else             | call self._numbers (  x[0],   1,     x[1],   a:app  ) | endif
 
-    elseif n == 3
-
-        if l:N(x[2])     | call self._numbers(x[0],  x[1],       x[2],  '',     a:app)
-        else             | call self._numbers(S,     S-1+x[0],   x[1],  x[2],   a:app) | endif
-
-    elseif n == 4        | call self._numbers(x[0],  x[1],       x[2],  x[3],   a:app) | endif
+    elseif n == 3        | call self._numbers (  x[0],   x[1],  x[2],   a:app  ) | endif
 
     "if started in cursor mode, return to it
     if !X && a:app | exe "normal o" | call s:G.change_mode()

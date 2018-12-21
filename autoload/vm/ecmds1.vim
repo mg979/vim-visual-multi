@@ -148,6 +148,11 @@ fun! s:Edit.replace() dict
         let char = nr2char(getchar())
         if char ==? "\<esc>" | return | endif
 
+        if s:v.multiline
+          call s:F.toggle_option('multiline')
+          call s:G.remove_empty_lines()
+        endif
+
         let s:v.W = self.store_widths() | let s:v.new_text = []
 
         for i in range(len(s:v.W))
@@ -313,5 +318,13 @@ fun! s:Edit.fill_register(reg, text, hard) dict
         endif
     endif
     return [text, type]
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.replace_regions_with_text(text) dict
+  """Paste a custom list of strings into current regions.
+  call self.fill_register('"', a:text, 0)
+  normal p
 endfun
 
