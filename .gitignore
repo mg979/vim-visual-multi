@@ -2,5 +2,7 @@
 .TODO
 tags
 doc/tags
-test
 *.sw*
+generated_output_file.txt
+test.log
+__pycache__

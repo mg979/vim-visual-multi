@@ -1,0 +1,18 @@
+language: python
+python: "3.6"
+#------------------------------
+# install vim from source
+#------------------------------
+before_install:
+  - curl https://raw.githubusercontent.com/kana/vim-version-manager/master/bin/vvm | python2 - setup; true
+  - source ~/.vvm/etc/login
+  - vvm update_itself
+  - vvm use vimorg--v8.0.1529 --install --with-features=huge
+#------------------------------
+install: pip install -r test/requirements.txt
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+script:
+  - cd test
+  - python3 test.py
