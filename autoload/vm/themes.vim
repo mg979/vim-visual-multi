@@ -1,7 +1,7 @@
 let s:Themes = {}
 
 fun! vm#themes#init()
-  if !v:vim_did_enter | return | endif
+  if !exists('g:VM') | return | endif
   let default = &background == 'light' ? 'lightblue1' : 'blue1'
   let theme = get(g:, 'VM_theme', 'default')
 

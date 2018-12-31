@@ -11,8 +11,6 @@ fun! vm#operators#init()
 
     let s:v.finding    = 0
     let s:correct_word = 0
-    let s:R            = { -> s:V.Regions      }
-    let s:X            = { -> g:VM.extend_mode }
 endfun
 
 fun! s:init()
@@ -40,19 +38,16 @@ fun! vm#operators#select(all, count, ...)
     let s = ''                     | let n = ''
     let x = a:count>1? a:count : 1 | echo "Selecting: ".(x>1? x : '')
 
-    let l:Single = { c -> index(split('webWEB$0^hjkl(){}', '\zs'), c) >= 0 }
-    let l:Double = { c -> index(split('iaftFTg', '\zs'), c) >= 0           }
-
     while 1
         let c = nr2char(getchar())
         if c == "\<esc>"                 | let abort = 1 | break
 
         elseif str2nr(c) > 0             | let n .= c    | echon c
 
-        elseif l:Single(c)               | let s .= c    | echon c
+        elseif s:single(c)               | let s .= c    | echon c
             break
 
-        elseif l:Double(c) || len(s)
+        elseif s:double(c) || len(s)
             let s .= c                   | echon c
             if len(s) > 1                | break          | endif
 
@@ -194,13 +189,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Operations at cursors (yank, delete, change)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-let s:back   = { c -> index(split('FTlbB0nN^{(', '\zs'), c[0]) >= 0     }
-let s:ia     = { c -> index(['i', 'a'], c) >= 0                         }
-let s:single = { c -> index(split('hlwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
-let s:double = { c -> index(split('fFtTg', '\zs'), c) >= 0              }
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:reorder_cmd(M, r, n, op)
@@ -394,5 +382,43 @@ fun! vm#operators#process(op, M, reg, n)
             call feedkeys("\"".reg.'c')
         endif
     endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Helpers
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+if v:version >= 800
+    let s:R      = { -> s:V.Regions                                           }
+    let s:X      = { -> g:VM.extend_mode                                      }
+    let s:back   = { c -> index(split('FTlhbB0nN^{(', '\zs'), c[0]) >= 0      }
+    let s:ia     = { c -> index(['i', 'a'], c) >= 0                           }
+    let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
+    let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
+  finish
+endif
+
+fun! s:back(c)
+  return index(split('FTlhbB0nN^{(', '\zs'), a:c[0]) >= 0
+endfun
+
+fun! s:ia(c)
+  return index(['i', 'a'], a:c) >= 0
+endfun
+
+fun! s:single(c)
+  return index(split('hljkwebWEB$^0{}()%nN', '\zs'), a:c) >= 0
+endfun
+
+fun! s:double(c)
+  return index(split('iafFtTg', '\zs'), a:c) >= 0
+endfun
+
+fun! s:R()
+  return s:V.Regions
+endfun
+
+fun! s:X()
+  return g:VM.extend_mode
 endfun
 
