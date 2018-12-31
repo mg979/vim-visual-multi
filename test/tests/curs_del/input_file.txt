@@ -1,0 +1,9 @@
+if v:version >= 800
+    let s:R      = { -> s:V.Regions                                           }
+    let s:X      = { -> g:VM.extend_mode                                      }
+    let s:back   = { c -> index(split('FTlhbB0nN^{(', '\zs'), c[0]) >= 0      }
+    let s:ia     = { c -> index(['i', 'a'], c) >= 0                           }
+    let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
+    let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
+  finish
+endif

@@ -8,3 +8,4 @@ endfunction
 
 set runtimepath^=..
 set nocompatible
+let g:VM_leader = ','

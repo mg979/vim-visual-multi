@@ -1,0 +1,11 @@
+# dot test
+keys('\<C-n>\<C-n>\<C-n>\<C-n>')
+keys('c')
+keys('changed_word')
+keys('\<Esc>\<Esc>ggA')
+keys('\<Tab>')
+keys('text')
+keys('\<Esc>')
+keys('0j\<C-Down>\<C-Down>')
+keys('.')
+keys('\<Esc>')

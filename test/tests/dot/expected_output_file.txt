@@ -1,0 +1,4 @@
+changed_word word	text
+word changed_word	text
+changed_word word	text
+word changed_word	text

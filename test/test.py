@@ -27,6 +27,7 @@ def print_banner(string, f=None):
 ++ %s
 ++--------------------------------------------------------------""" % string, f)
 
+
 def get_vimrc(test, f):
     """Check if test-specific vimrc is present, or use default one."""
     try:
@@ -36,6 +37,41 @@ def get_vimrc(test, f):
         vimrc, output = DEFAULT_VIMRC, "using default vimrc"
     log(output, f)
     return vimrc
+
+
+def get_test_description(test):
+    """Get test description if present."""
+    commands = Path('tests/', test, 'commands.py').resolve(strict=True)
+    with open(commands) as file:
+        desc = file.readline()
+    if desc[0] == '#':
+        return (1, desc[2:-1] )
+    else:
+        return (0, '')
+
+
+def log_test_info(test, f, nvim):
+    """Log test banner and description if present."""
+    # banner
+    log('\n//' + '-' * 38, f)
+    log("// ./test.py " + ("", "-n ")[nvim] + test, f)
+    log('//' + '-' * 38 + '\n', f)
+    # test info
+    desc = get_test_description(test)
+    if desc[0]:
+        log("reproduce: " + desc[1], f)
+    else:
+        log("reproduce: ./test.py " + ("", "-n ")[nvim] + test, f)
+
+
+def print_tests_list(tests, f):
+    """Print the list of available tests, with their descriptions."""
+    log("\n" + '-' * 60)
+    for t in tests:
+        desc = get_test_description(t)[1]
+        log(t.ljust(20) + "\t" + desc)
+    log('-' * 60)
+
 
 def get_paths(test, f):
     """Create the dictionary with the relevant file paths."""
@@ -47,6 +83,7 @@ def get_paths(test, f):
     paths["gen_out_file"] = Path('tests/', test, 'generated_output_file.txt').resolve()
     paths["socket"] = Path('socket_' + test).resolve()
     return paths
+
 
 def run_core(paths, nvim=False):
     """Start the test."""
@@ -80,9 +117,8 @@ def run_core(paths, nvim=False):
 
 def run_one_test(test, f=None, nvim=False):
     """Run a single test."""
-    log("++ " + test, f)
-    log("reproduce: ./test.py " + ("", "-n ")[nvim] + test, f)
     # input/output files
+    log_test_info(test, f, nvim)
     paths = get_paths(test, f)
     # remove previously generated file
     if os.path.exists(paths["gen_out_file"]):
@@ -116,16 +152,14 @@ def main():
     # execution
     failing_tests = []
     f = open('test.log', 'w')
-    tests = [PurePath(str(p)).name for p in Path('tests').glob('*')]
+    tests = sorted([PurePath(str(p)).name for p in Path('tests').glob('*')])
     if args.list:
-        log("\n".join(tests), f)
+        print_tests_list(tests, f)
     else:
-        if args.test is not None:
-            run_one_test(args.test, f, args.nvim)
-        else:
-            for t in tests:
-                if run_one_test(t, f, args.nvim) is not True:
-                    failing_tests.append(t)
+        tests = tests if args.test is None else [args.test]
+        for t in tests:
+            if run_one_test(t, f, args.nvim) is not True:
+                failing_tests.append(t)
         if failing_tests == []:
             print_banner("summary: SUCCESS", f)
         else:
