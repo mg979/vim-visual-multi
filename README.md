@@ -48,7 +48,7 @@ Alternate cursor/extend mode, motions (even %), reverse direction (as in visual 
 ![Imgur](https://i.imgur.com/MWR9DqL.gif)
 
 -------
-Indipendent anchoring
+Independent anchoring
 
 ![Imgur](https://i.imgur.com/kN3BYjU.gif)
 
