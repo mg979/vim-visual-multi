@@ -1,8 +1,10 @@
 ### [Wiki](https://github.com/mg979/vim-visual-multi/wiki)
-Work in progress. Most functionalities shold work as expected and described in the documentation.  
+Work in progress. Most functionalities should work as expected and described in the documentation.  
 Testers are welcome. Please consider that the wiki reflects more the feature of the test branch, rather than master. If you use master branch and something doesn't work as expected, please try the test branch.
 
-Also check the [latest changes](https://github.com/mg979/vim-visual-multi/wiki/Latest-changes) in the wiki to know about new features, when they're added.
+Be sure to read at least the [Quick Start](https://github.com/mg979/vim-visual-multi/wiki/Quick-start).
+Also check the [latest changes](https://github.com/mg979/vim-visual-multi/wiki/Latest-changes)
+in the wiki to know about new features, when they're added.
 
 -------
 Some random pics:
@@ -48,7 +50,7 @@ Alternate cursor/extend mode, motions (even %), reverse direction (as in visual 
 ![Imgur](https://i.imgur.com/MWR9DqL.gif)
 
 -------
-Indipendent anchoring
+Independent anchoring
 
 ![Imgur](https://i.imgur.com/kN3BYjU.gif)
 

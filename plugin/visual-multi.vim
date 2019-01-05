@@ -28,7 +28,7 @@ fun! <SID>VM_Init()
     let g:VM.last_ex          = ''
     let g:VM.last_normal      = ''
     let g:VM.last_visual      = ''
-    let g:VM.oldupdate        = has('nvim')? 0 : &updatetime
+    let g:VM.oldupdate        = exists("#TextYankPost") || has('nvim') ? 0 : &updatetime
 
     let g:VM_live_editing                     = get(g:, 'VM_live_editing', 1)
     let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
@@ -99,7 +99,7 @@ augroup plugin-visual-multi-start
     au!
     au VimEnter     * call <SID>VM_Init()
     au ColorScheme  * call vm#themes#init()
-    if has('nvim')
+    if exists("#TextYankPost") || has('nvim')
         au TextYankPost * call vm#operators#after_yank()
     else
         au CursorMoved  * call vm#operators#after_yank()

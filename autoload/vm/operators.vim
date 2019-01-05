@@ -24,7 +24,7 @@ fun! vm#operators#select(all, count, ...)
 
     if !a:all
         let g:VM.selecting = 1
-        if g:VM.oldupdate      | let &updatetime = 10   | endif
+        call s:updatetime()
         silent! nunmap <buffer> y
         return
     endif
@@ -65,8 +65,7 @@ endfun
 
 fun! s:select(cmd)
 
-    if g:VM.oldupdate | let &updatetime = 10 | endif
-
+    call s:updatetime()
     call s:V.Edit.before_macro(1)
 
     silent! nunmap <buffer> y
@@ -91,8 +90,8 @@ fun! s:select(cmd)
 
     nmap <silent> <nowait> <buffer> y               <Plug>(VM-Yank)
 
-    if empty(s:v.search) | let @/ = ''                      | endif
-    if g:VM.oldupdate    | let &updatetime = g:VM.oldupdate | endif
+    if empty(s:v.search) | let @/ = '' | endif
+    call s:updatetime()
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -131,8 +130,9 @@ fun! vm#operators#find(start, visual, ...)
             else           | call s:Search.get() | endif
         endif
 
-        if g:VM.oldupdate      | let &updatetime = 10   | endif
-        let s:v.finding = 1    | let g:VM.selecting = 1
+        call s:updatetime()
+        let s:v.finding = 1
+        let g:VM.selecting = 1
         silent! nunmap <buffer> y
         return 'y'
     endif
@@ -182,7 +182,7 @@ fun! vm#operators#after_yank()
             call s:G.check_mutliline(0, R)
         endif
 
-        if g:VM.oldupdate | let &updatetime = g:VM.oldupdate | endif
+        call s:updatetime()
         nmap <silent> <nowait> <buffer> y <Plug>(VM-Yank)
     endif
 endfun
@@ -387,6 +387,13 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Helpers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:updatetime()
+    """Restore &updatetime if not using TextYankPost.
+    if g:VM.oldupdate
+        let &updatetime = 10
+    endif
+endfun
 
 if v:version >= 800
     let s:R      = { -> s:V.Regions                                           }

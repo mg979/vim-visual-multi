@@ -133,8 +133,8 @@ fun! vm#maps#all#buffer()
                 \"Visual Hash":             ['#',         'x', 1, 1],
                 \"Merge To Eol":            ['<S-End>',   'n', 1, 1],
                 \"Merge To Bol":            ['<S-Home>',  'n', 1, 1],
-                \"Select All Operator":     ['s',         "n", 1, 0],
-                \"Find Operator":           ["m",         'n', 1, 1],
+                \"Select All Operator":     ['s',         'n', 1, 0],
+                \"Find Operator":           ['m',         'n', 1, 1],
                 \"Add Cursor Down":         ['<C-Down>',  'n', 1, 1],
                 \"Add Cursor Up":           ['<C-Up>',    'n', 1, 1],
                 \})
