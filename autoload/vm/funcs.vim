@@ -254,7 +254,7 @@ fun! s:Funcs.count_msg(force, ...) dict
     let t = g:VM.extend_mode? ' region' : ' cursor'
     let R = [len(s:R()).t.s, hl]
     let s1 = ['   Current patterns: ', hl]
-    let s2 = [self.pad(string(s:v.search), 120), H1]
+    let s2 = [self.pad(string(s:v.search), &columns - 1), H1]
     let msg = [i1, m1, i2, m2, i3, m3, i4, m4, ix, R, s1, s2]
     if a:0 | call insert(msg, a:1, 9) | endif | call self.msg(msg, a:force)
 endfun
@@ -291,17 +291,18 @@ fun! s:Funcs.toggle_option(option, ...) dict
 
         if s:v.whole_word
             if s[:1] != '\<' | let s:v.search[0] = '\<'.s.'\>' | endif
-            let pats = self.pad(string(s:v.search), 120)
+            let pats = self.pad(string(s:v.search), &columns - 1)
             call self.msg([
                         \['Search ->'               , wm], ['    whole word  ', L],
                         \['  ->  Current patterns: ', wm], [pats              , L]], 1)
         else
             if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
-            let pats = self.pad(string(s:v.search), 120)
+            let pats = self.pad(string(s:v.search), &columns - 1)
             call self.msg([
                         \['Search ->'              , wm], ['  not whole word ', L],
                         \[' ->  Current patterns: ', wm], [pats               , L]], 1)
         endif
+        call s:V.Search.apply()
         return
     endif
 
@@ -325,13 +326,15 @@ fun! s:Funcs.show_registers() dict
     endfor
 endfun
 
-function! s:Funcs.pad(t, n)
+function! s:Funcs.pad(t, n, ...)
     if len(a:t) > a:n
         return a:t[:(a:n-3)]."… "
-    else
+    elseif a:0
         let spaces = a:n - len(a:t)
         let spaces = printf("%".spaces."s", "")
         return a:t.spaces
+    else
+        return a:t
     endif
 endfunction
 
@@ -361,10 +364,12 @@ fun! s:Funcs.region_txt(r) dict
     let line = substitute(r.txt, '\V\n', '^M', 'g')
     if len(line) > 80 | let line = line[:80] . '…' | endif
 
-    echohl Directory  | echo  index."\t".r.id."\t".r.A."\t".r.B."\t".r.w."\t"
-                \.self.pad(r.l." / ".r.L, 14).self.pad("\t".r.a." / ".r.b, 14)."\t"
+    echohl Directory
+    echo index."\t".r.id."\t".r.A."\t".r.B."\t".r.w."\t"
+                \.self.pad(r.l." / ".r.L, 14, 1)
+                \.self.pad("\t".r.a." / ".r.b, 14, 1)."\t"
 
-    echohl Type       | echon self.pad(r.pat, 18)
+    echohl Type       | echon self.pad(r.pat, 18, 1)
     echohl None       | echon "\t".line
     echohl None
 endfun

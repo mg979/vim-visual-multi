@@ -169,8 +169,9 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.apply(s) dict
-    let s:v.search = a:s
+fun! s:Search.apply(...) dict
+    """Apply current patterns, optionally replacing them.
+    if a:0 | let s:v.search = a:1 | endif
     let @/ = join(s:v.search, '\|')
 endfun
 

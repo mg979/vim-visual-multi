@@ -140,7 +140,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:Pad = { t, n -> b:VM_Selection.Funcs.pad(t, n) }
+let s:Pad = { t, n -> b:VM_Selection.Funcs.pad(t, n, 1) }
 let s:Sep = { c    -> b:VM_Selection.Funcs.repeat_char(c) }
 
 fun! s:Txt(i, m)
