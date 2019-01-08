@@ -101,7 +101,8 @@ def run_core(paths, nvim=False):
         client.command('e %s' % paths["in_file"])
         keys = client.input
         for line in open(paths["command"]):
-            exec(line)
+            l = line.replace('\<', '<')
+            exec(l)
             time.sleep(0.5)
         client.command(':w! %s' % paths["gen_out_file"])
         client.quit()
