@@ -8,37 +8,45 @@ You may need to run `:helptags` if your plugin manager doesn't do it
 
 `:help helptags`
 
-### [Wiki](https://github.com/mg979/vim-visual-multi/wiki)
-Work in progress. Most functionalities should work as expected and described in the documentation.  
-Testers are welcome. Please consider that the wiki reflects more the feature of the test branch, rather than master. If you use master branch and something doesn't work as expected, please try the test branch.
+### Tutorial
 
+To run the tutorial:
+
+    vim -Nu path/to/visual-multi/tutorialrc
+
+
+### [Wiki](https://github.com/mg979/vim-visual-multi/wiki)
 Be sure to read at least the [Quick Start](https://github.com/mg979/vim-visual-multi/wiki/Quick-start).
 Also check the [latest changes](https://github.com/mg979/vim-visual-multi/wiki/Latest-changes)
 in the wiki to know about new features, when they're added.
 
 -------
-Some random pics:
+Some (very old) random pics:
 
 -------
-Insert mode with autocomplete, alignment
+Insert mode with autocomplete, alignment (mappings in pic have changed, don't trust them)
 
 ![Imgur](https://i.imgur.com/u5pPY5W.gif)
+
+-------
+Undo/Redo edits and selections
+
+![Imgur](https://i.imgur.com/gwFfUxq.gif)
+
+-------
+Alternate cursor/extend mode, motions (even %), reverse direction (as in visual mode) and extend from the back. At any time you can switch from extend to cursor mode and viceversa.
+
+![Imgur](https://i.imgur.com/ggQr1Ve.gif)
+
+-------
+Select inside/around brackets/quotes/etc:
+
+![Imgur](https://i.imgur.com/GAXQLao.gif)
 
 -------
 Select operator, here shown with 'wellle/targets.vim' plugin: sib, sia, saa + selection shift
 
 ![Imgur](https://i.imgur.com/yM3Fele.gif)
-
--------
-Undo/Redo edits and selections
-
-![Imgur](https://i.imgur.com/ZBWrTn4.gif)
-
-
--------
-Add numbering with expression
-
-![Imgur](https://i.imgur.com/K3MDnVH.gif)
 
 -------
 Synched column transposition
@@ -56,24 +64,14 @@ Shift regions left and right (M-S-\<\>)
 ![Imgur](https://i.imgur.com/Q7EF8YI.gif)
 
 -------
-Select inside/around brackets/quotes/etc:
-
-![Imgur](https://i.imgur.com/Nn9d0NS.gif)
-
--------
-Alternate cursor/extend mode, motions (even %), reverse direction (as in visual mode) and extend from the back. At any time you can switch from extend to cursor mode and viceversa.
-
-![Imgur](https://i.imgur.com/MWR9DqL.gif)
-
--------
 Independent anchoring
 
 ![Imgur](https://i.imgur.com/kN3BYjU.gif)
 
 ------
-Find words under cursor, add new words (patterns stack), navigate regions, skip them, add regions with regex(works with cursors too).
+Find words under cursor, add new words (patterns stack), navigate regions, skip them, add regions with regex.
 
-![Imgur](https://i.imgur.com/8MmJbD0.gif)
+![Imgur](https://i.imgur.com/zWtelNO.gif)
 
 -------
 Normal/Visual/Ex commands at cursors
@@ -89,11 +87,6 @@ Macros. Shorter lines are skipped when adding cursors above/below.
 Some editing functions: yank, delete, paste from register, paste block from yanked regions
 
 ![Imgur](https://i.imgur.com/0jRkVdp.gif)
-
--------
-Alignment (mappings in pic have changed, don't trust them)
-
-![Imgur](https://i.imgur.com/y4mR7Vt.gif)
 
 ----------------------------------------
 

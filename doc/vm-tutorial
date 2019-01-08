@@ -1,0 +1,258 @@
+===================================================================================
+        _                      _                  __                       ____  _~
+ _   __(_)___ ___       _   __(_)______  ______ _/ /     ____ ___  __  __ / / /_(_)~
+| | / / / __ `__ \_____| | / / / ___/ / / / __ `/ /_____/ __ `__ \/ / / // / __/ /~
+| |/ / / / / / / /_____/ |/ / (__  ) /_/ / /_/ / /_____/ / / / / / /_/ // / /_/ / ~
+|___/_/_/ /_/ /_/      |___/_/____/\__,_/\__,_/_/     /_/ /_/ /_/\__,_//_/\__/_/  ~
+
+===================================================================================
+                       _____      _             _       _~
+                      |_   _|   _| |_ ___  _ __(_) __ _| |~
+                        | || | | | __/ _ \| '__| |/ _` | |~
+                        | || |_| | || (_) | |  | | (_| | |~
+                        |_| \__,_|\__\___/|_|  |_|\__,_|_|~
+
+===================================================================================
+
+Hi and thanks for trying this plugin. Let's start!
+
+First and foremost, this mini vimrc will use the following non-default settings, so
+if you try the plugin with your vimrc, and something doesn't work, this could be the
+reason. These settings enable a theme, the mouse mappings, and the Undo/Redo
+functionality.
+>
+    let g:VM_mouse_mappings    = 1
+    let g:VM_theme             = 'iceblue'
+
+    let g:VM_maps = {}
+    let g:VM_maps["Undo"]      = 'u'
+    let g:VM_maps["Redo"]      = '<C-r>'
+<
+Also note that I'm using the default g:VM_leader, that is '\\' (two backslashes).
+Where you see two backslashes being used, that should be replaced if you're setting
+a different g:VM_leader in your vimrc.
+
+
+Create cursors ~
+------------------------------------------------------------------------------------
+
+I'll reuse the block above for the first test.
+
+    let g:VM_mouse_mappings             = 1
+    let g:VM_theme                      = 'iceblue'
+    let g:VM_highlight_matches          = 'underline'
+
+    let g:VM_maps = {}
+    let g:VM_maps["Undo"]      = 'u'
+    let g:VM_maps["Redo"]      = '<C-r>'
+
+Move the cursor to the first 'let' word, on the first letter. Press `mm`, to set a
+mark, since you'll go back there more than once.
+
+Now press 5 times <C-Down>: you see that you've created cursors vertically, skipping
+the empty line. Press <Esc> to exit VM, then `m to go back to the mark.
+
+Press 5<C-Down>: see what happened? [count] works just the same.
+
+You are now in `cursor mode`: you have a bunch of cursors and the commands you issue
+will be run as if you were in normal mode.
+
+What can you do with these cursors?
+
+- you can move them: press wwbb, then WWBB to get an idea.
+- you can issue VM specific commands that you'll learn later.
+- you can issue normal mode commands: press `dw`, then `cW`, and start editing.
+- you can also enter insert mode with i, a, I, A
+
+
+
+Extend selections ~
+------------------------------------------------------------------------------------
+
+Quit VM, undo changes if you made any, press `m, and 5<C-Down>.
+
+Now press <Tab>: what happened? You switched to `extend mode`: you can think of it
+as the 'visual' mode in VM. You are not working with cursors anymore, you are
+working with selections. As in visual mode, you can extend these selections with
+motions, and pressing 'c' will delete their content, and start editing.
+
+Note: vim registers will be restored after exiting VM. Inside VM, `change/x` commands
+are redirected to the black hole register (`_`), differently from vim.
+
+
+
+Select words ~
+------------------------------------------------------------------------------------
+
+Quit VM, undo changes, move below and set a new mark in the same way.
+
+    let g:VM_moLET_mappings = 1
+    Let g:VM_theme = 'iceblue'
+    lEt g:VM_highlight_matches = 'underline'
+
+    Let g:VM_maps = {}
+    let g:VM_maps["Undo"]      = 'u'
+    let g:VM_maps["Redo"]      = '<C-r>'
+
+Now press <C-n>: this is the default mapping to select words under the cursor. If
+your search settings are set to 'smartcase', you'll see that all following 'let'
+words are underlined, and will be selected if you keep pressing <C-n>.
+
+Quit VM and move to the second line.
+
+Press <C-n>: if smartcase is active, only one other match will be underlined.
+Press `\\c`: this allows you to cycle the case setting of the current pattern. Press
+it until it becomes case insensitive.
+Press <C-s>: the current match will be skipped. Alternate <C-n> and <C-s>.
+
+<C-n> selects words with word boundaries. What if you want to select a part of a
+word? You have three options. Go back with `m after every attempt:
+
+1. press 'vl', then <C-n>. You started VM from visual mode.
+2. press <S-Right>: you started VM by creating a selection, one character at a time.
+3. press <C-n>, then `\\w`: you selected a word, then converted its pattern to one
+   that doesn't check for word boundaries.
+
+Let's focus on the second option, since it's probably the easiest.  So you press
+<S-Right> once and select the first two letters. How do you select the next
+occurrence? <C-n> is an obvious choice: it will create a pattern from those letters,
+and will select the next occurrence.
+
+But you can also use `]` and `[`: select again the first two letters with <S-Right>,
+then press `]]]`. You can also skip a pattern with `q`. Try it. Add a pattern with
+`]`, skip one with `q`, go back with `[`, skip again with `q`.
+
+The keys `]` and `[` stand for `find next/previous`, they don't add new patterns,
+unless there is none set yet: since <S-Right> doesn't add a pattern, `]` and `[`
+will do it.
+
+Now press `Q`: you didn't skip a selection moving to the next one: you removed it.
+Note that you can also remove cursors with `Q`, not only selections.
+
+
+
+Some commands ~
+------------------------------------------------------------------------------------
+
+Set a new mark here below and let's learn some more useful commands.
+
+    let g:VM_mouse_mappings = 1               " some text
+    let g:VM_theme = 'iceblue'                " some text
+    let g:VM_highlight_matches = 'underline'  " some text
+
+    let g:VM_maps = {}                        " some text
+    let g:VM_maps["Undo"]       = 'u'         " some text
+    let g:VM_maps["Redo"]       = '<C-r>'     " some text
+
+
+Alignment ~
+
+Press `v2ap`, then `\\c`: from visual mode you created a column of cursors.
+Press `f=`: all cursors will move to the `=` character.
+Press `\\a`: all cursors will be aligned.
+
+Tip: make a macro or paste this in your command line, then execute the macro:
+>
+  let @q = '`mv6j\\c'
+
+Let's do it differently: undo changes, move on top, type `v6j\\c`, then press
+`\\<`, and you'll be asked for a character to align.
+
+If you press `=` you'll align equal signs as before. Press `'` instead: you'll see
+that where it can't find the apostrophe, no alignment is performed, and the cursor
+is removed.
+
+Anyway you'll see that the `"` column is now misaligned. You can do `f"\\a`.
+Undo changes and press again `v6j\\c.`
+
+This time try `2\\<="`. You're saying: align two characters, that are = and ".
+You can then press `12X` to reduce that empty space.
+
+Note: the two characters could have been the same (as in 2\\<==).
+Note: you can also align with regex, using `\\>` instead of `\\<`.
+
+
+Dot ~
+
+Pressing the dot (.) can be a very fast way to apply a change at cursors.
+
+1. Press `o` right here, start inserting some text, then exit insert mode
+2. Undo the change, then press `m to go back
+3. Press 5<C-Down>
+4. Finally press `.`
+
+Now try this, after having undone the last changes:
+
+1. Go back with `m, and press 5<C-Down>
+2. Press `dw`, then `.` several times
+
+You see that also this kind of operation at cursors is repeatable.
+Just don't expect *everything* to be repeatable, though!
+
+
+Replace in regions, Select Operator ~
+
+Say you want to remove underscores from the quoted text below. 
+Move to the start of the block, then:
+
+1. Press `f"l` to go inside the quotes
+2. Press `3<C-Down>` to create cursors
+3. Press `<C-n>` to select words
+4. Press `R`: this is the command to replace a pattern in each region.
+5. Enter `_`, then a single space as replacement.
+>
+    param_table.AddNumber("num_control_buffers", options_.num_control_buffers);
+    param_table.AddNumber("control_buffer_size", options_.control_buffer_size);
+    param_table.AddNumber("num_payload_buffers", options_.num_payload_buffers);
+    param_table.AddNumber("payload_buffer_size", options_.payload_buffer_size);
+
+You can also do the opposite: we'll use the `select operator` to do that.
+Go again to the start of the block, then:
+
+1. Press `3<C-Down>` to create cursors
+2. Press `f"` to go to the quotes
+3. Press `si"` to select inside the quotes
+4. Press `R`, then a single space followed by <Return>
+5. Enter `_` as replacement, and again <Return>
+>
+    param_table.AddNumber("num control buffers", options_.num_control_buffers);
+    param_table.AddNumber("control buffer size", options_.control_buffer_size);
+    param_table.AddNumber("num payload buffers", options_.num_payload_buffers);
+    param_table.AddNumber("payload buffer size", options_.payload_buffer_size);
+
+
+Some experiments ~
+------------------------------------------------------------------------------------
+>
+    let g:VM_mouse_mappings = 1               " some text
+    let g:VM_theme = 'iceblue'                  " some text
+    let g:VM_highlight_matches = 'underline'   " some text
+
+    let g:VM_maps = {}                         " some text
+    let g:VM_maps["Select l"] = '<S-Right>'   " some text
+    let g:VM_maps["Select h"] = '<S-Left>'      " some text
+
+You could try some of the following, after setting a new mark and creating a
+column of cursors with 5<C-Down>. Do the following in a single VM session:
+
+1. `~` (toggle case for character under cursors)
+2. `r`<char> (replace character under cursors)
+3. <C-n> to select words under current cursors, then repeat `~` and `r`<char>
+4. press `\\n`, then enter `,`<Space><CR> in the prompt (numbering with separator)
+5. now press <Tab>`dWWP`, then `A`<Space><C-v>
+6. exit insert mode, then press `0`, then <C-a>, then <C-x>
+7. still in VM, press `u` until you can, do the same with <C-r>, then again `u`
+
+About <C-v> in insert mode: it's a special VM command that will paste the content of
+the unnamed VM register, if this has been filled with something.
+If you pressed <C-r>{register}, this would still work, but the pasted content would
+be the same for all cursors, since it would use vim (and not VM) registers.
+
+About undo/redo, you can see that you are limited to the changes you did inside VM,
+and that your selections were restored as well: you can't undo changes that were
+done before entering VM. This will only work if you enable the undo/redo mappings,
+and they are disabled by default.
+
+
+
+ vim: ft=help tw=84 cole=2

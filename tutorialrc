@@ -1,0 +1,46 @@
+set runtimepath=$VIMRUNTIME
+cd `=expand('<sfile>:p:h')`
+set runtimepath^=.
+silent! set packpath=
+
+syntax enable
+set noswapfile
+
+if $COLORTERM == ( 'truecolor' || 'gnome-terminal' || 'rxvt-xpm' )
+  set t_Co=256
+endif
+
+if has('gui_running')
+  colorscheme desert
+else
+  colorscheme industry
+  hi Search ctermbg=236 ctermfg=12
+  hi PreProc ctermfg=174
+  hi Special ctermfg=223
+  hi ColorColumn ctermbg=236
+  hi Tabline cterm=NONE
+  hi! link StatusLine Tabline
+endif
+if has('patch-8.0.0616') || has('nvim')
+  hi Normal ctermbg=235
+endif
+set ttimeout timeoutlen=3000 ttimeoutlen=10
+silent e ./doc/vm-tutorial
+setf help
+set mouse=a
+set t_ut=
+set expandtab
+set laststatus=2
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" vim-visual-multi configuration {{{1
+
+let g:VM_mouse_mappings   = 1
+let g:VM_theme            = 'iceblue'
+
+let g:VM_maps = {}
+let g:VM_maps["Undo"]     = 'u'
+let g:VM_maps["Redo"]     = '<C-r>'
+
+
+" vim: ft=vim
