@@ -198,6 +198,8 @@ fun! vm#plugs#init()
     inoremap <expr> <Plug>(VM-I-CtrlW)            <sid>Insert('cw')
     inoremap <expr> <Plug>(VM-I-CtrlD)            <sid>Insert('x')
     inoremap <expr> <Plug>(VM-I-Del)              <sid>Insert('x')
+    inoremap <expr> <Plug>(VM-I-Home)             <sid>Insert('0')
+    inoremap <expr> <Plug>(VM-I-End)              <sid>Insert('$')
     inoremap <expr> <Plug>(VM-I-CtrlA)            <sid>Insert('^')
     inoremap <expr> <Plug>(VM-I-CtrlE)            <sid>Insert('$')
     inoremap <expr> <Plug>(VM-I-CtrlB)            <sid>Insert('h')
@@ -244,7 +246,7 @@ fun! s:Insert(key)
     elseif a:key ==? 'x'        "x/X
         "only join undo if there's been a change
         return "\<esc>".u.":call vm#icmds#x('".a:key."')\<cr>".i
-    elseif index(split('hlwbWBeE', '\zs'), a:key) >= 0
+    elseif index(split('hlwbWBeE0', '\zs'), a:key) >= 0
         return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
     elseif a:key ==? 'ge'
         return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i

@@ -229,6 +229,8 @@ fun! vm#maps#all#buffer()
                 \"I CtrlW":                 ['<C-w>',       'i', 1, 1],
                 \"I CtrlD":                 ['<C-d>',       'i', 1, 1],
                 \"I Del":                   ['<Del>',       'i', 1, 1],
+                \"I Home":                  ['<Home>',      'i', 1, 1],
+                \"I End":                   ['<End>',       'i', 1, 1],
                 \"I CtrlA":                 ['<C-a>',       'i', 1, 1],
                 \"I CtrlE":                 ['<C-e>',       'i', 1, 1],
                 \"I CtrlB":                 ['<C-b>',       'i', 1, 1],

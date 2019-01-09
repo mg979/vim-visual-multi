@@ -24,7 +24,7 @@ fun! vm#icmds#x(cmd)
     for r in s:R()
 
         call r.shift(s:change, s:change)
-        call cursor(r.l, r.a)
+        call s:F.Cursor(r.A)
 
         " we want to emulate the behaviour that <del> and <bs> have in insert
         " mode, but implemented as normal mode commands
