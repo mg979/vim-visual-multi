@@ -8,11 +8,11 @@ fun! vm#icmds#init()
     let s:G       = s:V.Global
     let s:F       = s:V.Funcs
 
-    let s:R         = {      -> s:V.Regions              }
-    let s:X         = {      -> g:VM.extend_mode         }
-    let s:size      = {      -> line2byte(line('$') + 1) }
-    let s:E         = { r    -> col([r.l, '$'])          }
-    let s:eol       = { r    -> r.a == (s:E(r) - 1)      }
+    let s:R         = {   -> s:V.Regions              }
+    let s:X         = {   -> g:VM.extend_mode         }
+    let s:size      = {   -> line2byte(line('$') + 1) }
+    let s:E         = { r -> col([r.l, '$'])          }
+    let s:eol       = { r -> r.a == (s:E(r) - 1)      }
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -24,70 +24,28 @@ fun! vm#icmds#x(cmd)
     for r in s:R()
 
         call r.shift(s:change, s:change)
+        call cursor(r.l, r.a)
 
-        if a:cmd ==# 'x' | let done = s:del(r)
-        else             | let done = 0         | endif
+        " we want to emulate the behaviour that <del> and <bs> have in insert
+        " mode, but implemented as normal mode commands
 
-        if !done
-            call cursor(r.l, r.a)
-            exe "normal! ".a:cmd
+        if a:cmd ==# 'x' && s:eol(r)        "at eol, join lines
+            normal! gJ
+        elseif a:cmd ==# 'x'                "normal delete
+            normal! x
+        elseif a:cmd ==# 'X' && r.a == 1    "at bol, go up and join lines
+            normal! kgJ
+            call r.shift(-1,-1)
+        else                                "normal backspace
+            normal! X
+            call r.shift(-1,-1)
         endif
 
         "update changed size
         let s:change = s:size() - size
-        if !has('nvim') | doautocmd CursorMoved
-        endif
     endfor
 
-    if a:cmd ==# 'X'
-        for r in s:R()
-            if r.a > 1 || s:E(r) > 1
-                call r.shift(-1,-1)
-            endif
-        endfor
-
-    else
-        for r in s:R()
-            if r.a > 1 && r.a == s:E(r)
-                call r.shift(-1,-1)
-            endif
-        endfor
-    endif
-
     call s:G.merge_regions()
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:del(r)
-    let r = a:r
-
-    "no adjustments
-    if !s:eol(r) | return | endif
-
-    "at eol, join lines and del 1 char
-    call cursor(r.l, r.a)
-    normal! Jhx
-
-    return 1
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:bs(r)
-    "UNUSED: for now
-    let r = a:r
-
-    "no adjustments
-    if !s:eol(r) | return | endif
-
-    "add an extra space and push cursor
-    call cursor(r.l, r.a)
-    normal! X
-    call s:V.Edit.extra_spaces.add(r)
-    call r.shift(1,1)
-
-    return 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
