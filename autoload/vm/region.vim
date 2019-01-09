@@ -143,13 +143,11 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.bytes(...) dict
-    """Update [l, L, a, b] from the new offsets.
-    "args: either new offsets A & B, or list [A shift, B shift]
+fun! s:Region.shift(x, y) dict
+    """Shift region offsets by integer values.
     let r = self
 
-    if a:0 > 1 | let r.A = a:1     | let r.B = a:2
-    elseif a:0 | let r.A += a:1[0] | let r.B += a:1[1] | endif
+    let r.A += a:x | let r.B += a:y
 
     let r.l = byte2line(r.A)
     let r.L = byte2line(r.B)

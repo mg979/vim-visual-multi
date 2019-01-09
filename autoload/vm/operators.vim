@@ -100,7 +100,7 @@ fun! s:check_word(R)
     """For cursor motions w/W, exclude the last char, except if at eol."""
     if s:correct_word
         if a:R.b != col([a:R.L, '$'])-1
-            call a:R.bytes([0, -1])
+            call a:R.shift(0, -1)
         endif
     endif
 endfun

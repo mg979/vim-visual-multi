@@ -182,7 +182,7 @@ fun! s:Edit._process(cmd, ...) dict
         "execute command, but also take special cases into account
         if a:0 && s:special(cmd, r, a:000)
         else
-            call r.bytes([s:change, s:change])
+            call r.shift(s:change, s:change)
             call cursor(r.l, r.a)
             exe cmd
         endif
@@ -205,7 +205,7 @@ fun! s:Edit.process_visual(cmd) dict
     let s:v.storepos = getpos('.')[1:2] | let s:v.eco = 1
 
     for r in s:R()
-        call r.bytes([change, change])
+        call r.shift(change, change)
         call cursor(r.L, r.b) | normal! m`
         call cursor(r.l, r.a) | normal! v``
         exe "normal ".a:cmd
@@ -234,7 +234,7 @@ fun! s:Edit.post_process(reselect, ...) dict
     if a:reselect
         if !s:X() | call s:G.change_mode() | endif
         for r in s:R()
-            call r.bytes([a:1, a:1 + s:v.W[r.index]])
+            call r.shift(a:1, a:1 + s:v.W[r.index])
         endfor
     endif
 
@@ -265,7 +265,7 @@ fun! s:special(cmd, r, args)
 
     if a:args[0] ==# 'del'
         "<del> key deletes \n if executed at eol
-        call a:r.bytes([s:change, s:change])
+        call a:r.shift(s:change, s:change)
         call cursor(a:r.l, a:r.a)
         if a:r.a == col([a:r.l, '$']) - 1 | normal! Jx
         else                              | normal! x
@@ -274,7 +274,7 @@ fun! s:special(cmd, r, args)
 
     elseif a:args[0] ==# 'd'
         "PROBABLY UNUSED: store deleted text so that it can all be put in the register
-        call a:r.bytes([s:change, s:change])
+        call a:r.shift(s:change, s:change)
         call cursor(a:r.l, a:r.a)
         exe a:cmd
         if s:v.use_register != "_"
@@ -370,12 +370,12 @@ fun! s:bs_del(cmd)
     else          | call s:V.Edit._process(s:cmd) | endif
 
     if a:cmd ==# 'X'
-        for r in s:R() | call r.bytes([-1,-1]) | endfor
+        for r in s:R() | call r.shift(-1,-1) | endfor
 
     elseif a:cmd ==# 'x'
         for r in s:R()
             if r.a == col([r.L, '$'])
-                call r.bytes([-1,-1])
+                call r.shift(-1,-1)
             endif
         endfor
     endif

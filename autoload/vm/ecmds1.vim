@@ -66,7 +66,7 @@ fun! s:Edit.delete(X, register, count, hard) dict
     let s:v.old_text = s:G.regions_text()
 
     for r in s:R()
-        call r.bytes([change, change])
+        call r.shift(change, change)
         call self.extra_spaces.add(r)
         call cursor(r.l, r.a)
         normal! m[
@@ -123,7 +123,7 @@ fun! s:Edit.block_paste(before) dict
 
     for r in s:R()
         if !empty(text)
-            call r.bytes([change, change])
+            call r.shift(change, change)
             call cursor(r.l, r.a)
             let s = remove(text, 0)
             call s:F.set_reg(s)

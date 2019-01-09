@@ -25,7 +25,7 @@ fun! vm#icmds#x(cmd)
 
     for r in s:R()
 
-        call r.bytes([s:change, s:change])
+        call r.shift(s:change, s:change)
 
         if a:cmd ==# 'x' | let done = s:del(r)
         else             | let done = 0         | endif
@@ -43,15 +43,15 @@ fun! vm#icmds#x(cmd)
 
     if a:cmd ==# 'X'
         for r in s:R()
-            if r.a > 1 || s:E(r)>1
-                call r.bytes([-1,-1])
+            if r.a > 1 || s:E(r) > 1
+                call r.shift(-1,-1)
             endif
         endfor
 
     else
         for r in s:R()
             if r.a > 1 && r.a == s:E(r)
-                call r.bytes([-1,-1])
+                call r.shift(-1,-1)
             endif
         endfor
     endif
@@ -87,7 +87,7 @@ fun! s:bs(r)
     call cursor(r.l, r.a)
     normal! X
     call s:V.Edit.extra_spaces.add(r)
-    call r.bytes([1,1])
+    call r.shift(1,1)
 
     return 1
 endfun
@@ -101,7 +101,7 @@ fun! vm#icmds#cw()
     for r in s:R()
         if s:eol(r)
             call s:V.Edit.extra_spaces.add(r, 1)
-            call r.bytes([2+n,2+n])
+            call r.shift(2+n,2+n)
             let n += 2
         endif
     endfor

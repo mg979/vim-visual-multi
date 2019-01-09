@@ -386,7 +386,7 @@ endfun
 fun! s:back()
     for r in s:R()
         if r.a != col([r.l, '$']) && r.a > 1
-            call r.bytes([-1,-1])
+            call r.shift(-1,-1)
         endif
     endfor
 
