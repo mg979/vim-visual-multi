@@ -32,8 +32,8 @@ fun! vm#region#new(cursor, ...)
 
     if a:0
         if a:0 == 2             "making a new region from offsets
-            let a = byte2line(a:1) | let c = a:1 - line2byte(a)
-            let b = byte2line(a:2) | let d = a:2 - line2byte(b)
+            let a = byte2line(a:1) | let c = a:1 - line2byte(a) + 1
+            let b = byte2line(a:2) | let d = a:2 - line2byte(b) + 1
 
         else                    "making a new region from positions
             let a = a:1 | let b = a:2 | let c = a:3 | let d = a:4
@@ -104,8 +104,8 @@ fun! s:Region.new(cursor, ...)
     let R.id      = s:v.ID + 1
     let R.group   = s:v.active_group
 
-    let R.A_      = { -> line2byte(R.l) + R.a }
-    let R.B_      = { -> line2byte(R.L) + R.b }
+    let R.A_      = { -> line2byte(R.l) + R.a - 1 }
+    let R.B_      = { -> line2byte(R.L) + R.b - 1 }
     let R.cur_ln  = { -> R.dir ? R.L : R.l }
     let R.cur_col = { -> R.dir ? R.b : R.a }
     let R.cur_Col = { -> R.cur_col() == R.b ? R.B : R.A }
@@ -152,13 +152,9 @@ fun! s:Region.bytes(...) dict
     elseif a:0 | let r.A += a:1[0] | let r.B += a:1[1] | endif
 
     let r.l = byte2line(r.A)
-    let r.a = r.A - line2byte(r.l)
     let r.L = byte2line(r.B)
-    let r.b = r.B - line2byte(r.L)
-
-    "fix for empty lines
-    if !r.a | let r.a = 1 | let r.l -= 1 | endif
-    if !r.b | let r.b = 1 | let r.L -= 1 | endif
+    let r.a = r.A - line2byte(r.l) + 1
+    let r.b = r.B - line2byte(r.L) + 1
 
     if !s:v.eco | call r.update() | endif
     return [r.l, r.L, r.a, r.b]
@@ -351,8 +347,13 @@ fun! s:Region.update_cursor(...) dict
     """Update cursor vars from position [line, col] or offset."""
     let r = self
 
-    if a:0 && !type(a:1) | let r.l = byte2line(a:1)    | let r.a = a:1 - line2byte(r.l)
-    elseif a:0           | let r.l = a:1[0]            | let r.a = a:1[1] | endif
+    if a:0 && !type(a:1)
+        let r.l = byte2line(a:1)
+        let r.a = a:1 - line2byte(r.l) + 1
+    elseif a:0
+        let r.l = a:1[0]
+        let r.a = a:1[1]
+    endif
 
     call s:fix_pos(r)
     call self.update_vars()
@@ -509,13 +510,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:fix_pos(r)
-    "fix positions in empty lines or endline
+    "fix positions in endline
     let r = a:r
     let eol = col([r.l, '$']) - 1
     let eoL = col([r.L, '$']) - 1
 
-    if !r.a             | let r.a = 1            | endif
-    if !r.b             | let r.b = 1            | endif
     if !s:v.multiline
         if r.a > eol    | let r.a = eol? eol : 1 | endif
         if r.b > eoL    | let r.b = eoL? eoL : 1 | endif

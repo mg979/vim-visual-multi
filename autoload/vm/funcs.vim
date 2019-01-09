@@ -36,10 +36,10 @@ fun! s:Funcs.pos2byte(...) dict
 
     elseif type(a:1) == v:t_string      "a string (like '.')
         let pos = getpos(a:1)[1:2]
-        return (line2byte(pos[0]) + pos[1])
+        return (line2byte(pos[0]) + pos[1] - 1)
 
     else                                "a list [line, col]
-        return (line2byte(a:1[0]) + a:1[1])
+        return (line2byte(a:1[0]) + a:1[1] - 1)
     endif
 endfun
 
@@ -49,14 +49,15 @@ fun! s:Funcs.byte2pos(byte) dict
     """Return the (line, col) position of a byte offset.
 
     let line   = byte2line(a:byte)
-    let col    = a:byte - line2byte(line)
+    let col    = a:byte - line2byte(line) + 1
     return [line, col]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.Cursor(A) dict
-    let ln = byte2line(a:A) | let cl = a:A - line2byte(ln)
+    let ln = byte2line(a:A)
+    let cl = a:A - line2byte(ln) + 1
     call cursor(ln, cl)
     return [ln, cl]
 endfun
