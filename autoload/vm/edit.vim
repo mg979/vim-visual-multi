@@ -10,11 +10,9 @@ fun! vm#edit#init()
     let s:G       = s:V.Global
     let s:F       = s:V.Funcs
 
-    let s:R         = {      -> s:V.Regions                       }
-    let s:X         = {      -> g:VM.extend_mode                  }
-    let s:size      = {      -> line2byte(line('$') + 1)          }
-    let s:Byte      = { pos  -> s:F.pos2byte(pos)                 }
-    let s:Pos       = { byte -> s:F.byte2pos(byte)                }
+    let s:R         = { -> s:V.Regions              }
+    let s:X         = { -> g:VM.extend_mode         }
+    let s:size      = { -> line2byte(line('$') + 1) }
 
     let s:v.use_register = s:v.def_reg
     let s:v.new_text     = ''

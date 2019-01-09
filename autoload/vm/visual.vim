@@ -84,7 +84,7 @@ fun! vm#visual#split()
     if empty(pat) | call s:F.msg('Command aborted.', 1)     | return | endif
 
     let stop = s:R()[-1].L              "stop at line of last region
-    call s:F.Cursor(s:R()[0].A-2)       "cursor before region 0, check for a match
+    call s:F.Cursor(s:R()[0].A-1)       "cursor before region 0, check for a match
     if !search(pat, 'nczW', stop)       "search method: accept at cursor position
         call s:F.msg("\t\tPattern not found", 1)
         call s:G.select_region(s:v.index)

@@ -13,12 +13,9 @@ fun! vm#insert#init()
     let s:G       = s:V.Global
     let s:F       = s:V.Funcs
 
-    let s:R       = {      -> s:V.Regions               }
-    let s:X       = {      -> g:VM.extend_mode          }
-    let s:Byte    = { pos  -> s:F.pos2byte(pos)         }
-    let s:Pos     = { byte -> s:F.byte2pos(byte)        }
-    let s:Cur     = { byte -> s:F.Cursor(byte)          }
-    let s:size    = {      -> line2byte(line('$') + 1) }
+    let s:R       = { -> s:V.Regions              }
+    let s:X       = { -> g:VM.extend_mode         }
+    let s:size    = { -> line2byte(line('$') + 1) }
 
     let s:v.restart_insert = 0
     return s:Insert
@@ -209,7 +206,7 @@ fun! s:Insert.stop() dict
 
     let s:v.eco = 1 | let s:v.insert = 0
 
-    if self.append | call s:back() | endif
+    if self.append | call s:step_back() | endif
     call s:V.Edit.post_process(0,0)
     set hlsearch
 
@@ -271,9 +268,9 @@ fun! s:Cursor.new(byte, ln, col) dict
     let C.l      = a:ln
     let C.L      = a:ln
     let C.a      = a:col
-    let C._a    = C.a
+    let C._a     = C.a
     let C.active = ( C.index == s:Insert.index )
-    let C.hl  = matchaddpos('MultiCursor', [[C.l, C.a]], 40)
+    let C.hl     = matchaddpos('MultiCursor', [[C.l, C.a]], 40)
 
     return C
 endfun
@@ -283,7 +280,7 @@ endfun
 fun! s:Cursor.update(l, c) dict
     "Update cursors positions and highlight.
     let C = self
-    let C.A = s:Byte([C.l, a:c])
+    let C.A = s:F.pos2byte([C.l, a:c])
     let C._a = a:c
 
     call matchdelete(C.hl)
@@ -315,20 +312,20 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Line.update(change, text) dict
-    let change = 0
-    let text = self.txt
-    let I    = s:V.Insert
+    let change   = 0
+    let text     = self.txt
+    let I        = s:V.Insert
 
     for c in self.cursors
-        let a = c.a>1? c.a-2 : c.a-1
-        let b = c.a-1
+        let a    = c.a > 1 ? (c.a - 2) : (c.a - 1)
+        let b    = c.a - 1
         let t1   = text[:a+change]
         let t2   = text[b+change:]
         let text = t1 . a:text . t2
         if c.a==1 | let text = text[1:] | endif
         "echom t1 "|||" t2 "///" text
         let change += a:change
-        call c.update(self.l, c.a+change)
+        call c.update(self.l, c.a + change)
         if c.index == I.index | let I.col = c._a | endif
     endfor
     call setline(self.l, text)
@@ -383,7 +380,8 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:back()
+fun! s:step_back()
+    """When insert mode is started with a/A, go back one char after exiting IM.
     for r in s:R()
         if r.a != col([r.l, '$']) && r.a > 1
             call r.shift(-1,-1)

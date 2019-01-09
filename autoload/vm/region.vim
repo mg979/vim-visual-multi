@@ -6,7 +6,6 @@ fun! vm#region#init()
 
     let s:X    = {     -> g:VM.extend_mode                   }
     let s:R    = {     -> s:V.Regions                        }
-    let s:Byte = { pos -> s:F.pos2byte(pos)                  }
     let s:lcol = { ln  -> len(getline(ln))                   }
     let s:B    = {     -> s:v.block_mode && g:VM.extend_mode }
 endfun
@@ -302,7 +301,7 @@ fun! s:move_region(r)
     endif
 
     "get the new position and see if there's been inversion
-    let new = col('.') | let New = s:Byte('.')
+    let new = col('.') | let New = s:F.pos2byte('.')
 
     let went_back  =   ( New <  r.K )  &&  ( New <  r.cur_Col() )
     let went_forth =   ( New >= r.K )  &&  ( New >= r.cur_Col() )

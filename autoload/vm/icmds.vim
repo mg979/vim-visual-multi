@@ -11,8 +11,6 @@ fun! vm#icmds#init()
     let s:R         = {      -> s:V.Regions              }
     let s:X         = {      -> g:VM.extend_mode         }
     let s:size      = {      -> line2byte(line('$') + 1) }
-    let s:Byte      = { pos  -> s:F.pos2byte(pos)        }
-    let s:Pos       = { byte -> s:F.byte2pos(byte)       }
     let s:E         = { r    -> col([r.l, '$'])          }
     let s:eol       = { r    -> r.a == (s:E(r) - 1)      }
 endfun
