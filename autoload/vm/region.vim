@@ -56,10 +56,14 @@ fun! vm#region#new(cursor, ...)
     "keep regions list ordered
     if empty(s:R()) || s:R()[s:v.index-1].A < R.A
         call add(s:R(), R)
+    elseif s:v.add_cursor_in_place
+        call insert(s:R(), R, s:v.index)
+        call s:G.update_indices(s:v.index)
+        let s:v.add_cursor_in_place = 0
     else
         let i = 0
         for r in s:R()
-            if r.A >= R.A
+            if r.A > R.A
                 call insert(s:R(), R, i)
                 break
             endif

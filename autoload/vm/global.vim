@@ -62,6 +62,7 @@ fun! s:Global.new_cursor(...) dict
         if get(g:, 'VM_disable_mappings_when_placing_single_cursors', 0)
             call b:VM_Selection.Maps.mappings(0, 1)
         endif
+        let s:v.add_cursor_in_place = 1
         let R = vm#region#new(1)
     else
         let R = self.is_region_at_pos('.')
