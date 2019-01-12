@@ -54,14 +54,14 @@ fun! s:Edit.run_normal(cmd, recursive, count, maps, ...) dict
     let s:cmd = a:recursive? ("normal ".c.cmd) : ("normal! ".c.cmd)
     if s:X() | call s:G.change_mode() | endif
 
-    call self.before_macro(a:maps)
+    call self.before_commands(a:maps)
 
     if a:cmd ==? 'x' | call s:bs_del(a:cmd)
     elseif a:0       | call self._process(0, a:1)
     else             | call self._process(s:cmd) | endif
 
     let g:VM.last_normal = [cmd, a:recursive]
-    call self.after_macro(0)
+    call self.after_commands(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -82,11 +82,11 @@ fun! s:Edit.run_visual(cmd, recursive, ...) dict
 
     "-----------------------------------------------------------------------
 
-    call self.before_macro(!a:recursive)
+    call self.before_commands(!a:recursive)
     call self.process_visual(cmd)
 
     let g:VM.last_visual = [cmd, a:recursive]
-    call self.after_macro(0)
+    call self.after_commands(0)
     if s:X() | call s:G.change_mode() | endif
 endfun
 
@@ -114,11 +114,11 @@ fun! s:Edit.run_ex(count, ...) dict
     let g:VM.last_ex = cmd
     if s:X() | call s:G.change_mode() | endif
 
-    call self.before_macro(1)
+    call self.before_commands(1)
     for n in range(a:count)
         call self._process(cmd)
     endfor
-    call self.after_macro(0)
+    call self.after_commands(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -135,12 +135,12 @@ fun! s:Edit.run_macro(replace) dict
         return | endif
 
     let s:cmd = "@".reg
-    call self.before_macro(1)
+    call self.before_commands(1)
 
     if s:X() | call s:G.change_mode() | endif
 
     call self.process()
-    call self.after_macro(0)
+    call self.after_commands(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -250,10 +250,10 @@ endfun
 
 fun! s:Edit.special(cmd, ...) dict
     if a:0 | let s:v.merge = 1 | endif
-    call self.before_macro(0)
+    call self.before_commands(0)
     call self._process(0, a:cmd)
     call s:G.merge_regions()
-    call self.after_macro(0)
+    call self.after_commands(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -321,21 +321,29 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
-fun! s:Edit.before_macro(maps) dict
+fun! s:Edit.before_commands(disable_maps) dict
     let s:v.silence = 1 | let s:v.auto = 1 | let s:v.eco = 1
-    let s:old_multiline = s:v.multiline    | let s:v.multiline = s:can_multiline
+
+    let s:old_multiline = s:v.multiline
+    let s:v.multiline = s:can_multiline
     let s:can_multiline = 0
 
-    "disable mappings and run custom functions
-    let s:maps = a:maps
     nunmap <buffer> <Space>
     nunmap <buffer> <esc>
-    call s:F.external_funcs(a:maps, 0)
+
+    let s:maps_disabled = 0
+    call s:F.external_before_auto()
+
+    if a:disable_maps
+        let s:maps_disabled = 1
+        call s:V.Maps.disable(0)
+        call s:F.external_before_macro()
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.after_macro(reselect, ...) dict
+fun! s:Edit.after_commands(reselect, ...) dict
     let s:v.multiline = s:old_multiline
     if a:reselect
         call s:V.Edit.post_process(1, a:1)
@@ -343,10 +351,16 @@ fun! s:Edit.after_macro(reselect, ...) dict
         call s:V.Edit.post_process(0)
     endif
 
-    "reenable mappings and run custom functions
+    call s:F.external_after_auto()
+
     nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
     nmap     <silent> <nowait> <buffer> <Space>    <Plug>(VM-Toggle-Mappings)
-    call s:F.external_funcs(s:maps, 1)
+
+    if s:maps_disabled
+        let s:maps_disabled = 0
+        call s:V.Maps.enable()
+        call s:F.external_after_macro()
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

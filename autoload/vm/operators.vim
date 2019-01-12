@@ -66,7 +66,7 @@ endfun
 fun! s:select(cmd)
 
     call s:updatetime()
-    call s:V.Edit.before_macro(1)
+    call s:V.Maps.disable(1)
 
     silent! nunmap <buffer> y
 
@@ -79,7 +79,7 @@ fun! s:select(cmd)
         call s:check_word(s:G.get_region())
     endfor
 
-    call s:V.Edit.after_macro(0)
+    call s:V.Maps.enable()
     let s:v.silence    = 0
     let s:correct_word = 0
 

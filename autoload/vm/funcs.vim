@@ -375,20 +375,27 @@ fun! s:Funcs.region_txt(r) dict
     echohl None
 endfun
 
-fun! s:Funcs.external_funcs(maps, restore)
-    if a:restore
-        if exists('*VM_after_auto')      | call VM_after_auto()   | endif
-        call s:V.Maps.mappings(1)
-        if a:maps
-            if exists('*VM_after_macro') | call VM_after_macro()  | endif
-        endif
-        return
+fun! s:Funcs.external_before_macro()
+    if exists('*VM_before_macro')
+        call VM_before_macro()
     endif
+endfun
 
-    if exists('*VM_before_auto')         | call VM_before_auto()  | endif
-    if a:maps
-        call s:V.Maps.mappings(0)
-        if exists('*VM_before_macro')    | call VM_before_macro() | endif
+fun! s:Funcs.external_after_macro()
+    if exists('*VM_after_macro')
+        call VM_after_macro()
+    endif
+endfun
+
+fun! s:Funcs.external_before_auto()
+    if exists('*VM_before_auto')
+        call VM_before_auto()
+    endif
+endfun
+
+fun! s:Funcs.external_after_auto()
+    if exists('*VM_after_auto')
+        call VM_after_auto()
     endif
 endfun
 
