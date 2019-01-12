@@ -58,8 +58,8 @@ fun! vm#region#new(cursor, ...)
         call add(s:R(), R)
     elseif s:v.add_cursor_in_place
         call insert(s:R(), R, s:v.index)
-        call s:G.update_indices(s:v.index)
         let s:v.add_cursor_in_place = 0
+        call s:G.reorder_regions()
     else
         let i = 0
         for r in s:R()

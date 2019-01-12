@@ -40,14 +40,13 @@ endfun
 
 fun! s:Global.new_cursor(...) dict
     """Create a new cursor if there isn't already a region.
+    let R = self.is_region_at_pos('.')
 
-    "if creating a single cursor at position, allow more cursors
-    if a:0 && get(g:, 'VM_allow_more_cursors_in_place', 1)
+    if empty(R)
+        return vm#region#new(1)
+    elseif a:0 && get(g:, 'VM_allow_more_cursors_in_place', 1)
         let s:v.add_cursor_in_place = 1
-        let R = vm#region#new(1)
-    else
-        let R = self.is_region_at_pos('.')
-        if empty(R) | let R = vm#region#new(1) | endif
+        return vm#region#new(1)
     endif
     return R
 endfun
