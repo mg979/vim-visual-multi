@@ -57,6 +57,15 @@ fun! s:Search.add(...) dict
     call s:update_search(pat)
 endfun
 
+fun! s:Search.add_if_empty(...) dict
+    """Add a new search pattern, only if no pattern is set.
+    if empty(s:v.search)
+        if a:0 | call self.add(a:1)
+        else   | call self.add(s:R()[s:v.index].pat)
+        endif
+    endif
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Search.get() dict

@@ -87,7 +87,7 @@ fun! s:Edit.run_visual(cmd, recursive, ...) dict
 
     let g:VM.last_visual = [cmd, a:recursive]
     call self.after_commands(0)
-    if s:X() | call s:G.change_mode() | endif
+    if !s:visual_reselect(cmd) | call s:G.change_mode() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -393,5 +393,13 @@ fun! s:bs_del(cmd)
     endif
 
     call s:G.merge_regions()
+endfun
+
+"------------------------------------------------------------------------------
+
+fun! s:visual_reselect(cmd)
+    """Ensure selections are reselected after some commands.
+    let reselect = a:cmd == '~' || a:cmd =~? 'gu'
+    return s:X() && reselect
 endfun
 

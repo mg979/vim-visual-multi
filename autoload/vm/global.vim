@@ -38,30 +38,11 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.get_region() dict
-    """Used by select operator."""
-
-    let R = self.is_region_at_pos('.')
-
-    if !empty(R) | return R                | endif
-    if s:v.eco   | return vm#region#new(0) | endif
-
-    call s:V.Search.add()
-    let R = vm#region#new(0)
-    call s:F.restore_reg()
-    return R
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:Global.new_cursor(...) dict
     """Create a new cursor if there isn't already a region.
 
     "if creating a single cursor at position, allow more cursors
     if a:0 && get(g:, 'VM_allow_more_cursors_in_place', 1)
-        if get(g:, 'VM_disable_mappings_when_placing_single_cursors', 0)
-            call b:VM_Selection.Maps.mappings(0, 1)
-        endif
         let s:v.add_cursor_in_place = 1
         let R = vm#region#new(1)
     else

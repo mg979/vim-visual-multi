@@ -76,7 +76,7 @@ fun! s:select(cmd)
     for r in Rs
         call cursor(r[0], r[1])
         exe "normal ".a:cmd
-        call s:check_word(s:G.get_region())
+        call s:check_word(s:get_region())
     endfor
 
     call s:V.Maps.enable()
@@ -103,6 +103,19 @@ fun! s:check_word(R)
             call a:R.shift(0, -1)
         endif
     endif
+endfun
+
+"------------------------------------------------------------------------------
+
+fun! s:get_region()
+    """Create region with select operator.
+    let R = s:G.is_region_at_pos('.')
+    if !empty(R) | return R | endif
+
+    let R = vm#region#new(0)
+    call s:V.Search.add_if_empty()
+    call s:F.restore_reg()
+    return R
 endfun
 
 
@@ -177,7 +190,7 @@ fun! vm#operators#after_yank()
             let s:v.visual_regex = 0
         else
             "select operator
-            call s:G.get_region()
+            call s:get_region()
             let R = s:G.select_region_at_pos('.')
             call s:G.check_mutliline(0, R)
         endif

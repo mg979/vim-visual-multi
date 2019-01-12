@@ -406,7 +406,7 @@ fun! vm#commands#find_next(skip, nav, ...)
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
 
     "write search pattern if not navigating and no search set
-    if s:X() && !a:nav && @/=='' | let s:v.motion = '' | call s:Search.rewrite(1) | endif
+    if s:X() && !a:nav | call s:Search.add_if_empty() | endif
 
     call s:Search.validate()
 
@@ -423,7 +423,7 @@ fun! vm#commands#find_prev(skip, nav)
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
 
     "write search pattern if not navigating and no search set
-    if s:X() && !a:nav && @/=='' | let s:v.motion = '' | call s:Search.rewrite(1) | endif
+    if s:X() && !a:nav | call s:Search.add_if_empty() | endif
 
     call s:Search.validate()
 
