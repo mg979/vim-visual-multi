@@ -54,6 +54,8 @@ fun! s:Edit.apply_change() dict
     let s:cmd = '.'
     let self.skip_index = s:v.index
     call self.process()
+    "reset index to skip
+    let self.skip_index = -1
 endfun
 
 

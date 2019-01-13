@@ -109,7 +109,7 @@ fun! s:d_cursors(M, reg, n)
   "for D, d$, dd: ensure there is only one region per line
   if (S == '$' || S == 'd') | call s:G.one_region_per_line() | endif
 
-  call s:V.Edit.run_normal('d'.S, {'count': N})
+  call s:V.Edit.run_normal('d'.S, {'count': N, 'store': a:reg})
   call s:G.merge_regions()
 endfun
 
@@ -190,7 +190,7 @@ fun! s:c_cursors(M, reg, n)
     call s:V.Insert.key('a')
 
   else
-    call s:V.Edit.run_normal('d'.S, {'count': N})
+    call s:V.Edit.run_normal('d'.S, {'count': N, 'store': a:reg})
     call s:G.merge_regions()
     call feedkeys("i")
   endif

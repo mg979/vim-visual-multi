@@ -15,8 +15,8 @@ fun! vm#edit#init()
     let s:size      = { -> line2byte(line('$') + 1) }
 
     let s:v.use_register = s:v.def_reg
-    let s:v.new_text     = ''
-    let s:v.old_text     = ''
+    let s:v.new_text     = []
+    let s:v.old_text     = []
     let s:v.W            = []
     let s:v.storepos     = []
     let s:v.insert_marks = {}
@@ -55,9 +55,6 @@ fun! s:Edit.run_normal(cmd, ...) dict
     if a:0 | call extend(args, a:1) | endif
     let args.maps = get(args, 'maps', args.recursive)
 
-    " see if there is a special command to be processed
-    let special = has_key(args, 'special')
-
     let n     = args.count > 1 ? args.count : ''
     let s:cmd = args.recursive ? ("normal ".n.cmd) : ("normal! ".n.cmd)
 
@@ -65,8 +62,7 @@ fun! s:Edit.run_normal(cmd, ...) dict
     call self.before_commands(args.maps)
 
     if a:cmd ==? 'x' | call s:bs_del(a:cmd)
-    elseif special   | call self._process(0, args.special)
-    else             | call self._process(s:cmd) | endif
+    else             | call self._process(s:cmd, args) | endif
 
     let g:VM.last_normal = [cmd, args.recursive]
     call self.after_commands(0)
@@ -167,7 +163,7 @@ fun! s:Edit.dot() dict
             call self.run_normal(dot, {'maps': 0})
 
         else
-            exe "normal ".dot
+            call self.run_normal(dot)
         endif
     else
         normal z.
@@ -182,28 +178,47 @@ fun! s:Edit._process(cmd, ...) dict
     let size = s:size()    | let s:change = 0 | let cmd = a:cmd  | let s:v.eco = 1
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
+    let special = a:0 && exists('a:1.special')
+    let store = a:0 && exists('a:1.store') && a:1.store != "_"
+    let stay_put = a:0 && exists('a:1.stay_put')
+    let txt = []
+
     for r in s:R()
+        " used in non-live edit, currently disabled
         if !s:v.auto && r.index == self.skip_index | continue | endif
 
         "execute command, but also take special cases into account
-        if a:0 && s:special(cmd, r, a:000)
+        if special
+            call s:special(cmd, r, a:1.special)
+
         else
+            " update cursor position on the base of previous text changes
             call r.shift(s:change, s:change)
+
+            " execute command at cursor
             call cursor(r.l, r.a)
             exe cmd
-            let diff = s:F.pos2byte('.') - r.A
-            call r.shift(diff, diff)
+
+            " store deleted text during deletions/changes at cursors
+            if store
+                call add(txt, getreg(a:1.store))
+            endif
+
+            " update new cursor position after the command, unless specified
+            if !stay_put
+                let diff = s:F.pos2byte('.') - r.A
+                call r.shift(diff, diff)
+            endif
         endif
 
         "update changed size
         let s:change = s:size() - size
-        if !has('nvim')
-            doautocmd CursorMoved
-        endif
     endfor
 
-    "reset index to skip
-    let self.skip_index = -1
+    " fill VM register after deletions/changes at cursors
+    if store
+        call self.fill_register(a:1.store, txt, 0)
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -261,7 +276,7 @@ endfun
 fun! s:Edit.special(cmd, ...) dict
     if a:0 | let s:v.merge = 1 | endif
     call self.before_commands(0)
-    call self._process(0, a:cmd)
+    call self._process(a:cmd, {'special': a:cmd})
     call s:G.merge_regions()
     call self.after_commands(0)
 endfun
@@ -271,25 +286,14 @@ endfun
 fun! s:special(cmd, r, args)
     "Some commands need special adjustments while being processed.
 
-    if a:args[0] ==# 'del'
-        "<del> key deletes \n if executed at eol
+    if a:args ==# 'del'
+        " <del> key deletes \n if executed at eol
         call a:r.shift(s:change, s:change)
         call cursor(a:r.l, a:r.a)
         if a:r.a == col([a:r.l, '$']) - 1 | normal! Jx
         else                              | normal! x
         endif
         return 1
-
-    elseif a:args[0] ==# 'd'
-        "PROBABLY UNUSED: store deleted text so that it can all be put in the register
-        call a:r.shift(s:change, s:change)
-        call cursor(a:r.l, a:r.a)
-        exe a:cmd
-        if s:v.use_register != "_"
-            call add(s:v.deleted_text, getreg(s:v.use_register))
-        endif
-        return 1
-
     endif
 endfun
 

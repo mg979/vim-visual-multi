@@ -87,7 +87,7 @@ fun! s:Edit.delete(X, register, count, hard) dict
 
     if a:hard            | call self.extra_spaces.remove() | endif
     if a:register == "_" | call s:F.restore_reg()          | endif
-    let s:v.old_text = ''
+    let s:v.old_text = []
     call s:F.Scroll.force(winline)
 endfun
 
@@ -113,7 +113,7 @@ fun! s:Edit.paste(before, vim_reg, reselect, register, ...) dict
 
     let s:v.W = self.store_widths(s:v.new_text)
     call self.post_process((X? 1 : a:reselect), !a:before)
-    let s:v.old_text = ''
+    let s:v.old_text = []
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
