@@ -10,7 +10,6 @@ fun! vm#operators#init()
     let s:Search  = s:V.Search
 
     let s:v.finding    = 0
-    let s:correct_word = 0
 endfun
 
 fun! s:init()
@@ -32,26 +31,31 @@ fun! vm#operators#select(all, count, ...)
     let s:v.storepos = getpos('.')[1:2]
     call s:F.Scroll.get()
 
-    if a:0 | call s:select('y'.a:1) | return | endif
+    if a:0 | return s:select('y'.a:1) | endif
 
     let abort = 0
     let s = ''                     | let n = ''
     let x = a:count>1? a:count : 1 | echo "Selecting: ".(x>1? x : '')
 
     while 1
-        let c = nr2char(getchar())
-        if c == "\<esc>"                 | let abort = 1 | break
+        let c = getchar()
 
-        elseif str2nr(c) > 0             | let n .= c    | echon c
+        if c == 27 | let abort = 1      | break
+        else       | let c = nr2char(c) | endif
 
-        elseif s:single(c)               | let s .= c    | echon c
-            break
+        if str2nr(c) > 0
+            let n .= c    | echon c
+
+        elseif s:single(c)
+            let s .= c    | echon c | break
 
         elseif s:double(c) || len(s)
-            let s .= c                   | echon c
-            if len(s) > 1                | break          | endif
+            let s .= c    | echon c
+            if len(s) > 1 | break   | endif
 
-        else                             | let abort = 1  | break    | endif
+        else
+            let abort = 1 | break
+        endif
     endwhile
 
     if abort | return | endif
@@ -76,12 +80,11 @@ fun! s:select(cmd)
     for r in Rs
         call cursor(r[0], r[1])
         exe "normal ".a:cmd
-        call s:check_word(s:get_region())
+        call s:get_region()
     endfor
 
     call s:V.Maps.enable()
     let s:v.silence    = 0
-    let s:correct_word = 0
 
     if !s:v.multiline
         for r in s:R()
@@ -95,17 +98,6 @@ fun! s:select(cmd)
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:check_word(R)
-    """For cursor motions w/W, exclude the last char, except if at eol."""
-    if s:correct_word
-        if a:R.b != col([a:R.L, '$'])-1
-            call a:R.shift(0, -1)
-        endif
-    endif
-endfun
-
-"------------------------------------------------------------------------------
 
 fun! s:get_region()
     """Create region with select operator.
@@ -201,203 +193,6 @@ fun! vm#operators#after_yank()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Operations at cursors (yank, delete, change)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:reorder_cmd(M, r, n, op)
-    """Reorder command, so that the exact count is found.
-    "remove register
-    let S = substitute(a:M, a:r, '', '')
-    "what comes after operator
-    let S = substitute(S, '^\d*'.a:op.'\(.*\)$', '\1', '')
-
-    if S ==? 'n' && empty(@/)
-      let @/ = s:v.oldsearch[0]
-    endif
-
-    "count that comes after operator
-    let x = match(S, '\d') >= 0? substitute(S, '\D', '', 'g') : 0
-    if x | let S = substitute(S, x, '', '') | endif
-
-    "final count
-    let n = a:n
-    let N = x? n*x : n>1? n : 1 | let N = N>1? N : ''
-
-    return [S, N, S[0]==#a:op]
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#operators#cursors(op, n, register, ...)
-    if s:X() | call s:G.change_mode() | endif
-
-    let reg = a:register | let r = "\"".reg | let hl1 = 'WarningMsg' | let hl2 = 'Label'
-
-    "shortcut for command in a:1
-    if a:0 | call vm#operators#process(a:op, a:1, reg, 0) | return | endif
-
-    let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
-                \ a:op==#'c'? [['Change ', hl1], ['([n] c/w/e/b/$...) ?  ',   hl2]] :
-                \ a:op==#'y'? [['Yank   ', hl1], ['([n] y/w/e/b/$...) ?  ',   hl2]] : 'Aborted.'
-
-    call s:F.msg(s, 1)
-
-    "starting string
-    let M = (a:n>1? a:n : '').( reg == s:v.def_reg? '' : '"'.reg ).a:op
-
-    "preceding count
-    let n = a:n>1? a:n : 1
-
-    echon M
-    while 1
-        let c = nr2char(getchar())
-        if str2nr(c) > 0                     | echon c | let M .= c
-        elseif s:double(c)                   | echon c | let M .= c
-            let c = nr2char(getchar())       | echon c | let M .= c | break
-
-        elseif s:ia(c)                       | echon c | let M .= c
-            let c = nr2char(getchar())       | echon c | let M .= c | break
-
-        elseif a:op ==# 'c' && c==?'r'       | echon c | let M .= c
-            let c = nr2char(getchar())       | echon c | let M .= c | break
-
-        elseif a:op ==# 'c' && c==?'s'       | echon c | let M .= c
-            let c = nr2char(getchar())       | echon c | let M .= c
-            let c = nr2char(getchar())       | echon c | let M .= c | break
-
-        elseif a:op ==# 'y' && c==?'s'       | echon c | let M .= c
-            let c = nr2char(getchar())       | echon c | let M .= c
-            if s:ia(c)
-                let c = nr2char(getchar())   | echon c | let M .= c | endif
-            let c = nr2char(getchar())       | echon c | let M .= c | break
-
-        elseif a:op ==# 'd' && c==#'s'       | echon c | let M .= c
-            let c = nr2char(getchar())       | echon c | let M .= c | break
-
-        elseif s:single(c)                   | let M .= c | break
-        elseif a:op ==# c                    | let M .= c | break
-
-        else | echon ' ...Aborted'           | return  | endif
-    endwhile
-
-    call vm#operators#process(a:op, M, reg, n)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#operators#process(op, M, reg, n)
-    if s:X() | call s:G.change_mode() | endif
-    let M = a:M | let reg = a:reg | let r = '"'.reg | let n = a:n
-    let s:v.dot = M
-
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "delete
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    if a:op ==# 'd'
-
-        "ds surround
-        if M[:1] ==? 'ds' | return s:V.Edit.run_normal(M) | endif
-
-        "reorder command; D = 'dd'
-        let [S, N, D] = s:reorder_cmd(M, r, n, 'd')
-
-        "for D, d$, dd: ensure there is only one region per line
-        if (S == '$' || S == 'd') | call s:G.one_region_per_line() | endif
-
-        if D | call s:V.Edit.run_normal('dd', {'recursive': 0})
-        else
-            let s:correct_word = S ==? 'w'
-            call vm#operators#select(1, 1, N.S)
-            if s:back(S) | exe "normal h" | endif
-            call s:V.Edit.delete(1, reg, 1, 1)
-        endif
-        call s:G.merge_regions()
-
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "yank
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    elseif a:op ==# 'y'
-
-        "ys surround
-        if M[:1] ==? 'ys' | return s:V.Edit.run_normal(M) | endif
-
-        "reset dot for yank command
-        let s:v.dot = ''
-
-        call s:G.change_mode()
-
-        "reorder command; Y = 'yy'
-        let [S, N, Y] = s:reorder_cmd(M, r, n, 'y')
-
-        "for Y, y$, yy, ensure there is only one region per line
-        if (S == '$' || S == 'y') | call s:G.one_region_per_line() | endif
-
-        "NOTE: yy doesn't accept count.
-        if Y
-            call vm#commands#motion('0', 1, 0, 0)
-            call vm#commands#motion('$', 1, 0, 0)
-            let s:v.multiline = 1
-            call vm#commands#motion('l', 1, 0, 0)
-            call feedkeys('y')
-        else
-            let s:correct_word = S ==? 'w'
-            call vm#operators#select(1, 1, N.S)
-            if s:back(S) | exe "normal h" | endif
-            call feedkeys("\"".reg.'y')
-        endif
-
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-    "change
-    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-    elseif a:op ==# 'c'
-
-        "cs surround
-        if M[:1] ==? 'cs' | return s:V.Edit.run_normal(M) | endif
-
-        "cr coerce (vim-abolish)
-        if M[:1] ==? 'cr' | return s:V.Edit.run_normal(M) | endif
-
-        "reorder command; C = 'cc'
-        let [S, N, C] = s:reorder_cmd(M, r, n, 'c')
-
-        "convert w,W to e,E (if motions), also in dot
-        if     S ==# 'w' | let S = 'e' | call substitute(s:v.dot, 'w', 'e', '')
-        elseif S ==# 'W' | let S = 'E' | call substitute(s:v.dot, 'W', 'E', '') | endif
-
-        "for c$, cc, ensure there is only one region per line
-        if (S == '$' || S == 'c') | call s:G.one_region_per_line() | endif
-
-        let S = substitute(S, '^c', 'd', '')
-        let reg = reg != s:v.def_reg? reg : "_"
-
-        if C
-            call vm#operators#select(1, 1, '$')
-            call vm#commands#motion('^', 1, 0, 0)
-            call s:V.Edit.delete(1, reg, 1, 0)
-            call s:V.Insert.key('a')
-
-        elseif index(['ip', 'ap'] + vm#comp#add_line(), S) >= 0
-            call vm#operators#select(1, 1, N.S)
-            call s:V.Edit.delete(1, reg, 1, 0)
-            call s:V.Insert.key('O')
-
-        elseif S=='$'
-            call vm#operators#select(1, 1, '$')
-            call s:V.Edit.delete(1, reg, 1, 0)
-            call s:V.Insert.key('a')
-
-        else
-            call vm#operators#select(1, 1, N.S)
-            if s:back(S) | exe "normal h" | endif
-            call feedkeys("\"".reg.'c')
-        endif
-    endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Helpers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -410,21 +205,10 @@ endfun
 
 if v:version >= 800
     let s:R      = { -> s:V.Regions                                           }
-    let s:X      = { -> g:VM.extend_mode                                      }
-    let s:back   = { c -> index(split('FTlhbB0nN^{(', '\zs'), c[0]) >= 0      }
-    let s:ia     = { c -> index(['i', 'a'], c) >= 0                           }
     let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
     let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
   finish
 endif
-
-fun! s:back(c)
-  return index(split('FTlhbB0nN^{(', '\zs'), a:c[0]) >= 0
-endfun
-
-fun! s:ia(c)
-  return index(['i', 'a'], a:c) >= 0
-endfun
 
 fun! s:single(c)
   return index(split('hljkwebWEB$^0{}()%nN', '\zs'), a:c) >= 0
@@ -436,9 +220,5 @@ endfun
 
 fun! s:R()
   return s:V.Regions
-endfun
-
-fun! s:X()
-  return g:VM.extend_mode
 endfun
 

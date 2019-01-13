@@ -26,8 +26,8 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) dict
     let register = (s:v.use_register != s:v.def_reg)? s:v.use_register :
                 \  a:def_reg?                         s:v.def_reg : v:register
 
-    if !s:X()    | call vm#operators#cursors('y', v:count, register) | return | endif
-    if !s:min(1) | call s:F.msg('No regions selected.', 0)           | return | endif
+    if !s:X()    | return vm#cursors#operation('y', v:count, register) | endif
+    if !s:min(1) | return s:F.msg('No regions selected.', 0)           | endif
 
     "write custom and possibly vim registers.
     let [text, type] = self.fill_register(register, s:G.regions_text(), a:hard)
@@ -57,7 +57,7 @@ fun! s:Edit.delete(X, register, count, hard) dict
     if !s:v.direction | call vm#commands#invert_direction() | endif
 
     if !a:X     "ask for motion
-        call vm#operators#cursors('d', a:count, a:register) | return | endif
+        return vm#cursors#operation('d', a:count, a:register) | endif
 
     let winline      = winline()
     let size         = s:size()

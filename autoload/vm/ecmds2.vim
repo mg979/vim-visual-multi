@@ -41,7 +41,7 @@ fun! s:Edit.change(X, count, reg) dict
         call self.delete(1, a:reg != s:v.def_reg? a:reg : "_", 1, 0)
         call s:V.Insert.start(0)
     else
-        call vm#operators#cursors('c', a:count, a:reg)
+        call vm#cursors#operation('c', a:count, a:reg)
     endif
 endfun
 

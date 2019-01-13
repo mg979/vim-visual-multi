@@ -163,8 +163,8 @@ fun! s:Edit.dot() dict
             let dot = 'd'.dot[1:]
             exe "normal ".dot."z."
 
-        elseif dot[1] ==? 's'                   "surround needs run_normal()
-            call self.run_normal(dot)
+        elseif dot[1] ==? 's'                   "surround
+            call self.run_normal(dot, {'maps': 0})
 
         else
             exe "normal ".dot
