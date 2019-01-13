@@ -191,6 +191,8 @@ fun! s:Edit._process(cmd, ...) dict
             call r.shift(s:change, s:change)
             call cursor(r.l, r.a)
             exe cmd
+            let diff = s:F.pos2byte('.') - r.A
+            call r.shift(diff, diff)
         endif
 
         "update changed size
@@ -389,10 +391,7 @@ fun! s:bs_del(cmd)
     if s:v.insert | call vm#icmds#x(a:cmd)        | return
     else          | call s:V.Edit._process(s:cmd) | endif
 
-    if a:cmd ==# 'X'
-        for r in s:R() | call r.shift(-1,-1) | endfor
-
-    elseif a:cmd ==# 'x'
+    if a:cmd ==# 'x'
         for r in s:R()
             if r.a == col([r.L, '$'])
                 call r.shift(-1,-1)
