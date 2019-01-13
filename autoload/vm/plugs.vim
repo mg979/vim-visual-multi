@@ -130,14 +130,14 @@ fun! vm#plugs#init()
     "Edit commands
     nnoremap        <Plug>(VM-D)                       :<C-u>call vm#operators#cursors('d', 0, v:register, 'd$')<cr>
     nnoremap        <Plug>(VM-Y)                       :<C-u>call vm#operators#cursors('y', 0, v:register, 'y$')<cr>
-    nnoremap        <Plug>(VM-x)                       :<C-u>call b:VM_Selection.Edit.run_normal('x', 0, v:count1, 0)<cr>:silent! undojoin<cr>
-    nnoremap        <Plug>(VM-X)                       :<C-u>call b:VM_Selection.Edit.run_normal('X', 0, v:count1, 0)<cr>:silent! undojoin<cr>
-    nnoremap        <Plug>(VM-J)                       :<C-u>call b:VM_Selection.Edit.run_normal('J', 0, v:count1, 0)<cr>:silent! undojoin<cr>
-    nnoremap        <Plug>(VM-~)                       :<C-u>call b:VM_Selection.Edit.run_normal('~', 0, 1, 0)<cr>:silent! undojoin<cr>
+    nnoremap        <Plug>(VM-x)                       :<C-u>call b:VM_Selection.Edit.run_normal('x', {'count': v:count1, 'recursive': 0})<cr>:silent! undojoin<cr>
+    nnoremap        <Plug>(VM-X)                       :<C-u>call b:VM_Selection.Edit.run_normal('X', {'count': v:count1, 'recursive': 0})<cr>:silent! undojoin<cr>
+    nnoremap        <Plug>(VM-J)                       :<C-u>call b:VM_Selection.Edit.run_normal('J', {'count': v:count1, 'recursive': 0})<cr>:silent! undojoin<cr>
+    nnoremap        <Plug>(VM-~)                       :<C-u>call b:VM_Selection.Edit.run_normal('~', {'recursive': 0})<cr>:silent! undojoin<cr>
     nnoremap        <Plug>(VM-Del)                     :call b:VM_Selection.Edit.special('del')<cr>
     nnoremap        <Plug>(VM-Dot)                     :call b:VM_Selection.Edit.dot()<cr>
-    nnoremap        <Plug>(VM-Increase)                :<C-u>call b:VM_Selection.Edit.run_normal('<c-a>', 0, v:count1, 0)<cr>
-    nnoremap        <Plug>(VM-Decrease)                :<C-u>call b:VM_Selection.Edit.run_normal('<c-x>', 0, v:count1, 0)<cr>
+    nnoremap        <Plug>(VM-Increase)                :<C-u>call b:VM_Selection.Edit.run_normal('<c-a>', {'count': v:count1, 'recursive': 0})<cr>
+    nnoremap        <Plug>(VM-Decrease)                :<C-u>call b:VM_Selection.Edit.run_normal('<c-x>', {'count': v:count1, 'recursive': 0})<cr>
     nnoremap        <Plug>(VM-a)                       :<C-u>call b:VM_Selection.Insert.key('a')<cr>
     nnoremap        <Plug>(VM-A)                       :<C-u>call b:VM_Selection.Insert.key('A')<cr>
     nnoremap        <Plug>(VM-i)                       :<C-u>call b:VM_Selection.Insert.key('i')<cr>
@@ -170,13 +170,13 @@ fun! vm#plugs#init()
     nnoremap        <Plug>(VM-Numbers-Append)          :<C-u>call b:VM_Selection.Edit.numbers(v:count1, 1)<cr>
     nnoremap        <Plug>(VM-Zero-Numbers)            :<C-u>call b:VM_Selection.Edit.numbers(v:count, 0)<cr>
     nnoremap        <Plug>(VM-Zero-Numbers-Append)     :<C-u>call b:VM_Selection.Edit.numbers(v:count, 1)<cr>
-    nnoremap        <Plug>(VM-Run-Dot)                 :<C-u>call b:VM_Selection.Edit.run_normal('.', 0, v:count1, 0)<cr>
+    nnoremap        <Plug>(VM-Run-Dot)                 :<C-u>call b:VM_Selection.Edit.run_normal('.', {'count': v:count1, 'recursive': 0})<cr>
     nnoremap        <Plug>(VM-Surround)                :call b:VM_Selection.Edit.surround()<cr>
     nnoremap        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
     nnoremap        <Plug>(VM-Run-Ex)                  :<C-u>call b:VM_Selection.Edit.run_ex(v:count1)<cr>
     nnoremap        <Plug>(VM-Run-Last-Ex)             :<C-u>call b:VM_Selection.Edit.run_ex(v:count1, g:VM.last_ex)<cr>
-    nnoremap        <Plug>(VM-Run-Normal)              :<C-u>call b:VM_Selection.Edit.run_normal(-1, 1,  v:count1,1)<cr>
-    nnoremap        <Plug>(VM-Run-Last-Normal)         :<C-u>call b:VM_Selection.Edit.run_normal(g:VM.last_normal[0] ,g:VM.last_normal[1], v:count1, 1)<cr>
+    nnoremap        <Plug>(VM-Run-Normal)              :<C-u>call b:VM_Selection.Edit.run_normal(-1, {'count': v:count1})<cr>
+    nnoremap        <Plug>(VM-Run-Last-Normal)         :<C-u>call b:VM_Selection.Edit.run_normal(g:VM.last_normal[0], {'count': v:count1, 'recursive': g:VM.last_normal[1]})<cr>
     nnoremap        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1, 0)<cr>
     nnoremap        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:VM.last_visual[0], g:VM.last_visual[1])<cr>
 

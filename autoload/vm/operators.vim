@@ -297,7 +297,7 @@ fun! vm#operators#process(op, M, reg, n)
     if a:op ==# 'd'
 
         "ds surround
-        if M[:1] ==# 'ds' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
+        if M[:1] ==? 'ds' | return s:V.Edit.run_normal(M) | endif
 
         "reorder command; D = 'dd'
         let [S, N, D] = s:reorder_cmd(M, r, n, 'd')
@@ -305,7 +305,7 @@ fun! vm#operators#process(op, M, reg, n)
         "for D, d$, dd: ensure there is only one region per line
         if (S == '$' || S == 'd') | call s:G.one_region_per_line() | endif
 
-        if D | call s:V.Edit.run_normal('dd', 0, 1, 0)
+        if D | call s:V.Edit.run_normal('dd', {'recursive': 0})
         else
             let s:correct_word = S ==? 'w'
             call vm#operators#select(1, 1, N.S)
@@ -321,7 +321,7 @@ fun! vm#operators#process(op, M, reg, n)
     elseif a:op ==# 'y'
 
         "ys surround
-        if M[:1] ==? 'ys' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
+        if M[:1] ==? 'ys' | return s:V.Edit.run_normal(M) | endif
 
         "reset dot for yank command
         let s:v.dot = ''
@@ -355,10 +355,10 @@ fun! vm#operators#process(op, M, reg, n)
     elseif a:op ==# 'c'
 
         "cs surround
-        if M[:1] ==? 'cs' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
+        if M[:1] ==? 'cs' | return s:V.Edit.run_normal(M) | endif
 
         "cr coerce (vim-abolish)
-        if M[:1] ==? 'cr' | call s:V.Edit.run_normal(M, 1, 1, 0) | return | endif
+        if M[:1] ==? 'cr' | return s:V.Edit.run_normal(M) | endif
 
         "reorder command; C = 'cc'
         let [S, N, C] = s:reorder_cmd(M, r, n, 'c')

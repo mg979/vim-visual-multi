@@ -90,6 +90,20 @@ fun! s:Global.change_mode(...) dict
     endif
 endfun
 
+"------------------------------------------------------------------------------
+
+fun! s:Global.cursor_mode() dict
+    """Change to cursor mode.
+    if s:X() | call self.change_mode() | endif
+endfun
+
+"------------------------------------------------------------------------------
+
+fun! s:Global.extend_mode() dict
+    """Change to extend mode.
+    if !s:X() | call self.change_mode() | endif
+endfun
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Highlight

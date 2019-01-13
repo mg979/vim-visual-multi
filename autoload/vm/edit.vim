@@ -32,13 +32,13 @@ endfun
 " Ex commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_normal(cmd, recursive, count, maps, ...) dict
-
+fun! s:Edit.run_normal(cmd, ...) dict
+    " optional arg is a dictionary with options
     "-----------------------------------------------------------------------
 
     if a:cmd == -1
         let cmd = input('Normal command? ')
-        if empty(cmd) | call s:F.msg('Command aborted.', 1) | return | endif
+        if empty(cmd) | return s:F.msg('Command aborted.', 1) | endif
 
     elseif a:cmd == '~' && s:X()
         call self.run_visual('~', 0)        | return
@@ -50,17 +50,25 @@ fun! s:Edit.run_normal(cmd, recursive, count, maps, ...) dict
 
     "-----------------------------------------------------------------------
 
-    let c = a:count>1? a:count : ''
-    let s:cmd = a:recursive? ("normal ".c.cmd) : ("normal! ".c.cmd)
-    if s:X() | call s:G.change_mode() | endif
+    " defaults: commands are recursive, count 1, disable buffer mappings
+    let args = { 'recursive': 1, 'count': 1 }
+    if a:0 | call extend(args, a:1) | endif
+    let args.maps = get(args, 'maps', args.recursive)
 
-    call self.before_commands(a:maps)
+    " see if there is a special command to be processed
+    let special = has_key(args, 'special')
+
+    let n     = args.count > 1 ? args.count : ''
+    let s:cmd = args.recursive ? ("normal ".n.cmd) : ("normal! ".n.cmd)
+
+    call s:G.cursor_mode()
+    call self.before_commands(args.maps)
 
     if a:cmd ==? 'x' | call s:bs_del(a:cmd)
-    elseif a:0       | call self._process(0, a:1)
+    elseif special   | call self._process(0, args.special)
     else             | call self._process(s:cmd) | endif
 
-    let g:VM.last_normal = [cmd, a:recursive]
+    let g:VM.last_normal = [cmd, args.recursive]
     call self.after_commands(0)
 endfun
 
@@ -156,7 +164,7 @@ fun! s:Edit.dot() dict
             exe "normal ".dot."z."
 
         elseif dot[1] ==? 's'                   "surround needs run_normal()
-            call self.run_normal(dot, 1, 1, 0)
+            call self.run_normal(dot)
 
         else
             exe "normal ".dot

@@ -214,7 +214,7 @@ fun! s:Insert.stop() dict
     let &synmaxcol = s:v.synmaxcol
 
     "reindent all and adjust cursors position, only if filetype/optioons allow
-    if s:do_reindent() | call s:V.Edit.run_normal('==', 0, 1, 0) | endif
+    if s:do_reindent() | call s:V.Edit.run_normal('==', {'recursive': 0}) | endif
 
     if g:VM_reselect_first_insert
         call s:G.select_region(0)
