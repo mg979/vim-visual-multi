@@ -181,7 +181,7 @@ fun! s:c_cursors(M, reg, n)
     call s:V.Insert.key('a')
 
   elseif index(['ip', 'ap'] + vm#comp#add_line(), S) >= 0
-    call s:V.Edit.run_normal('d'.S, {'count': N})
+    call s:V.Edit.run_normal('d'.S, {'count': N, 'store': a:reg})
     call s:V.Insert.key('O')
 
   elseif S=='$'

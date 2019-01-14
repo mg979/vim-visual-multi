@@ -62,7 +62,7 @@ fun! s:Edit.run_normal(cmd, ...) dict
     call self.before_commands(args.maps)
 
     if a:cmd ==? 'x' | call s:bs_del(a:cmd)
-    else             | call self._process(c, args)
+    else             | call self.process(c, args)
     endif
 
     let g:VM.last_normal = [cmd, args.recursive]
@@ -121,7 +121,7 @@ fun! s:Edit.run_ex(count, ...) dict
 
     call self.before_commands(1)
     for n in range(a:count)
-        call self._process(cmd)
+        call self.process(cmd)
     endfor
     call self.after_commands(0)
 endfun
@@ -136,15 +136,13 @@ fun! s:Edit.run_macro(replace) dict
     call s:F.msg('Macro register? ', 1)
     let reg = nr2char(getchar())
     if reg == "\<esc>"
-        call s:F.msg('Macro aborted.', 0)
-        return | endif
+        return s:F.msg('Macro aborted.', 0)
+    endif
 
-    let s:cmd = "@".reg
     call self.before_commands(1)
+    call s:G.cursor_mode()
 
-    if s:X() | call s:G.change_mode() | endif
-
-    call self.process()
+    call self.process('normal! @'.reg)
     call self.after_commands(0)
 endfun
 
@@ -175,11 +173,10 @@ endfun
 " Region processing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit._process(cmd, ...) dict
+fun! s:Edit.process(cmd, ...) dict
     let size = s:size()    | let s:change = 0 | let cmd = a:cmd  | let s:v.eco = 1
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
-    let special = a:0 && exists('a:1.special')
     let store = a:0 && exists('a:1.store') && a:1.store != "_"
     let stay_put = a:0 && exists('a:1.stay_put')
     let txt = []
@@ -188,28 +185,22 @@ fun! s:Edit._process(cmd, ...) dict
         " used in non-live edit, currently disabled
         if !s:v.auto && r.index == self.skip_index | continue | endif
 
-        "execute command, but also take special cases into account
-        if special
-            call s:special(cmd, r, a:1.special)
+        " update cursor position on the base of previous text changes
+        call r.shift(s:change, s:change)
 
-        else
-            " update cursor position on the base of previous text changes
-            call r.shift(s:change, s:change)
+        " execute command at cursor
+        call cursor(r.l, r.a)
+        exe cmd
 
-            " execute command at cursor
-            call cursor(r.l, r.a)
-            exe cmd
+        " store deleted text during deletions/changes at cursors
+        if store
+            call add(txt, getreg(a:1.store))
+        endif
 
-            " store deleted text during deletions/changes at cursors
-            if store
-                call add(txt, getreg(a:1.store))
-            endif
-
-            " update new cursor position after the command, unless specified
-            if !stay_put
-                let diff = s:F.pos2byte('.') - r.A
-                call r.shift(diff, diff)
-            endif
+        " update new cursor position after the command, unless specified
+        if !stay_put
+            let diff = s:F.pos2byte('.') - r.A
+            call r.shift(diff, diff)
         endif
 
         "update changed size
@@ -241,22 +232,10 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.process(...) dict
-    "arg1: prefix for normal command
-    "arg2: 0 for recursive command
-
-    let cmd = a:0? (a:1."normal".(a:2? "! ":" ").s:cmd)
-            \    : ("normal! ".s:cmd)
-
-    call self._process(cmd)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:Edit.post_process(reselect, ...) dict
 
     if a:reselect
-        if !s:X() | call s:G.change_mode() | endif
+        call s:G.extend_mode()
         for r in s:R()
             call r.shift(a:1, a:1 + s:v.W[r.index])
         endfor
@@ -270,33 +249,6 @@ fun! s:Edit.post_process(reselect, ...) dict
     call s:G.update_and_select_region(pos) | let s:v.storepos = []
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Special processing
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Edit.special(cmd, ...) dict
-    if a:0 | let s:v.merge = 1 | endif
-    call self.before_commands(0)
-    call self._process(a:cmd, {'special': a:cmd})
-    call s:G.merge_regions()
-    call self.after_commands(0)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:special(cmd, r, args)
-    "Some commands need special adjustments while being processed.
-
-    if a:args ==# 'del'
-        " <del> key deletes \n if executed at eol
-        call a:r.shift(s:change, s:change)
-        call cursor(a:r.l, a:r.a)
-        if a:r.a == col([a:r.l, '$']) - 1 | normal! Jx
-        else                              | normal! x
-        endif
-        return 1
-    endif
-endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Extra spaces
@@ -331,10 +283,10 @@ fun! s:Edit.extra_spaces.add(r, ...) dict
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Misc functions
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Before/after processing
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.before_commands(disable_maps) dict
     let s:v.silence = 1 | let s:v.auto = 1 | let s:v.eco = 1
@@ -378,6 +330,9 @@ fun! s:Edit.after_commands(reselect, ...) dict
     endif
 endfun
 
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Helpers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:count(c)
@@ -393,8 +348,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:bs_del(cmd)
-    if s:v.insert | call vm#icmds#x(a:cmd)        | return
-    else          | call s:V.Edit._process(s:cmd) | endif
+    if s:v.insert
+        return vm#icmds#x(a:cmd)
+    else
+        call s:V.Edit.process('normal! '.a:cmd)
+    endif
 
     if a:cmd ==# 'x'
         for r in s:R()

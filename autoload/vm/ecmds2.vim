@@ -52,7 +52,7 @@ endfun
 fun! s:Edit.apply_change() dict
     call s:V.Insert.auto_end()
     let self.skip_index = s:v.index
-    call self._process('normal! .')
+    call self.process('normal! .')
     "reset index to skip
     let self.skip_index = -1
 endfun

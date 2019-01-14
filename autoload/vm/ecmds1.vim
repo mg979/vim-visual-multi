@@ -169,7 +169,7 @@ fun! s:Edit.replace() dict
         call s:F.msg('Replace char... ', 1)
         let char = nr2char(getchar())
         if char ==? "\<esc>" | call s:F.msg('Canceled.', 1) | return | endif
-        call self.run_normal('r'.char, {'recursive': 0})
+        call self.run_normal('r'.char, {'recursive': 0, 'stay_put': 1})
         call s:F.count_msg(1)
     endif
 endfun
