@@ -55,14 +55,15 @@ fun! s:Edit.run_normal(cmd, ...) dict
     if a:0 | call extend(args, a:1) | endif
     let args.maps = get(args, 'maps', args.recursive)
 
-    let n     = args.count > 1 ? args.count : ''
-    let s:cmd = args.recursive ? ("normal ".n.cmd) : ("normal! ".n.cmd)
+    let n = args.count > 1 ? args.count : ''
+    let c = args.recursive ? ("normal ".n.cmd) : ("normal! ".n.cmd)
 
     call s:G.cursor_mode()
     call self.before_commands(args.maps)
 
     if a:cmd ==? 'x' | call s:bs_del(a:cmd)
-    else             | call self._process(s:cmd, args) | endif
+    else             | call self._process(c, args)
+    endif
 
     let g:VM.last_normal = [cmd, args.recursive]
     call self.after_commands(0)
@@ -116,7 +117,7 @@ fun! s:Edit.run_ex(count, ...) dict
     endif
 
     let g:VM.last_ex = cmd
-    if s:X() | call s:G.change_mode() | endif
+    call s:G.cursor_mode()
 
     call self.before_commands(1)
     for n in range(a:count)
@@ -159,7 +160,7 @@ fun! s:Edit.dot() dict
             let dot = 'd'.dot[1:]
             exe "normal ".dot."z."
 
-        elseif dot[1] ==? 's'                   "surround
+        elseif dot[1] ==? 's'                   "surround (ys, ds, cs)
             call self.run_normal(dot, {'maps': 0})
 
         else

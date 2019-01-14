@@ -51,9 +51,8 @@ endfun
 
 fun! s:Edit.apply_change() dict
     call s:V.Insert.auto_end()
-    let s:cmd = '.'
     let self.skip_index = s:v.index
-    call self.process()
+    call self._process('normal! .')
     "reset index to skip
     let self.skip_index = -1
 endfun
@@ -70,8 +69,9 @@ fun! s:Edit.surround() dict
     let c = nr2char(getchar())
 
     "not possible
-    if c == '<' || c == '>' | call s:F.msg('Not possible. Use visual command (zv) instead. ', 1)
-        return | endif
+    if c == '<' || c == '>'
+        return s:F.msg('Not possible. Use visual command (zv) instead. ', 1)
+    endif
 
     nunmap <buffer> S
 
@@ -127,8 +127,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.align() dict
-    if s:v.multiline | return                  | endif
-    if s:X()         | call s:G.change_mode()  | endif
+    if s:v.multiline
+        return s:F.msg('Not possible, multiline is enabled.') | endif
+    call s:G.cursor_mode()
 
     normal D
     let s:v.silence = 1

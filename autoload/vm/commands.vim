@@ -591,8 +591,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#merge_to_beol(eol, this)
-    if s:F.no_regions() | return                  | endif
-    if s:X()            | call s:G.change_mode()  | endif
+    if s:F.no_regions() | return | endif
+    call s:G.cursor_mode()
 
     let s:v.motion = a:eol? "\<End>" : '^'
     let s:v.merge = 1
@@ -617,8 +617,8 @@ endfun
 
 fun! vm#commands#shrink_or_enlarge(shrink, this)
     """Reduce/enlarge selection size by 1."""
-    if s:F.no_regions() | return                  | endif
-    if !s:X()           | call s:G.change_mode()  | endif
+    if s:F.no_regions() | return | endif
+    call s:G.extend_mode()
 
     let dir = s:v.direction
 
@@ -743,7 +743,7 @@ fun! vm#commands#align()
 endfun
 
 fun! vm#commands#align_char(count)
-    if s:X() | call s:G.change_mode() | endif
+    call s:G.cursor_mode()
 
     let s:v.restore_index = s:v.index
     let winline      = winline()
@@ -784,7 +784,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#align_regex()
-    if s:X() | call s:G.change_mode() | endif
+    call s:G.cursor_mode()
     let s:v.restore_index = s:v.index
     let winline      = winline()
 
