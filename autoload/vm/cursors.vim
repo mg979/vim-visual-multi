@@ -98,18 +98,21 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:d_cursors(M, reg, n)
-  let M = a:M | let reg = a:reg | let r = '"'.reg | let n = a:n
+  let M = a:M | let r = '"'.a:reg
 
   "ds surround
   if M[:1] ==# 'ds' | return s:V.Edit.run_normal(M, {'maps': 0}) | endif
 
-  "reorder command; D = 'dd'
-  let [S, N, DD] = s:reorder_cmd(M, r, n, 'd')
+  "reorder command; DD = 'dd'
+  let [S, N, DD] = s:reorder_cmd(M, r, a:n, 'd')
 
   "for D, d$, dd: ensure there is only one region per line
   if (S == '$' || S == 'd') | call s:G.one_region_per_line() | endif
 
-  call s:V.Edit.run_normal('d'.S, {'count': N, 'store': a:reg})
+  "no matter the entered register, we're using default register
+  "we're passing the register in the options dictionary instead
+  "fill_register function will be called and take care of it, if appropriate
+  call s:V.Edit.run_normal('"'.s:v.def_reg.'d'.S, {'count': N, 'store': a:reg})
   call s:G.merge_regions()
 endfun
 
@@ -118,7 +121,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:y_cursors(M, reg, n)
-  let M = a:M | let reg = a:reg | let r = '"'.reg | let n = a:n
+  let M = a:M | let r = '"'.a:reg
 
   "ys surround
   if M[:1] ==? 'ys' | return s:V.Edit.run_normal(M, {'maps': 0}) | endif
@@ -129,7 +132,7 @@ fun! s:y_cursors(M, reg, n)
   call s:G.change_mode()
 
   "reorder command; Y = 'yy'
-  let [S, N, YY] = s:reorder_cmd(M, r, n, 'y')
+  let [S, N, YY] = s:reorder_cmd(M, r, a:n, 'y')
 
   "for Y, y$, yy, ensure there is only one region per line
   if (S == '$' || S == 'y') | call s:G.one_region_per_line() | endif
@@ -144,7 +147,7 @@ fun! s:y_cursors(M, reg, n)
   else
     call vm#operators#select(1, 1, N.S)
     if s:back(S) | exe "normal h" | endif
-    call feedkeys("\"".reg.'y')
+    call feedkeys("\"".a:reg.'y')
   endif
 endfun
 
@@ -153,7 +156,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:c_cursors(M, reg, n)
-  let M = a:M | let reg = a:reg | let r = '"'.reg | let n = a:n
+  let M = a:M | let r = '"'.a:reg
 
   "cs surround
   if M[:1] ==? 'cs' | return s:V.Edit.run_normal(M, {'maps': 0}) | endif
@@ -161,8 +164,8 @@ fun! s:c_cursors(M, reg, n)
   "cr coerce (vim-abolish)
   if M[:1] ==? 'cr' | return s:V.Edit.run_normal(M, {'maps': 0}) | endif
 
-  "reorder command; C = 'cc'
-  let [S, N, CC] = s:reorder_cmd(M, r, n, 'c')
+  "reorder command; CC = 'cc'
+  let [S, N, CC] = s:reorder_cmd(M, r, a:n, 'c')
 
   "convert w,W to e,E (if motions), also in dot
   if     S ==# 'w' | let S = 'e' | call substitute(s:v.dot, 'w', 'e', '')
@@ -171,8 +174,11 @@ fun! s:c_cursors(M, reg, n)
   "for c$, cc, ensure there is only one region per line
   if (S == '$' || S == 'c') | call s:G.one_region_per_line() | endif
 
+  "replace c with d because we're doing a delete followed by multi insert
   let S = substitute(S, '^c', 'd', '')
-  let reg = reg != s:v.def_reg? reg : "_"
+
+  "we're using _ register, unless a register has been specified
+  let reg = a:reg != s:v.def_reg? a:reg : "_"
 
   if CC
     call vm#operators#select(1, 1, '$')
@@ -181,7 +187,7 @@ fun! s:c_cursors(M, reg, n)
     call s:V.Insert.key('a')
 
   elseif index(['ip', 'ap'] + vm#comp#add_line(), S) >= 0
-    call s:V.Edit.run_normal('d'.S, {'count': N, 'store': a:reg})
+    call s:V.Edit.run_normal('"'.s:v.def_reg.'d'.S, {'count': N, 'store': reg})
     call s:V.Insert.key('O')
 
   elseif S=='$'
@@ -190,7 +196,7 @@ fun! s:c_cursors(M, reg, n)
     call s:V.Insert.key('a')
 
   else
-    call s:V.Edit.run_normal('d'.S, {'count': N, 'store': a:reg})
+    call s:V.Edit.run_normal('"'.s:v.def_reg.'d'.S, {'count': N, 'store': reg})
     call s:G.merge_regions()
     call feedkeys("i")
   endif

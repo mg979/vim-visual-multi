@@ -194,7 +194,7 @@ fun! s:Edit.process(cmd, ...) dict
 
         " store deleted text during deletions/changes at cursors
         if store
-            call add(txt, getreg(a:1.store))
+            call add(txt, getreg(s:v.def_reg))
         endif
 
         " update new cursor position after the command, unless specified
@@ -209,7 +209,8 @@ fun! s:Edit.process(cmd, ...) dict
 
     " fill VM register after deletions/changes at cursors
     if store
-        call self.fill_register(a:1.store, txt, 0)
+        let hard = g:VM_overwrite_vim_registers || ( a:1.store == s:v.def_reg )
+        call self.fill_register(a:1.store, txt, hard)
     endif
 endfun
 
