@@ -80,7 +80,7 @@ fun! s:select(cmd)
     for r in Rs
         call cursor(r[0], r[1])
         exe "normal ".a:cmd
-        call s:get_region()
+        call s:get_region(0)
     endfor
 
     call s:V.Maps.enable()
@@ -99,13 +99,15 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:get_region()
+fun! s:get_region(add_pattern)
     """Create region with select operator.
     let R = s:G.is_region_at_pos('.')
     if !empty(R) | return R | endif
 
     let R = vm#region#new(0)
-    call s:V.Search.add_if_empty()
+    if a:add_pattern
+        call s:V.Search.add_if_empty()
+    endif
     call s:F.restore_reg()
     return R
 endfun
@@ -182,7 +184,7 @@ fun! vm#operators#after_yank()
             let s:v.visual_regex = 0
         else
             "select operator
-            call s:get_region()
+            call s:get_region(1)
             let R = s:G.select_region_at_pos('.')
             call s:G.check_mutliline(0, R)
         endif
