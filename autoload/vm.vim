@@ -120,7 +120,9 @@ fun! vm#init_buffer(empty, ...)
     set ww=h,l,<,>
     set lz
     set nofoldenable
-    let &ch = get(g:, 'VM_cmdheight', 2)
+    if !g:VM_manual_infoline
+      let &ch = get(g:, 'VM_cmdheight', 2)
+    endif
 
     if !empty(g:VM_highlight_matches)
         if !has_key(g:VM, 'Search')
