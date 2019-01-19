@@ -57,8 +57,6 @@ fun! vm#icmds#cw()
     for r in s:R()
         if s:eol(r)
             call s:V.Edit.extra_spaces.add(r, 1)
-            call r.shift(2+n,2+n)
-            let n += 2
         endif
     endfor
     call vm#operators#select(1, 1, 'b')

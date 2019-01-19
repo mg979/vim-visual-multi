@@ -1,0 +1,18 @@
+fun! s:d_cursors(M, reg, n)
+  let M = a:M | let r = '"'.a:reg
+
+  "ds surround
+  if M[:1] ==# 'ds' | return s:V.Edit.run_normal(M, {'maps': 0}) | endif
+
+  "reorder command; DD = 'dd'
+  let [S, N, DD] = s:reorder_cmd(M, r, a:n, 'd')
+
+  "for D, d$, dd: ensure there is only one region per line
+  if (S == '$' || S == 'd') | call s:G.one_region_per_line() | endif
+
+  "no matter the entered register, we're using default register
+  "we're passing the register in the options dictionary instead
+  "fill_register function will be called and take care of it, if appropriate
+  call s:V.Edit.run_normal('"'.s:v.def_reg.'d'.S, {'count': N, 'store': a:reg})
+  call s:G.merge_regions()
+endfun

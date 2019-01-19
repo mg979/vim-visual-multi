@@ -1,0 +1,23 @@
+# operations at cursors #2
+keys('\<C-Down>wwD\<Esc>')
+keys('jj^\<C-Down>C')
+keys('\<C-v>')
+keys('\<C-w>')
+keys('\<C-w>')
+keys('\<C-w>')
+keys('\<Esc>')
+keys('\<Esc>')
+
+keys('jj^')
+keys('g/c..')
+keys('\<CR>')
+keys(']zN')
+keys('/ ')
+keys('\<CR>')
+keys('\<Esc>')
+
+keys('jj^\<C-Down>fd')
+keys('sEE~o\<Tab>wC')
+keys('ciao')
+keys('\<Esc>')
+keys('\<Esc>')
