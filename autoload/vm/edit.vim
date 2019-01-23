@@ -61,7 +61,7 @@ fun! s:Edit.run_normal(cmd, ...) dict
     call s:G.cursor_mode()
     call self.before_commands(args.maps)
 
-    if a:cmd ==? 'x' | call s:bs_del(a:cmd)
+    if a:cmd ==? 'x' | call s:bs_del(n.a:cmd)
     else             | call self.process(c, args)
     endif
 

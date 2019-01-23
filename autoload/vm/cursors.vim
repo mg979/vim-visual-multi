@@ -10,7 +10,7 @@ fun! vm#cursors#operation(op, n, register, ...)
   "shortcut for command in a:1
   if a:0 | call vm#cursors#process(a:op, a:1, reg, 0) | return | endif
 
-  let s =       a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
+  let s = a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
         \ a:op==#'c'? [['Change ', hl1], ['([n] c/w/e/b/$...) ?  ',   hl2]] :
         \ a:op==#'y'? [['Yank   ', hl1], ['([n] y/w/e/b/$...) ?  ',   hl2]] : 'Aborted.'
 
@@ -146,7 +146,9 @@ fun! s:y_cursors(M, reg, n)
     call feedkeys('y')
   else
     call vm#operators#select(1, 1, N.S)
-    if s:back(S) | exe "normal h" | endif
+    if s:back(S)
+        normal h
+    endif
     call feedkeys("\"".a:reg.'y')
   endif
 endfun

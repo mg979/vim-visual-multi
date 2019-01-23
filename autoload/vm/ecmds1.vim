@@ -71,9 +71,7 @@ fun! s:Edit.delete(X, register, count, hard) dict
         call cursor(r.l, r.a)
         normal! m[
         call cursor(r.L, r.b>1? r.b+1 : 1)
-        normal! m]
-
-        exe "normal! `[d`]"
+        normal! m]`["_d`]
 
         "update changed size
         let change = s:size() - size

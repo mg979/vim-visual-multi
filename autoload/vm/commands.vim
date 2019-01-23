@@ -53,7 +53,10 @@ endfun
 fun! vm#commands#add_cursor_at_word(yank, search)
     call s:init(0, 1, 0)
 
-    if a:yank   | call s:yank(0)      | exe "keepjumps normal! `[" | endif
+    if a:yank
+        call s:yank(0)
+        keepjumps normal! `[
+    endif
     if a:search | call s:Search.add() | endif
 
     let R = s:G.new_cursor() | let R.pat = s:v.search[0]
@@ -226,7 +229,9 @@ fun! vm#commands#find_by_regex(mode)
     let s:v.using_regex = a:mode
 
     "if visual regex, reposition cursor to the beginning of the selection
-    if a:mode == 2 | exe "keepjumps normal! `<" | endif
+    if a:mode == 2
+        keepjumps normal! `<
+    endif
 
     "store reg and position, to check if the search will be aborted
     let s:regex_pos = getpos('.') | let s:regex_reg = @/
