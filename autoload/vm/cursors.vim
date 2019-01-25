@@ -189,7 +189,7 @@ fun! s:c_cursors(M, reg, n)
     call s:V.Insert.key('a')
 
   elseif index(['ip', 'ap'] + vm#comp#add_line(), S) >= 0
-    call s:V.Edit.run_normal('"'.s:v.def_reg.'d'.S, {'count': N, 'store': reg})
+    call s:V.Edit.run_normal('"'.reg.'d'.S, {'count': N, 'store': reg})
     call s:V.Insert.key('O')
 
   elseif S=='$'
@@ -197,8 +197,12 @@ fun! s:c_cursors(M, reg, n)
     call s:V.Edit.delete(1, reg, 1, 0)
     call s:V.Insert.key('a')
 
+  elseif S==?'e'
+    call vm#operators#select(1, 1, N.S)
+    call feedkeys("c")
+
   else
-    call s:V.Edit.run_normal('"'.s:v.def_reg.'d'.S, {'count': N, 'store': reg})
+    call s:V.Edit.run_normal('"'.reg.'d'.S, {'count': N, 'store': reg})
     call s:G.merge_regions()
     call feedkeys("i")
   endif

@@ -213,7 +213,7 @@ fun! vm#plugs#init()
     "mouse
     nmap            <Plug>(VM-Mouse-Cursor)            <LeftMouse>g<Space>
     nmap            <Plug>(VM-Mouse-Word)              <LeftMouse><Plug>(VM-Find-Under)
-    nmap            <Plug>(VM-Mouse-Column)            :call vm#commands#mouse_column()<cr>
+    nnoremap        <Plug>(VM-Mouse-Column)            :call vm#commands#mouse_column()<cr>
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
