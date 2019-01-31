@@ -1,7 +1,7 @@
 let s:Themes = {}
 
 fun! vm#themes#init()
-  if !exists('g:VM') | return | endif
+  if !exists('g:Vm') | return | endif
   let default = &background == 'light' ? 'lightblue1' : 'blue1'
   let theme = get(g:, 'VM_theme', 'default')
 

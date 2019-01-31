@@ -127,7 +127,7 @@ fun! vm#init_buffer(empty, ...)
     endif
 
     if !empty(g:VM_highlight_matches)
-        if !has_key(g:VM, 'Search')
+        if !has_key(g:Vm, 'Search')
             call vm#themes#init()
         endif
         hi clear Search
@@ -187,7 +187,7 @@ fun! vm#reset(...)
         exe "hi! Search ".g:Vm.search_hi
     endif
 
-    if g:Vm.oldupdate && &updatetime != g:VM.oldupdate
+    if g:Vm.oldupdate && &updatetime != g:Vm.oldupdate
       let &updatetime = g:Vm.oldupdate
     endif
 
