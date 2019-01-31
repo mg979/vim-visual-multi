@@ -187,6 +187,10 @@ fun! vm#reset(...)
         exe "hi! Search ".g:Vm.search_hi
     endif
 
+    if g:Vm.oldupdate && &updatetime != g:VM.oldupdate
+      let &updatetime = g:Vm.oldupdate
+    endif
+
     if !empty(matches)
         call setmatches(matches)
     endif

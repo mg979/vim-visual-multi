@@ -94,7 +94,7 @@ fun! s:select(cmd)
     nmap <silent> <nowait> <buffer> y               <Plug>(VM-Yank)
 
     if empty(s:v.search) | let @/ = '' | endif
-    call s:updatetime()
+    call s:old_updatetime()
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -189,9 +189,7 @@ fun! vm#operators#after_yank()
             call s:G.check_mutliline(0, R)
         endif
 
-        if g:Vm.oldupdate
-          let &updatetime = g:Vm.oldupdate
-        endif
+        call s:old_updatetime()
         nmap <silent> <nowait> <buffer> y <Plug>(VM-Yank)
     endif
 endfun
@@ -203,8 +201,15 @@ endfun
 fun! s:updatetime()
     """If not using TextYankPost, use CursorHold and reduce &updatetime.
     if g:Vm.oldupdate
-        let &updatetime = 10
+        let &updatetime = 100
     endif
+endfun
+
+fun! s:old_updatetime()
+  """Restore old &updatetime value.
+  if g:Vm.oldupdate
+    let &updatetime = g:Vm.oldupdate
+  endif
 endfun
 
 if v:version >= 800
