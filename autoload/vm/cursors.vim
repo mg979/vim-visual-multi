@@ -197,9 +197,18 @@ fun! s:c_cursors(M, reg, n)
     call s:V.Edit.delete(1, reg, 1, 0)
     call s:V.Insert.key('a')
 
-  elseif S==?'e'
+  elseif S=='l'
+    let oldmultiline = s:v.multiline
+    let s:v.multiline = 1
     call vm#operators#select(1, 1, N.S)
-    call feedkeys("c")
+    call vm#commands#motion('h', 1, 0, 0)
+    let s:v.multiline = 0
+    call feedkeys('"'.reg."c")
+    let s:v.multiline = oldmultiline
+
+  elseif s:forw(S)
+    call vm#operators#select(1, 1, N.S)
+    call feedkeys('"'.reg."c")
 
   else
     call s:V.Edit.run_normal('"'.reg.'d'.S, {'count': N, 'store': reg})
@@ -227,6 +236,7 @@ endfun
 
 if v:version >= 800
   let s:R      = { -> s:V.Regions                                           }
+  let s:forw   = { c -> index(split('weWE%', '\zs'), c) >= 0                }
   let s:back   = { c -> index(split('FThbB0N^{(', '\zs'), c[0]) >= 0        }
   let s:ia     = { c -> index(['i', 'a'], c) >= 0                           }
   let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }

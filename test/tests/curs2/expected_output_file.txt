@@ -10,9 +10,9 @@ fun!
   "for D, D$, DD: ciao
   if (S == '$' || S == 'D') | ciao
 
-  "no matter the entered register, we're using default register
-  "we're passing the register in the options dictionary instead
-  "fill_register function will be called and take care of it, if appropriate
+  "no matter the entered register, we're using defau c2E
+  "we're passing the register in the options diction c2E
+  "fill_register function will be called and take ca c2E it, if appropriate
   call s:V.Edit.run_normal('"'.s:v.def_reg.'d'.S, {'count': N, 'store': a:reg})
   call s:G.merge_regions()
 endfun

@@ -189,7 +189,9 @@ fun! vm#operators#after_yank()
             call s:G.check_mutliline(0, R)
         endif
 
-        call s:updatetime()
+        if g:VM.oldupdate
+          let &updatetime = g:VM.oldupdate
+        endif
         nmap <silent> <nowait> <buffer> y <Plug>(VM-Yank)
     endif
 endfun
@@ -199,7 +201,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:updatetime()
-    """Restore &updatetime if not using TextYankPost.
+    """If not using TextYankPost, use CursorHold and reduce &updatetime.
     if g:VM.oldupdate
         let &updatetime = 10
     endif
