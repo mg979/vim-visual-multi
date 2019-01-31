@@ -3,10 +3,10 @@ fun! vm#block#init()
     let s:v       = s:V.Vars
     let s:G       = s:V.Global
 
-    let s:X    = { -> g:VM.extend_mode }
+    let s:X    = { -> g:Vm.extend_mode }
     let s:R    = { -> s:V.Regions }
-    let s:B    = { -> s:v.block_mode && g:VM.extend_mode }
-    let s:is_r = { -> g:VM.is_active && !empty(s:G.is_region_at_pos('.')) }
+    let s:B    = { -> s:v.block_mode && g:Vm.extend_mode }
+    let s:is_r = { -> g:Vm.is_active && !empty(s:G.is_region_at_pos('.')) }
 
     return s:Block
 endfun

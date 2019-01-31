@@ -55,7 +55,7 @@ let s:base = {
 fun! vm#maps#all#permanent()
     """Default permanent mappings dictionary."""
     let maps = s:base
-    let leader = g:VM.leader
+    let leader = g:Vm.leader
 
     " map <c-n> in any case
     let maps["Find Under"][0]               = '<C-n>'
@@ -90,7 +90,7 @@ fun! vm#maps#all#buffer()
     """Default buffer mappings dictionary."""
 
     let maps = {}
-    let leader = g:VM.leader
+    let leader = g:Vm.leader
 
     "s
     call extend(maps, {

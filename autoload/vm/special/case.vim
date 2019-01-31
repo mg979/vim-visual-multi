@@ -5,7 +5,7 @@
 fun! vm#special#case#init()
   let s:V       = b:VM_Selection
 
-  let s:X    = { -> g:VM.extend_mode }
+  let s:X    = { -> g:Vm.extend_mode }
   let s:R    = { -> s:V.Regions }
 
   return s:Case
@@ -128,7 +128,7 @@ fun! s:Case.convert(type) dict
     normal siw
   endif
 
-  let text = [] | let g:VM.registers['"'] = text
+  let text = [] | let g:Vm.registers['"'] = text
   for r in s:R()
     call add(text, eval("self.".a:type."(r.txt)"))
   endfor

@@ -11,7 +11,7 @@ fun! vm#ecmds1#init()
     let s:F       = s:V.Funcs
 
     let s:R       = { -> s:V.Regions                  }
-    let s:X       = { -> g:VM.extend_mode             }
+    let s:X       = { -> g:Vm.extend_mode             }
     let s:size    = { -> line2byte(line('$') + 1)     }
     let s:min     = { nr -> s:X() && len(s:R()) >= nr }
 
@@ -96,14 +96,14 @@ endfun
 fun! s:Edit.paste(before, vim_reg, reselect, register, ...) dict
     let X                = s:X()
     let s:v.use_register = a:register
-    let vim_reg          = a:vim_reg || !has_key(g:VM.registers, a:register) ||
-                           \empty(g:VM.registers[a:register])
+    let vim_reg          = a:vim_reg || !has_key(g:Vm.registers, a:register) ||
+                           \empty(g:Vm.registers[a:register])
 
     if empty(s:v.old_text) | let s:v.old_text = s:G.regions_text() | endif
 
     if a:0         | let s:v.new_text = a:1
     elseif vim_reg | let s:v.new_text = self.convert_vimreg(a:vim_reg)
-    else           | let s:v.new_text = s:fix_regions_text(g:VM.registers[a:register]) | endif
+    else           | let s:v.new_text = s:fix_regions_text(g:Vm.registers[a:register]) | endif
 
     if X | call self.delete(1, "_", 1, 0) | endif
 
@@ -305,7 +305,7 @@ fun! s:Edit.fill_register(reg, text, hard) dict
     let text = a:text
     let maxw = max(map(copy(text), 'len(v:val)'))
 
-    let g:VM.registers[a:reg] = text
+    let g:Vm.registers[a:reg] = text
     let type = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
 
     "vim register is overwritten if unnamed, or if hard yank

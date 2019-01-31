@@ -1,6 +1,6 @@
-let s:X          = { -> g:VM.extend_mode }
-let s:B          = { -> g:VM.is_active && s:v.block_mode && g:VM.extend_mode }
-let s:is_r       = { -> g:VM.is_active && !empty(s:G.is_region_at_pos('.')) }
+let s:X          = { -> g:Vm.extend_mode }
+let s:B          = { -> g:Vm.is_active && s:v.block_mode && g:Vm.extend_mode }
+let s:is_r       = { -> g:Vm.is_active && !empty(s:G.is_region_at_pos('.')) }
 let s:first_line = { -> line('.') == 1 }
 let s:last_line  = { -> line('.') == line('$') }
 
@@ -21,10 +21,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:init(whole, empty, extend_mode)
-    if a:extend_mode | let g:VM.extend_mode = 1 | endif
+    if a:extend_mode | let g:Vm.extend_mode = 1 | endif
 
     "return true if already initialized
-    if g:VM.is_active
+    if g:Vm.is_active
         call s:F.Scroll.get()
         if s:v.using_regex | call vm#commands#regex_reset() | endif
         let s:v.whole_word = a:whole
@@ -146,7 +146,7 @@ fun! vm#commands#erase_regions(...)
     """Clear all regions, but stay in visual-multi mode.
 
     "empty start
-    if !g:VM.is_active | call s:init(0,1,0) | return | endif
+    if !g:Vm.is_active | call s:init(0,1,0) | return | endif
 
     call s:G.remove_highlight()
     let s:V.Regions = []
@@ -209,7 +209,7 @@ fun! vm#commands#regex_done()
 
     if s:v.visual_regex
         call s:Search.get_slash_reg()
-        let g:VM.selecting = 1 | let s:v.finding = 1
+        let g:Vm.selecting = 1 | let s:v.finding = 1
         silent keepjumps normal! gvy
         return
 
@@ -225,7 +225,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_by_regex(mode)
-    if !g:VM.is_active | call s:init(0, 0, 1) | endif
+    if !g:Vm.is_active | call s:init(0, 0, 1) | endif
     let s:v.using_regex = a:mode
 
     "if visual regex, reposition cursor to the beginning of the selection
@@ -565,7 +565,7 @@ endfun
 fun! vm#commands#motion(motion, count, select, this)
 
     "create cursor if needed
-    if !g:VM.is_active      | call s:init(0, 1, 1)     | call s:G.new_cursor()
+    if !g:Vm.is_active      | call s:init(0, 1, 1)     | call s:G.new_cursor()
     elseif s:F.no_regions() || ( a:this && !s:is_r() ) | call s:G.new_cursor() | endif
 
     "-----------------------------------------------------------------------
@@ -575,7 +575,7 @@ fun! vm#commands#motion(motion, count, select, this)
     "-----------------------------------------------------------------------
 
     if s:symbol()          | let s:v.merge = 1          | endif
-    if a:select && !s:X()  | let g:VM.extend_mode = 1   | endif
+    if a:select && !s:X()  | let g:Vm.extend_mode = 1   | endif
 
     if a:select && !s:v.multiline && s:vertical()
         call s:F.toggle_option('multiline') | endif

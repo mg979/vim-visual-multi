@@ -13,8 +13,8 @@ fun! vm#operators#init()
 endfun
 
 fun! s:init()
-    let g:VM.extend_mode = 1
-    if !g:VM.is_active       | call vm#init_buffer(0) | endif
+    let g:Vm.extend_mode = 1
+    if !g:Vm.is_active       | call vm#init_buffer(0) | endif
 endfun
 
 fun! vm#operators#select(all, count, ...)
@@ -22,7 +22,7 @@ fun! vm#operators#select(all, count, ...)
     call s:init()
 
     if !a:all
-        let g:VM.selecting = 1
+        let g:Vm.selecting = 1
         call s:updatetime()
         silent! nunmap <buffer> y
         return
@@ -120,7 +120,7 @@ endfun
 fun! vm#operators#find(start, visual, ...)
 
     if a:start
-        if !g:VM.is_active
+        if !g:Vm.is_active
             call s:init()
             if a:visual
                 "use search register if just starting from visual mode
@@ -139,7 +139,7 @@ fun! vm#operators#find(start, visual, ...)
 
         call s:updatetime()
         let s:v.finding = 1
-        let g:VM.selecting = 1
+        let g:Vm.selecting = 1
         silent! nunmap <buffer> y
         return 'y'
     endif
@@ -174,8 +174,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#operators#after_yank()
-    if g:VM.selecting
-        let g:VM.selecting = 0
+    if g:Vm.selecting
+        let g:Vm.selecting = 0
 
         "find operator
         if s:v.finding
@@ -189,8 +189,8 @@ fun! vm#operators#after_yank()
             call s:G.check_mutliline(0, R)
         endif
 
-        if g:VM.oldupdate
-          let &updatetime = g:VM.oldupdate
+        if g:Vm.oldupdate
+          let &updatetime = g:Vm.oldupdate
         endif
         nmap <silent> <nowait> <buffer> y <Plug>(VM-Yank)
     endif
@@ -202,7 +202,7 @@ endfun
 
 fun! s:updatetime()
     """If not using TextYankPost, use CursorHold and reduce &updatetime.
-    if g:VM.oldupdate
+    if g:Vm.oldupdate
         let &updatetime = 10
     endif
 endfun

@@ -4,10 +4,10 @@ fun! vm#region#init()
     let s:G       = s:V.Global
     let s:F       = s:V.Funcs
 
-    let s:X    = {     -> g:VM.extend_mode                   }
+    let s:X    = {     -> g:Vm.extend_mode                   }
     let s:R    = {     -> s:V.Regions                        }
     let s:lcol = { ln  -> len(getline(ln))                   }
-    let s:B    = {     -> s:v.block_mode && g:VM.extend_mode }
+    let s:B    = {     -> s:v.block_mode && g:Vm.extend_mode }
 endfun
 
 
@@ -42,7 +42,7 @@ fun! vm#region#new(cursor, ...)
 
     let cursor = a:cursor || ( a:0 && c==d && a==b )          "cursor or region?
 
-    if !g:VM.is_active | call vm#init_buffer(cursor) | endif  "activate if needed
+    if !g:Vm.is_active | call vm#init_buffer(cursor) | endif  "activate if needed
 
     if !a:0 | let R = s:Region.new(cursor)                    "create region
     else    | let R = s:Region.new(0, a, b, c, d)
@@ -453,7 +453,7 @@ fun! s:Region.highlight() dict
 
     "build a list of highlight entries, one for each possible line
     for line in region
-        call add(R.matches.region, matchaddpos(g:VM.hi.extend, [line], 30))
+        call add(R.matches.region, matchaddpos(g:Vm.hi.extend, [line], 30))
     endfor
     let R.matches.cursor = matchaddpos('MultiCursor', [cursor], 40)
 endfun

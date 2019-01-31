@@ -15,17 +15,17 @@ fun! vm#themes#init()
     redir => out
     silent! highlight Search
     redir END
-    let g:VM.search_hi = substitute(out, '^.*xxx ', '', '')
-    let g:VM.Search = g:VM_highlight_matches == 'underline' ? 'hi Search term=underline cterm=underline gui=underline' :
+    let g:Vm.search_hi = substitute(out, '^.*xxx ', '', '')
+    let g:Vm.Search = g:VM_highlight_matches == 'underline' ? 'hi Search term=underline cterm=underline gui=underline' :
           \           g:VM_highlight_matches == 'red'       ? 'hi Search ctermfg=196 guifg=#ff0000' : g:VM_highlight_matches
   endif
 
   if theme == 'default'
-    let g:VM.hi.extend  = get(g:, 'VM_Selection_hl',     'Visual')
-    let g:VM.hi.mono    = get(g:, 'VM_Mono_Cursor_hl',   'DiffChange')
-    let g:VM.hi.insert  = get(g:, 'VM_Ins_Mode_hl',      'Pmenu')
-    let g:VM.hi.cursor  = get(g:, 'VM_Normal_Cursor_hl', 'ToolbarLine')
-    exe "highlight link MultiCursor ".g:VM.hi.cursor
+    let g:Vm.hi.extend  = get(g:, 'VM_Selection_hl',     'Visual')
+    let g:Vm.hi.mono    = get(g:, 'VM_Mono_Cursor_hl',   'DiffChange')
+    let g:Vm.hi.insert  = get(g:, 'VM_Ins_Mode_hl',      'Pmenu')
+    let g:Vm.hi.cursor  = get(g:, 'VM_Normal_Cursor_hl', 'ToolbarLine')
+    exe "highlight link MultiCursor ".g:Vm.hi.cursor
     return
   endif
 
@@ -33,10 +33,10 @@ fun! vm#themes#init()
   exe "highlight VM_Mono"   s:Themes[theme].mono
   exe "highlight VM_Insert" s:Themes[theme].insert
   exe "highlight VM_Cursor" s:Themes[theme].cursor
-  let g:VM.hi.extend  = 'VM_Extend'
-  let g:VM.hi.mono    = 'VM_Mono'
-  let g:VM.hi.insert  = 'VM_Insert'
-  let g:VM.hi.cursor  = 'VM_Cursor'
+  let g:Vm.hi.extend  = 'VM_Extend'
+  let g:Vm.hi.mono    = 'VM_Mono'
+  let g:Vm.hi.insert  = 'VM_Insert'
+  let g:Vm.hi.cursor  = 'VM_Cursor'
   highlight link MultiCursor VM_Cursor
 endfun
 

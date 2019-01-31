@@ -11,7 +11,7 @@ fun! vm#ecmds2#init()
     let s:F       = s:V.Funcs
 
     let s:R       = { -> s:V.Regions                  }
-    let s:X       = { -> g:VM.extend_mode             }
+    let s:X       = { -> g:Vm.extend_mode             }
     let s:size    = { -> line2byte(line('$') + 1)     }
     let s:min     = { nr -> s:X() && len(s:R()) >= nr }
 
@@ -110,15 +110,15 @@ fun! s:Edit.transpose() dict
 
     "non-inline transposition
     if !inline
-        let t = remove(g:VM.registers[s:v.def_reg], 0)
-        call add(g:VM.registers[s:v.def_reg], t)
+        let t = remove(g:Vm.registers[s:v.def_reg], 0)
+        call add(g:Vm.registers[s:v.def_reg], t)
         call self.paste(1, 0, 1, '"')
         return | endif
 
     "inline transpositions
     for l in klines
-        let t = remove(g:VM.registers[s:v.def_reg], rlines[l][-1])
-        call insert(g:VM.registers[s:v.def_reg], t, rlines[l][0])
+        let t = remove(g:Vm.registers[s:v.def_reg], rlines[l][-1])
+        call insert(g:Vm.registers[s:v.def_reg], t, rlines[l][0])
     endfor
     call self.delete(1, "_", 0, 0)
     call self.paste(1, 0, 1, '"')
@@ -134,7 +134,7 @@ fun! s:Edit.align() dict
     normal D
     let s:v.silence = 1
     let max = max(map(copy(s:R()), 'virtcol([v:val.l, v:val.a])'))
-    let reg = g:VM.registers[s:v.def_reg]
+    let reg = g:Vm.registers[s:v.def_reg]
     for r in s:R()
         let s = ''
         while len(s) < (max - virtcol([r.l, r.a])) | let s .= ' ' | endwhile

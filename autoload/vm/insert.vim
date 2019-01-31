@@ -14,7 +14,7 @@ fun! vm#insert#init()
     let s:F       = s:V.Funcs
 
     let s:R       = { -> s:V.Regions              }
-    let s:X       = { -> g:VM.extend_mode         }
+    let s:X       = { -> g:Vm.extend_mode         }
     let s:size    = { -> line2byte(line('$') + 1) }
 
     let s:v.restart_insert = 0

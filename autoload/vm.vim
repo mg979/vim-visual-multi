@@ -4,6 +4,8 @@
 " b:VM_Selection (= s:V) contains Regions, Vars (= s:v = plugin variables),
 " function classes (Global, Funcs, Edit, Search, Insert, etc)
 
+call vm#plugs#buffer()
+
 fun! vm#init_buffer(empty, ...)
     """If already initialized, return current instance."""
 
@@ -129,13 +131,13 @@ fun! vm#init_buffer(empty, ...)
             call vm#themes#init()
         endif
         hi clear Search
-        exe g:VM.Search
+        exe g:Vm.Search
     endif
     if !g:VM_manual_infoline
         call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
     endif
 
-    let g:VM.is_active = 1
+    let g:Vm.is_active = 1
     return s:V
 endfun
 
@@ -173,16 +175,16 @@ fun! vm#reset(...)
     endif
 
     let b:VM_Selection = {}
-    let g:VM.is_active = 0
-    let g:VM.extend_mode = 0
-    let g:VM.selecting = 0
+    let g:Vm.is_active = 0
+    let g:Vm.extend_mode = 0
+    let g:Vm.selecting = 0
 
     "exiting manually
     if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif
 
     if !empty(g:VM_highlight_matches)
         hi clear Search
-        exe "hi! Search ".g:VM.search_hi
+        exe "hi! Search ".g:Vm.search_hi
     endif
 
     if !empty(matches)
@@ -199,9 +201,8 @@ endfun
 
 fun! vm#augroup(end)
     if a:end
-        augroup plugin-visual-multi-global
-            au!
-        augroup END
+        autocmd! plugin-visual-multi-global
+        augroup! plugin-visual-multi-global
         return
     endif
 
@@ -220,9 +221,8 @@ endfun
 
 fun! vm#au_cursor(end)
     if a:end
-        augroup plugin-vm-cursormoved
-            au!
-        augroup END
+        autocmd! plugin-vm-cursormoved
+        augroup! plugin-vm-cursormoved
         return
     endif
 
@@ -258,7 +258,7 @@ endfun
 fun! s:set_reg()
     "Replace old default register if yanking in VM outside a region or cursor
     let s:v.yanked = 0
-    let g:VM.registers['"'] = []
+    let g:Vm.registers['"'] = []
     let s:v.oldreg = s:V.Funcs.get_reg(v:register)
 endfun
 

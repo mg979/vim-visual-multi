@@ -9,7 +9,7 @@ fun! vm#icmds#init()
     let s:F       = s:V.Funcs
 
     let s:R         = {   -> s:V.Regions              }
-    let s:X         = {   -> g:VM.extend_mode         }
+    let s:X         = {   -> g:Vm.extend_mode         }
     let s:size      = {   -> line2byte(line('$') + 1) }
     let s:E         = { r -> col([r.l, '$'])          }
     let s:eol       = { r -> r.a == (s:E(r) - 1)      }

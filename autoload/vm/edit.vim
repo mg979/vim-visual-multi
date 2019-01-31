@@ -11,7 +11,7 @@ fun! vm#edit#init()
     let s:F       = s:V.Funcs
 
     let s:R         = { -> s:V.Regions              }
-    let s:X         = { -> g:VM.extend_mode         }
+    let s:X         = { -> g:Vm.extend_mode         }
     let s:size      = { -> line2byte(line('$') + 1) }
 
     let s:v.use_register = s:v.def_reg
@@ -65,7 +65,7 @@ fun! s:Edit.run_normal(cmd, ...) dict
     else             | call self.process(c, args)
     endif
 
-    let g:VM.last_normal = [cmd, args.recursive]
+    let g:Vm.last_normal = [cmd, args.recursive]
     call self.after_commands(0)
 endfun
 
@@ -90,7 +90,7 @@ fun! s:Edit.run_visual(cmd, recursive, ...) dict
     call self.before_commands(!a:recursive)
     call self.process_visual(cmd)
 
-    let g:VM.last_visual = [cmd, a:recursive]
+    let g:Vm.last_visual = [cmd, a:recursive]
     call self.after_commands(0)
     if !s:visual_reselect(cmd) | call s:G.change_mode() | endif
 endfun
@@ -116,7 +116,7 @@ fun! s:Edit.run_ex(count, ...) dict
         let cmd = g:VM_commands_aliases[cmd]
     endif
 
-    let g:VM.last_ex = cmd
+    let g:Vm.last_ex = cmd
     call s:G.cursor_mode()
 
     call self.before_commands(1)
@@ -339,7 +339,7 @@ endfun
 fun! s:count(c)
     "forbid count
     if a:c > 1
-        if !g:VM.is_active | return 1 | endif
+        if !g:Vm.is_active | return 1 | endif
         call s:F.msg('Count not allowed.', 0)
         call vm#reset()
         return 1

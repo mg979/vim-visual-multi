@@ -96,23 +96,23 @@ fun! s:Funcs.get_regs_1_9() dict
 endfun
 
 fun! s:Funcs.vm_regs_to_json() dict
-    if !filereadable(g:VM.regs_file) | return | endif
-    let regs = copy(g:VM.registers)
+    if !filereadable(g:Vm.regs_file) | return | endif
+    let regs = copy(g:Vm.registers)
     unlet regs['"']
     return json_encode(regs)
 endfun
 
 fun! s:Funcs.vm_regs_from_json() dict
-    if !get(g:, 'VM_persistent_registers', 0) || !filereadable(g:VM.regs_file)
+    if !get(g:, 'VM_persistent_registers', 0) || !filereadable(g:Vm.regs_file)
         return {'"': []} | endif
-    let regs = json_decode(readfile(g:VM.regs_file)[0])
+    let regs = json_decode(readfile(g:Vm.regs_file)[0])
     let regs['"'] = []
     return regs
 endfun
 
 fun! s:Funcs.save_vm_regs() dict
-  if get(g:, 'VM_persistent_registers', 0) && filereadable(g:VM.regs_file)
-    call writefile([self.vm_regs_to_json()], g:VM.regs_file)
+  if get(g:, 'VM_persistent_registers', 0) && filereadable(g:Vm.regs_file)
+    call writefile([self.vm_regs_to_json()], g:Vm.regs_file)
   endif
 endfun
 
@@ -142,7 +142,7 @@ fun! s:Funcs.restore_regs() dict
     "search reg
     let s = s:v.oldsearch
     call setreg("/", s[0], s[1])
-    let g:VM.registers['"'] = []
+    let g:Vm.registers['"'] = []
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -223,7 +223,7 @@ fun! s:Funcs.msg(text, force) dict
     elseif s:v.silence && !a:force | return | endif
 
     if type(a:text) == v:t_string
-        exe "echohl" g:VM.hi.message
+        exe "echohl" g:Vm.hi.message
         echon a:text
         echohl None | return | endif
 
@@ -246,13 +246,13 @@ fun! s:Funcs.count_msg(force, ...) dict
     if g:VM_debug | let ix = ' '.r.index.' '.r.a.' '.r.b | else | let ix = '' | endif
     let ix = ['  ['.s:v['index'].ix.']  ', hl]
 
-    let i1 = [' '  , hl] | let m1 = g:VM.mappings_enabled? ["M\+", H1] : ["m\-", H2]
+    let i1 = [' '  , hl] | let m1 = g:Vm.mappings_enabled? ["M\+", H1] : ["m\-", H2]
     let i2 = [' / ', hl] | let m2 = s:v.multiline?         ["V\+", H1] : ["v\-", H2]
     let i3 = [' / ', hl] | let m3 = s:v.block_mode?        ["B\+", H1] : ["b\-", H2]
     let i4 = [' / ', hl] | let m4 = s:v.only_this_always?  ["O\+", H1] : ["o\-", H2]
 
     let s = len(s:R())>1 ? 's.' : '.'
-    let t = g:VM.extend_mode? ' region' : ' cursor'
+    let t = g:Vm.extend_mode? ' region' : ' cursor'
     let R = [len(s:R()).t.s, hl]
     let s1 = ['   Current patterns: ', hl]
     let s2 = [self.pad(string(s:v.search), &columns - 1), H1]
@@ -316,10 +316,10 @@ endfun
 
 fun! s:Funcs.show_registers() dict
     echohl Label | echo " Register\tLine\t--- Register contents ---" | echohl None
-    for r in keys(g:VM.registers)
+    for r in keys(g:Vm.registers)
         echohl Directory  | echo "\n    ".r
         let l = 1
-        for s in g:VM.registers[r]
+        for s in g:Vm.registers[r]
             echohl WarningMsg | echo "\t\t".l."\t"
             echohl None  | echon s
             let l += 1

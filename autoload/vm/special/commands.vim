@@ -5,7 +5,7 @@ fun! vm#special#commands#init()
     let s:F = s:V.Funcs
     let s:G = s:V.Global
     let s:R = { -> s:V.Regions }
-    let s:X = { -> g:VM.extend_mode }
+    let s:X = { -> g:Vm.extend_mode }
 endfun
 
 fun! vm#special#commands#menu()
@@ -169,7 +169,7 @@ fun! vm#special#commands#filter_regions(...)
 endfun
 
 fun! s:not_active()
-    if !g:VM.is_active
+    if !g:Vm.is_active
         echohl ErrorMsg | echo "VM is not enabled" | echohl None | return 1
     endif
 endfun

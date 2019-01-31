@@ -103,7 +103,7 @@ fun! s:dict()
   let leader    = []
   let others    = []
 
-  for p in sort(keys(g:VM.help))
+  for p in sort(keys(g:Vm.help))
     let other = 0
     let ins = 0
 
@@ -123,10 +123,10 @@ fun! s:dict()
       let other = 1
     endif
 
-    if !ins && match(g:VM.help[p], '\-\<Up\>\|\-\<Down\>\|\-\<Left\>\|\-\<Right\>') >= 0
+    if !ins && match(g:Vm.help[p], '\-\<Up\>\|\-\<Down\>\|\-\<Left\>\|\-\<Right\>') >= 0
       let other = 0
       call add(arrows, p)
-    elseif !ins && match(g:VM.help[p], g:VM.leader) >= 0
+    elseif !ins && match(g:Vm.help[p], g:Vm.leader) >= 0
       let other = 0
       call add(leader, p)
     endif
@@ -194,9 +194,9 @@ fun! vm#special#help#show()
     let i = 0
     "iterate s:dict chosen groups and print keys / desctiptions / notes
     for plug in D[dict_key]
-      if !has_key(g:VM.help, plug)   | continue
+      if !has_key(g:Vm.help, plug)   | continue
       elseif !has_key(s:plugs, plug) | let s:plugs[plug] = [plug, ""] | endif
-      let Map  = g:VM.help[plug]
+      let Map  = g:Vm.help[plug]
       let Desc = s:plugs[plug][0]
       let Note = s:plugs[plug][1]
       echohl Special | exe s:Txt(i, Map)

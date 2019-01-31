@@ -124,11 +124,11 @@ endfun
 " indentLine plugin
 
 fun! s:check_clearmatches()
-    let il = exists('g:indentLine_loaded') &&
+    let indent_lines = exists('g:indentLine_loaded') &&
                 \ exists('b:indentLine_ConcealOptionSet') &&
                 \ b:indentLine_ConcealOptionSet
-    let s:v.clearmatches = get(g:, 'VM_clear_buffer_hl', !il)
-    if il && s:v.clearmatches
+    let s:v.clearmatches = get(g:, 'VM_clear_buffer_hl', !indent_lines)
+    if indent_lines && s:v.clearmatches
         let b:VM_indentLine = 1
     endif
 endfun

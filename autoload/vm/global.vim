@@ -9,9 +9,9 @@ fun! vm#global#init()
     let s:v       = s:V.Vars
     let s:F       = s:V.Funcs
 
-    let s:X       = { -> g:VM.extend_mode }
+    let s:X       = { -> g:Vm.extend_mode }
     let s:R       = { -> s:V.Regions      }
-    let s:B       = { -> s:v.block_mode && g:VM.extend_mode }
+    let s:B       = { -> s:v.block_mode && g:Vm.extend_mode }
     let s:Group   = { -> s:V.Groups[s:v.active_group] }
 
     let s:only_this = { -> s:v.only_this || s:v.only_this_always }
@@ -70,7 +70,7 @@ fun! s:Global.change_mode(...) dict
     if !s:X() | call self.merge_cursors()
     else      | let s:v.direction = 1 | endif
 
-    let g:VM.extend_mode = !s:X()
+    let g:Vm.extend_mode = !s:X()
 
     let ix = s:v.index
     call s:F.Scroll.get()
@@ -129,13 +129,13 @@ fun! s:Global.update_cursor_highlight(...) dict
     highlight clear MultiCursor
 
     if s:v.insert
-        exe "highlight link MultiCursor ".g:VM.hi.insert
+        exe "highlight link MultiCursor ".g:Vm.hi.insert
 
     elseif !s:X() && self.all_empty()
-        exe "highlight link MultiCursor ".g:VM.hi.mono
+        exe "highlight link MultiCursor ".g:Vm.hi.mono
 
     else
-        exe "highlight link MultiCursor ".g:VM.hi.cursor
+        exe "highlight link MultiCursor ".g:Vm.hi.cursor
     endif
 endfun
 
@@ -161,7 +161,7 @@ fun! s:Global.all_empty() dict
 
     for r in s:R()
         if r.a != r.b
-            if !s:X() | let g:VM.extend_mode = 1 | endif
+            if !s:X() | let g:Vm.extend_mode = 1 | endif
             return 0  | endif
     endfor
     return 1
@@ -262,7 +262,7 @@ fun! s:Global.collapse_regions() dict
     call s:V.Block.stop()
 
     for r in s:R() | call r.update_cursor([r.l, (r.dir? r.a : r.b)]) | endfor
-    let g:VM.extend_mode = 0
+    let g:Vm.extend_mode = 0
     call self.update_highlight()
 endfun
 
