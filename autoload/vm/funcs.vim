@@ -206,10 +206,10 @@ fun! s:Funcs.Scroll.restore(...) dict
     if s:v.restore_scroll | let s:v.restore_scroll = 0 | else | return | endif
     let lines = winline() - s:v.winline
     if lines > 0
-        exe "normal! ".lines."\<C-e>"
+        silent! exe "normal! ".lines."\<C-e>"
     elseif lines < 0
         let lines = lines * -1
-        exe "normal! ".lines."\<C-y>"
+        silent! exe "normal! ".lines."\<C-y>"
     endif
     if a:0 | let s:v.winline = winline() | endif
 endfun

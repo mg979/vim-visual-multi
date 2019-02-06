@@ -148,7 +148,7 @@ fun! s:deoplete(reenable)
 
     elseif exists('g:loaded_deoplete')
           \ && deoplete#is_enabled()
-          \ && !g:deoplete#disable_auto_complete
+          \ && !get(g:, 'deoplete#disable_auto_complete', 0)
 
         let s:deoplete_map = 1
         call deoplete#custom#buffer_option('auto_complete', v:false)
