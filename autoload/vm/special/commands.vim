@@ -13,7 +13,7 @@ fun! vm#special#commands#menu()
                 \["\"    - ", "Show VM registers"],
                 \["i    - ", "Show regions info"],
                 \["\n", ""],
-                \["f    - ", "Filter regions by expression"],
+                \["f    - ", "Filter regions by pattern or expression"],
                 \["l(L) - ", "Filter lines with regions (strip indent)"],
                 \["p    - ", "Paste regions contents in a new buffer"],
                 \]
@@ -33,7 +33,7 @@ fun! vm#special#commands#menu()
         call vm#special#commands#regions_to_buffer()
     elseif c ==# 'f'
         redraw!
-        call vm#special#commands#filter_regions()
+        call vm#special#commands#filter_regions(0, '')
     elseif c ==# 'l'
         call feedkeys("\<cr>", 'n')
         call vm#special#commands#filter_lines(0)
@@ -150,23 +150,37 @@ endfun
 " Filter by expression
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#special#commands#filter_regions(...)
-    """Remove regions that don't match an expression."""
+fun! vm#special#commands#filter_regions(type, fill, ...)
+    """Filter regions based on pattern or expression."""
     if s:not_active() | return | endif
+    if a:type == 0 || a:type > 2
+      let s:filter_type = 0
+    endif
+    let type = ['pattern', '!pattern', 'expression'][s:filter_type]
     if !a:0
+        cnoremap <buffer><nowait><silent><expr> <C-x> <sid>filter_regions(getcmdline())
         echohl Label
-        let exp = input('Enter a filter (expression) > ', '', 'command')
+        let exp = input('Enter a filter (^X '.type.') > ', a:fill, 'command')
         echohl None
+        cunmap <buffer> <C-x>
     else
         let exp = a:1
     endif
     if empty(exp)
         call s:F.msg('Canceled.', 1)
     else
-        call s:G.filter_by_expression(exp)
-        call s:G.select_region(0)
+        call s:G.filter_by_expression(exp, type)
+        call s:G.update_and_select_region()
     endif
 endfun
+
+fun! s:filter_regions(fill)
+  let s:filter_type += 1
+  let args = s:filter_type . ", '" . a:fill . "'"
+  return "\<C-U>\<Esc>:call vm#special#commands#filter_regions(".args.")\<cr>"
+endfun
+
+"------------------------------------------------------------------------------
 
 fun! s:not_active()
     if !g:Vm.is_active

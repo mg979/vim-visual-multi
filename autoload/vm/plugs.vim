@@ -84,7 +84,7 @@ fun! vm#plugs#buffer()
   nnoremap        <Plug>(VM-Show-Registers)          :call b:VM_Selection.Funcs.show_registers()<cr>
   nnoremap        <Plug>(VM-Tools-Menu)              :call vm#special#commands#menu()<cr>
   nnoremap        <Plug>(VM-Erase-Regions)           :call vm#commands#erase_regions(1)<cr>
-  nnoremap        <Plug>(VM-Filter-Regions)          :call vm#special#commands#filter_regions()<cr>
+  nnoremap        <Plug>(VM-Filter-Regions)          :call vm#special#commands#filter_regions(0, '')<cr>
   nnoremap        <Plug>(VM-Regions-To-Buffer)       :call vm#special#commands#regions_to_buffer()<cr>
   nnoremap        <Plug>(VM-Filter-Lines)            :call vm#special#commands#filter_lines(0)<cr>
   nnoremap        <Plug>(VM-Filter-Lines-Strip)      :call vm#special#commands#filter_lines(1)<cr>

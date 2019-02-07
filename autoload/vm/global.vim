@@ -510,10 +510,16 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.filter_by_expression(exp) dict
-  """Filter out regions that don't match an expression."""
+fun! s:Global.filter_by_expression(exp, type) dict
+  """Filter out regions that don't match an expression or a pattern."""
   let ids_to_remove = []
-  let exp = s:F.get_expr(a:exp)
+  if a:type == 'pattern'
+    let exp = "r.txt =~ '".a:exp."'"
+  elseif a:type == '!pattern'
+    let exp = "r.txt !~ '".a:exp."'"
+  else
+    let exp = s:F.get_expr(a:exp)
+  endif
   try
     for r in s:R()
       if !eval(exp)
