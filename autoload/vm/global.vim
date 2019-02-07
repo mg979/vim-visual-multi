@@ -431,23 +431,21 @@ fun! s:Global.lines_with_regions(reverse, ...) dict
 
     let lines = {}
     for r in s:R()
-        let sort_list = 0
-
         "called for a specific line
         if a:0 && r.l != a:1 | continue | endif
 
         "add region index to indices for that line
         let lines[r.l] = get(lines, r.l, [])
-
-        "mark for sorting if not empty
-        if !empty(lines[r.l]) | let sort_list = 1 | endif
         call add(lines[r.l], r.index)
+    endfor
 
-        "sort list so that lower indices are put farther in the list
-        if sort_list
-            if a:reverse | call reverse(sort(lines[r.l], 'n'))
-            else         | call sort(lines[r.l], 'n')            | endif
+    for line in keys(lines)
+      "sort list so that lower indices are put farther in the list
+      if len(lines[line]) > 1
+        if a:reverse | call reverse(sort(lines[line], 'n'))
+        else         | call sort(lines[line], 'n')
         endif
+      endif
     endfor
     return lines
 endfun
