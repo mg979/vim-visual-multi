@@ -77,9 +77,16 @@ fun! s:select(cmd)
     let Rs = map(copy(s:R()), '[v:val.l, v:val.a]')
     call vm#commands#erase_regions()
 
+    " issue #44: when using quotes text objects (i', i", etc), the marker ']
+    " is positioned on the quote, not on the end of the yanked region
+    " to correct this, select visually, then yank
+
+    let cmd = index(['''', '"', '`'], a:cmd[-1:-1]) >= 0 ?
+          \ 'v' . a:cmd[1:] . 'y' : a:cmd
+
     for r in Rs
         call cursor(r[0], r[1])
-        exe "normal ".a:cmd
+        exe "normal ".cmd
         call s:get_region(0)
     endfor
 

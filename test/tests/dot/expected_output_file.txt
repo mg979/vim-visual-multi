@@ -2,3 +2,6 @@ changed_word word	text
 word changed_word	text
 changed_word word	text
 word changed_word	text
+
+let g:VM_maps['change']                = 'g/'
+let g:VM_maps['change']                  = '<leader>A'

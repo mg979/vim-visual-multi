@@ -1,4 +1,4 @@
-# dot test
+# dot/select operator si'
 keys('\<C-n>\<C-n>\<C-n>\<C-n>')
 keys('c')
 keys('changed_word')
@@ -9,3 +9,9 @@ keys('\<Esc>')
 keys('0j\<C-Down>\<C-Down>')
 keys('.')
 keys('\<Esc>')
+
+keys("6Gf'l")
+keys('\<C-n>\<C-n>')
+keys("si'")
+keys('c')
+keys('change')
