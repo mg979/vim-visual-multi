@@ -22,21 +22,15 @@ def log(string, f=None):
 
 def print_banner(string, f=None):
     """Print a banner with the result of the test."""
-    log("""
-++--------------------------------------------------------------
-++ %s
-++--------------------------------------------------------------""" % string, f)
+    log("\n╒═" + 77*"═" + "\n│ %s" % string + "\n╘═" + 77*"═" + "\n", f)
 
 
 def get_vimrc(test, f):
     """Check if test-specific vimrc is present, or use default one."""
     try:
-        vimrc = Path('tests/', test, 'vimrc.vim').resolve(strict=True)
-        output = "using test vimrc"
+        return Path('tests/', test, 'vimrc.vim').resolve(strict=True)
     except FileNotFoundError:
-        vimrc, output = DEFAULT_VIMRC, "using default vimrc"
-    log(output, f)
-    return vimrc
+        return DEFAULT_VIMRC
 
 
 def get_test_description(test):
@@ -50,18 +44,15 @@ def get_test_description(test):
         return (0, '')
 
 
-def log_test_info(test, f, nvim):
-    """Log test banner and description if present."""
-    # banner
-    log('\n//' + '-' * 38, f)
-    log("// ./test.py " + ("", "-n ")[nvim] + test, f)
-    log('//' + '-' * 38 + '\n', f)
-    # test info
+def get_test_info(test, nvim, vimrc):
+    """Generate line for test logging."""
     desc = get_test_description(test)
+    rc = 'default' if vimrc == DEFAULT_VIMRC else 'test'
     if desc[0]:
-        log("reproduce: " + desc[1], f)
+        return desc[1].ljust(40) + "using " + rc + " vimrc"
     else:
-        log("reproduce: ./test.py " + ("", "-n ")[nvim] + test, f)
+        return "./test.py " + ("", "-n ")[nvim] + \
+                test + "\t" + "using " + rc + " vimrc"
 
 
 def print_tests_list(tests, f):
@@ -119,8 +110,8 @@ def run_core(paths, nvim=False):
 def run_one_test(test, f=None, nvim=False):
     """Run a single test."""
     # input/output files
-    log_test_info(test, f, nvim)
     paths = get_paths(test, f)
+    info = get_test_info(test, nvim, paths['vimrc'])
     # remove previously generated file
     if os.path.exists(paths["gen_out_file"]):
         os.remove(paths["gen_out_file"])
@@ -129,10 +120,10 @@ def run_one_test(test, f=None, nvim=False):
     time.sleep(0.5)
     # check results
     if filecmp.cmp(paths["exp_out_file"], paths["gen_out_file"]):
-        log("++ SUCCESS\n", f)
+        log(info + "... success", f)
         return True
     else:
-        log("++ FAIL\n", f)
+        log(info + "... FAIL", f)
         return False
 
 
@@ -157,6 +148,7 @@ def main():
     if args.list:
         print_tests_list(tests, f)
     else:
+        print_banner("Starting vim-visual-multi tests", f)
         tests = tests if args.test is None else [args.test]
         for t in tests:
             if run_one_test(t, f, args.nvim) is not True:
