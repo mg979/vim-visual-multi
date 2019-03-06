@@ -112,7 +112,7 @@ fun! s:d_cursors(M, reg, n)
   "no matter the entered register, we're using default register
   "we're passing the register in the options dictionary instead
   "fill_register function will be called and take care of it, if appropriate
-  call s:V.Edit.run_normal('"'.s:v.def_reg.'d'.S, {'count': N, 'store': a:reg})
+  call s:V.Edit.run_normal('d'.S, {'count': N, 'store': a:reg})
   call s:G.merge_regions()
 endfun
 
@@ -149,7 +149,8 @@ fun! s:y_cursors(M, reg, n)
     if s:back(S)
         normal h
     endif
-    call feedkeys("\"".a:reg.'y')
+    let r = a:reg == s:v.def_reg ? '' : "\"".a:reg
+    call feedkeys(r.'y')
   endif
 endfun
 

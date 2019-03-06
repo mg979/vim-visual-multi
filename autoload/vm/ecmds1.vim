@@ -305,7 +305,10 @@ fun! s:Edit.fill_register(reg, text, hard) dict
     let text = a:text
     let maxw = max(map(copy(text), 'len(v:val)'))
 
+    " set VM register, overwrite unnamed in any case
+    let g:Vm.registers[s:v.def_reg] = text
     let g:Vm.registers[a:reg] = text
+
     let type = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
 
     "vim register is overwritten if unnamed, or if hard yank
