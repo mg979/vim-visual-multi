@@ -86,12 +86,14 @@ fun! s:skip_shorter_lines()
     "   endline  = 1
     "and the line would be skipped: check endline as 2, so that the cursor is added
 
-    let vcol    = s:v.vertical_col
-    let col     = virtcol('.')
-    let endline = g:VM_skip_empty_lines? virtcol('$') : ((virtcol('$') > 1)? virtcol('$') : 2)
+    if get(g:, 'VM_skip_shorter_lines', 1)
+      let vcol    = s:v.vertical_col
+      let col     = virtcol('.')
+      let endline = g:VM_skip_empty_lines? virtcol('$') : ((virtcol('$') > 1)? virtcol('$') : 2)
 
-    "skip line
-    if ( col < vcol || col == endline ) | return 1              | endif
+      "skip line
+      if ( col < vcol || col == endline ) | return 1 | endif
+    endif
 
     "in block mode, cursor add is handled in block script
     if !s:V.Block.vertical()            | call s:G.new_cursor() | endif
@@ -113,7 +115,7 @@ fun! vm#commands#add_cursor_down(extend, count)
     call s:check_extend_default(a:extend)
     call s:set_vcol()
     call s:G.new_cursor()
-    let N = a:count>1? a:count-1 : 1
+    let N = a:count>1? a:count : 1
 
     while N
         keepjumps normal! j
@@ -130,7 +132,7 @@ fun! vm#commands#add_cursor_up(extend, count)
     call s:check_extend_default(a:extend)
     call s:set_vcol()
     call s:G.new_cursor()
-    let N = a:count>1? a:count-1 : 1
+    let N = a:count>1? a:count : 1
 
     while N
         keepjumps normal! k
