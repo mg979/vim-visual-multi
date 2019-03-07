@@ -9,4 +9,3 @@ endfunction
 set runtimepath^=..
 set packpath=
 set nocompatible
-let g:VM_leader = ','

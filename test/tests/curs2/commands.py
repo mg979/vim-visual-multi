@@ -1,4 +1,6 @@
 # operations at cursors #2
+L = '\\\\\\\\'
+
 keys('\<C-Down>wwD\<Esc>')
 keys('jj^\<C-Down>C')
 keys('\<C-v>')
@@ -9,9 +11,9 @@ keys('\<Esc>')
 keys('\<Esc>')
 
 keys('jj^')
-keys('g/c..')
+keys(L+'/c..')
 keys('\<CR>')
-keys(']zN')
+keys(']'+L+'N')
 keys('/ ')
 keys('\<CR>')
 keys('\<Esc>')
