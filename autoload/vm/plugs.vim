@@ -151,7 +151,7 @@ fun! vm#plugs#buffer()
   nnoremap <silent>        <Plug>(VM-J)                       :<C-u>call b:VM_Selection.Edit.run_normal('J', {'count': v:count1, 'recursive': 0})<cr>:silent! undojoin<cr>
   nnoremap <silent>        <Plug>(VM-~)                       :<C-u>call b:VM_Selection.Edit.run_normal('~', {'recursive': 0})<cr>:silent! undojoin<cr>
   nnoremap <silent>        <Plug>(VM-Del)                     :<C-u>call b:VM_Selection.Edit.run_normal('x', {'count': v:count1, 'recursive': 0})<cr>:silent! undojoin<cr>
-  nnoremap <silent>        <Plug>(VM-Dot)                     :call b:VM_Selection.Edit.dot()<cr>
+  nnoremap <silent>        <Plug>(VM-Dot)                     :<C-u>call b:VM_Selection.Edit.dot()<cr>
   nnoremap <silent>        <Plug>(VM-Increase)                :<C-u>call b:VM_Selection.Edit.run_normal('<c-a>', {'count': v:count1, 'recursive': 0})<cr>
   nnoremap <silent>        <Plug>(VM-Decrease)                :<C-u>call b:VM_Selection.Edit.run_normal('<c-x>', {'count': v:count1, 'recursive': 0})<cr>
   nnoremap <silent>        <Plug>(VM-a)                       :<C-u>call b:VM_Selection.Insert.key('a')<cr>

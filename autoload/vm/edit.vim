@@ -154,9 +154,10 @@ fun! s:Edit.dot() dict
     let dot = s:v.dot
     if !s:X() && !empty(dot)
 
-        if dot[0] ==? 'c' && dot[1] !=? 's'     "change -> delete + z.
-            let dot = 'd'.dot[1:]
-            exe "normal ".dot."z."
+        if dot[0] ==? 'c' && dot[1] !=? 's'     "repeat last change operator
+            call vm#operators#select(1, 1, dot[1:])
+            normal ".p
+            call s:G.cursor_mode()
 
         elseif dot[1] ==? 's'                   "surround (ys, ds, cs)
             call self.run_normal(dot, {'maps': 0})
@@ -165,7 +166,7 @@ fun! s:Edit.dot() dict
             call self.run_normal(dot)
         endif
     else
-        normal z.
+        call self.run_normal('.', {'count': v:count1, 'recursive': 0})
     endif
 endfun
 

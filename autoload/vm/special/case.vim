@@ -125,7 +125,7 @@ endfun
 fun! s:Case.convert(type) dict
   if !len(s:R()) | return | endif
   if !s:X()
-    normal siw
+    call vm#operators#select(1, 1, 'iw')
   endif
 
   let text = [] | let g:Vm.registers['"'] = text
