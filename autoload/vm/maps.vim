@@ -223,9 +223,7 @@ fun! s:assign(plug, key, buffer, ...)
     let g:Vm.help[a:plug] = k
     let p = substitute(a:plug, ' ', '-', 'g')
     let m = a:key[1]
-    let _ = a:buffer? '<buffer>' : ''
-    let _ .= a:key[2]? '<silent>' : ''
-    let _ .= a:key[3]? '<nowait> ' : ' '
+    let _ = a:buffer? '<buffer><nowait> ' : '<nowait> '
     return m."map "._.k.' <Plug>(VM-'.p.")"
 endfun
 
