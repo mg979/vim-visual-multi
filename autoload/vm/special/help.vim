@@ -8,7 +8,7 @@ fun! s:dict()
                   \'Select All',                        'Find Next',
                   \'Start Regex Search',                'Goto Prev',
                   \'Star',                              'Goto Next',
-                  \'Hash',                              'q Skip',
+                  \'Hash',                              'Alt Skip',
                   \'Remove Last Region',                'Remove Region',
                   \'Select Line Down',                  'Skip Region',
                   \'Select Line Up',                    'Find I Word',
@@ -49,8 +49,8 @@ fun! s:dict()
                   \]
 
   let fkeys     = ['Show Help',                         '',
-                  \'F2 Prev',                           '',
-                  \'F3 Next',                           '',
+                  \'Alt Prev',                          '',
+                  \'Alt Next',                          '',
                   \]
 
   let mouse     = ['Mouse Cursor',                      '',
@@ -250,8 +250,8 @@ let s:plugs = {
       \"Find Prev":               ["Find previous",              "always upwards"],
       \"Goto Next":               ["Goto Next",                  ""],
       \"Goto Prev":               ["Goto Prev",                  ""],
-      \"F3 Next":                 ["Goto Next",                  ""],
-      \"F2 Prev":                 ["Goto Prev",                  ""],
+      \"Alt Next":                ["Goto Next",                  ""],
+      \"Alt Prev":                ["Goto Prev",                  ""],
       \"Seek Up":                 ["Seek Up",                    "scroll the page up, and select a region"],
       \"Seek Down":               ["Seek Down",                  "scroll the page down, and select a region"],
       \"Toggle Mappings":         ["Toggle Mappings",            "disable VM mappings, except Space and Esc"],
@@ -260,7 +260,7 @@ let s:plugs = {
       \"Toggle Block":            ["Toggle Block Mode",          ""],
       \"Toggle Only This Region": ["Toggle Only This Region",    "lets you modify a region at a time"],
       \"Skip Region":             ["Skip Region",                "and find next in the current direction"],
-      \"q Skip":                  ["Skip Region",                "and find next in the current direction"],
+      \"Alt Skip":                ["Skip Region",                "and find next in the current direction"],
       \"Invert Direction":        ["Invert Direction",           "as 'o' in visual mode"],
       \"Remove Region":           ["Remove Region",              "and go back to previous"],
       \"Remove Every n Regions":  ["Remove Every n Regions",     "n is [count], min 2 if no count given"],

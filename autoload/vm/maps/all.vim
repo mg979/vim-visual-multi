@@ -89,21 +89,6 @@ fun! vm#maps#all#buffer()
   let maps = {}
   let leader = g:Vm.leader
 
-  "s
-  call extend(maps, {
-        \"Find I Word":             ['gw',        'n'],
-        \"Find A Word":             ['gW',        'n'],
-        \"Find A Subword":          ['gw',        'x'],
-        \"Find A Whole Subword":    ['gW',        'x'],
-        \})
-
-  "sublime
-  call extend(maps, {
-        \"Skip Region":             ['<C-s>',      'n'],
-        \"F3 Next":                 ['<F3>',       'n'],
-        \"F2 Prev":                 ['<F2>',       'n'],
-        \})
-
   "basic
   call extend(maps, {
         \"Switch Mode":             ['<Tab>',     'n'],
@@ -117,10 +102,13 @@ fun! vm#maps#all#buffer()
         \"Find Prev":               ['[',         'n'],
         \"Goto Next":               ['}',         'n'],
         \"Goto Prev":               ['{',         'n'],
+        \"Alt Next":                ['',          'n'],
+        \"Alt Prev":                ['',          'n'],
         \"Seek Up":                 ['<C-b>',     'n'],
         \"Seek Down":               ['<C-f>',     'n'],
         \"Invert Direction":        ['o',         'n'],
-        \"q Skip":                  ['q',         'n'],
+        \"Skip Region":             ['<C-s>',     'n'],
+        \"Alt Skip":                ['q',         'n'],
         \"Remove Region":           ['Q',         'n'],
         \"Remove Last Region":      ['<C-q>',     'n'],
         \"Remove Every n Regions":  [leader.'R',  'n'],
@@ -134,6 +122,10 @@ fun! vm#maps#all#buffer()
         \"Find Operator":           ['m',         'n'],
         \"Add Cursor Down":         ['<C-Down>',  'n'],
         \"Add Cursor Up":           ['<C-Up>',    'n'],
+        \"Find I Word":             ['',          'n'],
+        \"Find A Word":             ['',          'n'],
+        \"Find A Subword":          ['',          'x'],
+        \"Find A Whole Subword":    ['',          'x'],
         \})
 
   "utility
