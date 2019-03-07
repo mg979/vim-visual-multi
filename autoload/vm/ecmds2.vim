@@ -131,10 +131,10 @@ fun! s:Edit.align() dict
         return s:F.msg('Not possible, multiline is enabled.') | endif
     call s:G.cursor_mode()
 
-    normal D
+    call self.run_normal('D', {'store': '§'})
     let s:v.silence = 1
     let max = max(map(copy(s:R()), 'virtcol([v:val.l, v:val.a])'))
-    let reg = g:Vm.registers[s:v.def_reg]
+    let reg = g:Vm.registers['§']
     for r in s:R()
         let s = ''
         while len(s) < (max - virtcol([r.l, r.a])) | let s .= ' ' | endwhile

@@ -143,6 +143,7 @@ fun! s:Funcs.restore_regs() dict
     let s = s:v.oldsearch
     call setreg("/", s[0], s[1])
     let g:Vm.registers['"'] = []
+    silent! unlet g:Vm.registers['§']
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -317,6 +318,9 @@ endfun
 fun! s:Funcs.show_registers() dict
     echohl Label | echo " Register\tLine\t--- Register contents ---" | echohl None
     for r in keys(g:Vm.registers)
+        "skip temmporary register
+        if r == '§' | continue | endif
+
         echohl Directory  | echo "\n    ".r
         let l = 1
         for s in g:Vm.registers[r]
