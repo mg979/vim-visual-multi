@@ -296,7 +296,7 @@ fun! s:Edit.before_commands(disable_maps) dict
     let s:v.multiline = s:can_multiline
     let s:can_multiline = 0
 
-    nunmap <buffer> <Space>
+    exe 'nunmap <buffer>' g:Vm.maps.toggle
     nunmap <buffer> <esc>
 
     let s:maps_disabled = 0
@@ -321,8 +321,8 @@ fun! s:Edit.after_commands(reselect, ...) dict
 
     call s:F.external_after_auto()
 
-    nmap     <silent> <nowait> <buffer> <esc>      <Plug>(VM-Reset)
-    nmap     <silent> <nowait> <buffer> <Space>    <Plug>(VM-Toggle-Mappings)
+    nmap <nowait><buffer>       <esc>             <Plug>(VM-Reset)
+    exe 'nmap <nowait><buffer>' g:Vm.maps.toggle '<Plug>(VM-Toggle-Mappings)'
 
     if s:maps_disabled
         let s:maps_disabled = 0

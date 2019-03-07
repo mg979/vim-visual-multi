@@ -22,15 +22,15 @@ fun! vm#maps#init()
     if !has('nvim') && !has('gui_running')
         nnoremap <silent> <nowait> <buffer> <esc><esc> <esc><esc>
     endif
-    nmap     <silent><nowait><buffer> <esc>      <Plug>(VM-Reset)
-    nmap     <silent><nowait><buffer> <Space>    <Plug>(VM-Toggle-Mappings)
+    nmap     <nowait><buffer> <esc>      <Plug>(VM-Reset)
+    exe 'nmap <nowait><buffer>' g:Vm.maps.toggle '<Plug>(VM-Toggle-Mappings)'
 
     return s:Maps
 endfun
 
 fun! vm#maps#reset()
     """At VM reset, last buffer mappings are reset, and permanent maps are restored.
-    silent! nunmap <buffer> <Space>
+    silent! exe 'nunmap <buffer>' g:Vm.maps.toggle
     silent! nunmap <buffer> <esc>
     if !has('nvim') && !has('gui_running')
         silent! nunmap <buffer> <esc><esc>
@@ -199,13 +199,17 @@ fun! s:build_buffer_maps()
         call add(g:Vm.maps.buffer, s:assign(key, maps[key], 1))
     endfor
 
+    "store the key used to toggle mappings
+    let g:Vm.maps.toggle = has_key(g:VM_maps, 'Toggle Mappings') ?
+          \ g:VM_maps['Toggle Mappings'] : g:Vm.leader.'<Space>'
+
     "generate list of 'exe' commands for unmappings
     for key in keys(maps)
         call add(g:Vm.unmaps, s:unmap(maps[key], 1))
     endfor
 
     "extra help plugs
-    let g:Vm.help['Toggle Mappings'] = '<Space>'
+    let g:Vm.help['Toggle Mappings'] = g:Vm.maps.toggle
     let g:Vm.help['Exit Vm'] = '<Esc>'
 endfun
 
