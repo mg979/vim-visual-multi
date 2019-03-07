@@ -213,7 +213,7 @@ fun! s:Insert.stop() dict
     let &indentkeys = s:v.indentkeys
     let &synmaxcol = s:v.synmaxcol
 
-    "reindent all and adjust cursors position, only if filetype/optioons allow
+    "reindent all and adjust cursors position, only if filetype/options allow
     if s:do_reindent() | call s:V.Edit.run_normal('==', {'recursive': 0, 'stay_put': 1}) | endif
 
     if g:VM_reselect_first_insert

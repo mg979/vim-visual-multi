@@ -101,7 +101,7 @@ fun! s:d_cursors(M, reg, n)
   let M = a:M | let r = '"'.a:reg
 
   "ds surround
-  if M[:1] ==# 'ds' | return s:V.Edit.run_normal(M, {'maps': 0}) | endif
+  if M[:1] ==# 'ds' | return s:V.Edit.run_normal(M) | endif
 
   "reorder command; DD = 'dd'
   let [S, N, DD] = s:reorder_cmd(M, r, a:n, 'd')
@@ -124,7 +124,7 @@ fun! s:y_cursors(M, reg, n)
   let M = a:M | let r = '"'.a:reg
 
   "ys surround
-  if M[:1] ==? 'ys' | return s:V.Edit.run_normal(M, {'maps': 0}) | endif
+  if M[:1] ==? 'ys' | return s:V.Edit.run_normal(M) | endif
 
   "reset dot for yank command
   let s:v.dot = ''
@@ -162,10 +162,10 @@ fun! s:c_cursors(M, reg, n)
   let M = a:M | let r = '"'.a:reg
 
   "cs surround
-  if M[:1] ==? 'cs' | return s:V.Edit.run_normal(M, {'maps': 0}) | endif
+  if M[:1] ==? 'cs' | return s:V.Edit.run_normal(M) | endif
 
   "cr coerce (vim-abolish)
-  if M[:1] ==? 'cr' | return s:V.Edit.run_normal(M, {'maps': 0}) | endif
+  if M[:1] ==? 'cr' | return feedkeys('zz'.M."\<cr>") | endif
 
   "reorder command; CC = 'cc'
   let [S, N, CC] = s:reorder_cmd(M, r, a:n, 'c')
