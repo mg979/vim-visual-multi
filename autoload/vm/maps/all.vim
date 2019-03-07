@@ -59,17 +59,17 @@ fun! vm#maps#all#permanent()
   let maps["Find Subword Under"][0]      = '<C-n>'
 
   if g:VM_default_mappings
-    let maps["Select Operator"][0]       = 'gs'
+    let maps["Select Operator"][0]       = leader.'gs'
     let maps["Add Cursor At Pos"][0]     = 'g<space>'
-    let maps["Start Regex Search"][0]    = 'g/'
+    let maps["Start Regex Search"][0]    = leader.'/'
     let maps["Select All"][0]            = leader.'A'
     let maps["Add Cursor Down"][0]       = '<C-Down>'
     let maps["Add Cursor Up"][0]         = '<C-Up>'
-    let maps["Visual Regex"][0]          = 'g/'
+    let maps["Visual Regex"][0]          = leader.'/'
     let maps["Visual All"][0]            = leader.'A'
-    let maps["Visual Add"][0]            = '<C-a>'
-    let maps["Visual Find"][0]           = '<C-f>'
-    let maps["Visual Cursors"][0]        = '<C-c>'
+    let maps["Visual Add"][0]            = leader.'a'
+    let maps["Visual Find"][0]           = leader.'f'
+    let maps["Visual Cursors"][0]        = leader.'c'
   endif
 
   if g:VM_mouse_mappings
@@ -91,9 +91,9 @@ fun! vm#maps#all#buffer()
 
   "basic
   call extend(maps, {
-        \"Switch Mode":             ['<Tab>',     'n'],
-        \"Toggle Block":            ['<BS>',      'n'],
-        \"Toggle Only This Region": ['<CR>',      'n'],
+        \"Switch Mode":             ['<Tab>',       'n'],
+        \"Toggle Block":            [leader.'<BS>', 'n'],
+        \"Toggle Only This Region": [leader.'<CR>', 'n'],
         \})
 
   "select
@@ -112,12 +112,10 @@ fun! vm#maps#all#buffer()
         \"Remove Region":           ['Q',         'n'],
         \"Remove Last Region":      ['<C-q>',     'n'],
         \"Remove Every n Regions":  [leader.'R',  'n'],
-        \"Star":                    ['*',         'n'],
-        \"Hash":                    ['#',         'n'],
-        \"Visual Star":             ['*',         'x'],
-        \"Visual Hash":             ['#',         'x'],
-        \"Merge To Eol":            ['<S-End>',   'n'],
-        \"Merge To Bol":            ['<S-Home>',  'n'],
+        \"Star":                    [leader.'*',  'n'],
+        \"Hash":                    [leader.'#',  'n'],
+        \"Visual Star":             [leader.'*',  'x'],
+        \"Visual Hash":             [leader.'#',  'x'],
         \"Select All Operator":     ['s',         'n'],
         \"Find Operator":           ['m',         'n'],
         \"Add Cursor Down":         ['<C-Down>',  'n'],
@@ -130,17 +128,17 @@ fun! vm#maps#all#buffer()
 
   "utility
   call extend(maps, {
-        \"Tools Menu":              [leader.'x',  'n'],
-        \"Show Help":               ['<F1>',      'n'],
-        \"Show Registers":          [leader.'"',  'n'],
-        \"Toggle Debug":            ['<C-x><F12>','n'],
-        \"Case Setting":            ['<c-c>',     'n'],
-        \"Toggle Whole Word":       ['<c-w>',     'n'],
-        \"Case Conversion Menu":    [leader.'c',  'n'],
-        \"Search Menu":             [leader.'S',  'n'],
-        \"Rewrite Last Search":     [leader.'r',  'n'],
-        \"Show Infoline":           [leader.'l',  'n'],
-        \"Toggle Multiline":        ['M',         'n'],
+        \"Tools Menu":              [leader.'`',      'n'],
+        \"Show Help":               [leader.'<F1>',   'n'],
+        \"Show Registers":          [leader.'"',      'n'],
+        \"Toggle Debug":            [leader.'<F12>',  'n'],
+        \"Case Setting":            [leader.'c',      'n'],
+        \"Toggle Whole Word":       [leader.'w',      'n'],
+        \"Case Conversion Menu":    [leader.'C',      'n'],
+        \"Search Menu":             [leader.'S',      'n'],
+        \"Rewrite Last Search":     [leader.'r',      'n'],
+        \"Show Infoline":           [leader.'l',      'n'],
+        \"Toggle Multiline":        [leader.'M',      'n'],
         \})
 
   "commands
@@ -151,27 +149,23 @@ fun! vm#maps#all#buffer()
         \"Duplicate":               [leader.'d',  'n'],
         \"Align":                   [leader.'a',  'n'],
         \"Split Regions":           [leader.'s',  'n'],
-        \"Visual Subtract":         ['<C-s>',     'x'],
-        \})
-
-  "zeta
-  call extend(maps, {
-        \"Run Normal":              ['zz',        'n'],
-        \"Run Last Normal":         ['Z',         'n'],
-        \"Run Visual":              ['zv',        'n'],
-        \"Run Last Visual":         ['zV',        'n'],
-        \"Run Ex":                  ['zx',        'n'],
-        \"Run Last Ex":             ['<C-z>',     'n'],
-        \"Run Macro":               ['z@',        'n'],
-        \"Run Dot":                 ['z.',        'n'],
-        \"Align Char":              ['z<',        'n'],
-        \"Align Regex":             ['z>',        'n'],
-        \"Numbers":                 ['zn',        'n'],
-        \"Numbers Append":          ['zN',        'n'],
-        \"Zero Numbers":            ['z0n',       'n'],
-        \"Zero Numbers Append":     ['z0N',       'n'],
-        \"Shrink":                  ["z-",        'n'],
-        \"Enlarge":                 ["z+",        'n'],
+        \"Visual Subtract":         [leader.'s',  'x'],
+        \"Run Normal":              [leader.'z',  'n'],
+        \"Run Last Normal":         [leader.'Z',  'n'],
+        \"Run Visual":              [leader.'v',  'n'],
+        \"Run Last Visual":         [leader.'V',  'n'],
+        \"Run Ex":                  [leader.'x',  'n'],
+        \"Run Last Ex":             [leader.'X',  'n'],
+        \"Run Macro":               [leader.'@',  'n'],
+        \"Run Dot":                 [leader.'.',  'n'],
+        \"Align Char":              [leader.'<',  'n'],
+        \"Align Regex":             [leader.'>',  'n'],
+        \"Numbers":                 [leader.'n',  'n'],
+        \"Numbers Append":          [leader.'N',  'n'],
+        \"Zero Numbers":            [leader.'0n', 'n'],
+        \"Zero Numbers Append":     [leader.'0N', 'n'],
+        \"Shrink":                  [leader.'-',  'n'],
+        \"Enlarge":                 [leader.'+',  'n'],
         \})
 
   "arrows
@@ -236,8 +230,8 @@ fun! vm#maps#all#buffer()
         \"~":                       ['~',           'n'],
         \"Del":                     ['<del>',       'n'],
         \"Dot":                     ['.',           'n'],
-        \"Increase":                ['+',           'n'],
-        \"Decrease":                ['-',           'n'],
+        \"Increase":                ['<C-a>',       'n'],
+        \"Decrease":                ['<C-x>',       'n'],
         \"a":                       ['a',           'n'],
         \"A":                       ['A',           'n'],
         \"i":                       ['i',           'n'],

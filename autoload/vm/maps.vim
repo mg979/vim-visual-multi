@@ -147,15 +147,9 @@ endfun
 fun! s:build_permanent_maps()
     """Run at vim start. Generate permanent mappings and integrate custom ones.
 
-    "prevent <Space> to be used as leader inside VM
-    let g:Vm.leader = get(g:, 'VM_leader', '')
-    if !empty(g:Vm.leader) && g:Vm.leader !=? "\<Space>"
-        let g:Vm.leader = escape(g:Vm.leader, '\')
-    elseif !exists('g:mapleader') || g:mapleader ==? "\<Space>" || g:Vm.leader ==? "\<Space>"
-        let g:Vm.leader = '\'
-    else
-        let g:Vm.leader = g:mapleader
-    endif
+    "set default VM leader
+    let leader = get(g:, 'mapleader', '\')
+    let g:Vm.leader = get(g:, 'VM_leader', leader.leader)
 
     "init vars and generate base permanent maps dict
     let g:VM_maps   = get(g:, 'VM_maps', {})
