@@ -15,13 +15,14 @@ fun! vm#init_buffer(empty, ...)
                 \ 'Edit': {}, 'Global':  {}, 'Search': {}, 'Maps':  {}, 'Groups': {}
                         \}
 
-    let s:V            = b:VM_Selection
+    let b:VM_mappings_loaded = get(b:, 'VM_mappings_loaded', 0)
+    let b:VM_Debug           = get(b:, 'VM_Debug', {'lines': []})
 
     "init classes
+    let s:V            = b:VM_Selection
     let s:v            = s:V.Vars
     let s:Regions      = s:V.Regions
 
-    let s:V.Maps       = vm#maps#init()
     let s:V.Funcs      = vm#funcs#init()
 
     "init search
@@ -79,6 +80,7 @@ fun! vm#init_buffer(empty, ...)
 
     let s:v.add_cursor_in_place = 0
 
+    let s:V.Maps       = vm#maps#init()
     let s:V.Global     = vm#global#init()
     let s:V.Search     = vm#search#init()
     let s:V.Edit       = vm#edit#init()
@@ -133,7 +135,7 @@ fun! vm#init_buffer(empty, ...)
         hi clear Search
         exe g:Vm.Search
     endif
-    if !g:VM_manual_infoline
+    if empty(b:VM_Debug.lines) && !g:VM_manual_infoline
         call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
     endif
 

@@ -13,6 +13,7 @@ let g:loaded_visual_multi = 1
 com! -nargs=? -complete=customlist,vm#themes#complete
       \ VMTheme  call vm#themes#load(<q-args>)
 com!    VMConfig call vm#special#config#start()
+com!    VMDebug  call vm#special#help#debug()
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -22,18 +23,15 @@ let g:Vm.is_active        = 0
 let g:Vm.extend_mode      = 0
 let g:Vm.selecting        = 0
 let g:Vm.mappings_enabled = 0
-let g:Vm.mappings_loaded  = 0
 let g:Vm.last_ex          = ''
 let g:Vm.last_normal      = ''
 let g:Vm.last_visual      = ''
 let g:Vm.oldupdate        = exists("##TextYankPost") ? 0 : &updatetime
 
 let g:VM_live_editing                     = get(g:, 'VM_live_editing', 1)
+let g:VM_check_mappings                   = get(g:, 'VM_check_mappings', 1)
 let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
-let g:VM_sublime_mappings                 = get(g:, 'VM_sublime_mappings', 0)
 let g:VM_mouse_mappings                   = get(g:, 'VM_mouse_mappings', 0)
-let g:VM_permanent_mappings               = get(g:, 'VM_permanent_mappings', 1)
-let g:VM_extended_mappings                = get(g:, 'VM_extended_mappings', 0)
 
 let g:VM_custom_noremaps                  = get(g:, 'VM_custom_noremaps', {})
 let g:VM_custom_remaps                    = get(g:, 'VM_custom_remaps', {})
@@ -50,7 +48,6 @@ let g:VM_autoremove_empty_lines           = get(g:, 'VM_autoremove_empty_lines',
 let g:VM_pick_first_after_n_cursors       = get(g:, 'VM_pick_first_after_n_cursors', 0)
 let g:VM_disable_syntax_in_imode          = get(g:, 'VM_disable_syntax_in_imode', 0)
 let g:VM_dynamic_synmaxcol                = get(g:, 'VM_dynamic_synmaxcol', 20)
-let g:VM_leader_mappings                  = get(g:, 'VM_leader_mappings', 1)
 let g:VM_exit_on_1_cursor_left            = get(g:, 'VM_exit_on_1_cursor_left', 0)
 let g:VM_manual_infoline                  = get(g:, 'VM_manual_infoline', 1)
 let g:VM_persistent_registers             = get(g:, 'VM_persistent_registers', 0)

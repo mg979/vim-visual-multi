@@ -15,27 +15,18 @@ fun! vm#maps#default()
 endfun
 
 fun! vm#maps#init()
-    """At VM start, buffer mappings are generated (only once) and applied.
+    """At VM start, buffer mappings are generated (once per buffer) and applied.
     let s:V = b:VM_Selection
-    if !g:Vm.mappings_loaded | call s:build_buffer_maps() | endif
+    if !b:VM_mappings_loaded | call s:build_buffer_maps() | endif
 
-    if !has('nvim') && !has('gui_running')
-        nnoremap <silent> <nowait> <buffer> <esc><esc> <esc><esc>
-    endif
-    nmap     <nowait><buffer> <esc>      <Plug>(VM-Reset)
-    exe 'nmap <nowait><buffer>' g:Vm.maps.toggle '<Plug>(VM-Toggle-Mappings)'
-
+    call s:map_esc_and_toggle()
+    call s:check_warnings()
     return s:Maps
 endfun
 
 fun! vm#maps#reset()
     """At VM reset, last buffer mappings are reset, and permanent maps are restored.
-    silent! exe 'nunmap <buffer>' g:Vm.maps.toggle
-    silent! nunmap <buffer> <esc>
-    if !has('nvim') && !has('gui_running')
-        silent! nunmap <buffer> <esc><esc>
-    endif
-
+    call s:unmap_esc_and_toggle()
     for m in g:Vm.maps.permanent | exe m | endfor
 endfun
 
@@ -140,7 +131,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-" Map dicts functions
+" Map helper functions
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -165,7 +156,10 @@ fun! s:build_permanent_maps()
 
     "generate list of 'exe' commands for map assignment
     for key in keys(maps)
-        call add(g:Vm.maps.permanent, s:assign(key, maps[key], 0))
+        let mapping = s:assign(key, maps[key], 0)
+        if !empty(mapping)
+            call add(g:Vm.maps.permanent, mapping)
+        endif
     endfor
 
     "generate list of 'exe' commands for unmappings
@@ -177,8 +171,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:build_buffer_maps()
-    """Run at first VM start. Generate buffer mappings and integrate custom ones.
-    let g:Vm.mappings_loaded = 1
+    """Run once per buffer. Generate buffer mappings and integrate custom ones.
+    let b:VM_mappings_loaded = 1
+    let check_maps = get(b:, 'VM_check_mappings', g:VM_check_mappings)
+    let force_maps = get(b:, 'VM_force_maps', get(g:, 'VM_force_maps', []))
 
     "generate base buffer maps dict
     let maps = vm#maps#all#buffer()
@@ -190,7 +186,10 @@ fun! s:build_buffer_maps()
 
     "generate list of 'exe' commands for map assignment
     for key in keys(maps)
-        call add(g:Vm.maps.buffer, s:assign(key, maps[key], 1))
+        let mapping = s:assign(key, maps[key], 1, check_maps, force_maps)
+        if !empty(mapping)
+            call add(g:Vm.maps.buffer, mapping)
+        endif
     endfor
 
     "store the key used to toggle mappings
@@ -211,16 +210,26 @@ endfun
 
 fun! s:assign(plug, key, buffer, ...)
     """Create a map command that will be executed."""
-    let k = a:key[0]
-    if empty(k) | return '' | endif
+    let k = a:key[0] | if empty(k) | return '' | endif
+    let m = a:key[1]
 
-    if !empty(g:Vm.leader)
-        let k = substitute(k, '<leader>', g:Vm.leader, '')
+    "check if the mapping can be applied: this only runs for buffer mappings
+    "a:1 is a bool that is true if mappings must be checked
+    "a:2 can contain a list of mappings that will be applied anyway (forced)
+    "otherwise, if a buffer mapping already exists, the remapping fails, and
+    "a debug line is added
+    if a:0 && a:1 && index(a:2, k) < 0
+        let K = maparg(k, m, 0, 1)
+        if !empty(K) && K.buffer
+            let b = 'b'.bufnr('%').': '
+            let s = b.'Could not map: '.k.' ('.a:plug.')  ->  ' . K.rhs
+            call add(b:VM_Debug.lines, s)
+            return ''
+        endif
     endif
 
     let g:Vm.help[a:plug] = k
     let p = substitute(a:plug, ' ', '-', 'g')
-    let m = a:key[1]
     let _ = a:buffer? '<buffer><nowait> ' : '<nowait> '
     return m."map "._.k.' <Plug>(VM-'.p.")"
 endfun
@@ -236,4 +245,31 @@ fun! s:unmap(key, buffer)
     return "silent! ".m."unmap".b.k
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:map_esc_and_toggle() abort
+    if !has('nvim') && !has('gui_running')
+        nnoremap <nowait><buffer> <esc><esc> <esc><esc>
+    endif
+    nmap <nowait><buffer> <esc> <Plug>(VM-Reset)
+    exe 'nmap <nowait><buffer>' g:Vm.maps.toggle '<Plug>(VM-Toggle-Mappings)'
+endfun
+
+fun! s:unmap_esc_and_toggle() abort
+    silent! exe 'nunmap <buffer>' g:Vm.maps.toggle
+    silent! nunmap <buffer> <esc>
+    if !has('nvim') && !has('gui_running')
+        silent! nunmap <buffer> <esc><esc>
+    endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:check_warnings() abort
+    """Notify once per buffer if errors have happened.
+    if !empty(b:VM_Debug.lines) && !has_key(b:VM_Debug, 'maps_warning')
+        let b:VM_Debug.maps_warning = 1
+        call s:V.Funcs.msg('VM has started with warnings. :VM_Debug for more info', 1)
+    endif
+endfun
 
