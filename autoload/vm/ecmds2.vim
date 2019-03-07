@@ -179,21 +179,23 @@ fun! s:Edit._numbers(start, step, sep, app) dict
       call add(text, t)
     endfor
 
-    if s:X() && a:app
-        call self.fill_register('"', map(copy(s:R()), '(v:val.txt).text[v:key]'), 0)
-    elseif s:X()
-        call self.fill_register('"', map(copy(s:R()), 'text[v:key].(v:val.txt)'), 0)
+    if s:X()
+        call self.fill_register('"', map(copy(s:R()),
+              \ a:app ? '(v:val.txt).text[v:key]' : 'text[v:key].(v:val.txt)'), 0)
+        normal p
     else
         call self.fill_register('"', text, 0)
+        if a:app | normal p
+        else     | normal P
+        endif
     endif
-    normal p
 endfun
 
 fun! s:Edit.numbers(start, app) dict
     let X = s:X() | if !X | call s:G.change_mode() | endif
 
     " fill the command line with [count]/default_step
-    let x = input('Expression > ', a:start . '/1')
+    let x = input('Expression > ', a:start . '/1/')
 
     if empty(x) | return s:F.msg('Canceled', 1) | endif
 
@@ -203,10 +205,17 @@ fun! s:Edit.numbers(start, app) dict
     endif
 
     "evaluate terms of the expression
+    "/ is the separator, it must be escaped \/ to be used
     let x = split(x, '/', 1)
-    if empty(x[len(x) - 1])
-        let x[len(x) - 1] = '/'
-    endif
+    let i = 0
+    while i < len(x)-1
+        if x[i][-1:-1] == '\'
+            let x[i] = x[i][:-2].'/'.remove(x, i+1)
+        else
+            let i += 1
+        endif
+    endwhile
+    call filter(x, '!empty(v:val)')
     let n = len(x)
 
     " true for a number, not for a separator
