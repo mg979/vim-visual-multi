@@ -60,7 +60,7 @@ fun! vm#maps#all#permanent()
 
   if g:VM_default_mappings
     let maps["Select Operator"][0]       = leader.'gs'
-    let maps["Add Cursor At Pos"][0]     = 'g<space>'
+    let maps["Add Cursor At Pos"][0]     = leader.'\'
     let maps["Start Regex Search"][0]    = leader.'/'
     let maps["Select All"][0]            = leader.'A'
     let maps["Add Cursor Down"][0]       = '<C-Down>'
@@ -110,7 +110,7 @@ fun! vm#maps#all#buffer()
         \"Skip Region":             ['<C-s>',     'n'],
         \"Alt Skip":                ['q',         'n'],
         \"Remove Region":           ['Q',         'n'],
-        \"Remove Last Region":      ['<C-q>',     'n'],
+        \"Remove Last Region":      [leader.'q',  'n'],
         \"Remove Every n Regions":  [leader.'R',  'n'],
         \"Star":                    [leader.'*',  'n'],
         \"Hash":                    [leader.'#',  'n'],
@@ -246,8 +246,8 @@ fun! vm#maps#all#buffer()
         \"Transform Regions":       [leader.'e',    'n'],
         \"p Paste Regions":         ['p',           'n'],
         \"P Paste Regions":         ['P',           'n'],
-        \"p Paste Normal":          [leader.'p',    'n'],
-        \"P Paste Normal":          [leader.'P',    'n'],
+        \"p Paste Vimreg":          [leader.'p',    'n'],
+        \"P Paste Vimreg":          [leader.'P',    'n'],
         \"Yank":                    ['y',           'n'],
         \"Yank Hard":               [leader.'y',    'n'],
         \})

@@ -100,8 +100,8 @@ fun! s:dict()
                   \'Transform Regions',       'Delete',
                   \'Yank',                    'Replace',
                   \'Yank Hard',               'Replace Pattern',
-                  \'p Paste Regions',         'p Paste Normal',
-                  \'P Paste Regions',         'P Paste Normal',
+                  \'p Paste Regions',         'p Paste Vimreg',
+                  \'P Paste Regions',         'P Paste Vimreg',
                   \]
 
   let insert    = ['I Arrow w',               'I Arrow b',
@@ -379,8 +379,8 @@ let s:plugs = {
       \"Transform Regions":       ["Transform Regions",          "transform regions with expression"],
       \"p Paste Regions":         ["p Paste",                    "both vim and VM registers"],
       \"P Paste Regions":         ["P Paste",                    "both vim and VM registers"],
-      \"p Paste Normal":          ["p Paste [vimreg]",           "force pasting from vim register"],
-      \"P Paste Normal":          ["P Paste [vimreg]",           "force pasting from vim register"],
+      \"p Paste Vimreg":          ["p Paste [vimreg]",           "force pasting from vim register"],
+      \"P Paste Vimreg":          ["P Paste [vimreg]",           "force pasting from vim register"],
       \"Yank":                    ["Yank",                       "only write VM registers"],
       \"Yank Hard":               ["Hard Yank",                  "both vim and VM registers"],
       \}
