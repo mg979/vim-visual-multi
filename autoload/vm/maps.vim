@@ -139,8 +139,7 @@ fun! s:build_permanent_maps()
     """Run at vim start. Generate permanent mappings and integrate custom ones.
 
     "set default VM leader
-    let leader = get(g:, 'mapleader', '\')
-    let g:Vm.leader = get(g:, 'VM_leader', leader.leader)
+    let g:Vm.leader = get(g:, 'VM_leader', '\\')
 
     "init vars and generate base permanent maps dict
     let g:VM_maps   = get(g:, 'VM_maps', {})
