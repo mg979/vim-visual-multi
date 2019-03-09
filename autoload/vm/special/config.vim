@@ -88,38 +88,38 @@ fun! vm#special#config#help()
   """Options help."""
 
   redraw!
-  let _ = "-------------------------------------"
-  echohl WarningMsg | echo _._._."\n" | echohl None
+  let _ = repeat('-', &columns-1)."\n"
+  echohl WarningMsg | echo _ | echohl None
 
-  echohl Special | echo "g:VM_default_mappings\t\t\t"  | echohl None | echon "this should be enabled for basic mappings to work."
-  echohl Special | echo "g:VM_mouse_mappings\t\t\t"    | echohl None | echon "mouse mappings.\n\n"
+  echohl Special | echo "g:VM_default_mappings\t\t\t"  | echohl None | echon "if disabled, only <C-N> will be mapped"
+  echohl Special | echo "g:VM_mouse_mappings\t\t\t"    | echohl None | echon "default mouse mappings\n\n"
 
-  echohl WarningMsg | echo _._._."\n" | echohl None
+  echohl WarningMsg | echo _ | echohl None
 
   echohl Special
-  echohl Special | echo "g:VM_reselect_first_insert\t\t" | echohl None | echon "reselect first cursor after most commands."
-  echohl Special | echo "g:VM_reselect_first_always\t\t" | echohl None | echon "reselect first cursor after exiting insert mode.\n\n"
+  echohl Special | echo "g:VM_reselect_first_insert\t\t" | echohl None | echon "reselect first cursor after exiting insert mode"
+  echohl Special | echo "g:VM_reselect_first_always\t\t" | echohl None | echon "reselect first cursor after most commands\n\n"
 
-  echohl WarningMsg | echo _._._."\n" | echohl None
+  echohl WarningMsg | echo _ | echohl None
 
   echohl Special | echo "g:VM_case_setting"
-  echohl None | echon "\t\t\tThis setting controls case matching: 'smart' -> 'sensitive' -> 'ignore'\n\n"
+  echohl None | echon "\t\t\tthis setting controls case matching:\n\t\t\t\t\t'smart' -> 'sensitive' -> 'ignore'\n\n"
 
-  echohl WarningMsg | echo _._._."\n" | echohl None
+  echohl WarningMsg | echo _ | echohl None
 
   echo "Performance-related settings for insert mode. Type :help 'synmaxcol' for more info.\n\n"
   echohl Special | echo "g:VM_pick_first_after_n_cursors"
-  echohl None | echon "\t\tcan improve performance when there are lots of cursors, but you may not like to be brought to the first cursor and back."
+  echohl None | echon "\t\tcan improve performance when there are lots of cursors"
   echohl Special | echo "g:VM_dynamic_synmaxcol"
-  echohl None | echon "\t\t\twhen this number of cursors is reached, when entering insert mode, syntax highlightin max column will be gradually decreased."
+  echohl None | echon "\t\t\tsyntax highlighting max column will be gradually decreased"
   echohl Special | echo "g:VM_disable_syntax_in_imode"
-  echohl None | echon "\t\tdrops synmaxcol to 1, while in insert mode. The most radical solution.\n\n"
+  echohl None | echon "\t\tdrops synmaxcol to 1, while in insert mode\n\n"
   echohl None
 
-  echohl WarningMsg | echo _._._."\n" | echohl None
+  echohl WarningMsg | echo _ | echohl None
 
-  echohl Special | echo "g:VM_exit_on_1_cursor_left" | echohl None | echon "\t\tIf enabled, VM automatically exits when there is one cursor left."
-  echohl Special | echo "g:VM_manual_infoline"       | echohl None | echon "\t\t\tDon't show the infoline, only call it manually (default <leader>l)."
+  echohl Special | echo "g:VM_exit_on_1_cursor_left" | echohl None | echon "\t\tautomatically exit when there is one cursor left"
+  echohl Special | echo "g:VM_manual_infoline"       | echohl None | echon "\t\t\tshow the infoline only manually (default \\\\l)"
 
   echohl Special
   echohl None
