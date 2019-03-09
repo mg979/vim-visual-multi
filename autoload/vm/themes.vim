@@ -1,3 +1,16 @@
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"Set up highlighting
+
+let g:Vm.hi.extend                        = get(g:, 'VM_Selection_hl',     'Visual')
+let g:Vm.hi.mono                          = get(g:, 'VM_Mono_Cursor_hl',   'DiffChange')
+let g:Vm.hi.insert                        = get(g:, 'VM_Ins_Mode_hl',      'Pmenu')
+let g:Vm.hi.cursor                        = get(g:, 'VM_Normal_Cursor_hl', 'ToolbarLine')
+let g:Vm.hi.message                       = get(g:, 'VM_Message_hl',       'WarningMsg')
+
+exe "highlight link MultiCursor ".g:Vm.hi.cursor
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 let s:Themes = {}
 
 fun! vm#themes#init()

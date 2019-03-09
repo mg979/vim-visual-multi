@@ -3,8 +3,8 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#plugs#permanent()
-  nnoremap   <silent> <Plug>(VM-Select-Operator)     :<c-u>call vm#operators#select(0, 0)<cr>y
-  xmap <expr><silent> <Plug>(VM-Visual-Find)         vm#operators#find(1, 1)
+  nnoremap   <silent>     <Plug>(VM-Select-Operator)         :<c-u>call vm#operators#select(0, 0)<cr>y
+  xmap <expr><silent>     <Plug>(VM-Visual-Find)             vm#operators#find(1, 1)
 
   nnoremap <silent>       <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0)<cr>
   nnoremap <silent>       <Plug>(VM-Add-Cursor-At-Word)      :call vm#commands#add_cursor_at_word(1, 1)<cr>

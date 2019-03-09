@@ -38,12 +38,11 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:check_extend_default(X)
-    """If just starting, enable extend mode if option is set."""
+fun! s:set_extend_mode(X)
+    """If just starting, enable extend mode if appropriate.
 
-    if s:X()                                 | return s:init(0, 1, 1)
-    elseif ( a:X || g:VM_extend_by_default ) | return s:init(0, 1, 1)
-    else                                     | return s:init(0, 1, 0) | endif
+    if s:X() || a:X | return s:init(0, 1, 1)
+    else            | return s:init(0, 1, 0) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -89,20 +88,21 @@ fun! s:skip_shorter_lines()
     if get(g:, 'VM_skip_shorter_lines', 1)
       let vcol    = s:v.vertical_col
       let col     = virtcol('.')
-      let endline = g:VM_skip_empty_lines? virtcol('$') : ((virtcol('$') > 1)? virtcol('$') : 2)
+      let endline = g:VM_skip_empty_lines? virtcol('$') :
+            \                              virtcol('$') > 1 ? virtcol('$') : 2
 
       "skip line
       if ( col < vcol || col == endline ) | return 1 | endif
     endif
 
     "in block mode, cursor add is handled in block script
-    if !s:V.Block.vertical()            | call s:G.new_cursor() | endif
+    if !s:V.Block.vertical() | call s:G.new_cursor() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#add_cursor_at_pos(extend)
-    call s:check_extend_default(a:extend)
+    call s:set_extend_mode(a:extend)
     call s:Block.stop()
     call s:G.new_cursor(1)
     call s:F.count_msg(1)
@@ -112,7 +112,7 @@ endfun
 
 fun! vm#commands#add_cursor_down(extend, count)
     if s:last_line() | return | endif
-    call s:check_extend_default(a:extend)
+    call s:set_extend_mode(a:extend)
     call s:set_vcol()
     call s:G.new_cursor()
     let N = a:count>1? a:count : 1
@@ -129,7 +129,7 @@ endfun
 
 fun! vm#commands#add_cursor_up(extend, count)
     if s:first_line() | return | endif
-    call s:check_extend_default(a:extend)
+    call s:set_extend_mode(a:extend)
     call s:set_vcol()
     call s:G.new_cursor()
     let N = a:count>1? a:count : 1
@@ -162,7 +162,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#expand_line(down)
-    call s:check_extend_default(1)
+    call s:set_extend_mode(1)
     if !s:v.multiline | call s:F.toggle_option('multiline') | endif
 
     let R = s:G.is_region_at_pos('.')
@@ -507,7 +507,7 @@ endfun
 
 fun! vm#commands#from_visual(t)
     let mode = visualmode()
-    call s:check_extend_default(1)
+    call s:set_extend_mode(1)
     let s:v.silence = 1
 
     if a:t ==# 'subtract' | call vm#visual#subtract(mode)
@@ -533,7 +533,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#mouse_column()
-    call s:check_extend_default(0)
+    call s:set_extend_mode(0)
     let start = getpos('.')[1:2]
     exe "normal! \<LeftMouse>"
     let end = getpos('.')[1:2]

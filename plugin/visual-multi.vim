@@ -17,65 +17,20 @@ com!    VMDebug  call vm#special#help#debug()
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let g:Vm = { 'hi': {} }
-
-let g:Vm.is_active        = 0
-let g:Vm.extend_mode      = 0
-let g:Vm.selecting        = 0
-let g:Vm.mappings_enabled = 0
-let g:Vm.last_ex          = ''
-let g:Vm.last_normal      = ''
-let g:Vm.last_visual      = ''
-let g:Vm.oldupdate        = exists("##TextYankPost") ? 0 : &updatetime
-
-let g:VM_live_editing                     = get(g:, 'VM_live_editing', 1)
-let g:VM_check_mappings                   = get(g:, 'VM_check_mappings', 1)
-let g:VM_default_mappings                 = get(g:, 'VM_default_mappings', 1)
-let g:VM_mouse_mappings                   = get(g:, 'VM_mouse_mappings', 0)
-
-let g:VM_custom_noremaps                  = get(g:, 'VM_custom_noremaps', {})
-let g:VM_custom_remaps                    = get(g:, 'VM_custom_remaps', {})
-let g:VM_extend_by_default                = get(g:, 'VM_extend_by_default', 0)
-let g:VM_skip_empty_lines                 = get(g:, 'VM_skip_empty_lines', 0)
-let g:VM_custom_commands                  = get(g:, 'VM_custom_commands', {})
-let g:VM_commands_aliases                 = get(g:, 'VM_commands_aliases', {})
-let g:VM_debug                            = get(g:, 'VM_debug', 0)
-let g:VM_reselect_first_insert            = get(g:, 'VM_reselect_first_insert', 0)
-let g:VM_reselect_first_always            = get(g:, 'VM_reselect_first_always', 0)
-let g:VM_case_setting                     = get(g:, 'VM_case_setting', 'smart')
-let g:VM_use_first_cursor_in_line         = get(g:, 'VM_use_first_cursor_in_line', 0)
-let g:VM_autoremove_empty_lines           = get(g:, 'VM_autoremove_empty_lines', 0)
-let g:VM_pick_first_after_n_cursors       = get(g:, 'VM_pick_first_after_n_cursors', 0)
-let g:VM_disable_syntax_in_imode          = get(g:, 'VM_disable_syntax_in_imode', 0)
-let g:VM_dynamic_synmaxcol                = get(g:, 'VM_dynamic_synmaxcol', 20)
-let g:VM_exit_on_1_cursor_left            = get(g:, 'VM_exit_on_1_cursor_left', 0)
-let g:VM_manual_infoline                  = get(g:, 'VM_manual_infoline', 1)
-let g:VM_persistent_registers             = get(g:, 'VM_persistent_registers', 0)
-let g:VM_overwrite_vim_registers          = get(g:, 'VM_overwrite_vim_registers', 0)
-let g:VM_highlight_matches                = get(g:, 'VM_highlight_matches', '')
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Reindentation after insert mode
-
-let g:VM_reindent_all_filetypes           = get(g:, 'VM_reindent_all_filetypes', 0)
-let g:VM_reindent_filetype                = get(g:, 'VM_reindent_filetype', [])
-let g:VM_no_reindent_filetype             = get(g:, 'VM_no_reindent_filetype', ['text', 'markdown'])
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Set up highlighting
-
-let g:Vm.hi.extend                        = get(g:, 'VM_Selection_hl',     'Visual')
-let g:Vm.hi.mono                          = get(g:, 'VM_Mono_Cursor_hl',   'DiffChange')
-let g:Vm.hi.insert                        = get(g:, 'VM_Ins_Mode_hl',      'Pmenu')
-let g:Vm.hi.cursor                        = get(g:, 'VM_Normal_Cursor_hl', 'ToolbarLine')
-let g:Vm.hi.message                       = get(g:, 'VM_Message_hl',       'WarningMsg')
-
-exe "highlight link MultiCursor ".g:Vm.hi.cursor
+let g:Vm = { 'hi'          : {},
+      \ 'is_active'        : 0,
+      \ 'extend_mode'      : 0,
+      \ 'selecting'        : 0,
+      \ 'mappings_enabled' : 0,
+      \ 'last_ex'          : '',
+      \ 'last_normal'      : '',
+      \ 'last_visual'      : '',
+      \ 'oldupdate'        : exists("##TextYankPost") ? 0 : &updatetime,
+      \}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Global mappings
 
-call vm#themes#init()
 call vm#plugs#permanent()
 call vm#maps#default()
 
@@ -93,33 +48,3 @@ augroup plugin-visual-multi-start
     endif
 augroup END
 
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"VM registers
-
-fun! s:vm_regs()
-    if !g:VM_persistent_registers | return | endif
-
-    let is_win = has('win32') || has('win64') || has('win16')
-    let sep    = is_win ? '\' : '/'
-    let vmfile = is_win ? '_VM_registers' : '.VM_registers'
-    let home   = !empty(get(g:, 'VM_vimhome', '')) ? g:VM_vimhome :
-               \ exists('$VIMHOME')                ? $VIMHOME :
-               \ is_win                            ? '~/vimfiles' : "~/.vim"
-
-    let g:Vm.regs_file = home.sep.vmfile
-    if isdirectory(home) && !filereadable(g:Vm.regs_file)
-        call writefile(['{}'], g:Vm.regs_file)
-    endif
-endfun
-
-fun! s:vm_regs_from_json()
-    if !g:VM_persistent_registers || !filereadable(g:Vm.regs_file)
-        return {'"': []} | endif
-    let regs = json_decode(readfile(g:Vm.regs_file)[0])
-    let regs['"'] = []
-    return regs
-endfun
-
-call s:vm_regs()
-let g:Vm.registers = s:vm_regs_from_json()
