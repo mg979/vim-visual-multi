@@ -253,9 +253,9 @@ fun! vm#augroup(end)
         au BufEnter     * call s:buffer_enter()
 
         if exists("##TextYankPost")
-            au TextYankPost * if s:v.yanked | call <SID>set_reg() | endif
+            au TextYankPost * call s:set_reg()
         else
-            au CursorMoved  * if s:v.yanked | call <SID>set_reg() | endif
+            au CursorMoved  * call s:set_reg()
         endif
     augroup END
 endfun
@@ -269,11 +269,11 @@ fun! vm#au_cursor(end)
 
     augroup plugin-vm-cursormoved
         au!
-        au CursorMoved * call <SID>VM_cursor_moved()
+        au CursorMoved * call s:cursor_moved()
     augroup END
 endfun
 
-fun! s:VM_cursor_moved()
+fun! s:cursor_moved()
     if s:v.block_mode
         if !s:v.block[3]
             call s:V.Block.stop()
@@ -298,11 +298,12 @@ endfun
 
 fun! s:set_reg()
     "Replace old default register if yanking in VM outside a region or cursor
-    let s:v.yanked = 0
-    let g:Vm.registers['"'] = []
-    let s:v.oldreg = s:V.Funcs.get_reg(v:register)
+    if s:v.yanked
+      let s:v.yanked = 0
+      let g:Vm.registers['"'] = []
+      let s:v.oldreg = s:V.Funcs.get_reg(v:register)
+    endif
 endfun
-
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "VM registers

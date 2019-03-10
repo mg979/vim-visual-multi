@@ -18,7 +18,7 @@ fun! vm#plugs#permanent()
   xnoremap <silent>       <Plug>(VM-Visual-Cursors)          :<c-u>call vm#commands#from_visual('cursors')<cr>
   xnoremap <silent>       <Plug>(VM-Visual-Add)              :<c-u>call vm#commands#from_visual('add')<cr>
 
-  nnoremap <silent>       <Plug>(VM-Find-Under)              :<c-u>call vm#commands#ctrld(v:count1)<cr>
+  nnoremap <silent>       <Plug>(VM-Find-Under)              :<c-u>call vm#commands#ctrln(v:count1)<cr>
   xnoremap <silent><expr> <Plug>(VM-Find-Subword-Under)      <sid>Visual('under')
 
   nnoremap <silent>       <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex(1)<cr>:call <SID>Mode()<cr>/
@@ -91,7 +91,6 @@ fun! vm#plugs#buffer()
   nnoremap <silent>       <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
   nnoremap <silent>       <Plug>(VM-Switch-Mode)             :call b:VM_Selection.Global.change_mode(1)<cr>
   nnoremap <silent>       <Plug>(VM-Reset)                   :<c-u>call vm#reset()<cr><esc>
-  nnoremap <silent>       <Plug>(VM-Undo)                    u:call b:VM_Selection.Global.update_regions()<cr>
 
   nnoremap <silent>       <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction(1)<cr>
   nnoremap <silent>       <Plug>(VM-Goto-Next)               :call vm#commands#find_next(0, 1)<cr>
@@ -107,7 +106,6 @@ fun! vm#plugs#buffer()
   nnoremap <silent>       <Plug>(VM-Remove-Region)           :call vm#commands#skip(1)<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Last-Region)      :call b:VM_Selection.Global.remove_last_region()<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Every-n-Regions)  :<c-u>call vm#commands#remove_every_n_regions(v:count)<cr>
-  nnoremap <silent>       <Plug>(VM-Undo-Visual)             :call vm#commands#undo()<cr>
   nnoremap <silent>       <Plug>(VM-Show-Infoline)           :call b:VM_Selection.Funcs.count_msg(2)<cr>
 
   for m in g:Vm.motions

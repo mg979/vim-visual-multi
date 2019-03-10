@@ -263,11 +263,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#ctrld(count)
+fun! vm#commands#ctrln(count)
     call s:init(1, 0, 0)
 
     if !s:X() && s:is_r()
+        let pos = getpos('.')[1:2]
         call vm#operators#select(1, 1, "iw")
+        call s:G.update_and_select_region(pos)
     else
         let s:v.silence = 1
         for i in range(a:count)
@@ -807,16 +809,3 @@ fun! vm#commands#align_regex()
     call s:V.Edit.align()
     call s:F.Scroll.force(winline)
 endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#commands#undo()
-    call s:G.remove_highlight()
-    echom b:VM_backup == b:VM_Selection
-    let b:VM_Selection = copy(b:VM_backup)
-    call s:G.update_highlight()
-    call s:G.select_region(s:v.index)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
