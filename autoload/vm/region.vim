@@ -1,13 +1,12 @@
 fun! vm#region#init()
-    let s:V       = b:VM_Selection
-    let s:v       = s:V.Vars
-    let s:G       = s:V.Global
-    let s:F       = s:V.Funcs
+    let s:V = b:VM_Selection
+    let s:v = s:V.Vars
+    let s:G = s:V.Global
+    let s:F = s:V.Funcs
 
-    let s:X    = {     -> g:Vm.extend_mode                   }
-    let s:R    = {     -> s:V.Regions                        }
-    let s:lcol = { ln  -> len(getline(ln))                   }
-    let s:B    = {     -> s:v.block_mode && g:Vm.extend_mode }
+    let s:X = { -> g:Vm.extend_mode                   }
+    let s:R = { -> s:V.Regions                        }
+    let s:B = { -> s:v.block_mode && g:Vm.extend_mode }
 endfun
 
 
@@ -107,12 +106,6 @@ fun! s:Region.new(cursor, ...)
     let R.id      = s:v.ID + 1
     let R.group   = s:v.active_group
 
-    let R.A_      = { -> line2byte(R.l) + R.a - 1 }
-    let R.B_      = { -> line2byte(R.L) + R.b - 1 }
-    let R.cur_ln  = { -> R.dir ? R.L : R.l }
-    let R.cur_col = { -> R.dir ? R.b : R.a }
-    let R.cur_Col = { -> R.cur_col() == R.b ? R.B : R.A }
-    let R.char    = { -> s:X()? getline(R.l)[R.cur_col()-1] : '' }
     let R.matches = {'region': [], 'cursor': 0}
 
     if !a:0 && a:cursor    "/////////// CURSOR ////////////
@@ -142,6 +135,30 @@ endfun
 
 fun! s:Region.empty() dict
     return self.A == self.B
+endfun
+
+fun! s:Region.A_()
+    return line2byte(self.l) + self.a - 1
+endfun
+
+fun! s:Region.B_()
+    return line2byte(self.L) + self.b - 1
+endfun
+
+fun! s:Region.cur_ln()
+    return self.dir ? self.L : self.l
+endfun
+
+fun! s:Region.cur_col()
+    return self.dir ? self.b : self.a
+endfun
+
+fun! s:Region.cur_Col()
+    return self.cur_col() == self.b ? self.B : self.A
+endfun
+
+fun! s:Region.char()
+    return s:X()? getline(self.l)[self.cur_col()-1] : ''
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -198,32 +215,11 @@ fun! s:Region.remove_from_byte_map(all) dict
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.get_text() dict
-    """UNUSED: Get text content between A and B offsets.
-    let r = self
 
-    if r.h == 0 | return getline(r.l)[r.a-1:r.b-1]             | endif
-    if r.h == 1 | return
-                \ getline(r.l)[(r.a)-1:(s:lcol(r.l))-1] . getline(r.L)[:r.b-1] | endif
-
-    for ln in range(self.h)
-
-    endfor
-endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Region motions
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"NOTE: these lambdas aren't really used much for now.
-
-let s:forward   = { -> index(['w', 'W', 'e', 'E', 'l', 'j', 'f', 't', '$'], s:motion[0]) >=0}
-let s:backwards = { -> index(['b', 'B', 'F', 'T', 'h', 'k', '0', '^'],      s:motion[0]) >=0}
-let s:simple    = { -> index(['h', 'j', 'k', 'l'],                          s:motion[0]) >=0}
-let s:extreme   = { -> index(['$', '0', '^'],                               s:motion[0]) >=0}
-let s:vertical  = { -> index(['j', 'k'],                                    s:motion[0]) >=0}
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.move(...) dict
@@ -238,6 +234,12 @@ fun! s:Region.move(...) dict
     else
         call s:move_region(self)
     endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:vertical()
+    return index(['j', 'k'], s:motion[0]) >=0
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
