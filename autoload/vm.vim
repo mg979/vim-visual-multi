@@ -52,7 +52,7 @@ fun! vm#init_buffer(empty, ...)
 
     let b:VM_mappings_loaded = get(b:, 'VM_mappings_loaded', 0)
     let b:VM_Debug           = get(b:, 'VM_Debug', {'lines': []})
-    let b:VM_Backup          = {'ticks': []}
+    let b:VM_Backup          = {'ticks': [], 'last': 0, 'first': undotree().seq_cur}
 
     "init classes
     let s:V            = b:VM_Selection
@@ -113,7 +113,6 @@ fun! vm#init_buffer(empty, ...)
     let s:v.no_search        = 0
     let s:v.no_msg           = g:VM_manual_infoline
     let s:v.visual_regex     = 0
-    let s:v.undo_start       = undotree().seq_cur
 
     let s:v.add_cursor_in_place = 0
 
@@ -213,7 +212,7 @@ fun! vm#reset(...)
         call s:V.Funcs.Scroll.restore()
     endif
 
-    let b:VM_Backup = {'ticks': []}
+    let b:VM_Backup = {}
     let b:VM_Selection = {}
     let g:Vm.is_active = 0
     let g:Vm.extend_mode = 0

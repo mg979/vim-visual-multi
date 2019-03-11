@@ -266,13 +266,13 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.restore_regions() abort
+fun! s:Global.restore_regions(index) abort
     """Restore previous regions from backup.
-    call self.erase_regions()
-    let tick_number = remove(b:VM_Backup.ticks, -1)
-    let vm_tick = remove(b:VM_Backup, tick_number)
-    let s:V.Regions = remove(vm_tick, 'regions')
-    let g:Vm.extend_mode = vm_tick.X
+    let backup = b:VM_Backup | call self.erase_regions()
+
+    let tick = backup.ticks[a:index]
+    let s:V.Regions = deepcopy(backup[tick].regions)
+    let g:Vm.extend_mode = backup[tick].X
     call self.update_and_select_region('.')
 endfun
 
@@ -280,9 +280,17 @@ endfun
 
 fun! s:Global.backup_regions() abort
     """Store a copy of the current regions.
-    let tick = undotree().seq_cur
-    call add(b:VM_Backup.ticks, tick)
-    let b:VM_Backup[tick] = { 'regions': deepcopy(s:R()), 'X': s:X() }
+    let tick   = undotree().seq_cur
+    let backup = b:VM_Backup
+    let index  = index(backup.ticks, backup.last)
+
+    if index < len(backup.ticks) - 1
+      let backup.ticks = backup.ticks[:index]
+    endif
+
+    call add(backup.ticks, tick)
+    let backup[tick] = { 'regions': deepcopy(s:R()), 'X': s:X() }
+    let backup.last = tick
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -809,14 +809,37 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#undo() abort
-    if empty(b:VM_Backup.ticks)
-        call s:V.Funcs.msg('No regions to restore.', 1)
-        if undotree().seq_cur != s:v.undo_start
-            exe "undo" s:v.undo_start
+    let first = b:VM_Backup.first
+    let ticks = b:VM_Backup.ticks
+    let index = index(ticks, b:VM_Backup.last)
+
+    if index <= 0
+        call s:V.Funcs.msg('Undo not possible.', 1)
+        if undotree().seq_cur != first
+            exe "undo" first
+            call s:G.restore_regions(0)
         endif
     else
-        exe "undo" b:VM_Backup.ticks[-1]
-        call s:G.restore_regions()
+        echo 'Backup' index '/' len(ticks)
+        exe "undo" ticks[index-1]
+        call s:G.restore_regions(index-1)
+        let b:VM_Backup.last = ticks[index - 1]
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#redo() abort
+    let ticks = b:VM_Backup.ticks
+    let index = index(ticks, b:VM_Backup.last)
+
+    if index == len(ticks) - 1
+        call s:V.Funcs.msg('Redo not possible.', 1)
+    else
+        echo 'Backup' index+2 '/' len(ticks)
+        exe "undo" ticks[index+1]
+        call s:G.restore_regions(index+1)
+        let b:VM_Backup.last = ticks[index + 1]
     endif
 endfun
 
