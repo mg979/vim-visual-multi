@@ -165,7 +165,7 @@ fun! s:c_cursors(M, reg, n)
   if M[:1] ==? 'cs' | return s:V.Edit.run_normal(M) | endif
 
   "cr coerce (vim-abolish)
-  if M[:1] ==? 'cr' | return feedkeys('zz'.M."\<cr>") | endif
+  if M[:1] ==? 'cr' | return feedkeys("\<Plug>(VM-Run-Normal)".M."\<cr>") | endif
 
   "reorder command; CC = 'cc'
   let [S, N, CC] = s:reorder_cmd(M, r, a:n, 'c')
@@ -190,7 +190,7 @@ fun! s:c_cursors(M, reg, n)
     call s:V.Insert.key('a')
 
   elseif index(['ip', 'ap'] + vm#comp#add_line(), S) >= 0
-    call s:V.Edit.run_normal('"'.reg.'d'.S, {'count': N, 'store': reg})
+    call s:V.Edit.run_normal('d'.S, {'count': N, 'store': reg})
     call s:V.Insert.key('O')
 
   elseif S=='$'
@@ -212,7 +212,7 @@ fun! s:c_cursors(M, reg, n)
     call feedkeys('"'.reg."c")
 
   else
-    call s:V.Edit.run_normal('"'.reg.'d'.S, {'count': N, 'store': reg})
+    call s:V.Edit.run_normal('d'.S, {'count': N, 'store': reg})
     call s:G.merge_regions()
     call feedkeys("i")
   endif
