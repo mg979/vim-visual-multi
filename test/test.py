@@ -93,6 +93,7 @@ def run_core(paths, nvim=False):
         keys = client.input
         for line in open(paths["command"]):
             l = line.replace('\<', '<')
+            l = l.replace("\\\\", "\\")
             exec(l)
             time.sleep(0.5)
         client.command(':w! %s' % paths["gen_out_file"])

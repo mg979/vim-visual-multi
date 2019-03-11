@@ -143,8 +143,8 @@ fun! vm#maps#all#buffer()
 
   "commands
   call extend(maps, {
-        \"Undo":                    ['u',         'n'],
-        \"Redo":                    ['<C-r>',     'n'],
+        \"Undo":                    ['',          'n'],
+        \"Redo":                    ['',          'n'],
         \"Surround":                ['S',         'n'],
         \"Merge Regions":           [leader.'m',  'n'],
         \"Transpose":               [leader.'t',  'n'],
