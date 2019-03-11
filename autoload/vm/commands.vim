@@ -808,15 +808,15 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#undo()
-    if s:v.undo_tick == undotree().seq_cur
-      normal! u
-      call s:V.Funcs.msg(' No regions to restore. Exiting Visual-Multi.', 1)
-      return vm#reset(1)
+fun! vm#commands#undo() abort
+    if empty(b:VM_Backup.ticks)
+        call s:V.Funcs.msg('No regions to restore.', 1)
+        if undotree().seq_cur != s:v.undo_start
+            exe "undo" s:v.undo_start
+        endif
     else
-      normal! u
-      " TODO: doesn't restore extend mode if changed
-      call s:G.restore_regions()
+        exe "undo" b:VM_Backup.ticks[-1]
+        call s:G.restore_regions()
     endif
 endfun
 
