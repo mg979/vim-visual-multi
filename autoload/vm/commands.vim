@@ -809,14 +809,14 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#undo()
-    if s:v.changedtick == b:changedtick
+    if s:v.undo_tick == undotree().seq_cur
       normal! u
       call s:V.Funcs.msg(' No regions to restore. Exiting Visual-Multi.', 1)
       return vm#reset(1)
     else
       normal! u
+      " TODO: doesn't restore extend mode if changed
       call s:G.restore_regions()
-      let s:v.changedtick = b:changedtick
     endif
 endfun
 

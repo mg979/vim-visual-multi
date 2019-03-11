@@ -269,17 +269,25 @@ endfun
 fun! s:Global.restore_regions() abort
     """Restore previous regions from backup.
     call self.erase_regions()
-    for i in range(len(b:VM_Backup))
-        call add(s:V.Regions, deepcopy(b:VM_Backup[i]))
-    endfor
+    let s:V.Regions = remove(b:VM_Backup, -1)
     call self.update_and_select_region('.')
+    let s:v.undo_tick = undotree().seq_cur
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.backup_regions() abort
     """Store a copy of the current regions.
-    let b:VM_Backup = deepcopy(s:R())
+
+    " insert mode, or no text change since last update, skip
+    if s:v.insert || undotree().seq_cur == s:v.undo_tick && !empty(b:VM_Backup)
+        return | endif
+
+    " create an entry in the backup list
+    call add(b:VM_Backup, deepcopy(s:R()))
+
+    " update last tick
+    let s:v.undo_tick = undotree().seq_cur
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
