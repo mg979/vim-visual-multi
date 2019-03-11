@@ -150,11 +150,7 @@ fun! vm#commands#erase_regions(...)
     "empty start
     if !g:Vm.is_active | call s:init(0,1,0) | return | endif
 
-    call s:G.remove_highlight()
-    let s:V.Regions = []
-    let s:V.Bytes = {}
-    let s:V.Groups = {}
-    let s:v.index = -1
+    call s:G.erase_regions()
     call s:V.Block.stop()
     if a:0 | call s:F.count_msg(1) | endif
 endfun
@@ -809,3 +805,20 @@ fun! vm#commands#align_regex()
     call s:V.Edit.align()
     call s:F.Scroll.force(winline)
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#undo()
+    if s:v.changedtick == b:changedtick
+      normal! u
+      call s:V.Funcs.msg(' No regions to restore. Exiting Visual-Multi.', 1)
+      return vm#reset(1)
+    else
+      normal! u
+      call s:G.restore_regions()
+      let s:v.changedtick = b:changedtick
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+

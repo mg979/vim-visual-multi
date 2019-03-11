@@ -253,6 +253,35 @@ fun! s:Global.update_map_and_select_region(...) dict
     endif
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.erase_regions() abort
+    """Erase all regions.
+    call self.remove_highlight()
+    let s:V.Regions = []
+    let s:V.Bytes = {}
+    let s:V.Groups = {}
+    let s:v.index = -1
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.restore_regions() abort
+    """Restore previous regions from backup.
+    call self.erase_regions()
+    for i in range(len(b:VM_Backup))
+        call add(s:V.Regions, deepcopy(b:VM_Backup[i]))
+    endfor
+    call self.update_and_select_region('.')
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.backup_regions() abort
+    """Store a copy of the current regions.
+    let b:VM_Backup = deepcopy(s:R())
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.collapse_regions() dict

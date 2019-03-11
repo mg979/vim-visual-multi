@@ -91,6 +91,7 @@ fun! vm#plugs#buffer()
   nnoremap <silent>       <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
   nnoremap <silent>       <Plug>(VM-Switch-Mode)             :call b:VM_Selection.Global.change_mode(1)<cr>
   nnoremap <silent>       <Plug>(VM-Reset)                   :<c-u>call vm#reset()<cr><esc>
+  nnoremap <silent>       <Plug>(VM-Undo)                    :call vm#commands#undo()<cr>
 
   nnoremap <silent>       <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction(1)<cr>
   nnoremap <silent>       <Plug>(VM-Goto-Next)               :call vm#commands#find_next(0, 1)<cr>

@@ -182,6 +182,8 @@ fun! s:Edit.process(cmd, ...) dict
     let stay_put = a:0 && exists('a:1.stay_put')
     let txt = []
 
+    call s:G.backup_regions()
+
     for r in s:R()
         " used in non-live edit, currently disabled
         if !s:v.auto && r.index == self.skip_index | continue | endif

@@ -65,6 +65,9 @@ fun! s:Edit.delete(X, register, count, hard) dict
     let ix           = s:G.select_region_at_pos('.').index
     let s:v.old_text = s:G.regions_text()
 
+    " manual deletion: backup current regions
+    if a:hard | call s:G.backup_regions() | endif
+
     for r in s:R()
         call r.shift(change, change)
         call self.extra_spaces.add(r)
@@ -106,6 +109,8 @@ fun! s:Edit.paste(before, vim_reg, reselect, register, ...) dict
     elseif vim_V   | return self.run_normal(printf('"%s%s', a:register, a:before ? 'P' : 'p' ))
     elseif vim_reg | let s:v.new_text = self.convert_vimreg(a:vim_reg)
     else           | let s:v.new_text = s:fix_regions_text(g:Vm.registers[a:register]) | endif
+
+    call s:G.backup_regions()
 
     if X | call self.delete(1, "_", 1, 0) | endif
 

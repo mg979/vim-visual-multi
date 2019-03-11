@@ -77,8 +77,11 @@ fun! s:Insert.start(append) dict
     let I = self
     let I._index = get(I, '_index', -1)
 
-    " get winline when insert mode is entered the first time
-    if !exists('s:v.winline_insert') | let s:v.winline_insert = winline() | endif
+    " get winline and backup regions when insert mode is entered the first time
+    if !exists('s:v.winline_insert')
+      let s:v.winline_insert = winline()
+      call s:G.backup_regions()
+    endif
 
     " check synmaxcol settings
     if !s:v.insert

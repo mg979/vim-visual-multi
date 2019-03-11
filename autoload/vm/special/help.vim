@@ -102,6 +102,7 @@ fun! s:dict()
                   \'Yank Hard',               'Replace Pattern',
                   \'p Paste Regions',         'p Paste Vimreg',
                   \'P Paste Regions',         'P Paste Vimreg',
+                  \'Undo',
                   \]
 
   let insert    = ['I Arrow w',               'I Arrow b',
@@ -373,6 +374,7 @@ let s:plugs = {
       \"O":                       ["O",                          "as 'O' in normal mode"],
       \"c":                       ["c",                          ""],
       \"C":                       ["C",                          ""],
+      \"Undo":                    ["Undo",                       "undo last edit and reselect regions"],
       \"Delete":                  ["Delete",                     "both vim and VM registers"],
       \"Replace":                 ["Replace",                    "just as 'r'"],
       \"Replace Pattern":         ["Replace Pattern",            "regex substitution in all regions"],
