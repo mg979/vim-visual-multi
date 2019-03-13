@@ -19,7 +19,6 @@ let g:VM_dynamic_synmaxcol                = get(g:, 'VM_dynamic_synmaxcol', 20)
 let g:VM_exit_on_1_cursor_left            = get(g:, 'VM_exit_on_1_cursor_left', 0)
 let g:VM_manual_infoline                  = get(g:, 'VM_manual_infoline', 1)
 let g:VM_overwrite_vim_registers          = get(g:, 'VM_overwrite_vim_registers', 0)
-let g:VM_highlight_matches                = get(g:, 'VM_highlight_matches', '')
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Reindentation after insert mode

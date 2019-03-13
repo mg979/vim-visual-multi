@@ -8,7 +8,15 @@
 
 "Initialize variables
 
+if exists("g:loaded_visual_multi")
+  finish
+endif
 let g:loaded_visual_multi = 1
+
+let s:save_cpo = &cpo
+set cpo&vim
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 com! -nargs=? -complete=customlist,vm#themes#complete
       \ VMTheme  call vm#themes#load(<q-args>)
@@ -27,6 +35,8 @@ let g:Vm = { 'hi'          : {},
       \ 'last_visual'      : '',
       \ 'oldupdate'        : exists("##TextYankPost") ? 0 : &updatetime,
       \}
+
+let g:VM_highlight_matches = get(g:, 'VM_highlight_matches', '')
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Global mappings
@@ -48,3 +58,7 @@ augroup plugin-visual-multi-start
     endif
 augroup END
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
