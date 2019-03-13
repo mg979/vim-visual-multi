@@ -170,23 +170,45 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.insert(...) dict
-    "TextChangedI
+    """Update the text on TextChangedI and CompleteDone events.
 
     call vm#comp#TextChangedI()  "compatibility tweaks
 
     let I        = self
     let L        = I.lines
+
+    " this is the current cursor position
     let ln       = getpos('.')[1]
-    let pos      = I.begin[1]
+    let coln     = getpos('.')[2]
 
-    let cur      = getpos('.')[2]
-    let pos      = pos + I.change*I.nth
-    let I.change = cur - pos
-    let text     = getline(ln)[(pos-1):(cur-2)]
+    " we're now evaluating the current (original) line
+    " we're only interested in column changes, since we insert text horizontally
 
+    " I.begin is the starting column, when insert mode is entered
+    " I.change is the total length of the newly inserted text up to this moment
+    " I.nth refers to the n. of cursors in the same line: it's 0 if there is only
+    " a cursor, but if there are more cursors in the line, their changes add up
+    " In fact, even if it's the original cursor, there may be cursors behind it,
+    " and it will be 'pushed' forward by them
+
+    " Given the above, the adjusted initial position will then be:
+    "   initial position + ( current change  * number of cursors behind it)
+    let pos      = I.begin[1] + I.change*I.nth
+
+    " find out the actual text that has been inserted up to this point:
+    " it's a slice of the current line, between the updated initial position
+    " (pos) and the current cursor position (coln)
+    let text     = getline(ln)[(pos-1):(coln-2)]
+
+    " now update the current change: secondary cursors need this value updated
+    let I.change = coln - pos
+
+    " update the lines (also the current line is updated with setline())
     for l in sort(keys(L), 'N')
         call L[l].update(I.change, text)
     endfor
+
+    " put the cursor where it should stay after the lines update
     call cursor(ln, I.col)
 endfun
 
