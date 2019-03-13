@@ -24,7 +24,7 @@ fun! vm#themes#init()
   silent! hi clear VM_Insert
   silent! hi clear MultiCursor
 
-  if !empty(g:VM_highlight_matches)
+  if !empty(get(g:, 'VM_highlight_matches', ''))
     redir => out
     silent! highlight Search
     redir END
