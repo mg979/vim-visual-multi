@@ -25,6 +25,10 @@ fun! vm#comp#init()
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
 
+    if exists('*VM_Start')
+        call VM_Start()
+    endif
+
     if exists('g:loaded_youcompleteme')
         let g:VM_use_first_cursor_in_line = 1
     endif
