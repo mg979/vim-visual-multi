@@ -146,11 +146,11 @@ fun! vm#plugs#buffer()
   "Edit commands
   nnoremap <silent>        <Plug>(VM-D)                       :<C-u>call vm#cursors#operation('d', 0, v:register, 'd$')<cr>
   nnoremap <silent>        <Plug>(VM-Y)                       :<C-u>call vm#cursors#operation('y', 0, v:register, 'y$')<cr>
-  nnoremap <silent>        <Plug>(VM-x)                       :<C-u>call b:VM_Selection.Edit.run_normal('x', {'count': v:count1, 'recursive': 0})<cr>:silent! undojoin<cr>
-  nnoremap <silent>        <Plug>(VM-X)                       :<C-u>call b:VM_Selection.Edit.run_normal('X', {'count': v:count1, 'recursive': 0})<cr>:silent! undojoin<cr>
-  nnoremap <silent>        <Plug>(VM-J)                       :<C-u>call b:VM_Selection.Edit.run_normal('J', {'count': v:count1, 'recursive': 0})<cr>:silent! undojoin<cr>
-  nnoremap <silent>        <Plug>(VM-~)                       :<C-u>call b:VM_Selection.Edit.run_normal('~', {'recursive': 0})<cr>:silent! undojoin<cr>
-  nnoremap <silent>        <Plug>(VM-Del)                     :<C-u>call b:VM_Selection.Edit.run_normal('x', {'count': v:count1, 'recursive': 0})<cr>:silent! undojoin<cr>
+  nnoremap <silent>        <Plug>(VM-x)                       :<C-u>call b:VM_Selection.Edit.run_normal('x', {'count': v:count1, 'recursive': 0})<cr>
+  nnoremap <silent>        <Plug>(VM-X)                       :<C-u>call b:VM_Selection.Edit.run_normal('X', {'count': v:count1, 'recursive': 0})<cr>
+  nnoremap <silent>        <Plug>(VM-J)                       :<C-u>call b:VM_Selection.Edit.run_normal('J', {'count': v:count1, 'recursive': 0})<cr>
+  nnoremap <silent>        <Plug>(VM-~)                       :<C-u>call b:VM_Selection.Edit.run_normal('~', {'recursive': 0})<cr>
+  nnoremap <silent>        <Plug>(VM-Del)                     :<C-u>call b:VM_Selection.Edit.run_normal('x', {'count': v:count1, 'recursive': 0})<cr>
   nnoremap <silent>        <Plug>(VM-Dot)                     :<C-u>call b:VM_Selection.Edit.dot()<cr>
   nnoremap <silent>        <Plug>(VM-Increase)                :<C-u>call b:VM_Selection.Edit.run_normal('<c-a>', {'count': v:count1, 'recursive': 0})<cr>
   nnoremap <silent>        <Plug>(VM-Decrease)                :<C-u>call b:VM_Selection.Edit.run_normal('<c-x>', {'count': v:count1, 'recursive': 0})<cr>
@@ -250,25 +250,24 @@ fun! s:Insert(key)
   let b:VM_Selection.Vars.restart_insert = 1
   let i = ":call b:VM_Selection.Insert.key('i')\<cr>"
   let a = ":call b:VM_Selection.Insert.key('a')\<cr>"
-  let u = b:VM_Selection.Insert.change? ":silent! undojoin\<cr>" : ""
 
   if a:key == 'cr'            "return
     return "\<esc>:call vm#icmds#return()\<cr>".i
   elseif a:key ==? 'x'        "x/X
     "only join undo if there's been a change
-    return "\<esc>".u.":call vm#icmds#x('".a:key."')\<cr>".i
+    return "\<esc>:call vm#icmds#x('".a:key."')\<cr>".i
   elseif index(split('hlwbWBeE0', '\zs'), a:key) >= 0
     return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
   elseif a:key ==? 'ge'
     return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
   elseif a:key == '$'
-    return "\<esc>".u.":call b:VM_Selection.Insert.key('A')\<cr>"
+    return "\<esc>:call b:VM_Selection.Insert.key('A')\<cr>"
   elseif a:key == '^'
-    return "\<esc>".u.":call b:VM_Selection.Insert.key('I')\<cr>"
+    return "\<esc>:call b:VM_Selection.Insert.key('I')\<cr>"
   elseif a:key == 'p'         "c-v
-    return "\<esc>".u.":call vm#icmds#paste()\<cr>".a
+    return "\<esc>:call vm#icmds#paste()\<cr>".a
   elseif a:key == 'cw'        "c-w
-    return "\<esc>".u.":call vm#icmds#cw()\<cr>".i
+    return "\<esc>:call vm#icmds#cw()\<cr>".i
   endif
 endfun
 

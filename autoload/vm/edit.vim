@@ -270,8 +270,7 @@ fun! s:Edit.extra_spaces.remove(...) dict
         let l = s:R()[i].L + (a:0? a:1 : 0)
         if getline(l)[-1:-1] ==# ' '
             call cursor(l, 1)
-            silent! undojoin
-            normal! $x
+            silent! undojoin | normal! $x
         endif
     endfor
     let s:v.extra_spaces = []

@@ -115,7 +115,6 @@ fun! vm#icmds#return()
         call cursor(r.l, r.a) | normal! ==
     endfor
     normal ^
-    silent! undojoin
     call s:V.Edit.extra_spaces.remove(-1)
 endfun
 
@@ -147,7 +146,6 @@ fun! vm#icmds#return_above()
 
     "move back all cursors to indent level
     normal ^
-    silent! undojoin
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

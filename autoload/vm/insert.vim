@@ -226,8 +226,7 @@ fun! s:Insert.stop() dict
 
     "NOTE: restart_insert is set in plugs, to avoid postprocessing, but it will be reset on <esc>
     "check for s:v.insert instead, it will be true until insert session is really over
-    if s:v.restart_insert
-        let s:v.restart_insert = 0 | return | endif
+    if s:v.restart_insert | let s:v.restart_insert = 0 | return | endif
 
     let s:v.eco = 1 | let s:v.insert = 0
 
