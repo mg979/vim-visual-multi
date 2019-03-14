@@ -166,11 +166,11 @@ fun! s:Insert.start(append) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Insert insert mode
+" Insert mode update
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.insert(...) dict
-    """Update the text on TextChangedI and CompleteDone events.
+    """Update the text on TextChangedI event, and jsut after InsertLeave.
 
     call vm#comp#TextChangedI()  "compatibility tweaks
 
@@ -198,10 +198,14 @@ fun! s:Insert.insert(...) dict
     " find out the actual text that has been inserted up to this point:
     " it's a slice of the current line, between the updated initial position
     " (pos) and the current cursor position (coln)
-    let text     = getline(ln)[(pos-1):(coln-2)]
+
+    " coln needs some adjustments though:
+    "   in insert mode, 1 is subtracted to find the current cursor position
+    "   but when insert mode stops (a:0 == 1) this isn't true
+    let text     = getline(ln)[(pos-1):(coln-2+a:0)]
 
     " now update the current change: secondary cursors need this value updated
-    let I.change = coln - pos
+    let I.change = coln - pos + a:0
 
     " update the lines (also the current line is updated with setline())
     for l in sort(keys(L), 'N')
@@ -213,8 +217,12 @@ fun! s:Insert.insert(...) dict
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Insert mode stop
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.stop() dict
+fun! s:Insert.stop(...) dict
+    " text is updated one last time when stopping
+    if &modified && !s:v.restart_insert | call self.insert(1) | endif
     call self.clear_hi() | call self.auto_end() | let i = 0
 
     for r in s:R()
@@ -365,7 +373,6 @@ fun! s:Insert.auto_start() dict
     augroup plugin-vm-insert
         au!
         au TextChangedI * call b:VM_Selection.Insert.insert()
-        au CompleteDone * call b:VM_Selection.Insert.insert()
         au InsertLeave  * call b:VM_Selection.Insert.stop()
     augroup END
 endfun
