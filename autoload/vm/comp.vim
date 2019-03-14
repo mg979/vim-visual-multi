@@ -33,10 +33,6 @@ fun! vm#comp#init()
         let g:VM_use_first_cursor_in_line = 1
     endif
 
-    if exists('g:loaded_deoplete')
-        call s:deoplete(0)
-    endif
-
     call s:check_clearmatches()
 
     for plugin in keys(s:plugins)
@@ -55,17 +51,32 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#TextChangedI()
+    if exists('g:loaded_deoplete')
+        call deoplete#custom#buffer_option('auto_complete', v:true)
+    elseif exists('b:ncm2_enable')
+        let b:ncm2_enable = 1
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#icmds()
+    if exists('g:loaded_deoplete')
+        call deoplete#custom#buffer_option('auto_complete', v:false)
+    elseif exists('b:ncm2_enable')
+        let b:ncm2_enable = 0
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#reset()
     let oldmatches = []
+    if exists('g:loaded_deoplete')
+        call deoplete#custom#buffer_option('auto_complete', v:true)
+    elseif exists('b:ncm2_enable')
+        let b:ncm2_enable = 1
+    endif
 
     "restore plugins functionality if necessary
     for plugin in keys(s:plugins)
@@ -94,7 +105,6 @@ endfun
 fun! vm#comp#exit()
     """Called last on VM exit."""
     call s:restore_indentLine()
-    call s:deoplete(1)
     if exists('*VM_Exit') | call VM_Exit() | endif
 endfun
 
@@ -139,36 +149,3 @@ fun! s:restore_indentLine()
         unlet b:VM_indentLine
     endif
 endfun
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" deoplete compatibility
-
-fun! s:deoplete(reenable)
-    if a:reenable && exists('s:deoplete_map')
-        unlet s:deoplete_map
-        silent! iunmap <buffer> <Tab>
-        silent! iunmap <buffer> <S-Tab>
-        call deoplete#custom#buffer_option('auto_complete', v:true)
-
-    elseif exists('g:loaded_deoplete')
-          \ && deoplete#is_enabled()
-          \ && !get(g:, 'deoplete#disable_auto_complete', 0)
-
-        let s:deoplete_map = 1
-        call deoplete#custom#buffer_option('auto_complete', v:false)
-        inoremap <buffer><silent><expr> <Tab>
-                    \ pumvisible() ? "\<C-n>" :
-                    \ <SID>check_back_space() ? "\<Tab>" :
-                    \ deoplete#mappings#manual_complete()
-        inoremap <buffer><silent><expr> <S-Tab>
-                    \ pumvisible() ? "\<C-p>" :
-                    \ <SID>check_back_space() ? "\<S-Tab>" :
-                    \ deoplete#mappings#manual_complete()
-    endif
-endfun
-
-fun! s:check_back_space() abort
-    let col = col('.') - 1
-    return !col || getline('.')[col - 1]  =~ '\s'
-endfun
-
