@@ -18,6 +18,7 @@ fun! vm#insert#init()
     let s:size    = { -> line2byte(line('$') + 1) }
 
     let s:v.restart_insert = 0
+    let s:v.complete_done  = 0
     return s:Insert
 endfun
 
@@ -153,8 +154,8 @@ fun! s:Insert.start(append) dict
     "disable indentkeys
     set indentkeys=
 
-    "start insert mode and break the undo point
-    call feedkeys("i\<c-g>u", 'n')
+    "start insert mode
+    call feedkeys("i", 'n')
 
     "check if there are insert marks that must be cleared
     if !empty(s:v.insert_marks)
@@ -222,7 +223,11 @@ endfun
 
 fun! s:Insert.stop(...) dict
     " text is updated one last time when stopping
-    if &modified && !s:v.restart_insert | call self.insert(1) | endif
+    if &modified && ( !s:v.restart_insert || s:v.complete_done )
+      let s:v.complete_done = 0
+      call self.insert(1)
+    endif
+
     call self.clear_hi() | call self.auto_end() | let i = 0
 
     for r in s:R()
@@ -374,6 +379,7 @@ fun! s:Insert.auto_start() dict
         au!
         au TextChangedI * call b:VM_Selection.Insert.insert()
         au InsertLeave  * call b:VM_Selection.Insert.stop()
+        au CompleteDone * let s:v.complete_done = 1
     augroup END
 endfun
 
