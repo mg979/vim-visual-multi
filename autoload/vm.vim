@@ -255,8 +255,11 @@ fun! vm#augroup(end)
 
         if exists("##TextYankPost")
             au TextYankPost * call s:set_reg()
+            au TextYankPost * call vm#operators#after_yank()
         else
             au CursorMoved  * call s:set_reg()
+            au CursorMoved  * call vm#operators#after_yank()
+            au CursorHold   * call vm#operators#after_yank()
         endif
     augroup END
 endfun

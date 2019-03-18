@@ -50,12 +50,6 @@ call vm#maps#default()
 augroup VM_start
     au!
     au ColorScheme  * call vm#themes#init()
-    if exists("##TextYankPost")
-        au TextYankPost * call vm#operators#after_yank()
-    else
-        au CursorMoved  * call vm#operators#after_yank()
-        au CursorHold   * call vm#operators#after_yank()
-    endif
 augroup END
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
