@@ -115,6 +115,9 @@ fun! vm#init_buffer(empty, ...)
 
     let s:v.add_cursor_in_place = 0
 
+    " call hook before applying mappings
+    if exists('*VM_Start') | call VM_Start() | endif
+
     let s:V.Maps       = vm#maps#init()
     let s:V.Global     = vm#global#init()
     let s:V.Search     = vm#search#init()
