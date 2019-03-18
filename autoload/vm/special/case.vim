@@ -17,11 +17,11 @@ let s:Case = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Case.mixed(word) dict
+fun! s:Case.mixed(word) abort
   return substitute(self.camel(a:word),'^.','\u&','')
 endfun
 
-fun! s:Case.camel(word) dict
+fun! s:Case.camel(word) abort
   let word = substitute(a:word,'[.-]','_','g')
   let word = substitute(word,' ','_','g')
   if word !~# '_' && word =~# '\l'
@@ -31,7 +31,7 @@ fun! s:Case.camel(word) dict
   endif
 endfun
 
-fun! s:Case.snake(word) dict
+fun! s:Case.snake(word) abort
   let word = substitute(a:word,'::','/','g')
   let word = substitute(word,'\(\u\+\)\(\u\l\)','\1_\2','g')
   let word = substitute(word,'\(\l\|\d\)\(\u\)','\1_\2','g')
@@ -41,41 +41,41 @@ fun! s:Case.snake(word) dict
   return word
 endfun
 
-fun! s:Case.snake_upper(word) dict
+fun! s:Case.snake_upper(word) abort
   return toupper(self.snake(a:word))
 endfun
 
-fun! s:Case.dash(word) dict
+fun! s:Case.dash(word) abort
   return substitute(self.snake(a:word),'_','-','g')
 endfun
 
-fun! s:Case.space(word) dict
+fun! s:Case.space(word) abort
   return substitute(self.snake(a:word),'_',' ','g')
 endfun
 
-fun! s:Case.dot(word) dict
+fun! s:Case.dot(word) abort
   return substitute(self.snake(a:word),'_','.','g')
 endfun
 
-fun! s:Case.title(word) dict
+fun! s:Case.title(word) abort
   return substitute(self.space(a:word), '\(\<\w\)','\=toupper(submatch(1))','g')
 endfun
 
-fun! s:Case.lower(word) dict
+fun! s:Case.lower(word) abort
   return tolower(a:word)
 endfun
 
-fun! s:Case.upper(word) dict
+fun! s:Case.upper(word) abort
   return toupper(a:word)
 endfun
 
-fun! s:Case.capitalize(word) dict
+fun! s:Case.capitalize(word) abort
   return toupper(a:word[0:0]) . tolower(a:word[1:])
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Case.menu() dict
+fun! s:Case.menu() abort
   echohl WarningMsg | echo "\tCase Conversion\n---------------------------------"
   echohl WarningMsg | echo "l         " | echohl Type | echon "lowercase"       | echohl None
   echohl WarningMsg | echo "u         " | echohl Type | echon "UPPERCASE"       | echohl None
@@ -122,7 +122,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Case.convert(type) dict
+fun! s:Case.convert(type) abort
   if !len(s:R()) | return | endif
   if !s:X()
     call vm#operators#select(1, 1, 'iw')

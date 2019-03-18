@@ -243,12 +243,12 @@ endfun
 
 fun! vm#augroup(end)
     if a:end
-        autocmd! plugin-visual-multi-global
-        augroup! plugin-visual-multi-global
+        autocmd! VM_global
+        augroup! VM_global
         return
     endif
 
-    augroup plugin-visual-multi-global
+    augroup VM_global
         au!
         au BufLeave     * call s:buffer_leave()
         au BufEnter     * call s:buffer_enter()
@@ -263,12 +263,12 @@ endfun
 
 fun! vm#au_cursor(end)
     if a:end
-        autocmd! plugin-vm-cursormoved
-        augroup! plugin-vm-cursormoved
+        autocmd! VM_cursormoved
+        augroup! VM_cursormoved
         return
     endif
 
-    augroup plugin-vm-cursormoved
+    augroup VM_cursormoved
         au!
         au CursorMoved * call s:cursor_moved()
     augroup END

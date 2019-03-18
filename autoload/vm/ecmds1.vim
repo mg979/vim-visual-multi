@@ -22,7 +22,7 @@ endfun
 " Yank
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.yank(hard, def_reg, silent, ...) dict
+fun! s:Edit.yank(hard, def_reg, silent, ...) abort
     let register = (s:v.use_register != s:v.def_reg)? s:v.use_register :
                 \  a:def_reg?                         s:v.def_reg : v:register
 
@@ -52,7 +52,7 @@ endfun
 " Delete
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.delete(X, register, count, hard) dict
+fun! s:Edit.delete(X, register, count, hard) abort
     """Delete the selected text and change to cursor mode.
     if !s:v.direction | call vm#commands#invert_direction() | endif
 
@@ -96,7 +96,7 @@ endfun
 " Paste
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.paste(before, vim_reg, reselect, register, ...) dict
+fun! s:Edit.paste(before, vim_reg, reselect, register, ...) abort
     let X                = s:X()
     let s:v.use_register = a:register
     let vim_reg          = a:vim_reg || !has_key(g:Vm.registers, a:register) ||
@@ -123,7 +123,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.block_paste(before) dict
+fun! s:Edit.block_paste(before) abort
     let size = s:size() | let change = 0 | let text = copy(s:v.new_text) | let s:v.eco = 1
 
     for r in s:R()
@@ -148,7 +148,7 @@ endfun
 " Replace
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.replace() dict
+fun! s:Edit.replace() abort
     if s:X()
         let char = nr2char(getchar())
         if char ==? "\<esc>" | return | endif
@@ -181,7 +181,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.replace_pattern() dict
+fun! s:Edit.replace_pattern() abort
     """Replace a pattern in all regions as with :s command."""
     if !s:X() | return | endif
 
@@ -209,7 +209,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.replace_expression() dict
+fun! s:Edit.replace_expression() abort
     """Replace all regions with the result of an expression."""
     if !s:X() | return | endif
     let ix = s:v.index | call s:F.Scroll.get()
@@ -246,7 +246,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.convert_vimreg(as_block) dict
+fun! s:Edit.convert_vimreg(as_block) abort
     """Fill the content to paste with the chosen vim register.
     let text = []
     let block = char2nr(getregtype(s:v.use_register)[0]) == 22
@@ -305,7 +305,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.fill_register(reg, text, hard) dict
+fun! s:Edit.fill_register(reg, text, hard) abort
     """Write custom and possibly vim registers.
     if a:reg == "_" | return | endif
 
@@ -332,7 +332,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.replace_regions_with_text(text) dict
+fun! s:Edit.replace_regions_with_text(text) abort
   """Paste a custom list of strings into current regions.
   call self.fill_register('"', a:text, 0)
   normal p

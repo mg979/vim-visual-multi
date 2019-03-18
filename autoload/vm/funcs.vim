@@ -28,7 +28,7 @@ let s:Funcs = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.pos2byte(...) dict
+fun! s:Funcs.pos2byte(...) abort
     "pos can be a string, a list [line, col], or the offset itself
 
     if type(a:1) == v:t_number          "an offset
@@ -45,7 +45,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.byte2pos(byte) dict
+fun! s:Funcs.byte2pos(byte) abort
     """Return the (line, col) position of a byte offset.
 
     let line   = byte2line(a:byte)
@@ -55,7 +55,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.Cursor(A) dict
+fun! s:Funcs.Cursor(A) abort
     let ln = byte2line(a:A)
     let cl = a:A - line2byte(ln) + 1
     call cursor(ln, cl)
@@ -64,30 +64,30 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.no_regions() dict
+fun! s:Funcs.no_regions() abort
     if s:v.index == -1 | call self.msg('No selected regions.', 0) | return 1 | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.char_under_cursor() dict
+fun! s:Funcs.char_under_cursor() abort
     return matchstr(getline('.'), '\%' . col('.') . 'c.')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.default_reg() dict
+fun! s:Funcs.default_reg() abort
     return "\""
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.get_reg(...) dict
+fun! s:Funcs.get_reg(...) abort
     let r = a:0? a:1 : s:v.def_reg
     return [r, getreg(r), getregtype(r)]
 endfun
 
-fun! s:Funcs.get_regs_1_9() dict
+fun! s:Funcs.get_regs_1_9() abort
     let regs = []
     for r in range(1, 9)
         call add(regs, [r, getreg(r), getregtype(r)])
@@ -95,14 +95,14 @@ fun! s:Funcs.get_regs_1_9() dict
     return regs
 endfun
 
-fun! s:Funcs.vm_regs_to_json() dict
+fun! s:Funcs.vm_regs_to_json() abort
     if !filereadable(g:Vm.regs_file) | return | endif
     let regs = copy(g:Vm.registers)
     unlet regs['"']
     return json_encode(regs)
 endfun
 
-fun! s:Funcs.vm_regs_from_json() dict
+fun! s:Funcs.vm_regs_from_json() abort
     if !get(g:, 'VM_persistent_registers', 0) || !filereadable(g:Vm.regs_file)
         return {'"': []} | endif
     let regs = json_decode(readfile(g:Vm.regs_file)[0])
@@ -110,7 +110,7 @@ fun! s:Funcs.vm_regs_from_json() dict
     return regs
 endfun
 
-fun! s:Funcs.save_vm_regs() dict
+fun! s:Funcs.save_vm_regs() abort
   if get(g:, 'VM_persistent_registers', 0) && filereadable(g:Vm.regs_file)
     call writefile([self.vm_regs_to_json()], g:Vm.regs_file)
   endif
@@ -118,21 +118,21 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.set_reg(text) dict
+fun! s:Funcs.set_reg(text) abort
     let r = s:v.def_reg
     call setreg(r, a:text, 'v')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.restore_reg() dict
+fun! s:Funcs.restore_reg() abort
     let r = s:v.oldreg
     call setreg(r[0], r[1], r[2])
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.restore_regs() dict
+fun! s:Funcs.restore_regs() abort
     "default reg
     call self.restore_reg()
 
@@ -148,7 +148,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.region_with_id(id) dict
+fun! s:Funcs.region_with_id(id) abort
     for r in s:R()
         if r.id == a:id | return r | endif
     endfor
@@ -171,7 +171,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.get_expr(x) dict
+fun! s:Funcs.get_expr(x) abort
   let l:Has = { x, c -> match(x, '%'.c ) >= 0 }
   let l:Sub = { x, a, b -> substitute(x, a, b, 'g') }
   let N = len(s:R()) | let x = a:x
@@ -189,20 +189,20 @@ endfun
 
 let s:Funcs.Scroll = {}
 
-fun! s:Funcs.Scroll.get(...) dict
+fun! s:Funcs.Scroll.get(...) abort
     """Store winline()."""
     let s:v.restore_scroll = a:0
     let s:v.winline = winline()
 endfun
 
-fun! s:Funcs.Scroll.force(line) dict
+fun! s:Funcs.Scroll.force(line) abort
     """Restore arbitrary winline().
     let s:v.restore_scroll = 1
     let s:v.winline = a:line
     call self.restore()
 endfun
 
-fun! s:Funcs.Scroll.restore(...) dict
+fun! s:Funcs.Scroll.restore(...) abort
     """Restore viewport position when done."""
     if s:v.restore_scroll | let s:v.restore_scroll = 0 | else | return | endif
     let lines = winline() - s:v.winline
@@ -219,7 +219,7 @@ endfun
 " Messages
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.msg(text, force) dict
+fun! s:Funcs.msg(text, force) abort
     if s:v.eco                     | return
     elseif s:v.silence && !a:force | return | endif
 
@@ -235,7 +235,7 @@ fun! s:Funcs.msg(text, force) dict
     endfor
 endfun
 
-fun! s:Funcs.count_msg(force, ...) dict
+fun! s:Funcs.count_msg(force, ...) abort
     if s:v.eco || s:v.insert            | return
     elseif s:v.silence && !a:force      | return
     elseif s:v.no_msg  && a:force < 2   | return
@@ -265,7 +265,7 @@ endfun
 " Toggle options
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.toggle_option(option, ...) dict
+fun! s:Funcs.toggle_option(option, ...) abort
     if s:v.eco | return | endif
 
     let s = "s:v.".a:option
@@ -315,7 +315,7 @@ endfun
 " Utility functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.show_registers() dict
+fun! s:Funcs.show_registers() abort
     echohl Label | echo " Register\tLine\t--- Register contents ---" | echohl None
     for r in keys(g:Vm.registers)
         "skip temmporary register
@@ -343,7 +343,7 @@ function! s:Funcs.pad(t, n, ...)
     endif
 endfunction
 
-fun! s:Funcs.repeat_char(c) dict
+fun! s:Funcs.repeat_char(c) abort
   let s = ''
   for i in range(&columns - 20)
     let s .= a:c
@@ -351,19 +351,19 @@ fun! s:Funcs.repeat_char(c) dict
   return s
 endfun
 
-fun! s:Funcs.redraw() dict
+fun! s:Funcs.redraw() abort
     if !has('gui_running') | redraw!
     endif
 endfun
 
-fun! s:Funcs.regions_contents() dict
+fun! s:Funcs.regions_contents() abort
     echohl WarningMsg | echo "Index\tID\tA\tB\tw\tl / L\t\ta / b\t\t"
                 \ "--- Pattern ---\t"
                 \ "--- Regions contents ---" | echohl None
     for r in s:R() | call self.region_txt(r) | endfor
 endfun
 
-fun! s:Funcs.region_txt(r) dict
+fun! s:Funcs.region_txt(r) abort
     let r = a:r
     let index = printf("%-4d", r.index)
     let line = substitute(r.txt, '\V\n', '^M', 'g')

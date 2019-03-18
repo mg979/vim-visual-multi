@@ -133,7 +133,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.empty() dict
+fun! s:Region.empty() abort
     return self.A == self.B
 endfun
 
@@ -163,7 +163,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.shift(x, y) dict
+fun! s:Region.shift(x, y) abort
     """Shift region offsets by integer values.
     let r = self
 
@@ -182,7 +182,7 @@ endfun
 " Remove region
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.remove() dict
+fun! s:Region.remove() abort
     """Remove a region and its id, then update indices."""
     call self.remove_highlight()
     call remove(s:R(), self.index)
@@ -195,13 +195,13 @@ fun! s:Region.remove() dict
     return self
 endfun
 
-fun! s:Region.clear(...) dict
+fun! s:Region.clear(...) abort
     """Called if it's necessary to clear the byte map as well."""
     call self.remove_from_byte_map(a:0)
     return self.remove()
 endfun
 
-fun! s:Region.remove_from_byte_map(all) dict
+fun! s:Region.remove_from_byte_map(all) abort
     """Remove a region from the bytes map."""
     if !s:X() | return | endif
 
@@ -222,7 +222,7 @@ endfun
 " Region motions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.move(...) dict
+fun! s:Region.move(...) abort
     let s:motion = a:0? a:1 : s:v.motion
 
     "set vertical column if motion is j or k
@@ -339,14 +339,14 @@ endfun
 " Update functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.update() dict
+fun! s:Region.update() abort
     if s:X() | call self.update_region()
     else     | call self.update_cursor() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.update_cursor(...) dict
+fun! s:Region.update_cursor(...) abort
     """Update cursor vars from position [line, col] or offset."""
     let r = self
 
@@ -364,7 +364,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.update_content() dict
+fun! s:Region.update_content() abort
     """Yank region content if in extend mode."""
     call cursor(self.l, self.a)   | keepjumps normal! m[
     call cursor(self.L, self.b+1) | silent keepjumps normal! m]`[y`]
@@ -377,7 +377,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.update_region(...) dict
+fun! s:Region.update_region(...) abort
     """Update the main region positions."""
     let r = self
 
@@ -393,7 +393,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.update_vars() dict
+fun! s:Region.update_vars() abort
     """Update the rest of the region vars."""
 
     let r         = self
@@ -423,7 +423,7 @@ endfun
 " Highlight functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.highlight() dict
+fun! s:Region.highlight() abort
     """Create the highlight entries."""
 
     if s:v.eco | return | endif | let R = self
@@ -462,7 +462,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.remove_highlight() dict
+fun! s:Region.remove_highlight() abort
     """Remove the highlight entries."""
 
     let r       = self.matches.region
@@ -474,7 +474,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.update_highlight() dict
+fun! s:Region.update_highlight() abort
     """Update the region highlight."""
 
     call self.remove_highlight()
@@ -483,7 +483,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Region.update_bytes_map() dict
+fun! s:Region.update_bytes_map() abort
     if !s:X() | return | endif
 
     for b in range(self.A, self.B)

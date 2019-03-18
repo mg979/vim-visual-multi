@@ -17,7 +17,7 @@ let s:Block = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Block.vertical() dict
+fun! s:Block.vertical() abort
     if !s:B() | call self.stop() | return | endif
 
     let s:v.block[3] = 1
@@ -33,7 +33,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Block.horizontal(before) dict
+fun! s:Block.horizontal(before) abort
     if !s:B() | call self.stop() | return | endif
 
     "before motion
@@ -62,7 +62,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Block.positions(r, new, back, forth) dict
+fun! s:Block.positions(r, new, back, forth) abort
     let r = a:r | let new = a:new
 
     if !r.dir && a:back
@@ -88,7 +88,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Block.start() dict
+fun! s:Block.start() abort
     if s:v.eco | return | endif
     call s:G.extend_mode()
 
@@ -104,7 +104,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Block.stop() dict
+fun! s:Block.stop() abort
     if s:v.eco | return | endif
 
     let s:v.block_mode = 0

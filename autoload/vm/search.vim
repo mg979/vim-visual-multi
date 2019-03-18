@@ -23,7 +23,7 @@ let s:Search = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.get_pattern(register, regex) dict
+fun! s:Search.get_pattern(register, regex) abort
     let t = getreg(a:register)
     let p = t
     if !a:regex
@@ -51,13 +51,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.add(...) dict
+fun! s:Search.add(...) abort
     """Add a new search pattern."
     let pat = a:0? a:1 : self.get_pattern(s:v.def_reg, 0)
     call s:update_search(pat)
 endfun
 
-fun! s:Search.add_if_empty(...) dict
+fun! s:Search.add_if_empty(...) abort
     """Add a new search pattern, only if no pattern is set.
     if empty(s:v.search)
         if a:0 | call self.add(a:1)
@@ -68,7 +68,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.get() dict
+fun! s:Search.get() abort
     """Get a new search pattern from the selected region, with a fallback."
     let r = s:G.is_region_at_pos('.')
     if !empty(r)
@@ -83,7 +83,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.get_slash_reg() dict
+fun! s:Search.get_slash_reg() abort
     """Get pattern from current "/" register. Use backup register if empty."
     call s:update_search(self.get_pattern('/', 1))
     if empty(s:v.search) | call s:update_search(s:v.oldreg[1]) | endif
@@ -91,7 +91,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.update_current(...) dict
+fun! s:Search.update_current(...) abort
     """Update current search pattern to index 0 or <arg>."""
 
     if empty(s:v.search)          | let @/ = ''
@@ -104,7 +104,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.remove(also_regions) dict
+fun! s:Search.remove(also_regions) abort
     """Remove a search pattern, and optionally its associated regions."""
     let pats = s:v.search
 
@@ -139,7 +139,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.validate() dict
+fun! s:Search.validate() abort
     """Check whether the current search is valid, if not, clear the search."""
     if s:v.eco || empty(s:v.search) | return | endif
 
@@ -160,7 +160,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.check_pattern(...) dict
+fun! s:Search.check_pattern(...) abort
     """Update the search patterns if the active search isn't listed."""
     let current = a:0? [a:1] : split(@/, '\\|')
     for p in current
@@ -172,13 +172,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.escape_pattern(t) dict
+fun! s:Search.escape_pattern(t) abort
     return substitute(escape(a:t, '\/.*$^~[]'), "\n", '\\n', "g")
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.apply(...) dict
+fun! s:Search.apply(...) abort
     """Apply current patterns, optionally replacing them.
     if a:0 | let s:v.search = a:1 | endif
     let @/ = join(s:v.search, '\|')
@@ -187,7 +187,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
-fun! s:Search.case() dict
+fun! s:Search.case() abort
     if &smartcase              "smartcase        ->  case sensitive
         set nosmartcase
         set noignorecase
@@ -229,7 +229,7 @@ fun! s:pattern_found(t, i)
     endif
 endfun
 
-fun! s:Search.rewrite(last) dict
+fun! s:Search.rewrite(last) abort
     let r = s:G.is_region_at_pos('.') | if empty(r) | return | endif
 
     let t = self.escape_pattern(r.txt)
@@ -248,7 +248,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.menu() dict
+fun! s:Search.menu() abort
     echohl WarningMsg | echo "1 - " | echohl Type | echon "Rewrite Last Search"   | echohl None
     echohl WarningMsg | echo "2 - " | echohl Type | echon "Rewrite All Search"    | echohl None
     echohl WarningMsg | echo "3 - " | echohl Type | echon "Read From Search"      | echohl None

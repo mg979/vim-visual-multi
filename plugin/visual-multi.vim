@@ -47,7 +47,7 @@ call vm#maps#default()
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Autocommands
 
-augroup plugin-visual-multi-start
+augroup VM_start
     au!
     au ColorScheme  * call vm#themes#init()
     if exists("##TextYankPost")

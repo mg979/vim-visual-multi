@@ -22,7 +22,7 @@ endfun
 " Duplicate
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.duplicate() dict
+fun! s:Edit.duplicate() abort
     if !s:X() | return | endif
 
     call self.yank(0, 1, 1)
@@ -34,7 +34,7 @@ endfun
 " Change
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.change(X, count, reg) dict
+fun! s:Edit.change(X, count, reg) abort
     if !s:v.direction | call vm#commands#invert_direction() | endif
     if a:X
         "delete existing region contents and leave the cursors
@@ -49,7 +49,7 @@ endfun
 " Non-live edit mode
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.apply_change() dict
+fun! s:Edit.apply_change() abort
     call s:V.Insert.auto_end()
     let self.skip_index = s:v.index
     call self.process('normal! .')
@@ -62,7 +62,7 @@ endfun
 " Special commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.surround() dict
+fun! s:Edit.surround() abort
     if !s:X() | call vm#operators#select(1, 1, 'iw') | endif
 
     let s:v.W = self.store_widths()
@@ -88,7 +88,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.transpose() dict
+fun! s:Edit.transpose() abort
     if !s:min(2)                           | return         | endif
     let rlines = s:G.lines_with_regions(0) | let inline = 1 | let n = 0
     let klines = sort(keys(rlines), 'n')
@@ -126,7 +126,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.align() dict
+fun! s:Edit.align() abort
     if s:v.multiline
         return s:F.msg('Not possible, multiline is enabled.') | endif
     call s:G.cursor_mode()
@@ -148,7 +148,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.shift(dir) dict
+fun! s:Edit.shift(dir) abort
     if !s:min(1) | return | endif
 
     call self.yank(0, 1, 1)
@@ -165,7 +165,7 @@ endfun
 " Insert numbers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit._numbers(start, step, sep, app) dict
+fun! s:Edit._numbers(start, step, sep, app) abort
     let start = str2nr(a:start)
     let step = str2nr(a:step)
 
@@ -191,7 +191,7 @@ fun! s:Edit._numbers(start, step, sep, app) dict
     endif
 endfun
 
-fun! s:Edit.numbers(start, app) dict
+fun! s:Edit.numbers(start, app) abort
     let X = s:X() | if !X | call s:G.change_mode() | endif
 
     " fill the command line with [count]/default_step

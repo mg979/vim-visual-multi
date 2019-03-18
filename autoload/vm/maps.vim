@@ -42,21 +42,21 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Maps.enable() dict
+fun! s:Maps.enable() abort
     if !g:Vm.mappings_enabled
         let g:Vm.mappings_enabled = 1
         call self.start()
     endif
 endfun
 
-fun! s:Maps.disable(keep_permanent) dict
+fun! s:Maps.disable(keep_permanent) abort
     if g:Vm.mappings_enabled
         let g:Vm.mappings_enabled = 0
         call self.end(a:keep_permanent)
     endif
 endfun
 
-fun! s:Maps.mappings_toggle() dict
+fun! s:Maps.mappings_toggle() abort
     if g:Vm.mappings_enabled
         call self.disable(1)
     else
@@ -71,7 +71,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Maps.start() dict
+fun! s:Maps.start() abort
 
     for m in g:Vm.maps.permanent | exe m | endfor
     for m in g:Vm.maps.buffer    | exe m | endfor
@@ -105,7 +105,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Maps.end(keep_permanent) dict
+fun! s:Maps.end(keep_permanent) abort
     for m in g:Vm.unmaps | exe m | endfor
 
     for m in (g:Vm.motions + g:Vm.find_motions)
@@ -147,7 +147,7 @@ fun! s:build_permanent_maps()
     "set default VM leader
     let g:Vm.leader = get(g:, 'VM_leader', '\\')
 
-    "init vars and generate base permanent maps dict
+    "init vars and generate base permanent maps abort
     let g:VM_maps   = get(g:, 'VM_maps', {})
     let g:Vm.maps   = {'permanent': [], 'buffer': []}
     let g:Vm.unmaps = []
@@ -181,7 +181,7 @@ fun! s:build_buffer_maps()
     let check_maps = get(b:, 'VM_check_mappings', g:VM_check_mappings)
     let force_maps = get(b:, 'VM_force_maps', get(g:, 'VM_force_maps', []))
 
-    "generate base buffer maps dict
+    "generate base buffer maps abort
     let maps = vm#maps#all#buffer()
 
     "integrate custom maps

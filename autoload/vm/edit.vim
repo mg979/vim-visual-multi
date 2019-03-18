@@ -32,7 +32,7 @@ endfun
 " Ex commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_normal(cmd, ...) dict
+fun! s:Edit.run_normal(cmd, ...) abort
     " optional arg is a dictionary with options
     "-----------------------------------------------------------------------
 
@@ -71,7 +71,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_visual(cmd, recursive, ...) dict
+fun! s:Edit.run_visual(cmd, recursive, ...) abort
 
     "-----------------------------------------------------------------------
 
@@ -97,7 +97,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_ex(count, ...) dict
+fun! s:Edit.run_ex(count, ...) abort
 
     "-----------------------------------------------------------------------
 
@@ -130,7 +130,7 @@ endfun
 " Macros
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_macro(replace) dict
+fun! s:Edit.run_macro(replace) abort
     if s:count(v:count) | return | endif
 
     call s:F.msg('Macro register? ', 1)
@@ -150,7 +150,7 @@ endfun
 " Dot
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.dot() dict
+fun! s:Edit.dot() abort
     let dot = s:v.dot
     if !s:X() && !empty(dot)
 
@@ -174,7 +174,7 @@ endfun
 " Region processing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.process(cmd, ...) dict
+fun! s:Edit.process(cmd, ...) abort
     let size = s:size()    | let s:change = 0 | let cmd = a:cmd  | let s:v.eco = 1
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
@@ -219,7 +219,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.process_visual(cmd) dict
+fun! s:Edit.process_visual(cmd) abort
     let size = s:size()                 | let change = 0
     let s:v.storepos = getpos('.')[1:2] | let s:v.eco = 1
 
@@ -236,7 +236,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.post_process(reselect, ...) dict
+fun! s:Edit.post_process(reselect, ...) abort
 
     if a:reselect
         call s:G.extend_mode()
@@ -260,7 +260,7 @@ endfun
 
 let s:Edit.extra_spaces = {}
 
-fun! s:Edit.extra_spaces.remove(...) dict
+fun! s:Edit.extra_spaces.remove(...) abort
     "remove the extra space only if it comes after r.b, and it's just before \n
     for i in s:v.extra_spaces
 
@@ -276,7 +276,7 @@ fun! s:Edit.extra_spaces.remove(...) dict
     let s:v.extra_spaces = []
 endfun
 
-fun! s:Edit.extra_spaces.add(r, ...) dict
+fun! s:Edit.extra_spaces.add(r, ...) abort
     "add space if empty line(>) or eol(=)
     "a:0 is called by insert c-w, that requires an additional extra space
     let L = getline(a:r.L)
@@ -291,7 +291,7 @@ endfun
 " Before/after processing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.before_commands(disable_maps) dict
+fun! s:Edit.before_commands(disable_maps) abort
     let s:v.silence = 1 | let s:v.auto = 1 | let s:v.eco = 1
 
     let s:old_multiline = s:v.multiline
@@ -313,7 +313,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.after_commands(reselect, ...) dict
+fun! s:Edit.after_commands(reselect, ...) abort
     let s:v.multiline = s:old_multiline
     if a:reselect
         call s:V.Edit.post_process(1, a:1)

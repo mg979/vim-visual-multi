@@ -26,7 +26,7 @@ endfun
 " Insert mode
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.key(type) dict
+fun! s:Insert.key(type) abort
     call vm#comp#icmds()  "compatibility tweaks
 
     if a:type ==# 'I'
@@ -68,7 +68,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.start(append) dict
+fun! s:Insert.start(append) abort
     "--------------------------------------------------------------------------
 
     "Initialize Insert Mode dict. 'begin' is the initial ln/col, and will be
@@ -170,7 +170,7 @@ endfun
 " Insert mode update
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.insert(...) dict
+fun! s:Insert.insert(...) abort
     """Update the text on TextChangedI event, and jsut after InsertLeave.
 
     call vm#comp#TextChangedI()  "compatibility tweaks
@@ -221,7 +221,7 @@ endfun
 " Insert mode stop
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.stop(...) dict
+fun! s:Insert.stop(...) abort
     " text is updated one last time when stopping
     if &modified && ( !s:v.restart_insert || s:v.complete_done )
       let s:v.complete_done = 0
@@ -270,7 +270,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.clear_hi() dict
+fun! s:Insert.clear_hi() abort
     """Clear cursors highlight.
     if s:v.clearmatches
         call clearmatches()
@@ -296,7 +296,7 @@ let s:Cursor = {}
 "--------------------------------------------------------------------------
 
 
-fun! s:Cursor.new(byte, ln, col) dict
+fun! s:Cursor.new(byte, ln, col) abort
     "Create new cursor.
     let C        = copy(self)
     let C.index  = len(s:Insert.cursors)
@@ -314,7 +314,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Cursor.update(l, c) dict
+fun! s:Cursor.update(l, c) abort
     "Update cursors positions and highlight.
     let C = self
     let C.A = s:F.pos2byte([C.l, a:c])
@@ -332,7 +332,7 @@ let s:Line = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Line.new(line, cursor) dict
+fun! s:Line.new(line, cursor) abort
     let L         = copy(self)
     let L.l       = a:line
     let L.txt     = getline(a:line)
@@ -348,7 +348,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Line.update(change, text) dict
+fun! s:Line.update(change, text) abort
     let change   = 0
     let text     = self.txt
     let I        = s:V.Insert
@@ -373,9 +373,9 @@ endfun
 " Autocommands
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.auto_start() dict
+fun! s:Insert.auto_start() abort
     set nohlsearch
-    augroup plugin-vm-insert
+    augroup VM_insert
         au!
         au TextChangedI * call b:VM_Selection.Insert.insert()
         au InsertLeave  * call b:VM_Selection.Insert.stop()
@@ -383,10 +383,9 @@ fun! s:Insert.auto_start() dict
     augroup END
 endfun
 
-fun! s:Insert.auto_end() dict
-    augroup plugin-vm-insert
-        au!
-    augroup END
+fun! s:Insert.auto_end()
+    autocmd! VM_insert
+    augroup! VM_insert
 endfun
 
 
