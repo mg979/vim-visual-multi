@@ -36,7 +36,7 @@ let g:Vm = { 'hi'          : {},
       \ 'oldupdate'        : exists("##TextYankPost") ? 0 : &updatetime,
       \}
 
-let g:VM_highlight_matches = get(g:, 'VM_highlight_matches', '')
+let g:VM_highlight_matches = get(g:, 'VM_highlight_matches', 'underline')
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Global mappings

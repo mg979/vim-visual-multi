@@ -72,7 +72,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldwhichwrap     = &whichwrap
     let s:v.oldlz            = &lz
     let s:v.oldch            = &ch
-    let s:v.oldhls           = &hls
+    let s:v.oldhls           = v:hlsearch
     let s:v.oldcase          = [&smartcase, &ignorecase]
     let s:v.indentkeys       = &indentkeys
     let s:v.synmaxcol        = &synmaxcol
@@ -173,6 +173,11 @@ fun! vm#init_buffer(empty, ...)
         hi clear Search
         exe g:Vm.Search
     endif
+
+    if !v:hlsearch && !a:empty
+      call feedkeys("\<Plug>(VM-Toggle-Hls)")
+    endif
+
     if empty(b:VM_Debug.lines) && !g:VM_manual_infoline
         call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
     endif
@@ -193,10 +198,14 @@ fun! vm#reset(...)
     let &ignorecase  = s:v.oldcase[1]
     let &lz          = s:v.oldlz
     let &ch          = s:v.oldch
-    let &hls         = s:v.oldhls
     let &synmaxcol   = s:v.synmaxcol
     let &indentkeys  = s:v.indentkeys
     let &clipboard   = s:v.clipboard
+
+    if !s:v.oldhls
+      call feedkeys("\<Plug>(VM-Toggle-Hls)")
+    endif
+
     call vm#commands#regex_reset()
     call s:V.Global.remove_highlight()
     call s:V.Funcs.save_vm_regs()

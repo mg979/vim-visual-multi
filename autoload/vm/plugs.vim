@@ -110,6 +110,8 @@ fun! vm#plugs#buffer()
   nnoremap <silent>       <Plug>(VM-Remove-Every-n-Regions)  :<c-u>call vm#commands#remove_every_n_regions(v:count)<cr>
   nnoremap <silent>       <Plug>(VM-Show-Infoline)           :call b:VM_Selection.Funcs.count_msg(2)<cr>
 
+  nnoremap <silent>       <Plug>(VM-Toggle-Hls)              :if v:hlsearch<bar>nohlsearch<bar>else<bar>set hls<bar>endif<cr>
+
   for m in g:Vm.motions
     exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 0, 0)\<cr>"
     exe "nnoremap <silent> <Plug>(VM-This-Motion-".m.") :\<C-u>call vm#commands#motion('".m."',v:count1, 0, 1)\<cr>"
