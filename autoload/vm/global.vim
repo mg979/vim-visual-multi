@@ -44,9 +44,8 @@ fun! s:Global.new_cursor(...) abort
 
     if empty(R)
         return vm#region#new(1)
-    elseif a:0 && get(g:, 'VM_allow_more_cursors_in_place', 1)
-        let s:v.add_cursor_in_place = 1
-        return vm#region#new(1)
+    elseif a:0  " toggle cursor
+        return R.clear()
     endif
     return R
 endfun
