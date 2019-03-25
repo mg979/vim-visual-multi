@@ -179,6 +179,7 @@ fun! vm#plugs#buffer()
   nnoremap <silent>        <Plug>(VM-Move-Right)              :call b:VM_Selection.Edit.shift(1)<cr>
   nnoremap <silent>        <Plug>(VM-Move-Left)               :call b:VM_Selection.Edit.shift(0)<cr>
   nnoremap <silent>        <Plug>(VM-Transpose)               :call b:VM_Selection.Edit.transpose()<cr>
+  nnoremap <silent>        <Plug>(VM-Rotate)                  :call b:VM_Selection.Edit.rotate()<cr>
   nnoremap <silent>        <Plug>(VM-Duplicate)               :call b:VM_Selection.Edit.duplicate()<cr>
 
   nnoremap <silent>        <Plug>(VM-Align)                   :<C-u>call vm#commands#align()<cr>

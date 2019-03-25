@@ -88,14 +88,28 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Edit.rotate() abort
+    """Non-inline transposition.
+    if !s:min(2) | return | endif
+
+    call self.yank(0, 1, 1)
+
+    let t = remove(g:Vm.registers[s:v.def_reg], 0)
+    call add(g:Vm.registers[s:v.def_reg], t)
+    call self.paste(1, 0, 1, '"')
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Edit.transpose() abort
-    if !s:min(2)                           | return         | endif
-    let rlines = s:G.lines_with_regions(0) | let inline = 1 | let n = 0
+    if !s:min(2) | return | endif
+    let rlines = s:G.lines_with_regions(0)
     let klines = sort(keys(rlines), 'n')
 
     "check if there is the same nr of regions in each line
-    if len(klines) == 1 | let inline = 0
-    else
+    let inline = len(klines) > 1
+    if inline
+        let n = 0
         for l in klines
             let nr = len(rlines[l])
 
@@ -106,14 +120,12 @@ fun! s:Edit.transpose() abort
         endfor
     endif
 
-    call self.yank(0, 1, 1)
-
     "non-inline transposition
     if !inline
-        let t = remove(g:Vm.registers[s:v.def_reg], 0)
-        call add(g:Vm.registers[s:v.def_reg], t)
-        call self.paste(1, 0, 1, '"')
-        return | endif
+        return self.rotate()
+    endif
+
+    call self.yank(0, 1, 1)
 
     "inline transpositions
     for l in klines

@@ -65,6 +65,7 @@ fun! s:dict()
                   \'Transpose',                         'Merge Regions',
                   \'Increase',                          'Duplicate',
                   \'Decrease',                          'Split Regions',
+                  \'Rotate',
                   \]
 
   let fkeys     = ['Show Help',                         '',
@@ -311,7 +312,8 @@ let s:plugs = {
       \"Show Infoline":           ["Show Infoline",              ""],
       \"Surround":                ["Surround",                   ""],
       \"Merge Regions":           ["Merge Regions",              ""],
-      \"Transpose":               ["Transpose",                  ""],
+      \"Transpose":               ["Transpose",                  "Transpose regions: can be inline-synched"],
+      \"Rotate":                  ["Rotate",                     "Rotate regions: always unsynched"],
       \"Duplicate":               ["Duplicate",                  ""],
       \"Align":                   ["Align at Column",            "simple alignment at highest cursors column"],
       \"Split Regions":           ["Split Regions",              "subtract regex from all regions"],

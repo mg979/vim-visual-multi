@@ -148,6 +148,7 @@ fun! vm#maps#all#buffer()
         \"Surround":                ['S',         'n'],
         \"Merge Regions":           [leader.'m',  'n'],
         \"Transpose":               [leader.'t',  'n'],
+        \"Rotate":                  ['',          'n'],
         \"Duplicate":               [leader.'d',  'n'],
         \"Align":                   [leader.'a',  'n'],
         \"Split Regions":           [leader.'s',  'n'],
