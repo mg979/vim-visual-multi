@@ -112,10 +112,10 @@ fun! vm#maps#all#buffer()
         \"Remove Region":           ['Q',         'n'],
         \"Remove Last Region":      [leader.'q',  'n'],
         \"Remove Every n Regions":  [leader.'R',  'n'],
-        \"Star":                    [leader.'*',  'n'],
-        \"Hash":                    [leader.'#',  'n'],
-        \"Visual Star":             [leader.'*',  'x'],
-        \"Visual Hash":             [leader.'#',  'x'],
+        \"Star":                    ['',          'n'],
+        \"Hash":                    ['',          'n'],
+        \"Visual Star":             ['',          'x'],
+        \"Visual Hash":             ['',          'x'],
         \"Select All Operator":     ['s',         'n'],
         \"Find Operator":           ['m',         'n'],
         \"Add Cursor Down":         ['<C-Down>',  'n'],
@@ -138,6 +138,7 @@ fun! vm#maps#all#buffer()
         \"Search Menu":             [leader.'S',      'n'],
         \"Rewrite Last Search":     [leader.'r',      'n'],
         \"Show Infoline":           [leader.'l',      'n'],
+        \"Filter Regions":          [leader.'f',      'n'],
         \"Toggle Multiline":        [leader.'M',      'n'],
         \})
 

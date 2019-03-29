@@ -65,7 +65,7 @@ fun! s:dict()
                   \'Transpose',                         'Merge Regions',
                   \'Increase',                          'Duplicate',
                   \'Decrease',                          'Split Regions',
-                  \'Rotate',
+                  \'Rotate',                            'Filter Regions',
                   \]
 
   let fkeys     = ['Show Help',                         '',
@@ -317,6 +317,7 @@ let s:plugs = {
       \"Duplicate":               ["Duplicate",                  ""],
       \"Align":                   ["Align at Column",            "simple alignment at highest cursors column"],
       \"Split Regions":           ["Split Regions",              "subtract regex from all regions"],
+      \"Filter Regions":          ["Filter Regions",             "Filter regions based on given pattern"],
       \"Visual Subtract":         ["Visual Subtract",            "subtract visual selection from regions"],
       \"Run Normal":              ["Run Normal Command",         ""],
       \"Run Last Normal":         ["Run Last Normal Command",    ""],
