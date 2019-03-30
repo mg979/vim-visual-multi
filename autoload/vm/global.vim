@@ -495,10 +495,13 @@ fun! s:Global.one_region_per_line() abort
     """Remove all regions in each line, except the first one."""
 
     let L = self.lines_with_regions(0)
-    for l in reverse(sort(keys(L)))
-        while len(L[l])>1
-            call s:R()[remove(L[l], -1)].remove()
-        endwhile | endfor
+    let new_regions = []
+    for l in keys(L)
+        let first_in_line = copy(s:R()[L[l][0]])
+        call add(new_regions, first_in_line)
+    endfor
+    let s:V.Regions = new_regions
+    call self.reorder_regions()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

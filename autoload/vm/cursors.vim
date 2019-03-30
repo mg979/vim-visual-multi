@@ -113,6 +113,7 @@ fun! s:d_cursors(M, reg, n)
   "we're passing the register in the options dictionary instead
   "fill_register function will be called and take care of it, if appropriate
   call s:V.Edit.run_normal('d'.S, {'count': N, 'store': a:reg})
+  call s:G.reorder_regions()
   call s:G.merge_regions()
 endfun
 
