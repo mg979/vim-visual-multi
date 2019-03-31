@@ -637,5 +637,12 @@ endfun
 if !g:VM_use_python | finish | endif
 
 fun! s:Global.rebuild_from_map(...) abort
-    python3 vm.merge_regions()
+    let l:dict = a:0 ? a:1 : s:V.Bytes
+    python3 vm.py_rebuild_from_map()
+endfun
+
+fun! s:Global.lines_with_regions(reverse, ...) abort
+    let l:specific_line = a:0 ? a:1 : 0
+    python3 vm.py_lines_with_regions()
+    return lines
 endfun
