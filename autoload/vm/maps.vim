@@ -194,6 +194,9 @@ fun! s:build_buffer_maps()
         let mapping = s:assign(key, maps[key], 1, check_maps, force_maps)
         if !empty(mapping)
             call add(g:Vm.maps.buffer, mapping)
+        else
+            " remove the mapping, so that it won't be unmapped either
+            unlet maps[key]
         endif
     endfor
 
