@@ -178,8 +178,9 @@ fun! s:Edit.process(cmd, ...) abort
     let size = s:size()    | let s:change = 0 | let cmd = a:cmd  | let s:v.eco = 1
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
-    let store = a:0 && exists('a:1.store') && a:1.store != "_"
-    let stay_put = a:0 && exists('a:1.stay_put')
+    let store           = a:0 && exists('a:1.store') && a:1.store != "_"
+    let stay_put        = a:0 && exists('a:1.stay_put')
+    let do_cursor_moved = !exists("##TextYankPost")
     let txt = []
 
     call s:G.backup_regions()
@@ -201,13 +202,18 @@ fun! s:Edit.process(cmd, ...) abort
         endif
 
         " update new cursor position after the command, unless specified
+        let diff = s:F.pos2byte('.') - r.A
         if !stay_put
-            let diff = s:F.pos2byte('.') - r.A
             call r.shift(diff, diff)
         endif
 
-        "update changed size
+        " update changed size
         let s:change = s:size() - size
+
+        " let's force CursorMoved in case some yank command needs it
+        if !diff && do_cursor_moved
+            doautocmd CursorMoved
+        endif
     endfor
 
     " fill VM register after deletions/changes at cursors
