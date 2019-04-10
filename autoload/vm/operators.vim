@@ -63,6 +63,7 @@ fun! vm#operators#select(all, count, ...)
     let n = n<1? 1 : n
     let n = n*x>1? n*x : ''
     call s:select('y'.n.s)
+    call s:G.select_region_at_pos('.')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -98,7 +99,7 @@ fun! s:select(cmd)
             if r.h | call s:F.toggle_option('multiline') | break | endif
         endfor | endif
 
-    nmap <silent> <nowait> <buffer> y               <Plug>(VM-Yank)
+    nmap <silent><nowait><buffer> y <Plug>(VM-Yank)
 
     if empty(s:v.search) | let @/ = '' | endif
     call s:old_updatetime()
