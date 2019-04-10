@@ -95,7 +95,7 @@ fun! s:Maps.start() abort
     "custom commands
     let cm = g:VM_custom_commands
     for m in keys(cm)
-        exe "nmap <silent> <nowait> <buffer> ".cm[m][0]." <Plug>(VM-".m.")"
+        exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-".m.")"
     endfor
 endfun
 
@@ -118,7 +118,7 @@ fun! s:Maps.end(keep_permanent) abort
 
     let cm = g:VM_custom_commands
     for m in keys(cm)
-        exe "silent! nunmap <buffer>".cm[m][0]
+        exe "silent! nunmap <buffer>".m
     endfor
 
     nunmap <buffer> :

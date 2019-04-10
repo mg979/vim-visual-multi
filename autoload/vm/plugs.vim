@@ -137,7 +137,7 @@ fun! vm#plugs#buffer()
 
   let cm = g:VM_custom_commands
   for m in keys(cm)
-    exe "nnoremap <silent> <Plug>(VM-".m.") ".cm[m][1]
+    exe "nnoremap <silent> <Plug>(VM-".m.") ".cm[m]
   endfor
 
   nnoremap <silent>        <Plug>(VM-Shrink)                  :call vm#commands#shrink_or_enlarge(1, 0)<cr>
