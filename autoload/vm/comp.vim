@@ -18,6 +18,8 @@ let s:ftype           = { p -> has_key(p, 'ft') && index(p.ft, &ft) >= 0 }
 let s:noftype         = { p -> !has_key(p, 'ft') || empty(p.ft) }
 let s:restore_matches = { p -> s:v.clearmatches && has_key(p, 'matches') && p.matches }
 
+let s:disabled_deoplete = 0
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#init()
@@ -47,8 +49,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#TextChangedI()
-    if exists('g:loaded_deoplete')
-        call deoplete#custom#buffer_option('auto_complete', v:true)
+    if exists('g:loaded_deoplete') && s:disabled_deoplete
+        call deoplete#enable()
+        let s:disabled_deoplete = 0
     elseif exists('b:ncm2_enable')
         let b:ncm2_enable = 1
     endif
@@ -57,8 +60,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#icmds()
-    if exists('g:loaded_deoplete')
-        call deoplete#custom#buffer_option('auto_complete', v:false)
+    if exists('g:loaded_deoplete') && g:deoplete#is_enabled()
+        call deoplete#disable()
+        let s:disabled_deoplete = 1
     elseif exists('b:ncm2_enable')
         let b:ncm2_enable = 0
     endif
@@ -68,8 +72,9 @@ endfun
 
 fun! vm#comp#reset()
     let oldmatches = []
-    if exists('g:loaded_deoplete')
-        call deoplete#custom#buffer_option('auto_complete', v:true)
+    if exists('g:loaded_deoplete') && s:disabled_deoplete
+        call deoplete#enable()
+        let s:disabled_deoplete = 0
     elseif exists('b:ncm2_enable')
         let b:ncm2_enable = 1
     endif
