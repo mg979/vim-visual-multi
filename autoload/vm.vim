@@ -232,7 +232,7 @@ fun! vm#reset(...)
 
     if !empty(g:VM_highlight_matches)
         hi clear Search
-        exe "hi! Search ".g:Vm.search_hi
+        exe g:Vm.search_hi
     endif
 
     if g:Vm.oldupdate && &updatetime != g:Vm.oldupdate

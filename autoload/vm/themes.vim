@@ -28,7 +28,14 @@ fun! vm#themes#init()
     redir => out
     silent! highlight Search
     redir END
-    let g:Vm.search_hi = substitute(out, '^.*xxx ', '', '')
+    let hi = substitute(out, '^.*xxx ', '', '')
+    if match(hi, ' links to ') >= 0
+      let hi = substitute(out, '^.*links to ', '', '')
+      let g:Vm.search_hi = "hi! link Search ".hi
+    else
+      let g:Vm.search_hi = "hi! Search ".hi
+    endif
+
     let g:Vm.Search = g:VM_highlight_matches == 'underline' ? 'hi Search term=underline cterm=underline gui=underline' :
           \           g:VM_highlight_matches == 'red'       ? 'hi Search ctermfg=196 guifg=#ff0000' : g:VM_highlight_matches
   endif
