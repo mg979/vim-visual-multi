@@ -10,13 +10,22 @@ fun! vm#ecmds1#init()
     let s:G       = s:V.Global
     let s:F       = s:V.Funcs
 
-    let s:R       = { -> s:V.Regions                  }
-    let s:X       = { -> g:Vm.extend_mode             }
-    let s:size    = { -> line2byte(line('$') + 1)     }
-    let s:min     = { nr -> s:X() && len(s:R()) >= nr }
-
     return extend(s:Edit, vm#ecmds2#init())
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Lambdas
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+if v:version >= 800
+    let s:R    = { -> s:V.Regions }
+    let s:X    = { -> g:Vm.extend_mode }
+    let s:size = { -> line2byte(line('$') + 1) }
+else
+    let s:R    = function('vm#v74#regions')
+    let s:X    = function('vm#v74#extend_mode')
+    let s:size = function('vm#v74#size')
+endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Yank
@@ -232,6 +241,10 @@ endfun
 " Helper functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:min(n)
+    return s:X() && len(R()) >= a:n
+endfun
+
 fun! s:fix_regions_text(replacement)
     """Ensure there are enough elements for all regions.
     let L = a:replacement
@@ -285,8 +298,8 @@ fun! s:Edit.store_widths(...)
     let use_list = 0
 
     if a:0
-        if type(a:1) == v:t_string | let text = len(a:1)-1 | let use_text = 1
-        else                       | let list = a:1        | let use_list = 1 | endif
+        if type(a:1) == type("") | let text = len(a:1)-1 | let use_text = 1
+        else                     | let list = a:1        | let use_list = 1 | endif
     endif
 
     "mismatching blocks must be corrected

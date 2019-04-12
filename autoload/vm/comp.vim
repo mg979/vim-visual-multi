@@ -13,11 +13,6 @@ let s:plugins = extend({
                                 \'var': 'b:autopairs_enabled'}
                 \}, get(g:, 'VM_plugins_compatibilty', {}))
 
-"specific for plugin filetype
-let s:ftype           = { p -> has_key(p, 'ft') && index(p.ft, &ft) >= 0 }
-let s:noftype         = { p -> !has_key(p, 'ft') || empty(p.ft) }
-let s:restore_matches = { p -> s:v.clearmatches && has_key(p, 'matches') && p.matches }
-
 let s:disabled_deoplete = 0
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -150,3 +145,21 @@ fun! s:restore_indentLine()
         unlet b:VM_indentLine
     endif
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Helpers
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:ftype()
+    return has_key(a:p, 'ft') && index(a:p.ft, &ft) >= 0
+endfun
+
+fun! s:noftype()
+    return !has_key(a:p, 'ft') || empty(a:p.ft)
+endfun
+
+fun! s:restore_matches()
+    return s:v.clearmatches && has_key(a:p, 'matches') && a:p.matches
+endfun
+
+

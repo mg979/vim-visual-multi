@@ -5,14 +5,10 @@
 let s:Edit = {'skip_index': -1}
 
 fun! vm#edit#init()
-    let s:V       = b:VM_Selection
-    let s:v       = s:V.Vars
-    let s:G       = s:V.Global
-    let s:F       = s:V.Funcs
-
-    let s:R         = { -> s:V.Regions              }
-    let s:X         = { -> g:Vm.extend_mode         }
-    let s:size      = { -> line2byte(line('$') + 1) }
+    let s:V = b:VM_Selection
+    let s:v = s:V.Vars
+    let s:G = s:V.Global
+    let s:F = s:V.Funcs
 
     let s:v.use_register = s:v.def_reg
     let s:v.new_text     = []
@@ -27,6 +23,20 @@ fun! vm#edit#init()
     call vm#icmds#init()
     return extend(s:Edit, vm#ecmds1#init())
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Lambdas
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+if v:version >= 800
+    let s:R    = { -> s:V.Regions }
+    let s:X    = { -> g:Vm.extend_mode }
+    let s:size = { -> line2byte(line('$') + 1) }
+else
+    let s:R    = function('vm#v74#regions')
+    let s:X    = function('vm#v74#extend_mode')
+    let s:size = function('vm#v74#size')
+endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Ex commands

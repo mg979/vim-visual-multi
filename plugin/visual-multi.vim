@@ -6,6 +6,11 @@
 " Licence:      The MIT License (MIT)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+if v:version < 704 || v:version == 704 && !has("patch330")
+  echomsg '[vim-visual-multi] Vim version 7.4.330 is required'
+  finish
+endif
+
 "Initialize variables
 
 if exists("g:loaded_visual_multi")

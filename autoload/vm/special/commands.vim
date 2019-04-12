@@ -4,9 +4,17 @@ fun! vm#special#commands#init()
     let s:V = b:VM_Selection
     let s:F = s:V.Funcs
     let s:G = s:V.Global
-    let s:R = { -> s:V.Regions }
-    let s:X = { -> g:Vm.extend_mode }
 endfun
+
+if v:version >= 800
+    let s:R    = { -> s:V.Regions }
+    let s:X    = { -> g:Vm.extend_mode }
+else
+    let s:R    = function('vm#v74#regions')
+    let s:X    = function('vm#v74#extend_mode')
+endif
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#special#commands#menu()
     let opts = [
@@ -63,7 +71,7 @@ fun! vm#special#commands#filter_lines(strip)
     """Filter lines containing regions, and paste them in a new buffer.
     if !len(s:R()) | return | endif
 
-    let lines = sort(keys(s:G.lines_with_regions(0)), 'N')
+    let lines = sort(keys(s:G.lines_with_regions(0)))
     let txt = []
     for l in lines
         call add(txt, getline(l))

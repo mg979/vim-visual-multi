@@ -162,8 +162,13 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:Pad = { t, n -> b:VM_Selection.Funcs.pad(t, n, 1) }
-let s:Sep = { c    -> b:VM_Selection.Funcs.repeat_char(c) }
+fun! s:Pad()
+  return b:VM_Selection.Funcs.pad(a:t, a:n, 1)
+endfun
+
+fun! s:Sep()
+  return b:VM_Selection.Funcs.repeat_char(a:c)
+endfun
 
 fun! s:Txt(i, m)
   let n = &columns > 180 ? 18 : 20

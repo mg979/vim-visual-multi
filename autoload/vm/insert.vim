@@ -7,20 +7,28 @@ let s:Insert = {'index': -1, 'cursors': [], 'append': 0}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#insert#init()
-    let s:V       = b:VM_Selection
-
-    let s:v       = s:V.Vars
-    let s:G       = s:V.Global
-    let s:F       = s:V.Funcs
-
-    let s:R       = { -> s:V.Regions              }
-    let s:X       = { -> g:Vm.extend_mode         }
-    let s:size    = { -> line2byte(line('$') + 1) }
-
+    let s:V    = b:VM_Selection
+    let s:v    = s:V.Vars
+    let s:G    = s:V.Global
+    let s:F    = s:V.Funcs
     let s:v.restart_insert = 0
     let s:v.complete_done  = 0
     return s:Insert
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Lambdas
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+if v:version >= 800
+    let s:R    = { -> s:V.Regions }
+    let s:X    = { -> g:Vm.extend_mode }
+    let s:size = { -> line2byte(line('$') + 1) }
+else
+    let s:R    = function('vm#v74#regions')
+    let s:X    = function('vm#v74#extend_mode')
+    let s:size = function('vm#v74#size')
+endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Insert mode
@@ -117,7 +125,6 @@ fun! s:Insert.start(append) abort
     let I.cursors   = []
     let I.lines     = {}
     let I.change    = 0
-    let s:C         = { -> I.cursors }
     let I.col       = getpos('.')[2]
 
     " remove regular regions highlight
@@ -209,7 +216,7 @@ fun! s:Insert.insert(...) abort
     let I.change = coln - pos + a:0
 
     " update the lines (also the current line is updated with setline())
-    for l in sort(keys(L), 'N')
+    for l in sort(keys(L))
         call L[l].update(I.change, text)
     endfor
 
@@ -356,8 +363,8 @@ fun! s:Line.update(change, text) abort
     for c in self.cursors
         let a    = c.a > 1 ? (c.a - 2) : (c.a - 1)
         let b    = c.a - 1
-        let t1   = text[:a+change]
-        let t2   = text[b+change:]
+        let t1   = text[:(a+change)]
+        let t2   = text[(b+change):]
         let text = t1 . a:text . t2
         if c.a==1 | let text = text[1:] | endif
         "echom t1 "|||" t2 "///" text

@@ -5,21 +5,32 @@
 let s:Global = {}
 
 fun! vm#global#init()
-    let s:V       = b:VM_Selection
-    let s:v       = s:V.Vars
-    let s:F       = s:V.Funcs
-
-    let s:X       = { -> g:Vm.extend_mode }
-    let s:R       = { -> s:V.Regions      }
-    let s:B       = { -> s:v.block_mode && g:Vm.extend_mode }
-    let s:Group   = { -> s:V.Groups[s:v.active_group] }
-
-    let s:only_this = { -> s:v.only_this || s:v.only_this_always }
+    let s:V = b:VM_Selection
+    let s:v = s:V.Vars
+    let s:F = s:V.Funcs
 
     "make a bytes map of the file, where 0 is unselected, 1 is selected
     call s:Global.reset_byte_map(0)
     return s:Global
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Lambdas
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+if v:version >= 800
+    let s:X         = { -> g:Vm.extend_mode }
+    let s:R         = { -> s:V.Regions      }
+    let s:B         = { -> s:v.block_mode && g:Vm.extend_mode }
+    let s:Group     = { -> s:V.Groups[s:v.active_group] }
+    let s:only_this = { -> s:v.only_this || s:v.only_this_always }
+else
+    let s:R         = function('vm#v74#regions')
+    let s:X         = function('vm#v74#extend_mode')
+    let s:B         = function('vm#v74#block_mode')
+    let s:Group     = function('vm#v74#group')
+    let s:only_this = function('vm#v74#only_this')
+endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -284,7 +295,7 @@ fun! s:Global.backup_regions() abort
     let index  = index(backup.ticks, backup.last)
 
     if index < len(backup.ticks) - 1
-      let backup.ticks = backup.ticks[:index]
+        let backup.ticks = backup.ticks[:index]
     endif
 
     call add(backup.ticks, tick)
@@ -343,7 +354,9 @@ fun! s:Global.is_region_at_pos(pos) abort
 
     for r in (s:v.active_group? s:Group() : s:R())
         if pos >= r.A && pos <= r.B
-            return r | endif | endfor
+            return r
+        endif
+    endfor
     return {}
 endfun
 
@@ -479,12 +492,12 @@ fun! s:Global.lines_with_regions(reverse, ...) abort
     endfor
 
     for line in keys(lines)
-      "sort list so that lower indices are put farther in the list
-      if len(lines[line]) > 1
-        if a:reverse | call reverse(sort(lines[line], 'n'))
-        else         | call sort(lines[line], 'n')
+        "sort list so that lower indices are put farther in the list
+        if len(lines[line]) > 1
+            if a:reverse | call reverse(sort(lines[line], 'n'))
+            else         | call sort(lines[line], 'n')
+            endif
         endif
-      endif
     endfor
     return lines
 endfun
@@ -553,34 +566,34 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.filter_by_expression(exp, type) abort
-  """Filter out regions that don't match an expression or a pattern."""
-  let ids_to_remove = []
-  if a:type == 'pattern'
-    let exp = "r.txt =~ '".a:exp."'"
-  elseif a:type == '!pattern'
-    let exp = "r.txt !~ '".a:exp."'"
-  else
-    let exp = s:F.get_expr(a:exp)
-  endif
-  try
-    for r in s:R()
-      if !eval(exp)
-        call add(ids_to_remove, r.id)
-      endif
-    endfor
-  catch
-    echohl ErrorMsg | echo "\tinvalid expression" | echohl None | return
-  endtry
-  call self.remove_regions_by_id(ids_to_remove)
+    """Filter out regions that don't match an expression or a pattern."""
+    let ids_to_remove = []
+    if a:type == 'pattern'
+        let exp = "r.txt =~ '".a:exp."'"
+    elseif a:type == '!pattern'
+        let exp = "r.txt !~ '".a:exp."'"
+    else
+        let exp = s:F.get_expr(a:exp)
+    endif
+    try
+        for r in s:R()
+            if !eval(exp)
+                call add(ids_to_remove, r.id)
+            endif
+        endfor
+    catch
+        echohl ErrorMsg | echo "\tinvalid expression" | echohl None | return
+    endtry
+    call self.remove_regions_by_id(ids_to_remove)
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.remove_regions_by_id(list)
-  """Remove a list of regions by id."""
-  for id in a:list
-      call s:F.region_with_id(id).remove()
-  endfor
+    """Remove a list of regions by id."""
+    for id in a:list
+        call s:F.region_with_id(id).remove()
+    endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

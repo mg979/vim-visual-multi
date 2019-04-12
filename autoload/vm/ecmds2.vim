@@ -9,14 +9,22 @@ fun! vm#ecmds2#init()
     let s:v       = s:V.Vars
     let s:G       = s:V.Global
     let s:F       = s:V.Funcs
-
-    let s:R       = { -> s:V.Regions                  }
-    let s:X       = { -> g:Vm.extend_mode             }
-    let s:size    = { -> line2byte(line('$') + 1)     }
-    let s:min     = { nr -> s:X() && len(s:R()) >= nr }
-
     return s:Edit
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Lambdas
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+if v:version >= 800
+    let s:R    = { -> s:V.Regions }
+    let s:X    = { -> g:Vm.extend_mode }
+    let s:size = { -> line2byte(line('$') + 1) }
+else
+    let s:R    = function('vm#v74#regions')
+    let s:X    = function('vm#v74#extend_mode')
+    let s:size = function('vm#v74#size')
+endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Duplicate
@@ -250,3 +258,8 @@ fun! s:Edit.numbers(start, app) abort
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:min(n)
+    return s:X() && len(R()) >= a:n
+endfun
+

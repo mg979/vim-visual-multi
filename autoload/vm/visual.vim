@@ -170,6 +170,11 @@ fun! s:init()
     let s:v = s:V.Vars
     let s:G = s:V.Global
     let s:F = s:V.Funcs
-    let s:R = { -> s:V.Regions }
 endfun
+
+if v:version >= 800
+    let s:R = { -> s:V.Regions }
+else
+    let s:R = function('vm#v74#regions')
+endif
 

@@ -7,13 +7,14 @@ fun! vm#search#init()
     let s:v        = s:V.Vars
     let s:F        = s:V.Funcs
     let s:G        = s:V.Global
-
-    let s:V.Search = s:Search
-
-    let s:R        = { -> s:V.Regions }
-
     return s:Search
 endfun
+
+if v:version >= 800
+    let s:R = { -> s:V.Regions }
+else
+    let s:R = function('vm#v74#regions')
+endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Search
@@ -29,7 +30,8 @@ fun! s:Search.get_pattern(register, regex) abort
     if !a:regex
         let t = self.escape_pattern(t)
         let p = s:v.whole_word? '\<'.t.'\>' : t
-        let p = search(p, 'nzc')? p : t
+        "if whole word, ensure pattern can be found
+        let p = search(p, 'nc')? p : t
     endif
     return p
 endfun

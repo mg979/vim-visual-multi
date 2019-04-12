@@ -3,19 +3,33 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#operators#init()
-    let s:V       = b:VM_Selection
-    let s:v       = s:V.Vars
-    let s:G       = s:V.Global
-    let s:F       = s:V.Funcs
-    let s:Search  = s:V.Search
-
-    let s:v.finding    = 0
+    let s:V = b:VM_Selection
+    let s:v = s:V.Vars
+    let s:G = s:V.Global
+    let s:F = s:V.Funcs
+    let s:v.finding = 0
 endfun
 
 fun! s:init()
     let g:Vm.extend_mode = 1
     if !g:Vm.is_active       | call vm#init_buffer(0) | endif
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Lambdas
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+if v:version >= 800
+    let s:R      = { -> s:V.Regions }
+    let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
+    let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
+else
+    let s:R      = function('vm#v74#regions')
+    let s:single = function('vm#v74#single')
+    let s:double = function('vm#v74#double')
+endif
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#operators#select(all, count, ...)
     """Perform a yank, the autocmd will create the region.
@@ -83,7 +97,7 @@ fun! s:select(cmd)
     " to correct this, select visually, then yank
 
     let cmd = index(['''', '"', '`'], a:cmd[-1:-1]) >= 0 ?
-          \ 'v' . a:cmd[1:] . 'y' : a:cmd
+                \ 'v' . a:cmd[1:] . 'y' : a:cmd
 
     for r in Rs
         call cursor(r[0], r[1])
@@ -133,7 +147,7 @@ fun! vm#operators#find(start, visual, ...)
             if a:visual
                 "use search register if just starting from visual mode
                 let @/ = s:v.oldsearch[0]
-                call s:Search.get_slash_reg()
+                call s:V.Search.get_slash_reg()
             endif
         else
             call s:init()
@@ -141,8 +155,8 @@ fun! vm#operators#find(start, visual, ...)
 
         "ensure there is an active search
         if empty(s:v.search)
-            if !len(s:R()) | call s:Search.get_slash_reg()
-            else           | call s:Search.get() | endif
+            if !len(s:R()) | call s:V.Search.get_slash_reg()
+            else           | call s:V.Search.get() | endif
         endif
 
         call s:updatetime()
@@ -214,28 +228,8 @@ fun! s:updatetime()
 endfun
 
 fun! s:old_updatetime()
-  """Restore old &updatetime value.
-  if g:Vm.oldupdate
-    let &updatetime = g:Vm.oldupdate
-  endif
+    """Restore old &updatetime value.
+    if g:Vm.oldupdate
+        let &updatetime = g:Vm.oldupdate
+    endif
 endfun
-
-if v:version >= 800
-    let s:R      = { -> s:V.Regions                                           }
-    let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
-    let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
-  finish
-endif
-
-fun! s:single(c)
-  return index(split('hljkwebWEB$^0{}()%nN', '\zs'), a:c) >= 0
-endfun
-
-fun! s:double(c)
-  return index(split('iafFtTg', '\zs'), a:c) >= 0
-endfun
-
-fun! s:R()
-  return s:V.Regions
-endfun
-

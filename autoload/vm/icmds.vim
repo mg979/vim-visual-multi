@@ -3,17 +3,25 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#icmds#init()
-    let s:V       = b:VM_Selection
-    let s:v       = s:V.Vars
-    let s:G       = s:V.Global
-    let s:F       = s:V.Funcs
-
-    let s:R         = {   -> s:V.Regions              }
-    let s:X         = {   -> g:Vm.extend_mode         }
-    let s:size      = {   -> line2byte(line('$') + 1) }
-    let s:E         = { r -> col([r.l, '$'])          }
-    let s:eol       = { r -> r.a == (s:E(r) - 1)      }
+    let s:V = b:VM_Selection
+    let s:v = s:V.Vars
+    let s:G = s:V.Global
+    let s:F = s:V.Funcs
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Lambdas
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+if v:version >= 800
+    let s:R    = { -> s:V.Regions }
+    let s:X    = { -> g:Vm.extend_mode }
+    let s:size = { -> line2byte(line('$') + 1) }
+else
+    let s:R    = function('vm#v74#regions')
+    let s:X    = function('vm#v74#extend_mode')
+    let s:size = function('vm#v74#size')
+endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -149,3 +157,18 @@ fun! vm#icmds#return_above()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+if v:version >= 800
+    let s:E         = { r -> col([r.l, '$'])          }
+    let s:eol       = { r -> r.a == (s:E(r) - 1)      }
+    finish
+endif
+
+fun! s:E(r)
+    return col([a:r.l, '$'])
+endfun
+
+fun! s:eol(r)
+    return r.a == (s:E(a:r) - 1)
+endfun
+

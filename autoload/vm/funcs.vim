@@ -8,13 +8,16 @@
 "accessed from anywhere.
 
 fun! vm#funcs#init()
-    let s:V       = b:VM_Selection
-    let s:v       = s:V.Vars
-
-    let s:R       = { -> s:V.Regions }
-
+    let s:V = b:VM_Selection
+    let s:v = s:V.Vars
     return s:Funcs
 endfun
+
+if v:version >= 800
+    let s:R = { -> s:V.Regions }
+else
+    let s:R = function('vm#v74#regions')
+endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Backup/restore buffer state on buffer change
@@ -31,10 +34,10 @@ let s:Funcs = {}
 fun! s:Funcs.pos2byte(...) abort
     "pos can be a string, a list [line, col], or the offset itself
 
-    if type(a:1) == v:t_number          "an offset
+    if type(a:1) == 0                   "an offset
         return a:1
 
-    elseif type(a:1) == v:t_string      "a string (like '.')
+    elseif type(a:1) == type("")        "a string (like '.')
         let pos = getpos(a:1)[1:2]
         return (line2byte(pos[0]) + pos[1] - 1)
 
@@ -111,9 +114,9 @@ fun! s:Funcs.vm_regs_from_json() abort
 endfun
 
 fun! s:Funcs.save_vm_regs() abort
-  if get(g:, 'VM_persistent_registers', 0) && filereadable(g:Vm.regs_file)
-    call writefile([self.vm_regs_to_json()], g:Vm.regs_file)
-  endif
+    if get(g:, 'VM_persistent_registers', 0) && filereadable(g:Vm.regs_file)
+        call writefile([self.vm_regs_to_json()], g:Vm.regs_file)
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -158,29 +161,29 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.syntax(pos)
-  """Find syntax element at position."""
-  if type(a:pos) == v:t_list    "list [line, col]
-    let line = a:pos[0]
-    let col = a:pos[1]
-  else                          "position ('.', ...)
-    let line = line(a:pos)
-    let col = col(a:pos)
-  endif
-  return synIDattr(synID(line, col, 1),"name")
+    """Find syntax element at position."""
+    if type(a:pos) == type([])    "list [line, col]
+        let line = a:pos[0]
+        let col = a:pos[1]
+    else                          "position ('.', ...)
+        let line = line(a:pos)
+        let col = col(a:pos)
+    endif
+    return synIDattr(synID(line, col, 1),"name")
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.get_expr(x) abort
-  let l:Has = { x, c -> match(x, '%'.c ) >= 0 }
-  let l:Sub = { x, a, b -> substitute(x, a, b, 'g') }
-  let N = len(s:R()) | let x = a:x
+    let l:Has = { x, c -> match(x, '%'.c ) >= 0 }
+    let l:Sub = { x, a, b -> substitute(x, a, b, 'g') }
+    let N = len(s:R()) | let x = a:x
 
-  if l:Has(x, 't')   | let x = l:Sub(x, '%t', 'r.txt')                    | endif
-  if l:Has(x, 'i')   | let x = l:Sub(x, '%i', 'r.index')                  | endif
-  if l:Has(x, 'n')   | let x = l:Sub(x, '%n', N)                          | endif
-  if l:Has(x, 'syn') | let x = l:Sub(x, '%syn', 's:F.syntax([r.l, r.a])') | endif
-  return x
+    if l:Has(x, 't')   | let x = l:Sub(x, '%t', 'r.txt')                    | endif
+    if l:Has(x, 'i')   | let x = l:Sub(x, '%i', 'r.index')                  | endif
+    if l:Has(x, 'n')   | let x = l:Sub(x, '%n', N)                          | endif
+    if l:Has(x, 'syn') | let x = l:Sub(x, '%syn', 's:F.syntax([r.l, r.a])') | endif
+    return x
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -223,7 +226,7 @@ fun! s:Funcs.msg(text, force) abort
     if s:v.eco                     | return
     elseif s:v.silence && !a:force | return | endif
 
-    if type(a:text) == v:t_string
+    if type(a:text) == type("")
         exe "echohl" g:Vm.hi.message
         echon a:text
         echohl None | return | endif
@@ -344,11 +347,11 @@ function! s:Funcs.pad(t, n, ...)
 endfunction
 
 fun! s:Funcs.repeat_char(c) abort
-  let s = ''
-  for i in range(&columns - 20)
-    let s .= a:c
-  endfor
-  return s
+    let s = ''
+    for i in range(&columns - 20)
+        let s .= a:c
+    endfor
+    return s
 endfun
 
 fun! s:Funcs.redraw() abort
@@ -402,5 +405,3 @@ fun! s:Funcs.external_after_auto()
         call VM_after_auto()
     endif
 endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

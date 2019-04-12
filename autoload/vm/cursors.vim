@@ -232,37 +232,27 @@ fun! s:init()
   let s:G         = s:V.Global
   let s:F         = s:V.Funcs
   let s:Search    = s:V.Search
+  let s:R         = function('vm#v74#regions')
   let s:init_done = 1
   call s:G.cursor_mode()
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Lambdas
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 if v:version >= 800
-  let s:R      = { -> s:V.Regions                                           }
+  let s:R      = { -> s:V.Regions      }
   let s:forw   = { c -> index(split('weWE%', '\zs'), c) >= 0                }
   let s:back   = { c -> index(split('FThbB0N^{(', '\zs'), c[0]) >= 0        }
   let s:ia     = { c -> index(['i', 'a'], c) >= 0                           }
   let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
   let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
-  finish
+else
+  let s:R                = function('vm#v74#regions')
+  let s:forw   = function('vm#v74#forw')
+  let s:back   = function('vm#v74#back')
+  let s:ia     = function('vm#v74#ia')
+  let s:single = function('vm#v74#single')
+  let s:double = function('vm#v74#double')
 endif
-
-fun! s:back(c)
-  return index(split('FThbB0N^{(', '\zs'), a:c[0]) >= 0
-endfun
-
-fun! s:ia(c)
-  return index(['i', 'a'], a:c) >= 0
-endfun
-
-fun! s:single(c)
-  return index(split('hljkwebWEB$^0{}()%nN', '\zs'), a:c) >= 0
-endfun
-
-fun! s:double(c)
-  return index(split('iafFtTg', '\zs'), a:c) >= 0
-endfun
-
-fun! s:R()
-  return s:V.Regions
-endfun
-

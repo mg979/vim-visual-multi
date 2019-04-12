@@ -1,15 +1,23 @@
 fun! vm#block#init()
-    let s:V       = b:VM_Selection
-    let s:v       = s:V.Vars
-    let s:G       = s:V.Global
-
-    let s:X    = { -> g:Vm.extend_mode }
-    let s:R    = { -> s:V.Regions }
-    let s:B    = { -> s:v.block_mode && g:Vm.extend_mode }
-    let s:is_r = { -> g:Vm.is_active && !empty(s:G.is_region_at_pos('.')) }
-
+    let s:V = b:VM_Selection
+    let s:v = s:V.Vars
+    let s:G = s:V.Global
     return s:Block
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Lambdas
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+if v:version >= 800
+    let s:X         = { -> g:Vm.extend_mode }
+    let s:R         = { -> s:V.Regions      }
+    let s:B         = { -> s:v.block_mode && g:Vm.extend_mode }
+else
+    let s:R         = function('vm#v74#regions')
+    let s:X         = function('vm#v74#extend_mode')
+    let s:B         = function('vm#v74#block_mode')
+endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -39,8 +47,9 @@ fun! s:Block.horizontal(before) abort
     "before motion
     if a:before
         let s:v.block[3] = 1
+        let is_region = g:Vm.is_active && !empty(s:G.is_region_at_pos('.'))
 
-        if !s:is_r()          | call self.stop()
+        if !is_region         | call self.stop()
         elseif !s:v.block[0]  | let s:v.block[0] = col('.') | endif
 
     "-----------------------------------------------------------------------
@@ -110,3 +119,4 @@ fun! s:Block.stop() abort
     let s:v.block_mode = 0
     let s:v.block = [0,0,0,0]
 endfun
+
