@@ -2,7 +2,7 @@
 " Insert class
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:Insert = {'index': -1, 'cursors': [], 'append': 0}
+let s:Insert = {'index': -1, 'cursors': []}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -48,35 +48,36 @@ fun! s:Insert.key(type) abort
     elseif a:type ==# 'o'
         call vm#commands#merge_to_beol(1, 0)
         call vm#icmds#return()
-        call self.start(0)
+        call self.start()
 
     elseif a:type ==# 'O'
         call vm#commands#merge_to_beol(0, 0)
         call vm#icmds#return_above()
-        call self.start(0)
+        call self.start()
 
     elseif a:type ==# 'a'
         if s:X()
-            if s:v.direction        | call vm#commands#invert_direction() | endif
-            call s:G.change_mode()  | let s:v.direction = 1               | endif
-
+            if s:v.direction | call vm#commands#invert_direction() | endif
+            call s:G.change_mode()
+            let s:v.direction = 1
+        endif
         for r in s:R() | call s:V.Edit.extra_spaces.add(r) | endfor
         normal l
-        let self.append = 1
-        call self.start(1)
+        call self.start()
 
     else
         if s:X()
-            if !s:v.direction       | call vm#commands#invert_direction() | endif
-            call s:G.change_mode()  | endif
+            if !s:v.direction | call vm#commands#invert_direction() | endif
+            call s:G.change_mode()
+        endif
 
-        call self.start(0)
+        call self.start()
     endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.start(append) abort
+fun! s:Insert.start() abort
     "--------------------------------------------------------------------------
 
     "Initialize Insert Mode dict. 'begin' is the initial ln/col, and will be
@@ -138,8 +139,7 @@ fun! s:Insert.start(append) abort
 
         call add(I.cursors, C)
 
-        "if (I.append && eol) || E == 1 || Key == 'l' | call s:V.Edit.extra_spaces(r, 0) | endif
-        if eol && !a:append | call s:V.Edit.extra_spaces.add(r) | endif
+        if eol | call s:V.Edit.extra_spaces.add(r) | endif
 
         if !has_key(I.lines, r.l)
             let I.lines[r.l] = s:Line.new(r.l, C)
@@ -250,7 +250,7 @@ fun! s:Insert.stop(...) abort
 
     let s:v.eco = 1 | let s:v.insert = 0
 
-    if self.append | call s:step_back() | endif
+    call s:step_back()
     call s:V.Edit.post_process(0,0)
     set hlsearch
 
@@ -424,12 +424,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:step_back()
-    """When insert mode is started with a/A, go back one char after exiting IM.
+    """Go back one char after exiting insert mode, as vim does.
     for r in s:R()
         if r.a != col([r.l, '$']) && r.a > 1
             call r.shift(-1,-1)
         endif
     endfor
-
-    let s:V.Insert.append = 0
 endfun

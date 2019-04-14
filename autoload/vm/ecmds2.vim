@@ -47,7 +47,7 @@ fun! s:Edit.change(X, count, reg) abort
     if a:X
         "delete existing region contents and leave the cursors
         call self.delete(1, a:reg != s:v.def_reg? a:reg : "_", 1, 0)
-        call s:V.Insert.start(0)
+        call s:V.Insert.start()
     else
         call vm#cursors#operation('c', a:count, a:reg)
     endif
