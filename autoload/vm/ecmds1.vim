@@ -242,7 +242,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:min(n)
-    return s:X() && len(R()) >= a:n
+    return s:X() && len(s:R()) >= a:n
 endfun
 
 fun! s:fix_regions_text(replacement)
