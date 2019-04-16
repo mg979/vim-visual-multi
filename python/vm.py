@@ -28,12 +28,13 @@ def py_lines_with_regions():
     specific_line, rev = evint('l:specific_line'), evint('a:reverse')
 
     for r in regions:
+        line = int(r['l'])
         #called for a specific line
-        if specific_line and r['l'] != specific_line:
+        if specific_line and line != specific_line:
             continue
         #add region index to indices for that line
-        lines.setdefault(r['l'], [])
-        lines[r['l']].append(r['index'])
+        lines.setdefault(line, [])
+        lines[line].append(int(r['index']))
 
     for line in lines:
       #sort list so that lower indices are put farther in the list
