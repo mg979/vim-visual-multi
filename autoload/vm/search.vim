@@ -85,8 +85,9 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.get_slash_reg() abort
+fun! s:Search.get_slash_reg(...) abort
     """Get pattern from current "/" register. Use backup register if empty."
+    if a:0 | let @/ = a:1 | endif
     call s:update_search(self.get_pattern('/', 1))
     if empty(s:v.search) | call s:update_search(s:v.oldreg[1]) | endif
 endfun

@@ -83,9 +83,11 @@ fun! vm#visual#split()
     echohl Type   | let pat = input('Pattern to remove > ') | echohl None
     if empty(pat) | call s:F.msg('Command aborted.', 1)     | return | endif
 
-    let stop = s:R()[-1].L              "stop at line of last region
-    call s:F.Cursor(s:R()[0].A-1)       "cursor before region 0, check for a match
-    if !search(pat, 'nczW', stop)       "search method: accept at cursor position
+    let start = s:R()[0]                "first region
+    let stop = s:R()[-1]                "last region
+
+    call s:F.Cursor(start.A)            "check for a match first
+    if !search(pat, 'nczW', stop.L)     "search method: accept at cursor position
         call s:F.msg("\t\tPattern not found", 1)
         call s:G.select_region(s:v.index)
         return | endif
@@ -95,13 +97,10 @@ fun! vm#visual#split()
     call s:create_group()
 
     "backup old patterns and create new regions
-    let oldsearch = s:v.search | let s:v.search = []
-    let @/ = pat               | call s:V.Search.get_slash_reg()
+    let oldsearch = copy(s:v.search)
+    call s:V.Search.get_slash_reg(pat)
 
-    while 1
-        if !search(pat, 'zn', stop) | break | endif
-        call vm#commands#find_next(0,0,1)
-    endwhile
+    call s:G.get_all_regions(start.A, stop.B)
 
     "subtract regions and rebuild from map
     call extend(s:V.Bytes, oldmap)

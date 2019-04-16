@@ -241,12 +241,6 @@ fun! s:yank(inclusive)
     endif
 endfun
 
-fun! s:check_overlap(R, ...)
-    "if a:1 is given, just check without merging
-    if s:G.overlapping_regions(a:R) | return a:0? 1 : s:G.merge_regions() | endif
-    return a:0? 0 : a:R
-endfun
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#ctrln(count)
@@ -284,7 +278,7 @@ fun! vm#commands#find_under(visual, whole, inclusive, ...)
     let R = s:G.new_region()
     call s:G.check_mutliline(0, R)
     call s:F.count_msg(0)
-    return (a:0 && a:visual)? vm#commands#find_next(0, 0) : s:check_overlap(R)
+    return (a:0 && a:visual)? vm#commands#find_next(0, 0) : s:G.check_overlap(R)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -311,15 +305,7 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     let @/ = join(s:v.search, '\|')
     let s:v.nav_direction = 1
     call vm#commands#erase_regions()
-    let ows = &wrapscan
-    set nowrapscan
-    call s:get_next_all(1)
-    while 1
-        try   | call s:get_next_all(0)
-        catch | break
-        endtry
-    endwhile
-    let &wrapscan = ows
+    call s:G.get_all_regions()
 
     let s:v.restore_scroll = 1
     call s:G.update_map_and_select_region(pos)
@@ -328,18 +314,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find next/previous
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:get_next_all(first)
-    "variant for multiple searches (find_all, find_op, ...)
-    if a:first | silent keepjumps normal! ggygn
-    else       | silent keepjumps normal! nygn
-    endif
-    let R = s:G.new_region()
-    if s:check_overlap(R, 1)
-        let s:v.find_all_overlap = 1
-    endif
-    return R
-endfun
 
 fun! s:get_next()
     "variant for single search (find_next)
@@ -394,9 +368,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_next(skip, nav, ...)
-    if a:0 | return s:get_next_all(0) | endif  "multiple calls: shortcut and no message
-
+fun! vm#commands#find_next(skip, nav)
     if ( a:nav || a:skip ) && s:F.no_regions()                          | return | endif
     if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
 

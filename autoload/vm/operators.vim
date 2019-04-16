@@ -140,14 +140,12 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#operators#find(start, visual, ...)
-
     if a:start
         if !g:Vm.is_active
             call s:init()
             if a:visual
                 "use search register if just starting from visual mode
-                let @/ = s:v.oldsearch[0]
-                call s:V.Search.get_slash_reg()
+                call s:V.Search.get_slash_reg(s:v.oldsearch[0])
             endif
         else
             call s:init()
@@ -161,32 +159,57 @@ fun! vm#operators#find(start, visual, ...)
 
         call s:updatetime()
         let s:v.finding = 1
+        let s:vblock = a:visual && mode() == "\<C-v>"
         let g:Vm.selecting = 1
         silent! nunmap <buffer> y
         return 'y'
     endif
 
     "set the cursor to the start of the yanked region, then find occurrences until end mark is met
-    keepjumps normal! `]
-    let endline = getpos('.')[1]
-    let endcol = getpos('.')[2]
-    keepjumps normal! `[h
-    let startcol = getpos('.')[2]
+    let [endline, endcol] = getpos("']")[1:2]
+    keepjumps normal! `[
+    let [startline, startcol] = getpos('.')[1:2]
 
-    let vblock = a:visual && visualmode() == "\<C-v>"
+    if !search(join(s:v.search, '\|'), 'znp', endline)
+        call s:F.msg('No matches found.', 0)
+        if !len(s:R())
+            call vm#reset(1)
+        else
+            call s:G.update_map_and_select_region()
+        endif
+        return
+    endif
+
+    let ows = &wrapscan
+    set nowrapscan
+    silent keepjumps normal! ygn
+    if s:vblock
+        let R = getpos('.')[2]
+        if !( R < startcol || R > endcol )
+            call s:G.new_region()
+        endif
+    else
+        call s:G.new_region()
+    endif
 
     while 1
         if !search(join(s:v.search, '\|'), 'znp', endline) | break | endif
-        let R = vm#commands#find_next(0, 0, 1)
-        if empty(R)
-            if s:v.index >= 0 | let s:v.index -= 1 | endif | break
-        elseif vblock && ( R.a < startcol || R.a > endcol )
-            call R.remove()
+        silent keepjumps normal! nygn
+        if getpos("'[")[1] > endline
+            break
+        elseif s:vblock
+            let R = getpos('.')[2]
+            if ( R < startcol || R > endcol )
+                continue
+            endif
         endif
+        call s:G.new_region()
     endwhile
+    let &wrapscan = ows
 
     if !len(s:R())
         call s:F.msg('No matches found. Exiting VM.', 0)
+        call cursor(startline, startcol)
         call vm#reset(1)
     else
         call s:G.update_map_and_select_region()
