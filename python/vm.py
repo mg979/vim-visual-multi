@@ -11,7 +11,7 @@ def py_rebuild_from_map():
     vim.command('call vm#commands#erase_regions()')
 
     for i in bys[1:]:
-        if i == end+1:
+        if i == end + 1:
             end = i
         else:
             vim.command('call vm#region#new(0, %d, %d)' % (start, end))

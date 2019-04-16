@@ -136,7 +136,6 @@ endfun
 
 fun! vm#commands#erase_regions(...)
     """Clear all regions, but stay in visual-multi mode.
-
     "empty start
     if !g:Vm.is_active | call s:init(0,1,0) | return | endif
 
@@ -278,7 +277,7 @@ fun! vm#commands#find_under(visual, whole, inclusive, ...)
     let R = s:G.new_region()
     call s:G.check_mutliline(0, R)
     call s:F.count_msg(0)
-    return (a:0 && a:visual)? vm#commands#find_next(0, 0) : s:G.check_overlap(R)
+    return (a:0 && a:visual)? vm#commands#find_next(0, 0) : s:G.merge_overlapping(R)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -289,8 +288,7 @@ fun! vm#commands#find_all(visual, whole, inclusive)
     call s:init(a:whole, 0, 1)
 
     let pos = getpos('.')[1:2]
-    let s:v.eco = 1 | let s:v.multi_find = 1
-    let seen = []
+    let s:v.eco = 1
 
     if !a:visual
         let R = s:G.is_region_at_pos('.')
@@ -369,8 +367,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_next(skip, nav)
-    if ( a:nav || a:skip ) && s:F.no_regions()                          | return | endif
-    if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
+    if ( a:nav || a:skip ) && s:F.no_regions()                 | return | endif
+    if !s:X() && a:skip && s:is_r() | call vm#commands#skip(1) | return | endif
 
     "write search pattern if not navigating and no search set
     if s:X() && !a:nav | call s:Search.add_if_empty() | endif
@@ -386,8 +384,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_prev(skip, nav)
-    if ( a:nav || a:skip ) && s:F.no_regions()                          | return | endif
-    if !s:X() && a:skip && s:is_r()          | call vm#commands#skip(1) | return | endif
+    if ( a:nav || a:skip ) && s:F.no_regions()                 | return | endif
+    if !s:X() && a:skip && s:is_r() | call vm#commands#skip(1) | return | endif
 
     "write search pattern if not navigating and no search set
     if s:X() && !a:nav | call s:Search.add_if_empty() | endif
@@ -430,7 +428,7 @@ endfun
 
 fun! vm#commands#invert_direction(...)
     """Invert direction and reselect region."""
-    if s:v.auto | return | endif
+    if s:F.no_regions() || s:v.auto | return | endif
 
     for r in s:RS() | let r.dir = !r.dir | endfor
 
@@ -451,6 +449,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#split_lines()
+    if s:F.no_regions() | return | endif
     call s:G.split_lines()
     if g:VM_autoremove_empty_lines
         call s:G.remove_empty_lines()
@@ -480,6 +479,7 @@ endfun
 
 fun! vm#commands#remove_every_n_regions(count)
   """Remove every n regions, given by [count] (min 2).
+  if s:F.no_regions() | return | endif
   let R = s:R() | let i = 1 | let cnt = a:count < 2 ? 2 : a:count
   for n in range(1, len(R))
       if n % cnt == 0
@@ -695,6 +695,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#align()
+    if s:F.no_regions() | return | endif
     let s:v.restore_index = s:v.index
     let winline = winline()
     call s:V.Edit.align()
@@ -702,6 +703,7 @@ fun! vm#commands#align()
 endfun
 
 fun! vm#commands#align_char(count)
+    if s:F.no_regions() | return | endif
     call s:G.cursor_mode()
 
     let s:v.restore_index = s:v.index
@@ -743,6 +745,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#align_regex()
+    if s:F.no_regions() | return | endif
     call s:G.cursor_mode()
     let s:v.restore_index = s:v.index
     let winline      = winline()
@@ -835,6 +838,4 @@ else
     let s:vertical         = function('vm#v74#vertical')
     let s:simple           = function('vm#v74#simple')
 endif
-
-
 

@@ -1,7 +1,7 @@
-cat dog bat
-cat dog bat
-cat dog bat
-cat dog bat
+bat dog cat
+bat dog cat
+bat dog cat
+bat dog cat
 
 bat dog cat
 bat dog cat

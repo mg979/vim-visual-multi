@@ -35,7 +35,7 @@ endif
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.new_region() abort
-    """Get the region under cursor, or create a new one if there is none."""
+    """Get the region under cursor, or create a new one if there is none.
 
     let R = self.is_region_at_pos('.')
     if empty(R) | let R = vm#region#new(0) | endif
@@ -64,18 +64,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.regions(...) abort
-    """Return current working set of regions."""
+    """Return current working set of regions.
     if s:only_this()        | return [s:V.Regions[s:v.index]]
     elseif s:v.active_group | return s:Group()
     else                    | return s:V.Regions | endif
-endfun
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Global.check_overlap(R, ...)
-    "if a:1 is given, just check without merging
-    if self.overlapping_regions(a:R) | return a:0? 1 : self.merge_regions() | endif
-    return a:0? 0 : a:R
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -95,7 +87,7 @@ fun! s:Global.get_all_regions(...)
                 break
             endif
             let R = self.new_region()
-            if !s:v.find_all_overlap && self.check_overlap(R, 1)
+            if !s:v.find_all_overlap && self.overlapping_regions(R)
                 let s:v.find_all_overlap = 1
             endif
         catch
@@ -155,7 +147,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_highlight(...) abort
-    """Update highlight for all regions."""
+    """Update highlight for all regions.
     if s:v.eco | return | endif
 
     for r in s:R()
@@ -168,7 +160,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_cursor_highlight(...) abort
-    """Set cursor highlight, depending on extending mode."""
+    """Set cursor highlight, depending on extending mode.
     if s:v.eco | return | endif
 
     highlight clear MultiCursor
@@ -187,7 +179,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.remove_highlight() abort
-    """Remove all regions' highlight."""
+    """Remove all regions' highlight.
     if s:v.clearmatches
         call clearmatches()
     else
@@ -215,7 +207,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_regions() abort
-    """Force regions update."""
+    """Force regions update.
     if s:v.eco | return | endif
 
     if s:X()
@@ -230,7 +222,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_and_select_region(...) abort
-    """Update regions and select region at position, index or id."""
+    """Update regions and select region at position, index or id.
     if s:v.merge
         let s:v.merge = 0 | return self.merge_regions()
     endif
@@ -341,7 +333,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.collapse_regions() abort
-    """Collapse regions to cursors and turn off extend mode."""
+    """Collapse regions to cursors and turn off extend mode.
 
     call self.reset_byte_map(0)
     call s:V.Block.stop()
@@ -354,7 +346,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.select_region(i) abort
-    """Adjust cursor position of the region at index, then return the region."""
+    """Adjust cursor position of the region at index, then return the region.
     if !len(s:R()) | return | endif
 
     let i = a:i >= len(s:R())? 0 : a:i
@@ -369,7 +361,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.select_region_at_pos(pos) abort
-    """Try to select a region at the given position."""
+    """Try to select a region at the given position.
 
     let r = self.is_region_at_pos(a:pos)
     if !empty(r)
@@ -382,7 +374,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.is_region_at_pos(pos) abort
-    """Return the region under the cursor, or an empty dict if not found."""
+    """Return the region under the cursor, or an empty dict if not found.
 
     let pos = s:F.pos2byte(a:pos)
     if s:X() && !has_key(s:V.Bytes, pos) | return {} | endif
@@ -398,15 +390,23 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.overlapping_regions(R) abort
-    """Check if two regions are overlapping."""
+    """Check if two regions are overlapping.
     let B = range(a:R.A, a:R.B)
     for b in B | if s:V.Bytes[b] > 1 | return 1 | endif | endfor
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.merge_overlapping(R)
+    """Return merged regions if region had overlapping regions.
+    let overlap = self.overlapping_regions(a:R)
+    return overlap ? self.merge_regions() : a:R
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.remove_empty_lines() abort
-    """Remove regions that consist of the endline marker only."""
+    """Remove regions that consist of the endline marker only.
     for r in self.regions()
         if r.a == 1 && r.A == r.B && col([r.l, '$']) == 1
             call r.clear()
@@ -417,7 +417,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.reset_byte_map(update) abort
-    """Reset byte map for region, group, or all regions."""
+    """Reset byte map for region, group, or all regions.
 
     if s:only_this()        | call s:R()[s:v.index].remove_from_byte_map(0)
     elseif s:v.active_group | for r in s:Group() | call r.remove_from_byte_map(0) | endfor
@@ -436,7 +436,6 @@ fun! s:Global.reset_vars() abort
     if !( s:v.eco || s:v.auto ) | return | endif
 
     let s:v.auto = 0    | let s:v.eco = 0
-    let s:v.multi_find = 0
     let s:v.no_search = 0
     call s:F.restore_reg()
 endfun
@@ -444,7 +443,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.remove_last_region(...) abort
-    """Remove last region and reselect the previous one."""
+    """Remove last region and reselect the previous one.
 
     for r in s:R()
         if r.id == ( a:0? a:1 : s:v.IDs_list[-1] )
@@ -463,7 +462,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_indices(...) abort
-    """Adjust region indices."""
+    """Adjust region indices.
     if a:0
         let i = a:1
         for r in s:R()[i:]
@@ -481,7 +480,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_region_patterns(pat) abort
-    """Update the patterns for the appropriate regions."""
+    """Update the patterns for the appropriate regions.
 
     for r in s:R()
         if a:pat =~ r.pat || r.pat =~ a:pat
@@ -493,7 +492,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.regions_text() abort
-    """Return a list with all regions' contents."""
+    """Return a list with all regions' contents.
     let t = []
     for r in self.regions() | call add(t, r.txt) | endfor
     return t
@@ -502,7 +501,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.check_mutliline(all, ...) abort
-    """Check if multiline must be enabled."""
+    """Check if multiline must be enabled.
 
     for r in a:0? [a:1] : s:R()
         if r.h && !s:v.multiline
@@ -540,7 +539,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.one_region_per_line() abort
-    """Remove all regions in each line, except the first one."""
+    """Remove all regions in each line, except the first one.
 
     let L = self.lines_with_regions(0)
     let new_regions = []
@@ -576,7 +575,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.split_lines() abort
-    """Split regions, so that each is contained in a single line."""
+    """Split regions, so that each is contained in a single line.
 
     let prev = s:v.index
 
@@ -601,7 +600,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.filter_by_expression(exp, type) abort
-    """Filter out regions that don't match an expression or a pattern."""
+    """Filter out regions that don't match an expression or a pattern.
     let ids_to_remove = []
     if a:type == 'pattern'
         let exp = "r.txt =~ '".a:exp."'"
@@ -625,7 +624,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.remove_regions_by_id(list)
-    """Remove a list of regions by id."""
+    """Remove a list of regions by id.
     for id in a:list
         call s:F.region_with_id(id).remove()
     endfor
@@ -636,7 +635,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.merge_cursors() abort
-    """Merge overlapping cursors."""
+    """Merge overlapping cursors.
 
     let ids_to_remove = [] | let last_A = 0 | let pos = getpos('.')[1:2]
 
@@ -654,7 +653,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.merge_regions(...) abort
-    ""Merge overlapping regions."""
+    """Merge overlapping regions.
     if !len(s:R()) | return                      | endif
     if !s:X()      | return self.merge_cursors() | endif
 
@@ -667,6 +666,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.rebuild_from_map(...) abort
+    """Rebuild regions from bytes map.
     let By = sort(map(keys(a:0? a:1 : s:V.Bytes), 'str2nr(v:val)'), 'n')
     let A = By[0] | let B = By[0]
 

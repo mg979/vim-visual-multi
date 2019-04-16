@@ -19,7 +19,7 @@ endfun
 if v:version >= 800
     let s:R    = { -> s:V.Regions }
     let s:X    = { -> g:Vm.extend_mode }
-    let s:size = { -> line2byte(line('$') + 1) }
+    let s:size = { -> line2byte(line('$')) }
 else
     let s:R    = function('vm#v74#regions')
     let s:X    = function('vm#v74#extend_mode')
@@ -31,7 +31,7 @@ endif
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.duplicate() abort
-    if !s:X() | return | endif
+    if !s:min(1) | return | endif
 
     call self.yank(0, 1, 1)
     call s:G.change_mode()
@@ -43,6 +43,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.change(X, count, reg) abort
+    if !len(s:R()) | return | endif
     if !s:v.direction | call vm#commands#invert_direction() | endif
     if a:X
         "delete existing region contents and leave the cursors
@@ -71,6 +72,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.surround() abort
+    if !len(s:R()) | return | endif
     if !s:X() | call vm#operators#select(1, 1, 'iw') | endif
 
     let s:v.W = self.store_widths()
@@ -212,6 +214,7 @@ fun! s:Edit._numbers(start, step, sep, app) abort
 endfun
 
 fun! s:Edit.numbers(start, app) abort
+    if !len(s:R()) | return | endif
     let X = s:X() | if !X | call s:G.change_mode() | endif
 
     " fill the command line with [count]/default_step

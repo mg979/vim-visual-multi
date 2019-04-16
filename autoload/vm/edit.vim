@@ -31,7 +31,7 @@ endfun
 if v:version >= 800
     let s:R    = { -> s:V.Regions }
     let s:X    = { -> g:Vm.extend_mode }
-    let s:size = { -> line2byte(line('$') + 1) }
+    let s:size = { -> line2byte(line('$')) }
 else
     let s:R    = function('vm#v74#regions')
     let s:X    = function('vm#v74#extend_mode')

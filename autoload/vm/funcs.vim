@@ -68,7 +68,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.no_regions() abort
-    if s:v.index == -1 | call self.msg('No selected regions.', 0) | return 1 | endif
+    if !len(s:R())
+      let s:v.index = -1
+      call self.msg('No regions.', 0)
+      return 1
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

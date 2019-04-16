@@ -16,3 +16,10 @@
 
 ## (optional) if you don't want to use default/vimrc.vim, add:
     vimrc.vim
+
+# Reminders
+
+When creating tests, some characters need special escaping:
+
+* a literal backslash is written `\\\\`
+* a literal double quote is written `\\"`
