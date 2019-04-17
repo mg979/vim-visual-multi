@@ -777,7 +777,7 @@ fun! vm#commands#undo() abort
             call s:G.restore_regions(0)
         endif
     else
-        echo 'Backup' index '/' len(ticks)
+        if &cmdheight > 1 | echo 'Backup' index '/' len(ticks) | endif
         exe "undo" ticks[index-1]
         call s:G.restore_regions(index-1)
         let b:VM_Backup.last = ticks[index - 1]
