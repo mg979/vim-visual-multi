@@ -229,11 +229,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.stop(...) abort
-    " text is updated one last time when stopping
-    if &modified && ( !s:v.restart_insert || s:v.complete_done )
-      let s:v.complete_done = 0
+    " text can be updated again after complete_done
+    if &modified && s:v.complete_done
       call self.insert(1)
     endif
+    let s:v.complete_done = 0
 
     call self.clear_hi() | call self.auto_end() | let i = 0
 
