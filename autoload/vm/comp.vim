@@ -150,15 +150,15 @@ endfun
 " Helpers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:ftype()
+fun! s:ftype(p)
     return has_key(a:p, 'ft') && index(a:p.ft, &ft) >= 0
 endfun
 
-fun! s:noftype()
+fun! s:noftype(p)
     return !has_key(a:p, 'ft') || empty(a:p.ft)
 endfun
 
-fun! s:restore_matches()
+fun! s:restore_matches(p)
     return s:v.clearmatches && has_key(a:p, 'matches') && a:p.matches
 endfun
 

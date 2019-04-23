@@ -62,7 +62,7 @@ fun! vm#v74#vertical()
     return index(['j', 'k'], b:VM_Selection.Vars.motion) >= 0
 endfun
 
-fun! vm#v74#simple()
+fun! vm#v74#simple(m)
     return index(split('hlwebWEB', '\zs'), a:m) >= 0
 endfun
 

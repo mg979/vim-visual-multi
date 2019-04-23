@@ -162,11 +162,11 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Pad()
+fun! s:Pad(t, n)
   return b:VM_Selection.Funcs.pad(a:t, a:n, 1)
 endfun
 
-fun! s:Sep()
+fun! s:Sep(c)
   return b:VM_Selection.Funcs.repeat_char(a:c)
 endfun
 
