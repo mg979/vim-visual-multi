@@ -209,8 +209,8 @@ fun! vm#plugs#buffer()
   inoremap <silent><expr> <Plug>(VM-I-Arrow-gE)         <sid>Insert('gE')
   inoremap <silent><expr> <Plug>(VM-I-Left-Arrow)       <sid>Insert('h')
   inoremap <silent><expr> <Plug>(VM-I-Right-Arrow)      <sid>Insert('l')
-  inoremap <silent><expr> <Plug>(VM-I-Up-Arrow)         <sid>Insert('h')
-  inoremap <silent><expr> <Plug>(VM-I-Down-Arrow)       <sid>Insert('l')
+  inoremap <silent><expr> <Plug>(VM-I-Up-Arrow)         <sid>Insert('k')
+  inoremap <silent><expr> <Plug>(VM-I-Down-Arrow)       <sid>Insert('j')
   inoremap <silent><expr> <Plug>(VM-I-Return)           <sid>Insert('cr')
   inoremap <silent><expr> <Plug>(VM-I-BS)               <sid>Insert('X')
   inoremap <silent><expr> <Plug>(VM-I-Paste)            <sid>Insert('p')
@@ -250,6 +250,12 @@ fun! s:Star(type)
 endfun
 
 fun! s:Insert(key)
+  if pumvisible()
+    if a:key == 'j'     | return "\<C-n>"
+    elseif a:key == 'k' | return "\<C-p>"
+    endif
+  endif
+
   let b:VM_Selection.Vars.restart_insert = 1
   let i = ":call b:VM_Selection.Insert.key('i')\<cr>"
   let a = ":call b:VM_Selection.Insert.key('a')\<cr>"
@@ -259,7 +265,7 @@ fun! s:Insert(key)
   elseif a:key ==? 'x'        "x/X
     "only join undo if there's been a change
     return "\<esc>:call vm#icmds#x('".a:key."')\<cr>".i
-  elseif index(split('hlwbWBeE0', '\zs'), a:key) >= 0
+  elseif index(split('hjklwbWBeE0', '\zs'), a:key) >= 0
     return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
   elseif a:key ==? 'ge'
     return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
