@@ -555,7 +555,11 @@ fun! vm#commands#motion(motion, count, select, this)
 
     "-----------------------------------------------------------------------
 
-    let s:v.motion = a:count>1? a:count.a:motion : a:motion
+    if a:motion == '|' && a:count <= 1
+        let s:v.motion = col('.').a:motion
+    else
+        let s:v.motion = a:count>1? a:count.a:motion : a:motion
+    endif
 
     "-----------------------------------------------------------------------
 

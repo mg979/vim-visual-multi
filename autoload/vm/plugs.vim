@@ -38,7 +38,7 @@ endfun
 
 fun! vm#plugs#buffer()
 
-  let g:Vm.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '$', '0', '^', '%', 'ge', 'gE']
+  let g:Vm.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '$', '0', '^', '%', 'ge', 'gE', '\|']
   let g:Vm.find_motions   = ['f', 'F', 't', 'T']
 
   nnoremap <silent>   <Plug>(VM-Select-All-Operator) :<c-u>call vm#operators#select(1, v:count)<cr>

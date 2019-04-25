@@ -231,14 +231,23 @@ endfun
 fun! s:Region.move(...) abort
     let s:motion = a:0? a:1 : s:v.motion
 
-    "set vertical column if motion is j or k
-    if s:vertical() && !s:v.vertical_col | let s:v.vertical_col = virtcol('.')
-    elseif !s:vertical()                 | let s:v.vertical_col = 0 | endif
-
     if !s:X()
         call s:move_cursor(self)
     else
         call s:move_region(self)
+    endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Region.set_vcol(...) abort
+    """Set vertical column if motion is j or k, and vcol not previously set.
+    if s:vertical()
+        if !self.vcol
+            let self.vcol = virtcol('.')
+        endif
+    else
+        let self.vcol = 0
     endif
 endfun
 
@@ -254,6 +263,7 @@ fun! s:move_cursor(r)
     """If not in extend mode, just move the cursors."""
 
     call cursor(a:r.l, a:r.a)
+    call a:r.set_vcol()
     exe "keepjumps normal! ".s:motion
 
     "keep line or column
@@ -279,12 +289,12 @@ endfun
 
 fun! s:keep_vertical_col(r)
     """Keep the vertical column if moving vertically."""
-    let vcol    = s:v.vertical_col
+    let vcol    = a:r.vcol
     let ln      = line('.')
     let endline = (col('$') > 1)? col('$') - 1 : 1
 
     if ( vcol < endline )
-        call cursor ( ln, s:v.vertical_col )
+        call cursor ( ln, a:r.vcol )
     elseif ( a:r.cur_col() < endline )
         call cursor ( ln, endline )
     endif
@@ -297,9 +307,10 @@ fun! s:move_region(r)
 
     "move the cursor to the current head and perform the motion
     call cursor(r.cur_ln(), r.cur_col())
+    call a:r.set_vcol()
     exe "keepjumps normal! ".s:motion
 
-    if s:vertical()       | call s:keep_vertical_col(r) | endif
+    if s:vertical() | call s:keep_vertical_col(r) | endif
 
     "check the line
     let nl = line('.')
@@ -563,6 +574,7 @@ fun! s:region_vars(r, cursor, ...)
         let R.h     = R.L - R.l             " height
         let R.k     = R.dir? R.a : R.b      " anchor
         let R.K     = R.dir? R.A : R.B      " anchor offset
+        let R.vcol  = 0                     " vertical column
 
         let R.txt   = R.char()              " character under cursor in extend mode
         let R.pat   = s:pattern(R)
@@ -582,6 +594,7 @@ fun! s:region_vars(r, cursor, ...)
         let R.h     = R.L - R.l             " height
         let R.k     = R.dir? R.a : R.b      " anchor
         let R.K     = R.dir? R.A : R.B      " anchor offset
+        let R.vcol  = 0                     " vertical column
 
         let R.txt   = getreg(s:v.def_reg)   " text content
         let R.pat   = s:pattern(R)          " associated search pattern
@@ -601,6 +614,7 @@ fun! s:region_vars(r, cursor, ...)
         let R.h     = R.L - R.l             " height
         let R.k     = R.dir? R.a : R.b      " anchor
         let R.K     = R.dir? R.A : R.B      " anchor offset
+        let R.vcol  = 0                     " vertical column
 
         call R.update_content()
     endif
