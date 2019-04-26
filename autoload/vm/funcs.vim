@@ -230,6 +230,7 @@ fun! s:Funcs.msg(text, force) abort
     if s:v.eco                     | return
     elseif s:v.silence && !a:force | return | endif
 
+    redraw
     if type(a:text) == type("")
         exe "echohl" g:Vm.hi.message
         echon a:text

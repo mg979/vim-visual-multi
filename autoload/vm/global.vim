@@ -38,7 +38,12 @@ fun! s:Global.new_region() abort
     """Get the region under cursor, or create a new one if there is none.
 
     let R = self.is_region_at_pos('.')
-    if empty(R) | let R = vm#region#new(0) | endif
+    if empty(R)
+        let R = vm#region#new(0)
+        let s:v.was_region_at_pos = 0
+    else
+        let s:v.was_region_at_pos = 1
+    endif
 
     if !s:v.eco
         call self.select_region(R.index)

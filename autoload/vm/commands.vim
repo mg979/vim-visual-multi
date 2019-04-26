@@ -244,6 +244,7 @@ endfun
 
 fun! vm#commands#ctrln(count)
     call s:init(1, 0, 0)
+    let no_reselect = get(g:, 'VM_notify_previously_selected', 0) == 2
 
     if !s:X() && s:is_r()
         let pos = getpos('.')[1:2]
@@ -253,6 +254,9 @@ fun! vm#commands#ctrln(count)
         let s:v.silence = 1
         for i in range(a:count)
             call vm#commands#find_under(0, 1, 0, 1, 1)
+            if no_reselect && s:v.was_region_at_pos
+                break
+            endif
         endfor
         let s:v.silence = 0
         call s:F.count_msg(0)
@@ -313,14 +317,32 @@ endfun
 " Find next/previous
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:get_region(next)
+    """Call the needed function and notify if reselecting a region.
+    if !get(g:, 'VM_notify_previously_selected', 0)
+        return a:next ? s:get_next() : s:get_prev()
+    endif
+    normal! m`
+    echo "\r"
+    let R = a:next ? s:get_next() : s:get_prev()
+    if s:v.was_region_at_pos
+        if g:VM_notify_previously_selected == 2
+            normal! ``
+            call s:F.msg('Already selected', 1)
+            return s:G.is_region_at_pos('.')
+        endif
+        call s:F.msg('Already selected', 1)
+    endif
+    return R
+endfun
+
 fun! s:get_next()
-    "variant for single search (find_next)
     if s:X()
-        silent keepjumps normal! ngny`]
+        keepjumps normal! ngny`]
         let R = s:G.new_region()
         call s:F.count_msg(0)
     else
-        silent keepjumps normal! ngny`[
+        keepjumps normal! ngny`[
         let R = vm#commands#add_cursor_at_word(0, 0)
     endif
     let s:v.nav_direction = 1
@@ -329,11 +351,11 @@ endfun
 
 fun! s:get_prev()
     if s:X()
-        silent keepjumps normal! NgNy`]
+        keepjumps normal! NgNy`]
         let R = s:G.new_region()
         call s:F.count_msg(1)
     else
-        silent keepjumps normal! NgNy`[
+        keepjumps normal! NgNy`[
         let R = vm#commands#add_cursor_at_word(0, 0)
     endif
     let s:v.nav_direction = 0
@@ -378,7 +400,7 @@ fun! vm#commands#find_next(skip, nav)
     if s:navigate(a:nav, 1) | return 0                    "just navigate to previous
     elseif a:skip           | call s:skip() | endif       "skip current match
 
-    return s:get_next()
+    return s:get_region(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -402,7 +424,7 @@ fun! vm#commands#find_prev(skip, nav)
 
     "move to the beginning of the current match
     call cursor(pos)
-    return s:get_prev()
+    return s:get_region(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
