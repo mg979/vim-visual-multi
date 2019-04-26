@@ -230,9 +230,14 @@ fun! s:assign(plug, key, buffer, ...)
         let K = maparg(k, m, 0, 1)
         if !empty(K) && K.buffer
             let b = 'b'.bufnr('%').': '
-            let s = b.'Could not map: '.k.' ('.a:plug.')  ->  ' . K.rhs
-            call add(b:VM_Debug.lines, s)
-            return ''
+            if m != 'i'
+                let s = b.'Could not map: '.k.' ('.a:plug.')  ->  ' . K.rhs
+                call add(b:VM_Debug.lines, s)
+                return ''
+            else
+                let s = b.'Overwritten imap: '.k.' ('.a:plug.')  ->  ' . K.rhs
+                call add(b:VM_Debug.lines, s)
+            endif
         endif
     endif
 
