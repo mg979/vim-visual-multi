@@ -14,8 +14,6 @@ let g:VM_mouse_mappings    = get(g:, 'VM_mouse_mappings', 0)
 
 fun! vm#maps#default()
     """At vim start, permanent mappings are generated and applied.
-    let s:noremaps = g:VM_custom_noremaps
-    let s:remaps   = g:VM_custom_remaps
     call s:build_permanent_maps()
     for m in g:Vm.maps.permanent | exe m | endfor
 endfun
@@ -81,22 +79,6 @@ fun! s:Maps.start() abort
     nmap              <nowait> <buffer> ?          <Plug>(VM-?)
     nnoremap <silent> <nowait> <buffer> n          n
     nnoremap <silent> <nowait> <buffer> N          N
-
-    for m in (g:Vm.motions + g:Vm.find_motions)
-        exe "nmap <silent> <buffer> ".m." <Plug>(VM-Motion-".m.")"
-    endfor
-    for m in keys(s:noremaps)
-        exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Motion-".s:noremaps[m].")"
-    endfor
-    for m in keys(s:remaps)
-        exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-Remap-Motion-".s:remaps[m].")"
-    endfor
-
-    "custom commands
-    let cm = g:VM_custom_commands
-    for m in keys(cm)
-        exe "nmap <silent> <nowait> <buffer> ".m." <Plug>(VM-".m.")"
-    endfor
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -107,19 +89,6 @@ endfun
 
 fun! s:Maps.end(keep_permanent) abort
     for m in g:Vm.unmaps | exe m | endfor
-
-    for m in (g:Vm.motions + g:Vm.find_motions)
-        exe "nunmap <buffer> ".m
-    endfor
-
-    for m in ( keys(s:noremaps) + keys(s:remaps) )
-        exe "silent! nunmap <buffer> ".m
-    endfor
-
-    let cm = g:VM_custom_commands
-    for m in keys(cm)
-        exe "silent! nunmap <buffer>".m
-    endfor
 
     nunmap <buffer> :
     nunmap <buffer> /
@@ -147,7 +116,7 @@ fun! s:build_permanent_maps()
     "set default VM leader
     let g:Vm.leader = get(g:, 'VM_leader', '\\')
 
-    "init vars and generate base permanent maps abort
+    "init vars and generate base permanent maps
     let g:VM_maps   = get(g:, 'VM_maps', {})
     let g:Vm.maps   = {'permanent': [], 'buffer': []}
     let g:Vm.unmaps = []
@@ -181,10 +150,26 @@ fun! s:build_buffer_maps()
     let check_maps = get(b:, 'VM_check_mappings', g:VM_check_mappings)
     let force_maps = get(b:, 'VM_force_maps', get(g:, 'VM_force_maps', []))
 
-    "generate base buffer maps abort
+    "generate base buffer maps
     let maps = vm#maps#all#buffer()
 
-    "integrate custom maps
+    "integrate motions
+    for m in (g:Vm.motions + g:Vm.find_motions)
+        let maps['Motion ' . m] = [m, 'n']
+    endfor
+
+    "integrate custom motions and commands
+    for m in keys(g:VM_custom_noremaps)
+        let maps['Motion ' . m] = [g:VM_custom_noremaps[m], 'n']
+    endfor
+    for m in keys(g:VM_custom_remaps)
+        let maps['Remap Motion ' . m] = [m, 'n']
+    endfor
+    for m in keys(g:VM_custom_commands)
+        let maps[m] = [m, 'n']
+    endfor
+
+    "integrate custom remappings
     for key in keys(g:VM_maps)
         silent! let maps[key][0] = g:VM_maps[key]
     endfor
