@@ -1,0 +1,20 @@
+
+regex change_this
+change_this regex
+regex change_this
+change_this regex
+
+visual_regex change_this
+change_this visual_regex
+visual_regex change_this
+change_this visual_regex
+
+find_operator change_this
+change_this find_operator
+find_operator change_this
+change_this find_operator
+
+visual_find change_this
+change_this visual_find
+visual_find change_this
+change_this visual_find
