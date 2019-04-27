@@ -197,7 +197,8 @@ fun! vm#commands#regex_done()
     if s:v.visual_regex
         call s:Search.get_slash_reg()
         let g:Vm.selecting = 1 | let s:v.finding = 1
-        silent keepjumps normal! gvy
+        silent keepjumps normal! gv
+        exe "silent normal \<Plug>(VM-Visual-Find)"
         return
 
     elseif s:X() | silent keepjumps normal! gny`]

@@ -208,6 +208,8 @@ fun! vm#reset(...)
     call s:V.Funcs.save_vm_regs()
     call s:V.Funcs.restore_regs()
     call s:V.Maps.disable(1)
+    silent! call s:V.Insert.auto_end()
+
     call vm#maps#reset()
     let matches = vm#comp#reset()
     call vm#augroup(1)

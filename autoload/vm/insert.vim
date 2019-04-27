@@ -178,7 +178,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.insert(...) abort
-    """Update the text on TextChangedI event, and jsut after InsertLeave.
+    """Update the text on TextChangedI event, and just after InsertLeave.
 
     call vm#comp#TextChangedI()  "compatibility tweaks
 
