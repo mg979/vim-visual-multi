@@ -163,7 +163,7 @@ fun! s:build_buffer_maps()
         let maps['Motion ' . m] = [g:VM_custom_noremaps[m], 'n']
     endfor
     for m in keys(g:VM_custom_remaps)
-        let maps['Remap Motion ' . m] = [m, 'n']
+        let maps['Remap ' . g:VM_custom_remaps[m]] = [m, 'n']
     endfor
     for m in keys(g:VM_custom_commands)
         let maps[m] = [m, 'n']

@@ -127,7 +127,7 @@ fun! vm#plugs#buffer()
 
   let remaps = g:VM_custom_remaps
   for m in keys(remaps)
-    exe "nnoremap <silent> <Plug>(VM-Remap-Motion-".remaps[m].") :call vm#commands#remap_motion('".remaps[m]."', 0)\<cr>"
+    exe "nmap <silent> <Plug>(VM-Remap-".remaps[m].") ".remaps[m]
   endfor
 
   let noremaps = g:VM_custom_noremaps
