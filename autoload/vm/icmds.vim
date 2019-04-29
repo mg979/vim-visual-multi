@@ -83,77 +83,66 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#icmds#return()
-    "NOTE: this function could probably be simplified, only 'end' seems necessary
-
-    "invert regions order, so that they are processed from bottom to top
-    let s:V.Regions = reverse(s:R()) | let nR = len(s:R())-1
-
     for r in s:R()
-        "these vars will be used to see what must be done (read NOTE)
-        let eol = col([r.l, '$']) | let end = (r.a >= eol-1)
-        let ind = indent(r.l)     | let ok = ind && !end
-
+        "cursor line will be moved down by the next cursors
+        let r.l += r.index
         call cursor(r.l, r.a)
 
-        "append new line with mark/extra space if needed
-        if ok          | call append(line('.'), '')
-        elseif !ind    | call append(line('.'), ' ')
-        else           | call append(line('.'), '° ')
+        "if not at eol, CR will cut the line and carry over the remaining text
+        let at_eol = (r.a >= col([r.l, '$']) - 1)
+
+        "if carrying over some text, delete it now, before finding the indent
+        if !at_eol
+            normal! d$
         endif
 
-        "cut and paste below, or just move down if at eol, then reindent
-        if !end    | normal! d$jp==
-        else       | normal! j==
+        "append a line with a dummy char, to be able to indent it
+        call append(line('.'), '-')
+        normal! j==
+
+        "get indent level for the new line
+        let indent = strlen(matchstr(getline('.'), '^[ \t]*'))
+
+        "fill the line with tabs or spaces, according to the found indent
+        "an extra space must be added, if not carrying over any text
+        let extra_space = at_eol ? ' ' : ''
+        call setline('.', repeat(&et ? " " : "\t", indent) . extra_space)
+
+        "if carrying over some text, paste it after the indent
+        if !at_eol
+            normal! $p
         endif
 
-        "cursor line will be moved down by the next cursors
-        call r.update_cursor([r.l + 1 + r.index, getpos('.')[2]])
-        if !ok | call add(s:v.extra_spaces, nR - r.index) | endif
-
-        "remember which lines have been marked
-        if !ok | let s:v.insert_marks[r.l] = indent(r.l) | endif
+        call r.update_cursor([line('.'), indent + 1])
     endfor
 
-    "reorder regions
-    let s:V.Regions = reverse(s:R())
-
-    "reindent all and move back cursors to indent level
-    normal ^
-    for r in s:R()
-        call cursor(r.l, r.a) | normal! ==
-    endfor
-    normal ^
+    "remove extra spaces that could have been left in the lines above
     call s:V.Edit.extra_spaces.remove(-1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#icmds#return_above()
-    "invert regions order, so that they are processed from bottom to top
-    let s:V.Regions = reverse(s:R()) | let nR = len(s:R())-1
-
     for r in s:R()
+        "cursor line will be moved down by the next cursors
+        let r.l += r.index
+
+        "append a line above with a dummy char, to be able to indent it
         call cursor(r.l, r.a)
-
-        "append new line above, with mark/extra space
-        call append(line('.')-1, '° ')
-
-        "move up, then reindent
+        call append(line('.')-1, '-')
         normal! k==
 
-        "cursor line will be moved down by the next cursors
-        call r.update_cursor([r.l + r.index, getpos('.')[2]])
-        call add(s:v.extra_spaces, nR - r.index)
+        "get indent level for the new line
+        let indent = strlen(matchstr(getline('.'), '^[ \t]*'))
 
-        "remember which lines have been marked
-        let s:v.insert_marks[r.l] = indent(r.l)
+        "fill the line with tabs or spaces, then move at end of line
+        call setline('.', repeat(&et ? " " : "\t", indent).' ')
+
+        call r.update_cursor([line('.'), indent + 1])
     endfor
 
-    "reorder regions
-    let s:V.Regions = reverse(s:R())
-
-    "move back all cursors to indent level
-    normal ^
+    "remove extra spaces that could have been left in the lines below
+    call s:V.Edit.extra_spaces.remove(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

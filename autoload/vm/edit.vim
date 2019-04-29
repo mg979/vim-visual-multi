@@ -15,7 +15,6 @@ fun! vm#edit#init()
     let s:v.old_text     = []
     let s:v.W            = []
     let s:v.storepos     = []
-    let s:v.insert_marks = {}
     let s:v.extra_spaces = []
     let s:change         = 0
     let s:can_multiline  = 0

@@ -163,14 +163,6 @@ fun! s:Insert.start() abort
 
     "start insert mode
     call feedkeys("i", 'n')
-
-    "check if there are insert marks that must be cleared
-    if !empty(s:v.insert_marks)
-        for l in keys(s:v.insert_marks)
-            call setline(l, substitute(getline(l), '^\(\s*\)°', '\1', ''))
-            call remove(s:v.insert_marks, l)
-        endfor
-    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -344,12 +336,6 @@ fun! s:Line.new(line, cursor) abort
     let L.l       = a:line
     let L.txt     = getline(a:line)
     let L.cursors = [a:cursor]
-
-    "check if there are insert marks that must be cleared
-    if has_key(s:v.insert_marks, L.l)
-        let L.txt = substitute(L.txt, '^\(\s*\)°', '\1', '')
-    endif
-
     return L
 endfun
 
