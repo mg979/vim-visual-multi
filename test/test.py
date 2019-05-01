@@ -95,7 +95,7 @@ def run_core(paths, nvim=False):
             l = line.replace('\<', '<')
             l = l.replace("\\\\", "\\")
             exec(l)
-            time.sleep(0.5)
+            time.sleep(0.3)
         client.command(':w! %s' % paths["gen_out_file"])
         client.quit()
     else:
@@ -103,7 +103,9 @@ def run_core(paths, nvim=False):
         client = vim.start()
         client.edit(paths["in_file"])
         keys = client.feedkeys
-        exec(open(paths["command"]).read())
+        for line in open(paths["command"]):
+            exec(line)
+            time.sleep(0.3)
         client.feedkeys('\<Esc>')
         client.feedkeys(':wq! %s\<CR>' % paths["gen_out_file"])
 

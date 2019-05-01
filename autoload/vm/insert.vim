@@ -126,7 +126,7 @@ fun! s:Insert.start() abort
     let I.cursors   = []
     let I.lines     = {}
     let I.change    = 0
-    let I.col       = getpos('.')[2]
+    let I.col       = col('.')
 
     " remove regular regions highlight
     call s:G.remove_highlight()
@@ -174,12 +174,12 @@ fun! s:Insert.insert(...) abort
 
     call vm#comp#TextChangedI()  "compatibility tweaks
 
-    let I        = self
-    let L        = I.lines
+    let I    = self
+    let L    = I.lines
 
     " this is the current cursor position
-    let ln       = getpos('.')[1]
-    let coln     = getpos('.')[2]
+    let ln   = line('.')
+    let coln = col('.')
 
     " we're now evaluating the current (original) line
     " we're only interested in column changes, since we insert text horizontally
@@ -193,7 +193,7 @@ fun! s:Insert.insert(...) abort
 
     " Given the above, the adjusted initial position will then be:
     "   initial position + ( current change  * number of cursors behind it)
-    let pos      = I.begin[1] + I.change*I.nth
+    let pos = I.begin[1] + I.change*I.nth
 
     " find out the actual text that has been inserted up to this point:
     " it's a slice of the current line, between the updated initial position
@@ -202,7 +202,7 @@ fun! s:Insert.insert(...) abort
     " coln needs some adjustments though:
     "   in insert mode, 1 is subtracted to find the current cursor position
     "   but when insert mode stops (a:0 == 1) this isn't true
-    let text     = getline(ln)[(pos-1):(coln-2+a:0)]
+    let text = getline(ln)[(pos-1):(coln-2+a:0)]
 
     " now update the current change: secondary cursors need this value updated
     let I.change = coln - pos + a:0
@@ -346,17 +346,43 @@ fun! s:Line.update(change, text) abort
     let text     = self.txt
     let I        = s:V.Insert
 
+    " self.txt is the initial text of the line, when insert mode starts
+    " it is not updated: the new text will be inserted inside of it
+    " 'text' is the updated content of the line
+
+    " self.cursors are the cursors in this line
+
+    " when created, cursors are relative to normal mode, but in insert mode
+    " 1 must be subtracted from their column (c.a)
+
+    " a:change is the length of the text inserted by the main cursor
+    " 'change' is the cumulative length inside the for loop
+    " it is zero if there is only one cursor in the line
+    " but if there are more cursors, changes add up
+
+    " to sum it up, if:
+    "     t1 is the original line, before the insertion point
+    "     t2 is the original line, after the insertion point
+    "     || is the insertion point (== c.a - 1 + change)
+    "     // is the end of the inserted text
+    " then:
+    "     line = t1 || inserted text // t2
+
     for c in self.cursors
-        let a    = c.a > 1 ? (c.a - 2) : (c.a - 1)
-        let b    = c.a - 1
-        let t1   = text[:(a+change)]
-        let t2   = text[(b+change):]
+        let insPoint = c.a + change - 1
+        if c.a > 1
+            let t1 = text[ 0 : (insPoint - 1) ]
+            let t2 = text[ insPoint : ]
+        else
+            let t1 = text[ 1 : insPoint ]
+            let t2 = text[ insPoint : ]
+        endif
         let text = t1 . a:text . t2
-        if c.a==1 | let text = text[1:] | endif
-        "echom t1 "|||" t2 "///" text
+        " echo strtrans(t1) . "█" . strtrans(a:text) . "█" . strtrans(t2)
         let change += a:change
         call c.update(self.l, c.a + change)
-        if c.index == I.index | let I.col = c._a | endif
+        " c._a is the updated cursor position, c.a stays the same
+        if c.active | let I.col = c._a | endif
     endfor
     call setline(self.l, text)
 endfun
@@ -381,20 +407,6 @@ fun! s:Insert.auto_end()
     augroup! VM_insert
 endfun
 
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:get_inserted_text(a, b)
-    "UNUSED: Yank between the offsets and return the yanked text
-
-    let pos = s:Pos(a:a)
-    call cursor(pos[0], pos[1])
-    normal! `[
-    let pos = s:Pos(a:b)
-    call cursor(pos[0], pos[1]+1)
-    normal! `]`[y`]`]
-    return getreg(s:v.def_reg)
-endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

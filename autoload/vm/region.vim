@@ -242,12 +242,10 @@ endfun
 
 fun! s:Region.set_vcol(...) abort
     """Set vertical column if motion is j or k, and vcol not previously set.
-    if s:vertical()
-        if !self.vcol
-            let self.vcol = virtcol('.')
-        endif
-    else
+    if !s:vertical()
         let self.vcol = 0
+    elseif !self.vcol
+        let self.vcol = virtcol('.')
     endif
 endfun
 
@@ -290,13 +288,13 @@ endfun
 fun! s:keep_vertical_col(r)
     """Keep the vertical column if moving vertically."""
     let vcol    = a:r.vcol
-    let ln      = line('.')
+    let lnum    = line('.')
     let endline = (col('$') > 1)? col('$') - 1 : 1
 
     if ( vcol < endline )
-        call cursor ( ln, a:r.vcol )
+        call cursor ( lnum, vcol )
     elseif ( a:r.cur_col() < endline )
-        call cursor ( ln, endline )
+        call cursor ( lnum, endline )
     endif
 endfun
 
@@ -324,29 +322,29 @@ fun! s:move_region(r)
     endif
 
     "get the new position and see if there's been inversion
-    let new = col('.') | let New = s:F.pos2byte('.')
+    let New = s:F.pos2byte('.')
 
     let went_back  =   ( New <  r.K )  &&  ( New <  r.cur_Col() )
     let went_forth =   ( New >= r.K )  &&  ( New >= r.cur_Col() )
 
     "assign new values
     if s:v.block_mode
-        call s:V.Block.positions(r, new, went_back, went_forth) | return | endif
+        return s:V.Block.positions(r, col('.'), went_back, went_forth)
 
-    if went_back
+    elseif went_back
         let r.dir = 0
-        let r.a = new
+        let r.a = col('.')
         let r.b = r.k
 
     elseif went_forth
         let r.dir = 1
-        let r.b = new
+        let r.b = col('.')
         let r.a = r.k
 
     elseif r.dir
-        let r.b = new
+        let r.b = col('.')
     else
-        let r.a = new
+        let r.a = col('.')
     endif
 
     call r.update_region()
@@ -551,9 +549,9 @@ fun! s:region_vars(r, cursor, ...)
 
     if !a:0 && a:cursor    "/////////// CURSOR ////////////
 
-        let R.l     = getpos('.')[1]        " line
+        let R.l     = line('.')
         let R.L     = R.l
-        let R.a     = getpos('.')[2]        " position
+        let R.a     = col('.')
         let R.b     = R.a
 
         call s:fix_pos(R)
@@ -581,10 +579,10 @@ fun! s:region_vars(r, cursor, ...)
 
     elseif !a:0            "/////////// REGION ////////////
 
-        let R.l     = getpos("'[")[1]       " starting line
-        let R.L     = getpos("']")[1]       " ending line
-        let R.a     = getpos("'[")[2]       " begin
-        let R.b     = getpos("']")[2]       " end
+        let R.l     = line("'[")            " starting line
+        let R.L     = line("']")            " ending line
+        let R.a     = col("'[")             " begin
+        let R.b     = col("']")             " end
 
         call s:fix_pos(R)
 
