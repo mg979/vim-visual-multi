@@ -119,6 +119,7 @@ fun! s:Insert.start() abort
 
     " restore winline anyway, because it could have been auto-restarted
     call s:F.Scroll.force(s:v.winline_insert)
+    call s:F.Scroll.get(1)
 
     let I.index     = R.index
     let I.begin     = [R.l, R.a]
@@ -132,14 +133,11 @@ fun! s:Insert.start() abort
     call s:G.remove_highlight()
 
     for r in s:R()
-        let C = s:Cursor.new(r.A, r.l, r.a)
-
-        let E = col([r.l, '$'])
-        let eol = r.a == (E>1? E-1 : E)
-
+        let C = s:Cursor.new(r.l, r.a)
         call add(I.cursors, C)
 
-        if eol | call s:V.Edit.extra_spaces.add(r) | endif
+        " if cursor is at EOL, an extra space will be added
+        call s:V.Edit.extra_spaces.add(r)
 
         if !has_key(I.lines, r.l)
             let I.lines[r.l] = s:Line.new(r.l, C)
@@ -295,11 +293,10 @@ let s:Cursor = {}
 "--------------------------------------------------------------------------
 
 
-fun! s:Cursor.new(byte, ln, col) abort
+fun! s:Cursor.new(ln, col) abort
     "Create new cursor.
     let C        = copy(self)
     let C.index  = len(s:Insert.cursors)
-    let C.A      = a:byte
     let C.txt    = ''
     let C.l      = a:ln
     let C.L      = a:ln
@@ -316,7 +313,6 @@ endfun
 fun! s:Cursor.update(l, c) abort
     "Update cursors positions and highlight.
     let C = self
-    let C.A = s:F.pos2byte([C.l, a:c])
     let C._a = a:c
 
     call matchdelete(C.hl)
