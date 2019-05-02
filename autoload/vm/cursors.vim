@@ -188,7 +188,7 @@ fun! s:c_cursors(M, reg, n)
     call vm#operators#select(1, 1, '$')
     call vm#commands#motion('^', 1, 0, 0)
     call s:V.Edit.delete(1, reg, 1, 0)
-    call s:V.Insert.key('a')
+    call s:V.Insert.key('i')
 
   elseif index(['ip', 'ap'] + vm#comp#add_line(), S) >= 0
     call s:V.Edit.run_normal('d'.S, {'count': N, 'store': reg})
@@ -197,7 +197,7 @@ fun! s:c_cursors(M, reg, n)
   elseif S=='$'
     call vm#operators#select(1, 1, '$')
     call s:V.Edit.delete(1, reg, 1, 0)
-    call s:V.Insert.key('a')
+    call s:V.Insert.key('i')
 
   elseif S=='l'
     let oldmultiline = s:v.multiline

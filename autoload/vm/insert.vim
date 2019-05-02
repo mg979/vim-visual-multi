@@ -63,7 +63,7 @@ fun! s:Insert.key(type) abort
         endif
         for r in s:R() | call s:V.Edit.extra_spaces.add(r) | endfor
         normal l
-        call self.start()
+        call self.start(1)
 
     else
         if s:X()
@@ -77,7 +77,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.start() abort
+fun! s:Insert.start(...) abort
     "--------------------------------------------------------------------------
 
     "Initialize Insert Mode dict. 'begin' is the initial ln/col, and will be
@@ -136,8 +136,11 @@ fun! s:Insert.start() abort
         let C = s:Cursor.new(r.l, r.a)
         call add(I.cursors, C)
 
-        " if cursor is at EOL, an extra space will be added
-        call s:V.Edit.extra_spaces.add(r)
+        " if cursor is at EOL/empty line, an extra space will be added
+        " if starting with keys 'a/A', spaces have been added already
+        if !a:0
+            call s:V.Edit.extra_spaces.add(r)
+        endif
 
         if !has_key(I.lines, r.l)
             let I.lines[r.l] = s:Line.new(r.l, C)
@@ -242,7 +245,7 @@ fun! s:Insert.stop(...) abort
 
     call s:step_back()
     call s:V.Edit.post_process(0,0)
-    set hlsearch
+    call s:V.Edit.extra_spaces.remove_cw()
 
     let &indentkeys = s:v.indentkeys
     let &synmaxcol = s:v.synmaxcol
@@ -263,6 +266,7 @@ fun! s:Insert.stop(...) abort
         call s:F.Scroll.force(s:v.winline_insert)
     endif
     unlet s:v.winline_insert
+    set hlsearch
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

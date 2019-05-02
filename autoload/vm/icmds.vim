@@ -64,7 +64,9 @@ fun! vm#icmds#cw()
 
     for r in s:R()
         if s:eol(r)
-            call s:V.Edit.extra_spaces.add(r, 1)
+            "c-w requires an additional extra space, will be fixed on its own
+            call setline(r.L, getline(r.L).'  ')
+            call add(s:v.cw_spaces, r.index)
         endif
     endfor
     call vm#operators#select(1, 1, 'b')
@@ -183,8 +185,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 if v:version >= 800
-    let s:E         = { r -> col([r.l, '$'])          }
-    let s:eol       = { r -> r.a == (s:E(r) - 1)      }
+    let s:E   = { r -> col([r.l, '$']) }
+    let s:eol = { r -> r.a == (s:E(r) - 1) }
     finish
 endif
 
@@ -193,6 +195,5 @@ fun! s:E(r)
 endfun
 
 fun! s:eol(r)
-    return r.a == (s:E(a:r) - 1)
+    return a:r.a == (s:E(a:r) - 1)
 endfun
-

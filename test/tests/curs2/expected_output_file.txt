@@ -1,8 +1,8 @@
 fun! 
   let 
 
-  s:d_cursors(M, reg  
-  M = a:M | let r = '"'.  
+  s:d_cursors(M, reg
+  M = a:M | let r = '"'.
 
   "reorder com 1mand; DD = 'dd'
   let [S, N, DD] = s:reorder_cmd 2(M, r, a:n, 'd')

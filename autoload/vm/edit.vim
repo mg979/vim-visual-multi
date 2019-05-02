@@ -16,6 +16,7 @@ fun! vm#edit#init()
     let s:v.W            = []
     let s:v.storepos     = []
     let s:v.extra_spaces = []
+    let s:v.cw_spaces    = []
     let s:change         = 0
     let s:can_multiline  = 0
 
@@ -278,25 +279,38 @@ let s:Edit.extra_spaces = {}
 fun! s:Edit.extra_spaces.remove(...) abort
     "remove the extra space only if it comes after r.b, and it's just before \n
     for i in s:v.extra_spaces
-
         "some region has been removed for some reason(merge, ...)
         if i >= len(s:R()) | break | endif
 
         let l = s:R()[i].L + (a:0? a:1 : 0)
-        if getline(l)[-1:-1] ==# ' '
-            call cursor(l, 1)
-            silent! undojoin | normal! $x
+        let Line = getline(l)
+        if Line[-1:-1] ==# ' '
+            call setline(l, Line[:-2])
         endif
     endfor
     let s:v.extra_spaces = []
 endfun
 
-fun! s:Edit.extra_spaces.add(r, ...) abort
+fun! s:Edit.extra_spaces.remove_cw() abort
+    "remove the extra space added by insert mode <C-W>
+    for i in s:v.cw_spaces
+        "some region has been removed for some reason(merge, ...)
+        if i >= len(s:R()) | break | endif
+
+        let l = s:R()[i].L
+        let Line = getline(l)
+        if Line[-2:-1] ==# '  '
+            call setline(l, Line[:-3])
+        endif
+    endfor
+    let s:v.cw_spaces = []
+endfun
+
+fun! s:Edit.extra_spaces.add(r) abort
     "add space if empty line(>) or eol(=)
-    "a:0 is called by insert c-w, that requires an additional extra space
     let L = getline(a:r.L)
-    if a:r.b > len(L) || (a:r.b == len(L) && (L[-1:-1] != ' ' || a:0))
-        call setline(a:r.L, a:0? L.'  ' : L.' ')
+    if a:r.b >= strwidth(L)
+        call setline(a:r.L, L.' ')
         call add(s:v.extra_spaces, a:r.index)
     endif
 endfun
