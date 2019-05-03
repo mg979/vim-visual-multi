@@ -172,6 +172,7 @@ endfun
 
 fun! s:Insert.insert(...) abort
     """Update the text on TextChangedI event, and just after InsertLeave.
+    if !g:VM_live_editing && !a:0 | return | endif
 
     call vm#comp#TextChangedI()  "compatibility tweaks
 
@@ -223,8 +224,8 @@ endfun
 
 fun! s:Insert.stop(...) abort
     " text can be updated again after complete_done
-    if &modified && s:v.complete_done
-      call self.insert(1)
+    if &modified && ( s:v.complete_done || !g:VM_live_editing )
+        call self.insert(1)
     endif
     let s:v.complete_done = 0
 
