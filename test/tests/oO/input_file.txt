@@ -1,0 +1,14 @@
+fun! vm#icmds#return()
+    "invert regions order, so that they are processed from bottom to top
+    let s:V.Regions = reverse(s:R())
+
+    for r in s:R()
+        call cursor(r.l, r.a)
+
+        "if not at eol, CR will cut the line and carry over the remaining text
+        let at_eol = (r.a >= col([r.l, '$']) - 1)
+
+        "if carrying over some text, delete it now, before finding the indent
+        if !at_eol
+            normal! d$
+        endif

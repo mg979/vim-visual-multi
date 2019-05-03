@@ -83,25 +83,38 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#icmds#return()
+    let indentexpr = !empty(&indentexpr)
+    let autoindent = !indentexpr && &autoindent
+    let indent = 0
+
+    "invert regions order, so that they are processed from bottom to top
+    let s:V.Regions = reverse(s:R())
+
     for r in s:R()
-        "cursor line will be moved down by the next cursors
-        let r.l += r.index
         call cursor(r.l, r.a)
+
+        "get indent level for the current line, if using autoindent
+        if autoindent
+            let indent = strlen(matchstr(getline(r.l), '^[ \t]*'))
+        endif
 
         "if not at eol, CR will cut the line and carry over the remaining text
         let at_eol = (r.a >= col([r.l, '$']) - 1)
 
-        "if carrying over some text, delete it now, before finding the indent
+        "if carrying over some text, delete it now, for better indentexpr
         if !at_eol
             normal! d$
         endif
 
         "append a line with a dummy char, to be able to indent it
         call append(line('.'), '-')
-        normal! j==
+        normal! j
 
-        "get indent level for the new line
-        let indent = strlen(matchstr(getline('.'), '^[ \t]*'))
+        "get indent level for the new line, if using indentexpr
+        if indentexpr
+            normal! ==
+            let indent = strlen(matchstr(getline('.'), '^[ \t]*'))
+        endif
 
         "fill the line with tabs or spaces, according to the found indent
         "an extra space must be added, if not carrying over any text
@@ -111,10 +124,20 @@ fun! vm#icmds#return()
         "if carrying over some text, paste it after the indent
         if !at_eol
             normal! $p
+            if indentexpr
+                normal! ==
+            endif
         endif
 
-        call r.update_cursor([line('.'), indent + 1])
+        "cursor line will be moved down by the next cursors
+        call r.update_cursor([line('.') + r.index, indent + 1])
     endfor
+
+    "reorder regions
+    let s:V.Regions = reverse(s:R())
+
+    "move back cursors to indent level
+    normal ^
 
     "remove extra spaces that could have been left in the lines above
     call s:V.Edit.extra_spaces.remove(-1)
@@ -122,27 +145,39 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#icmds#return_above()
+fun! vm#icmds#insert_line(above)
+    let indentexpr = !empty(&indentexpr)
+    let autoindent = !indentexpr && &autoindent
+    let indent = 0
+
     for r in s:R()
         "cursor line will be moved down by the next cursors
         let r.l += r.index
 
-        "append a line above with a dummy char, to be able to indent it
+        "get indent level for the current line, if using autoindent
+        if autoindent
+            let indent = strlen(matchstr(getline(r.l), '^[ \t]*'))
+        endif
+
+        "append a line with a dummy char, to be able to indent it
         call cursor(r.l, r.a)
-        call append(line('.')-1, '-')
-        normal! k==
+        call append(line('.') - a:above, '-')
+        exe "normal!" (a:above ? 'k' : 'j')
 
-        "get indent level for the new line
-        let indent = strlen(matchstr(getline('.'), '^[ \t]*'))
+        "get indent level for the new line, if using indentexpr
+        if indentexpr
+            normal! ==
+            let indent = strlen(matchstr(getline('.'), '^[ \t]*'))
+        endif
 
-        "fill the line with tabs or spaces, then move at end of line
+        "fill the line with tabs or spaces
         call setline('.', repeat(&et ? " " : "\t", indent).' ')
 
         call r.update_cursor([line('.'), indent + 1])
     endfor
 
     "remove extra spaces that could have been left in the lines below
-    call s:V.Edit.extra_spaces.remove(1)
+    call s:V.Edit.extra_spaces.remove(a:above ? 1 : -1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
