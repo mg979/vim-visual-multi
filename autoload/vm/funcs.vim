@@ -81,6 +81,10 @@ fun! s:Funcs.char_under_cursor() abort
     return matchstr(getline('.'), '\%' . col('.') . 'c.')
 endfun
 
+fun! s:Funcs.char_at_pos(l, c) abort
+    return matchstr(getline(a:l), '\%' . a:c . 'c.')
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.default_reg() abort

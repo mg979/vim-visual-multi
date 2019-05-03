@@ -148,7 +148,9 @@ fun! s:Region.A_()
 endfun
 
 fun! s:Region.B_()
-    return line2byte(self.L) + self.b - 1
+    " the final byte will be higher than the byte of the column, if multibyte
+    let extra = strlen(self.txt[-1:-1])
+    return line2byte(self.L) + self.b + extra - 2
 endfun
 
 fun! s:Region.cur_ln()
@@ -164,7 +166,7 @@ fun! s:Region.cur_Col()
 endfun
 
 fun! s:Region.char()
-    return s:X()? getline(self.l)[self.cur_col()-1] : ''
+    return s:X()? s:F.char_at_pos(self.l, self.cur_col()) : ''
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -322,23 +324,28 @@ fun! s:move_region(r)
     endif
 
     "get the new position and see if there's been inversion
-    let New = s:F.pos2byte('.')
-
-    let went_back  =   ( New <  r.K )  &&  ( New <  r.cur_Col() )
-    let went_forth =   ( New >= r.K )  &&  ( New >= r.cur_Col() )
+    let newcol = col('.')
+    if !s:v.multiline
+        let went_back  =   newcol < r.k
+        let went_forth =   newcol > r.k
+    else
+        let New = s:F.pos2byte('.')
+        let went_back  =   ( New <  r.K )  &&  ( New <  r.cur_Col() )
+        let went_forth =   ( New >= r.K )  &&  ( New >= r.cur_Col() )
+    endif
 
     "assign new values
     if s:v.block_mode
-        return s:V.Block.positions(r, col('.'), went_back, went_forth)
+        return s:V.Block.positions(r, newcol, went_back, went_forth)
 
     elseif went_back
         let r.dir = 0
-        let r.a = col('.')
+        let r.a = newcol
         let r.b = r.k
 
     elseif went_forth
         let r.dir = 1
-        let r.b = col('.')
+        let r.b = newcol
         let r.a = r.k
 
     elseif r.dir
@@ -380,14 +387,22 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_content() abort
-    """Yank region content if in extend mode."""
-    call cursor(self.l, self.a)   | keepjumps normal! m[
-    call cursor(self.L, self.b+1) | silent keepjumps normal! m]`[y`]
-    let self.txt = getreg(s:v.def_reg)
-    if s:v.multiline && self.b == col([self.L, '$'])
-        let self.txt .= "\n"
+    """Get region content if in extend mode.
+    let r = self
+    call cursor(r.l, r.a)   | keepjumps normal! m[
+    call cursor(r.L, r.b+1) | silent keepjumps normal! m]`[y`]
+    let r.txt = getreg(s:v.def_reg)
+
+    if s:v.multiline && r.b == col([r.L, '$'])
+        let r.txt .= "\n"
+    else
+        " if last character is multibyte, it won't be yanked, add it manually
+        let lastchar = s:F.char_at_pos(r.L, r.b)
+        if strlen(lastchar) > 1
+            let r.txt .= lastchar
+        endif
     endif
-    let self.pat = s:pattern(self)
+    let r.pat = s:pattern(r)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -396,14 +411,13 @@ fun! s:Region.update_region(...) abort
     """Update the main region positions."""
     let r = self
 
-    if a:0 == 4 | let r.l = a:1 | let r.L = a:2 | let r.a = a:3 | let r.b = a:4
-    elseif a:0
-        let a = r.a_() | let r.l = a[0] | let r.a = a[1]
-        let b = r.b_() | let r.L = b[0] | let r.b = b[1] | endif
+    if a:0 == 4
+        let [ r.l, r.L, r.a, r.b ] = [ a:1, a:2, a:3, a:4 ]
+    endif
 
     call s:fix_pos(r)
-    call self.update_vars()
     call self.update_content()
+    call self.update_vars()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -420,7 +434,7 @@ fun! s:Region.update_vars() abort
         let r.L   = r.l              | let r.b = r.a
         let r.A   = r.A_()           | let r.B = r.A
         let r.k   = r.a              | let r.K = r.A
-        let r.w   = 1                | let r.h = 0
+        let r.w   = 0                | let r.h = 0
         let r.txt = ''               | let r.pat = s:pattern(r)
 
         "--------- extend mode ----------------------------
@@ -566,16 +580,16 @@ fun! s:region_vars(r, cursor, ...)
             endif
         endif
 
+        let R.txt   = R.char()              " character under cursor in extend mode
+        let R.pat   = s:pattern(R)
+
         let R.A     = R.A_()                " byte offset a
-        let R.B     = R.B_()                " byte offset b
+        let R.B     = s:X() ? R.B_() : R.A  " byte offset b
         let R.w     = R.B - R.A + 1         " width
         let R.h     = R.L - R.l             " height
         let R.k     = R.dir? R.a : R.b      " anchor
         let R.K     = R.dir? R.A : R.B      " anchor offset
         let R.vcol  = 0                     " vertical column
-
-        let R.txt   = R.char()              " character under cursor in extend mode
-        let R.pat   = s:pattern(R)
 
     elseif !a:0            "/////////// REGION ////////////
 
@@ -586,6 +600,9 @@ fun! s:region_vars(r, cursor, ...)
 
         call s:fix_pos(R)
 
+        let R.txt   = getreg(s:v.def_reg)   " text content
+        let R.pat   = s:pattern(R)          " associated search pattern
+
         let R.A     = R.A_()                " byte offset a
         let R.B     = R.B_()                " byte offset b
         let R.w     = R.B - R.A + 1         " width
@@ -593,9 +610,6 @@ fun! s:region_vars(r, cursor, ...)
         let R.k     = R.dir? R.a : R.b      " anchor
         let R.K     = R.dir? R.A : R.B      " anchor offset
         let R.vcol  = 0                     " vertical column
-
-        let R.txt   = getreg(s:v.def_reg)   " text content
-        let R.pat   = s:pattern(R)          " associated search pattern
 
     else                   "///////// FROM ARGS ///////////
 
@@ -605,6 +619,7 @@ fun! s:region_vars(r, cursor, ...)
         let R.b     = a:4
 
         call s:fix_pos(R)
+        call R.update_content()
 
         let R.A     = R.A_()                " byte offset a
         let R.B     = R.B_()                " byte offset b
@@ -613,7 +628,5 @@ fun! s:region_vars(r, cursor, ...)
         let R.k     = R.dir? R.a : R.b      " anchor
         let R.K     = R.dir? R.A : R.B      " anchor offset
         let R.vcol  = 0                     " vertical column
-
-        call R.update_content()
     endif
 endfun
