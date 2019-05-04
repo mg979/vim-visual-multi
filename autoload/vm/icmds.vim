@@ -101,15 +101,14 @@ fun! vm#icmds#return()
             let indent = strlen(matchstr(rline, '^[ \t]*'))
         endif
 
-        "if not at eol, CR will cut the line and carry over the remaining text
-        let at_eol = r.a >= col([r.l, '$']) - 1
+        "we also consider at EOL cursors that have trailing spaces after them
+        "if not at EOL, CR will cut the line and carry over the remaining text
+        let at_eol = match(strpart(rline, r.a-1, len(rline)), ' *$') == 0
 
         "if carrying over some text, delete it now, for better indentexpr
-        "otherwise delete the trailing space that would be left at EOL
-        if !at_eol
-            normal! d$
-        elseif rline[-1:-1] == ' '
-            normal! "_x
+        "otherwise delete the trailing spaces that would be left at EOL
+        if !at_eol  | normal! d$
+        else        | normal! "_d$
         endif
 
         "append a line with a dummy char, to be able to indent it
@@ -129,7 +128,11 @@ fun! vm#icmds#return()
         call setline('.', repeat(&et ? " " : "\t", indent) . extra_space)
 
         "if carrying over some text, paste it after the indent
+        "if not using indentexpr, strip preceding whitespace
         if !at_eol
+            if !indentexpr
+                let @" = substitute(@", '^ *', '', '')
+            endif
             normal! $p
             if indentexpr
                 normal! ==
@@ -143,11 +146,8 @@ fun! vm#icmds#return()
     "reorder regions
     let s:V.Regions = reverse(s:R())
 
-    "move back cursors to indent level
+    "ensure cursors are at indent level
     normal ^
-
-    "remove extra spaces that could have been left in the new lines
-    call s:V.Edit.extra_spaces.remove()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
