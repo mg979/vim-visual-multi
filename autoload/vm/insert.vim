@@ -48,12 +48,12 @@ fun! s:Insert.key(type) abort
     elseif a:type ==# 'o'
         call vm#commands#merge_to_beol(1, 0)
         call vm#icmds#insert_line(0)
-        call self.start()
+        call self.start(1)
 
     elseif a:type ==# 'O'
         call vm#commands#merge_to_beol(0, 0)
         call vm#icmds#insert_line(1)
-        call self.start()
+        call self.start(1)
 
     elseif a:type ==# 'a'
         if s:X()

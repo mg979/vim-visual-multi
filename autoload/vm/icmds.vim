@@ -94,18 +94,22 @@ fun! vm#icmds#return()
 
     for r in s:R()
         call cursor(r.l, r.a)
+        let rline = getline('.')
 
         "get indent level for the current line, if using autoindent
         if autoindent
-            let indent = strlen(matchstr(getline(r.l), '^[ \t]*'))
+            let indent = strlen(matchstr(rline, '^[ \t]*'))
         endif
 
         "if not at eol, CR will cut the line and carry over the remaining text
-        let at_eol = (r.a >= col([r.l, '$']) - 1)
+        let at_eol = r.a >= col([r.l, '$']) - 1
 
         "if carrying over some text, delete it now, for better indentexpr
+        "otherwise delete the trailing space that would be left at EOL
         if !at_eol
             normal! d$
+        elseif rline[-1:-1] == ' '
+            normal! "_x
         endif
 
         "append a line with a dummy char, to be able to indent it
@@ -113,7 +117,8 @@ fun! vm#icmds#return()
         normal! j
 
         "get indent level for the new line, if using indentexpr
-        if indentexpr
+        "if carrying over text, no need to find the indent
+        if at_eol && indentexpr
             normal! ==
             let indent = strlen(matchstr(getline('.'), '^[ \t]*'))
         endif
@@ -141,8 +146,8 @@ fun! vm#icmds#return()
     "move back cursors to indent level
     normal ^
 
-    "remove extra spaces that could have been left in the lines above
-    call s:V.Edit.extra_spaces.remove(-1)
+    "remove extra spaces that could have been left in the new lines
+    call s:V.Edit.extra_spaces.remove()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -176,10 +181,8 @@ fun! vm#icmds#insert_line(above)
         call setline('.', repeat(&et ? " " : "\t", indent).' ')
 
         call r.update_cursor([line('.'), indent + 1])
+        call add(s:v.extra_spaces, r.index)
     endfor
-
-    "remove extra spaces that could have been left in the lines below
-    call s:V.Edit.extra_spaces.remove(a:above ? 1 : -1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

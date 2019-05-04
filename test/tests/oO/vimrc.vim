@@ -11,4 +11,4 @@ set packpath=
 set nocompatible
 filetype plugin indent on
 syntax enable
-
+set et ts=2 sts=2 sw=2

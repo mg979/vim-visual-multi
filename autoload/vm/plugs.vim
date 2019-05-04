@@ -260,10 +260,9 @@ fun! s:Insert(key)
   let i = ":call b:VM_Selection.Insert.key('i')\<cr>"
   let a = ":call b:VM_Selection.Insert.key('a')\<cr>"
 
-  if a:key == 'cr'            "return
+  if a:key == 'cr'            "CR
     return "\<esc>:call vm#icmds#return()\<cr>".i
   elseif a:key ==? 'x'        "x/X
-    "only join undo if there's been a change
     return "\<esc>:call vm#icmds#x('".a:key."')\<cr>".i
   elseif index(split('hjklwbWBeE0', '\zs'), a:key) >= 0
     return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
