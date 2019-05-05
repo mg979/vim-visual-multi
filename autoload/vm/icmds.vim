@@ -85,21 +85,12 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#icmds#return()
-    let indentexpr = !empty(&indentexpr)
-    let autoindent = !indentexpr && &autoindent
-    let indent = 0
-
     "invert regions order, so that they are processed from bottom to top
     let s:V.Regions = reverse(s:R())
 
     for r in s:R()
         call cursor(r.l, r.a)
         let rline = getline('.')
-
-        "get indent level for the current line, if using autoindent
-        if autoindent
-            let indent = strlen(matchstr(rline, '^[ \t]*'))
-        endif
 
         "we also consider at EOL cursors that have trailing spaces after them
         "if not at EOL, CR will cut the line and carry over the remaining text
@@ -111,36 +102,24 @@ fun! vm#icmds#return()
         else        | normal! "_d$
         endif
 
-        "append a line with a dummy char, to be able to indent it
-        call append(line('.'), '-')
-        normal! j
-
-        "get indent level for the new line, if using indentexpr
-        "if carrying over text, no need to find the indent
-        if at_eol && indentexpr
-            normal! ==
-            let indent = strlen(matchstr(getline('.'), '^[ \t]*'))
-        endif
+        "append a line and get the indent
+        noautocmd exe "normal! o\<C-R>=<SID>get_indent()\<CR>"
 
         "fill the line with tabs or spaces, according to the found indent
         "an extra space must be added, if not carrying over any text
         let extra_space = at_eol ? ' ' : ''
-        call setline('.', repeat(&et ? " " : "\t", indent) . extra_space)
+        let indent = substitute(g:.Vm.indent, '[^ \t]', '', 'g')
+        call setline('.', indent . extra_space)
 
         "if carrying over some text, paste it after the indent
-        "if not using indentexpr, strip preceding whitespace
+        "but strip preceding whitespace
         if !at_eol
-            if !indentexpr
-                let @" = substitute(@", '^ *', '', '')
-            endif
+            let @" = substitute(@", '^ *', '', '')
             normal! $p
-            if indentexpr
-                normal! ==
-            endif
         endif
 
         "cursor line will be moved down by the next cursors
-        call r.update_cursor([line('.') + r.index, indent + 1])
+        call r.update_cursor([line('.') + r.index, len(indent) + 1])
     endfor
 
     "reorder regions
@@ -153,39 +132,32 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#icmds#insert_line(above)
-    let indentexpr = !empty(&indentexpr)
-    let autoindent = !indentexpr && &autoindent
-    let indent = 0
-
     for r in s:R()
         "cursor line will be moved down by the next cursors
         let r.l += r.index
 
-        "get indent level for the current line, if using autoindent
-        if autoindent
-            let indent = strlen(matchstr(getline(r.l), '^[ \t]*'))
-        endif
-
-        "append a line with a dummy char, to be able to indent it
+        "append a line below or above
         call cursor(r.l, r.a)
-        call append(line('.') - a:above, '-')
-        exe "normal!" (a:above ? 'k' : 'j')
-
-        "get indent level for the new line, if using indentexpr
-        if indentexpr
-            normal! ==
-            let indent = strlen(matchstr(getline('.'), '^[ \t]*'))
-        endif
+        noautocmd exe "normal!" (a:above ? 'O' : 'o')."\<C-R>=<SID>get_indent()\<CR>"
 
         "fill the line with tabs or spaces
-        call setline('.', repeat(&et ? " " : "\t", indent).' ')
+        let indent = substitute(g:.Vm.indent, '[^ \t]', '', 'g')
+        call setline('.', indent . ' ')
 
-        call r.update_cursor([line('.'), indent + 1])
+        call r.update_cursor([line('.'), len(indent) + 1])
         call add(s:v.extra_spaces, r.index)
     endfor
+
+    "ensure cursors are at indent level
+    normal ^
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:get_indent()
+    let g:Vm.indent = getline('.')
+    return ''
+endfun
 
 if v:version >= 800
     let s:E   = { r -> col([r.l, '$']) }

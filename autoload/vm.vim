@@ -75,6 +75,7 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldhls           = v:hlsearch
     let s:v.oldcase          = [&smartcase, &ignorecase]
     let s:v.indentkeys       = &indentkeys
+    let s:v.cinkeys          = &cinkeys
     let s:v.synmaxcol        = &synmaxcol
     let s:v.oldmatches       = getmatches()
     let s:v.clipboard        = &clipboard

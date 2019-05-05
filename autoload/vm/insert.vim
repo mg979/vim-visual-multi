@@ -160,7 +160,8 @@ fun! s:Insert.start(...) abort
     call s:G.update_cursor_highlight()
 
     "disable indentkeys
-    set indentkeys=
+    set indentkeys=o,O
+    set cinkeys=o,O
 
     "start insert mode
     call feedkeys("i", 'n')
@@ -249,7 +250,8 @@ fun! s:Insert.stop(...) abort
     call s:V.Edit.extra_spaces.remove_cw()
 
     let &indentkeys = s:v.indentkeys
-    let &synmaxcol = s:v.synmaxcol
+    let &cinkeys    = s:v.cinkeys
+    let &synmaxcol  = s:v.synmaxcol
 
     "reindent all and adjust cursors position, only if filetype/options allow
     if s:do_reindent() | call s:V.Edit.run_normal('==', {'recursive': 0, 'stay_put': 1}) | endif
