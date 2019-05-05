@@ -372,16 +372,16 @@ fun! s:Line.update(change, text) abort
     "     line = t1 || inserted text // t2
 
     for c in self.cursors
-        let insPoint = c.a + change - 1
         if c.a > 1
+            let insPoint = c.a + change - 1
             let t1 = text[ 0 : (insPoint - 1) ]
             let t2 = text[ insPoint : ]
+            let text = t1 . a:text . t2
+            " echo strtrans(t1) . "█" . strtrans(a:text) . "█" . strtrans(t2)
         else
-            let t1 = text[ 1 : insPoint ]
-            let t2 = text[ insPoint : ]
+            " echo "█" . strtrans(a:text) . "█" . strtrans(text)
+            let text = a:text . text
         endif
-        let text = t1 . a:text . t2
-        " echo strtrans(t1) . "█" . strtrans(a:text) . "█" . strtrans(t2)
         let change += a:change
         call c.update(self.l, c.a + change)
         " c._a is the updated cursor position, c.a stays the same
