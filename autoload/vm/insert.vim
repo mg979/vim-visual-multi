@@ -203,9 +203,20 @@ fun! s:Insert.insert(...) abort
     " (pos) and the current cursor position (coln)
 
     " coln needs some adjustments though:
-    "   in insert mode, 1 is subtracted to find the current cursor position
-    "   but when insert mode stops (a:0 == 1) this isn't true
-    let text = getline(ln)[(pos-1):(coln-2+a:0)]
+    "   -  in insert mode, 1 is subtracted to find the current cursor position
+    "   -  but when insert mode stops (a:0 == 1) this isn't true
+
+    " moreover, when exiting insert mode (a:0) we should check if the last
+    " inserted character is multibyte, we do so by checking last char of @.,
+    " that has just been updated
+
+    " the extra coln adjustment will take into account:
+    "   -  +1 because exiting insert mode
+    "   -  extra bytes of last entered character (strlen -1), if multibyte
+
+    let lastchar = strcharpart(@., strchars(@.)-1)
+    let extra = a:0 ? strlen(lastchar) : 0
+    let text = getline(ln)[(pos-1):(coln-2+extra)]
 
     " now update the current change: secondary cursors need this value updated
     let I.change = coln - pos + a:0
