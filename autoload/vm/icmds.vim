@@ -132,10 +132,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#icmds#insert_line(above)
-    for r in s:R()
-        "cursor line will be moved down by the next cursors
-        let r.l += r.index
+    "invert regions order, so that they are processed from bottom to top
+    let s:V.Regions = reverse(s:R())
 
+    for r in s:R()
         "append a line below or above
         call cursor(r.l, r.a)
         noautocmd exe "normal!" (a:above ? 'O' : 'o')."\<C-R>=<SID>get_indent()\<CR>"
@@ -144,9 +144,13 @@ fun! vm#icmds#insert_line(above)
         let indent = substitute(g:.Vm.indent, '[^ \t]', '', 'g')
         call setline('.', indent . ' ')
 
-        call r.update_cursor([line('.'), len(indent) + 1])
+        "cursor line will be moved down by the next cursors
+        call r.update_cursor([line('.') + r.index, len(indent) + 1])
         call add(s:v.extra_spaces, r.index)
     endfor
+
+    "reorder regions
+    let s:V.Regions = reverse(s:R())
 
     "ensure cursors are at indent level
     normal ^
