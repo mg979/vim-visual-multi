@@ -53,6 +53,15 @@ fun! vm#commands#add_cursor_at_word(yank, search)
     call s:F.count_msg(1)
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:check_block_mode()
+    "enable block mode when adding cursors up/down from extend mode
+    if s:X() && get(g:, 'VM_auto_block_mode', 1)
+      call s:V.Block.start()
+    endif
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:set_vcol()
@@ -102,6 +111,7 @@ endfun
 fun! vm#commands#add_cursor_down(extend, count)
     if s:last_line() | return | endif
     call s:set_extend_mode(a:extend)
+    call s:check_block_mode()
     call s:set_vcol()
     call s:G.new_cursor()
     let N = a:count>1? a:count : 1
@@ -119,6 +129,7 @@ endfun
 fun! vm#commands#add_cursor_up(extend, count)
     if s:first_line() | return | endif
     call s:set_extend_mode(a:extend)
+    call s:check_block_mode()
     call s:set_vcol()
     call s:G.new_cursor()
     let N = a:count>1? a:count : 1
