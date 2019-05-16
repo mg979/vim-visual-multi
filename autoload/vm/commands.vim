@@ -56,11 +56,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:set_vcol()
-    let is_tab = s:F.char_under_cursor() == "\t"
-    let vcol   = s:v.vertical_col
-
-    if !is_tab && ( !vcol || ( col('.') > 1 && vcol > 1 ) )
-        let s:v.vertical_col = virtcol('.')
+    "set the new wanted virtcol only if it hasn't been set yet
+    if !s:v.vertical_col
+        let s:v.vertical_col = getcurpos()[4]
     endif
 endfun
 
@@ -78,8 +76,9 @@ fun! s:skip_shorter_lines()
     if get(g:, 'VM_skip_shorter_lines', 1)
       let vcol    = s:v.vertical_col
       let col     = virtcol('.')
-      let endline = g:VM_skip_empty_lines? virtcol('$') :
-            \                              virtcol('$') > 1 ? virtcol('$') : 2
+      let endline = get(g:, 'VM_skip_empty_lines', 0)?  virtcol('$') :
+            \                                           virtcol('$') > 1 ?
+            \                                           virtcol('$') : 2
 
       "skip line
       if ( col < vcol || col == endline ) | return 1 | endif
@@ -665,6 +664,9 @@ fun! s:after_move(R)
     let s:v.direction = a:R.dir
     let s:v.only_this = 0
     let s:v.restore_scroll = !s:v.insert
+
+    "also reset the wanted virtcol (set when adding cursors down/up)
+    let s:v.vertical_col = 0
 
     if s:always_from_back() | call vm#commands#invert_direction() | endif
 

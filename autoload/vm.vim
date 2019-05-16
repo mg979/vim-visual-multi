@@ -4,7 +4,6 @@
 
 let g:VM_live_editing                     = get(g:, 'VM_live_editing', 1)
 
-let g:VM_skip_empty_lines                 = get(g:, 'VM_skip_empty_lines', 0)
 let g:VM_custom_commands                  = get(g:, 'VM_custom_commands', {})
 let g:VM_commands_aliases                 = get(g:, 'VM_commands_aliases', {})
 let g:VM_debug                            = get(g:, 'VM_debug', 0)
