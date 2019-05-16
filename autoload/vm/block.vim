@@ -23,50 +23,60 @@ endif
 
 let s:Block = {}
 
+" s:v.block:
+"   [0]  virtcol() for left edge
+"   [1]  virtcol() for right edge
+"   [2]  minimum edge for all regions
+"   [3]  state boolean: checked by CursorMoved autocommand
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Block.vertical() abort
-    if !s:B() | call self.stop() | return | endif
+    if !s:B() | return self.stop() | endif
+    let vcol = virtcol('.')
 
     let s:v.block[3] = 1
     if s:v.direction
-        if s:v.block[1] <= col('.') | let s:v.block[1] = col('.') | endif
+        if s:v.block[1] <= vcol | let s:v.block[1] = vcol | endif
 
-    elseif s:v.block[1] >= col('.') | let s:v.block[1] = col('.') | endif
+    elseif s:v.block[1] >= vcol | let s:v.block[1] = vcol | endif
 
     call s:G.new_cursor()
-    call s:G.update_and_select_region()
+    call s:G.merge_regions()
+    call s:G.select_region_at_pos('.')
     return 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Block.horizontal(before) abort
-    if !s:B() | call self.stop() | return | endif
-
-    "before motion
-    if a:before
-        let s:v.block[3] = 1
-        let is_region = g:Vm.is_active && !empty(s:G.is_region_at_pos('.'))
-
-        if !is_region         | call self.stop()
-        elseif !s:v.block[0]  | let s:v.block[0] = col('.') | endif
+    if !s:B() | return self.stop() | endif
+    let vcol = virtcol('.')
 
     "-----------------------------------------------------------------------
-    "after motion
+    "before motion
+
+    if a:before
+        let s:v.block[3] = 1
+        let is_region = !empty(s:G.is_region_at_pos('.'))
+
+        if !is_region         | call self.stop()
+        elseif !s:v.block[0]  | let s:v.block[0] = vcol | endif
+
+        "-----------------------------------------------------------------------
+        "after motion
 
     else
-        let b0 = s:v.block[0] | let b1 = s:v.block[1]
+        let [ b0, b1 ] = [ s:v.block[0], s:v.block[1] ]
 
-        if col('.') < b0 | let s:v.block[0] = col('.')
-        elseif col('.') < b1 | let s:v.block[1] = col('.') | endif
+        if vcol < b0      | let s:v.block[0] = vcol
+        elseif vcol < b1  | let s:v.block[1] = vcol | endif
 
         "set minimum edge
         let bs = map(copy(s:R()), 'v:val.b')
         if count(bs, bs[0]) == len(bs) | let s:v.block[2] = s:v.block[0]
         else                           | let s:v.block[2] = min(bs) | endif
     endif
-
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
