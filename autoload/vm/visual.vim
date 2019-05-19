@@ -67,10 +67,14 @@ fun! vm#visual#cursors(mode)
 
     if a:mode ==# 'V'
         call s:G.split_lines()
-        call s:G.remove_empty_lines()
+        call s:G.cursor_mode()
+        if get(g:, 'VM_autoremove_empty_lines', 1)
+            call s:G.remove_empty_lines()
+        endif
+    else
+        call s:G.cursor_mode()
     endif
 
-    call s:G.change_mode()
     call s:G.update_and_select_region(0, s:v.IDs_list[-1])
 endfun
 
@@ -126,14 +130,12 @@ endfun
 
 fun! s:vblock()
     "blockwise
-    let start = getpos('.')[1:2]
-    keepjumps normal! `>
-    let end = getpos('.')[1:2]
+    let start = getpos("'<")[1:2]
+    let end = getpos("'>")[1:2]
     let w = end[1] - start[1]
 
     "create cursors downwards until end of block
-    call cursor([start[0], start[1]])
-    let r = s:G.new_cursor()
+    call cursor(start)
 
     while getpos('.')[1] < end[0]
         call vm#commands#add_cursor_down(0, 1)

@@ -484,7 +484,7 @@ endfun
 fun! vm#commands#split_lines()
     if s:F.no_regions() | return | endif
     call s:G.split_lines()
-    if g:VM_autoremove_empty_lines
+    if get(g:, 'VM_autoremove_empty_lines', 1)
         call s:G.remove_empty_lines()
     endif
     call s:G.update_and_select_region()

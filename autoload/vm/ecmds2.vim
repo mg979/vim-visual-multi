@@ -150,7 +150,7 @@ endfun
 
 fun! s:Edit.align() abort
     if s:v.multiline
-        return s:F.msg('Not possible, multiline is enabled.') | endif
+        return s:F.msg('Not possible, multiline is enabled.', 1) | endif
     call s:G.cursor_mode()
 
     call self.run_normal('D', {'store': '§'})

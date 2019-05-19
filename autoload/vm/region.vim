@@ -149,8 +149,8 @@ endfun
 
 fun! s:Region.B_()
     " the final byte will be higher than the byte of the column, if multibyte
-    let extra = strlen(self.txt[-1:-1])
-    return line2byte(self.L) + self.b + extra - 2
+    let bytes = len(self.txt) ? strlen(self.txt[-1:-1]) : 1
+    return line2byte(self.L) + self.b + bytes - 2
 endfun
 
 fun! s:Region.cur_ln()

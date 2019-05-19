@@ -97,7 +97,7 @@ endfun
 fun! s:save_lines(buf)
     setlocal nomodified
     if len(b:VM_lines) != line("$")
-        return s:F.msg("Number of lines doesn't match, aborting")
+        return s:F.msg("Number of lines doesn't match, aborting", 1)
     endif
     let lnums = copy(b:VM_lines)
     let lines = map(range(line("$")), 'getline(v:key + 1)')
@@ -142,7 +142,7 @@ endfun
 fun! s:save_regions(buf)
     setlocal nomodified
     if len(b:VM_regions) != line("$")
-        return s:F.msg("Number of lines doesn't match number of regions")
+        return s:F.msg("Number of lines doesn't match number of regions", 1)
     endif
     let R = copy(b:VM_regions)
     let lines = map(range(line("$")), 'getline(v:key + 1)')

@@ -11,7 +11,6 @@ let g:VM_reselect_first_insert            = get(g:, 'VM_reselect_first_insert', 
 let g:VM_reselect_first_always            = get(g:, 'VM_reselect_first_always', 0)
 let g:VM_case_setting                     = get(g:, 'VM_case_setting', 'smart')
 let g:VM_use_first_cursor_in_line         = get(g:, 'VM_use_first_cursor_in_line', 0)
-let g:VM_autoremove_empty_lines           = get(g:, 'VM_autoremove_empty_lines', 0)
 let g:VM_pick_first_after_n_cursors       = get(g:, 'VM_pick_first_after_n_cursors', 0)
 let g:VM_disable_syntax_in_imode          = get(g:, 'VM_disable_syntax_in_imode', 0)
 let g:VM_dynamic_synmaxcol                = get(g:, 'VM_dynamic_synmaxcol', 0)
