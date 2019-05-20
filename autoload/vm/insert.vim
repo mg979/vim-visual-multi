@@ -163,6 +163,11 @@ fun! s:Insert.start(...) abort
     set indentkeys=o,O
     set cinkeys=o,O
 
+    "set sync minlines to 1 for speed
+    if len(b:VM_sync_minlines)
+      syn sync minlines=1
+    endif
+
     "start insert mode
     call feedkeys("i", 'n')
 endfun
@@ -263,6 +268,11 @@ fun! s:Insert.stop(...) abort
     let &indentkeys = s:v.indentkeys
     let &cinkeys    = s:v.cinkeys
     let &synmaxcol  = s:v.synmaxcol
+
+    "restore sync minlines if possible
+    if len(b:VM_sync_minlines)
+      exe 'syn sync minlines='.b:VM_sync_minlines
+    endif
 
     "reindent all and adjust cursors position, only if filetype/options allow
     if s:do_reindent() | call s:V.Edit.run_normal('==', {'recursive': 0, 'stay_put': 1}) | endif

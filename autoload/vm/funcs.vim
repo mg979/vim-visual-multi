@@ -194,6 +194,15 @@ fun! s:Funcs.get_expr(x) abort
     return x
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.sync_minlines()
+  """Get the current sync minlines setting for the buffer.
+  let sync = split(execute('syn sync'), '\n')
+  let sync = len(sync) > 1 ? sync[1] : sync[0]
+  return matchstr(sync, '\d\+')
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Keep viewport position
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

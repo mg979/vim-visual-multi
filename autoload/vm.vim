@@ -178,6 +178,11 @@ fun! vm#init_buffer(empty, ...)
         call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
     endif
 
+    " backup sync settings for the buffer
+    if !exists('b:VM_sync_minlines')
+        let b:VM_sync_minlines = s:V.Funcs.sync_minlines()
+    endif
+
     let g:Vm.is_active = 1
     return s:V
 endfun
