@@ -42,10 +42,14 @@ endfun
 " Change
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.change(X, count, reg) abort
+fun! s:Edit.change(X, count, reg, smart_case) abort
     if !len(s:R()) | return | endif
     if !s:v.direction | call vm#commands#invert_direction() | endif
+    if a:smart_case && !exists('s:v.smart_case_change')
+        let s:v.smart_case_change = 1
+    endif
     if a:X
+        let s:v.changed_text = map(copy(s:R()), 'v:val.txt')
         "delete existing region contents and leave the cursors
         call self.delete(1, a:reg != s:v.def_reg? a:reg : "_", 1, 0)
         call s:V.Insert.start()

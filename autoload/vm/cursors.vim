@@ -187,6 +187,7 @@ fun! s:c_cursors(M, reg, n)
   if CC
     call vm#operators#select(1, 1, '$')
     call vm#commands#motion('^', 1, 0, 0)
+    call s:backup_changed_text()
     call s:V.Edit.delete(1, reg, 1, 0)
     call s:V.Insert.key('i')
 
@@ -196,6 +197,7 @@ fun! s:c_cursors(M, reg, n)
 
   elseif S=='$'
     call vm#operators#select(1, 1, '$')
+    call s:backup_changed_text()
     call s:V.Edit.delete(1, reg, 1, 0)
     call s:V.Insert.key('i')
 
@@ -235,6 +237,11 @@ fun! s:init()
   let s:R         = function('vm#v74#regions')
   let s:init_done = 1
   call s:G.cursor_mode()
+endfun
+
+fun! s:backup_changed_text()
+  "backup original regions text since it could used
+  let s:v.changed_text = map(copy(s:R()), 'v:val.txt')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

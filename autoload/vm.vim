@@ -183,6 +183,10 @@ fun! vm#init_buffer(empty, ...)
         let b:VM_sync_minlines = s:V.Funcs.sync_minlines()
     endif
 
+    command! -bang -nargs=1 VMSmartChange
+                \ if <bang>0 | let s:v.smart_case_change = 0 |
+                \ else | let s:v.smart_case_change = function(<q-args>) | endif
+
     let g:Vm.is_active = 1
     return s:V
 endfun
@@ -249,6 +253,7 @@ fun! vm#reset(...)
     endif
     call garbagecollect()
     call vm#comp#exit()
+    delcommand VMSmartChange
 endfun
 
 

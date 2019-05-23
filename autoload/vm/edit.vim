@@ -189,6 +189,7 @@ fun! s:Edit.process(cmd, ...) abort
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
     let store           = a:0 && exists('a:1.store') && a:1.store != "_"
+    let backup_txt      = a:0 && exists('a:1.store')
     let stay_put        = a:0 && exists('a:1.stay_put')
     let do_cursor_moved = !exists("##TextYankPost")
     let txt = []
@@ -230,6 +231,10 @@ fun! s:Edit.process(cmd, ...) abort
     if store
         let hard = g:VM_overwrite_vim_registers || ( a:1.store == s:v.def_reg )
         call self.fill_register(a:1.store, txt, hard)
+    endif
+    " backup original regions text since it could used
+    if backup_txt
+        let s:v.changed_text = txt
     endif
 endfun
 

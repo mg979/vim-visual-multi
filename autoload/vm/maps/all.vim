@@ -243,6 +243,7 @@ fun! vm#maps#all#buffer()
         \"o":                       [leader.'o',    'n'],
         \"O":                       [leader.'O',    'n'],
         \"c":                       ['c',           'n'],
+        \"gc":                      ['gc',          'n'],
         \"C":                       ['C',           'n'],
         \"Delete":                  ['d',           'n'],
         \"Replace":                 ['r',           'n'],

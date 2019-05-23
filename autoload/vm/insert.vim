@@ -232,6 +232,7 @@ fun! s:Insert.insert(...) abort
     endfor
 
     " put the cursor where it should stay after the lines update
+    " as said before, the actual cursor can be pushed by cursors behind it
     call cursor(ln, I.col)
 endfun
 
@@ -290,6 +291,7 @@ fun! s:Insert.stop(...) abort
         call s:F.Scroll.force(s:v.winline_insert)
     endif
     unlet s:v.winline_insert
+    silent! unlet s:v.smart_case_change
     set hlsearch
 endfun
 
@@ -316,7 +318,7 @@ let s:Cursor = {}
 "--------------------------------------------------------------------------
 
 "in Insert Mode we will forget about the regions, and work with cursors at
-"byte offsets; from the final offset, we'll update the real regions later
+"positions; from the final position, we'll update the real regions later
 
 "--------------------------------------------------------------------------
 
@@ -392,16 +394,19 @@ fun! s:Line.update(change, text) abort
     " then:
     "     line = t1 || inserted text // t2
 
+
     for c in self.cursors
+        let inserted = exists('s:v.smart_case_change') ?
+                    \ s:smart_case_change(c, a:text) : a:text
         if c.a > 1
             let insPoint = c.a + change - 1
             let t1 = text[ 0 : (insPoint - 1) ]
             let t2 = text[ insPoint : ]
-            let text = t1 . a:text . t2
-            " echo strtrans(t1) . "█" . strtrans(a:text) . "█" . strtrans(t2)
+            let text = t1 . inserted . t2
+            " echo strtrans(t1) . "█" . strtrans(inserted) . "█" . strtrans(t2)
         else
-            " echo "█" . strtrans(a:text) . "█" . strtrans(text)
-            let text = a:text . text
+            " echo "█" . strtrans(inserted) . "█" . strtrans(text)
+            let text = inserted . text
         endif
         let change += a:change
         call c.update(self.l, c.a + change)
@@ -429,6 +434,30 @@ endfun
 fun! s:Insert.auto_end()
     autocmd! VM_insert
     augroup! VM_insert
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:smart_case_change(cursor, txt) abort
+    " the active cursor isn't affected, text is entered as typed
+    " if smart_case_change has been set by VMSmartChange, eval the function
+    if a:cursor.active
+        return a:txt
+    elseif type(s:v.smart_case_change) == v:t_func
+        return s:v.smart_case_change(a:cursor, a:txt)
+    endif
+    try
+        let original = s:v.changed_text[a:cursor.index]
+        if match(original, '\u') >= 0 && match(original, '\U') < 0
+            return toupper(a:txt)
+        elseif match(original, '\u') == 0
+            return toupper(a:txt[:0]) . a:txt[1:]
+        else
+            return a:txt
+        endif
+    catch
+        return a:txt
+    endtry
 endfun
 
 

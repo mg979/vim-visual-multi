@@ -162,7 +162,8 @@ fun! vm#plugs#buffer()
   nnoremap <silent>        <Plug>(VM-I)                       :<C-u>call b:VM_Selection.Insert.key('I')<cr>
   nnoremap <silent>        <Plug>(VM-o)                       :<C-u>call b:VM_Selection.Insert.key('o')<cr>
   nnoremap <silent>        <Plug>(VM-O)                       :<C-u>call b:VM_Selection.Insert.key('O')<cr>
-  nnoremap <silent>        <Plug>(VM-c)                       :<C-u>call b:VM_Selection.Edit.change(g:Vm.extend_mode, v:count1, v:register)<cr>
+  nnoremap <silent>        <Plug>(VM-c)                       :<C-u>call b:VM_Selection.Edit.change(g:Vm.extend_mode, v:count1, v:register, 0)<cr>
+  nnoremap <silent>        <Plug>(VM-gc)                      :<C-u>call b:VM_Selection.Edit.change(g:Vm.extend_mode, v:count1, v:register, 1)<cr>
   nnoremap <silent>        <Plug>(VM-C)                       :<C-u>call vm#cursors#operation('c', 0, v:register, 'c$')<cr>
   nnoremap <silent>        <Plug>(VM-Delete)                  :<C-u>call b:VM_Selection.Edit.delete(g:Vm.extend_mode, v:register, v:count1, 1)<cr>
   nnoremap <silent>        <Plug>(VM-Delete-Exit)             :<C-u>call b:VM_Selection.Edit.delete(g:Vm.extend_mode, v:register, v:count1, 1)<cr>:call vm#reset()<cr>
