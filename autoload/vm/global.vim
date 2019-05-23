@@ -699,3 +699,4 @@ fun! s:Global.lines_with_regions(reverse, ...) abort
     python3 vm.py_lines_with_regions()
     return lines
 endfun
+" vim: et ts=4 sw=4 sts=4 :

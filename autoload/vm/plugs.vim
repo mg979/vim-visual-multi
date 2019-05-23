@@ -310,3 +310,4 @@ fun! s:Visual(cmd)
         \ a:cmd == 'wsubw'? "y:call vm#commands#find_under(1, 1, 0)\<cr>".r."`]" :
         \ a:cmd == 'star' ? "y:call <sid>Star(3)\<cr>".r."`]" : "y:call <sid>Star(4)\<cr>".r."`]"
 endfun
+" vim: et ts=2 sw=2 sts=2 :

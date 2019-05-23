@@ -256,3 +256,4 @@ fun! s:old_updatetime()
         let &updatetime = g:Vm.oldupdate
     endif
 endfun
+" vim: et ts=4 sw=4 sts=4 :

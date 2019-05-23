@@ -270,3 +270,4 @@ fun! s:min(n)
     return s:X() && len(s:R()) >= a:n
 endfun
 
+" vim: et ts=4 sw=4 sts=4 :

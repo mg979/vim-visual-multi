@@ -189,3 +189,4 @@ let s:Themes.lightpurple2 = {
       \ 'mono':   "ctermbg=135 guibg=#af5fff ctermfg=225 guifg=#ffdfff cterm=bold term=bold gui=bold",
       \}
 
+" vim: et ts=2 sw=2 sts=2 :

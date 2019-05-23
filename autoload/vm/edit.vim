@@ -410,3 +410,4 @@ fun! s:visual_reselect(cmd)
     return s:X() && reselect
 endfun
 
+" vim: et ts=4 sw=4 sts=4 :

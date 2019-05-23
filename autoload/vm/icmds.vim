@@ -176,3 +176,4 @@ endfun
 fun! s:eol(r)
     return a:r.a == (s:E(a:r) - 1)
 endfun
+" vim: et ts=4 sw=4 sts=4 :

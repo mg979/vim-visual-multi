@@ -162,7 +162,7 @@ fun! vm#special#commands#filter_regions(type, fill, ...)
     """Filter regions based on pattern or expression."""
     if s:not_active() | return | endif
     if a:type == 0 || a:type > 2
-      let s:filter_type = 0
+        let s:filter_type = 0
     endif
     let type = ['pattern', '!pattern', 'expression'][s:filter_type]
     if !a:0
@@ -183,9 +183,9 @@ fun! vm#special#commands#filter_regions(type, fill, ...)
 endfun
 
 fun! s:filter_regions(fill)
-  let s:filter_type += 1
-  let args = s:filter_type . ", '" . a:fill . "'"
-  return "\<C-U>\<Esc>:call vm#special#commands#filter_regions(".args.")\<cr>"
+    let s:filter_type += 1
+    let args = s:filter_type . ", '" . a:fill . "'"
+    return "\<C-U>\<Esc>:call vm#special#commands#filter_regions(".args.")\<cr>"
 endfun
 
 "------------------------------------------------------------------------------
@@ -196,3 +196,4 @@ fun! s:not_active()
     endif
 endfun
 
+" vim: et ts=4 sw=4 sts=4 :

@@ -179,3 +179,4 @@ else
     let s:R = function('vm#v74#regions')
 endif
 
+" vim: et ts=4 sw=4 sts=4 :

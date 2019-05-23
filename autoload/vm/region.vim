@@ -475,9 +475,9 @@ fun! s:Region.highlight() abort
 
     "define highlight
     for n in range(max)
-        let line = n==0    ? [R.l, R.a, len(getline(R.l))] :
-              \    n<max-1 ? [R.l + n]        :
-              \              [R.L, 1, R.b]
+        let line =    n==0    ? [R.l, R.a, len(getline(R.l))] :
+                    \ n<max-1 ? [R.l + n] :
+                    \           [R.L, 1, R.b]
 
         call add(region, line)
     endfor
@@ -533,7 +533,8 @@ fun! s:pattern(r)
 
     "return current search pattern in regex mode
     if !has_key(a:r, 'pat')
-        if s:v.using_regex | return s:v.search[0] | else | return '' | endif | endif
+        if s:v.using_regex | return s:v.search[0] | else | return '' | endif
+    endif
 
     "return current pattern if one is present (in cursor mode text is empty)
     return empty(a:r.pat)? '' : a:r.pat
@@ -630,3 +631,4 @@ fun! s:region_vars(r, cursor, ...)
         let R.vcol  = 0                     " vertical column
     endif
 endfun
+" vim: et ts=4 sw=4 sts=4 :

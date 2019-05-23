@@ -130,3 +130,4 @@ fun! s:Block.stop() abort
     let s:v.block = [0,0,0,0]
 endfun
 
+" vim: et ts=4 sw=4 sts=4 :

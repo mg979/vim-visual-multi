@@ -163,3 +163,4 @@ fun! s:restore_matches(p)
 endfun
 
 
+" vim: et ts=4 sw=4 sts=4 :

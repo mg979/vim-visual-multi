@@ -187,7 +187,7 @@ fun! s:build_buffer_maps()
 
     "store the key used to toggle mappings
     let g:Vm.maps.toggle = has_key(g:VM_maps, 'Toggle Mappings') ?
-          \ g:VM_maps['Toggle Mappings'] : g:Vm.leader.'<Space>'
+                \ g:VM_maps['Toggle Mappings'] : g:Vm.leader.'<Space>'
 
     "generate list of 'exe' commands for unmappings
     for key in keys(maps)
@@ -271,3 +271,4 @@ fun! s:check_warnings() abort
     endif
 endfun
 
+" vim: et ts=4 sw=4 sts=4 :

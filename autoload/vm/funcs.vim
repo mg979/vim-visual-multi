@@ -69,9 +69,9 @@ endfun
 
 fun! s:Funcs.no_regions() abort
     if !len(s:R())
-      let s:v.index = -1
-      call self.msg('No regions.', 0)
-      return 1
+        let s:v.index = -1
+        call self.msg('No regions.', 0)
+        return 1
     endif
 endfun
 
@@ -197,10 +197,10 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.sync_minlines()
-  """Get the current sync minlines setting for the buffer.
-  let sync = split(execute('syn sync'), '\n')
-  let sync = len(sync) > 1 ? sync[1] : sync[0]
-  return matchstr(sync, '\d\+')
+    """Get the current sync minlines setting for the buffer.
+    let sync = split(execute('syn sync'), '\n')
+    let sync = len(sync) > 1 ? sync[1] : sync[0]
+    return matchstr(sync, '\d\+')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -430,3 +430,4 @@ fun! s:Funcs.external_after_auto()
         call VM_after_auto()
     endif
 endfun
+" vim: et ts=4 sw=4 sts=4 :

@@ -58,7 +58,7 @@ endfun
 fun! s:check_block_mode()
     "enable block mode when adding cursors up/down from extend mode
     if s:X() && get(g:, 'VM_auto_block_mode', 1)
-      call s:V.Block.start()
+        call s:V.Block.start()
     endif
 endfun
 
@@ -74,14 +74,14 @@ fun! s:skip_shorter_lines()
     "and the line would be skipped: check endline as 2, so that the cursor is added
 
     if get(g:, 'VM_skip_shorter_lines', 1)
-      let vcol    = s:v.vertical_col
-      let col     = virtcol('.')
-      let endline = get(g:, 'VM_skip_empty_lines', 0)?  virtcol('$') :
-            \                                           virtcol('$') > 1 ?
-            \                                           virtcol('$') : 2
+        let vcol    = s:v.vertical_col
+        let col     = virtcol('.')
+        let endline = get(g:, 'VM_skip_empty_lines', 0)?  virtcol('$') :
+                    \                                     virtcol('$') > 1 ?
+                    \                                     virtcol('$') : 2
 
-      "skip line
-      if ( col < vcol || col == endline ) | return 1 | endif
+        "skip line
+        if ( col < vcol || col == endline ) | return 1 | endif
     endif
 
     "in block mode, cursor add is handled in block script
@@ -504,16 +504,16 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#remove_every_n_regions(count)
-  """Remove every n regions, given by [count] (min 2).
-  if s:F.no_regions() | return | endif
-  let R = s:R() | let i = 1 | let cnt = a:count < 2 ? 2 : a:count
-  for n in range(1, len(R))
-      if n % cnt == 0
-          call R[n-i].remove()
-          let i += 1
-      endif
-  endfor
-  call s:G.update_and_select_region(1, 0)
+    """Remove every n regions, given by [count] (min 2).
+    if s:F.no_regions() | return | endif
+    let R = s:R() | let i = 1 | let cnt = a:count < 2 ? 2 : a:count
+    for n in range(1, len(R))
+        if n % cnt == 0
+            call R[n-i].remove()
+            let i += 1
+        endif
+    endfor
+    call s:G.update_and_select_region(1, 0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -872,3 +872,4 @@ else
     let s:simple           = function('vm#v74#simple')
 endif
 
+" vim: et ts=4 sw=4 sts=4 :

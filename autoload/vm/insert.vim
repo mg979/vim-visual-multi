@@ -89,8 +89,8 @@ fun! s:Insert.start(...) abort
 
     " get winline and backup regions when insert mode is entered the first time
     if !exists('s:v.winline_insert')
-      let s:v.winline_insert = winline()
-      call s:G.backup_regions()
+        let s:v.winline_insert = winline()
+        call s:G.backup_regions()
     endif
 
     " check synmaxcol settings
@@ -165,7 +165,7 @@ fun! s:Insert.start(...) abort
 
     "set sync minlines to 1 for speed
     if len(b:VM_sync_minlines)
-      syn sync minlines=1
+        syn sync minlines=1
     endif
 
     "start insert mode
@@ -272,7 +272,7 @@ fun! s:Insert.stop(...) abort
 
     "restore sync minlines if possible
     if len(b:VM_sync_minlines)
-      exe 'syn sync minlines='.b:VM_sync_minlines
+        exe 'syn sync minlines='.b:VM_sync_minlines
     endif
 
     "reindent all and adjust cursors position, only if filetype/options allow
@@ -482,3 +482,4 @@ fun! s:step_back()
         endif
     endfor
 endfun
+" vim: et ts=4 sw=4 sts=4 :

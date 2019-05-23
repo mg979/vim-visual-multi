@@ -148,7 +148,7 @@ fun! s:y_cursors(M, reg, n)
   else
     call vm#operators#select(1, 1, N.S)
     if s:back(S)
-        normal h
+      normal h
     endif
     let r = a:reg == s:v.def_reg ? '' : "\"".a:reg
     call feedkeys(r.'y')
@@ -263,3 +263,4 @@ else
   let s:single = function('vm#v74#single')
   let s:double = function('vm#v74#double')
 endif
+" vim: et ts=2 sw=2 sts=2 :

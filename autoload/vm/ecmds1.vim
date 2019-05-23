@@ -110,7 +110,7 @@ fun! s:Edit.paste(before, vim_reg, reselect, register, ...) abort
     let X                = s:X()
     let s:v.use_register = a:register
     let vim_reg          = a:vim_reg || !has_key(g:Vm.registers, a:register) ||
-                           \empty(g:Vm.registers[a:register])
+                \          empty(g:Vm.registers[a:register])
     let vim_V            = vim_reg && getregtype(a:register) ==# 'V'
 
     if empty(s:v.old_text) | let s:v.old_text = s:G.regions_text() | endif
@@ -164,8 +164,8 @@ fun! s:Edit.replace() abort
         if char ==? "\<esc>" | return | endif
 
         if s:v.multiline
-          call s:F.toggle_option('multiline')
-          call s:G.remove_empty_lines()
+            call s:F.toggle_option('multiline')
+            call s:G.remove_empty_lines()
         endif
 
         let s:v.W = self.store_widths() | let s:v.new_text = []
@@ -309,10 +309,7 @@ fun! s:Edit.store_widths(...)
     for r in s:R()
         "if using list, w must be len[i]-1, but always >= 0, set it to 0 if empty
         if use_list | let w = len(list[r.index]) | endif
-        call add(W, use_text? text :
-                \   use_list? (w? w-1 : 0) :
-                \   r.w
-                \)
+        call add( W, use_text? text : use_list? (w? w-1 : 0) : r.w )
     endfor
     return W
 endfun
@@ -328,7 +325,7 @@ fun! s:Edit.fill_register(reg, text, hard) abort
 
     " set VM register, overwrite unnamed unless temporary VM register
     if a:reg != '§'
-      let g:Vm.registers[s:v.def_reg] = text
+        let g:Vm.registers[s:v.def_reg] = text
     endif
     let g:Vm.registers[a:reg] = text
 
@@ -347,8 +344,9 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.replace_regions_with_text(text) abort
-  """Paste a custom list of strings into current regions.
-  call self.fill_register('"', a:text, 0)
-  normal p
+    """Paste a custom list of strings into current regions.
+    call self.fill_register('"', a:text, 0)
+    normal p
 endfun
 
+" vim: et ts=4 sw=4 sts=4 :

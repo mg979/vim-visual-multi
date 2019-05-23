@@ -140,3 +140,4 @@ fun! s:Case.convert(type) abort
   endfor
   normal p
 endfun
+" vim: et ts=2 sw=2 sts=2 :

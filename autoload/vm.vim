@@ -45,7 +45,7 @@ fun! vm#init_buffer(empty, ...)
 
     let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Funcs':  {}, 'Block': {}, 'Bytes': '',
                 \ 'Edit': {}, 'Global':  {}, 'Search': {}, 'Maps':  {}, 'Groups': {}
-                        \}
+                \}
 
     let b:VM_mappings_loaded = get(b:, 'VM_mappings_loaded', 0)
     let b:VM_Debug           = get(b:, 'VM_Debug', {'lines': []})
@@ -159,7 +159,7 @@ fun! vm#init_buffer(empty, ...)
     set lz
     set nofoldenable
     if !g:VM_manual_infoline
-      let &ch = get(g:, 'VM_cmdheight', 2)
+        let &ch = get(g:, 'VM_cmdheight', 2)
     endif
 
     if !empty(g:VM_highlight_matches)
@@ -171,7 +171,7 @@ fun! vm#init_buffer(empty, ...)
     endif
 
     if !v:hlsearch && !a:empty
-      call feedkeys("\<Plug>(VM-Toggle-Hls)")
+        call feedkeys("\<Plug>(VM-Toggle-Hls)")
     endif
 
     if empty(b:VM_Debug.lines) && !g:VM_manual_infoline
@@ -208,7 +208,7 @@ fun! vm#reset(...)
     let &clipboard   = s:v.clipboard
 
     if !s:v.oldhls
-      call feedkeys("\<Plug>(VM-Toggle-Hls)")
+        call feedkeys("\<Plug>(VM-Toggle-Hls)")
     endif
 
     call vm#commands#regex_reset()
@@ -245,7 +245,7 @@ fun! vm#reset(...)
     endif
 
     if g:Vm.oldupdate && &updatetime != g:Vm.oldupdate
-      let &updatetime = g:Vm.oldupdate
+        let &updatetime = g:Vm.oldupdate
     endif
 
     if !empty(matches)
@@ -323,9 +323,9 @@ endfun
 fun! s:set_reg()
     "Replace old default register if yanking in VM outside a region or cursor
     if s:v.yanked
-      let s:v.yanked = 0
-      let g:Vm.registers['"'] = []
-      let s:v.oldreg = s:V.Funcs.get_reg(v:register)
+        let s:v.yanked = 0
+        let g:Vm.registers['"'] = []
+        let s:v.oldreg = s:V.Funcs.get_reg(v:register)
     endif
 endfun
 
@@ -342,8 +342,8 @@ fun! s:vm_regs()
     let sep    = is_win ? '\' : '/'
     let vmfile = is_win ? '_VM_registers' : '.VM_registers'
     let home   = !empty(get(g:, 'VM_vimhome', '')) ? g:VM_vimhome :
-               \ exists('$VIMHOME')                ? $VIMHOME :
-               \ is_win                            ? '~/vimfiles' : "~/.vim"
+                \ exists('$VIMHOME')               ? $VIMHOME :
+                \ is_win                           ? '~/vimfiles' : "~/.vim"
 
     let g:Vm.regs_file = home.sep.vmfile
     if isdirectory(home) && !filereadable(g:Vm.regs_file)
@@ -386,3 +386,4 @@ python_root_dir = normpath(join(root_dir, '..', 'python'))
 sys.path.insert(0, python_root_dir)
 import vm
 EOF
+" vim: et ts=4 sw=4 sts=4 :

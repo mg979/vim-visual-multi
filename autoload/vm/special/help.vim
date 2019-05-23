@@ -398,3 +398,4 @@ let s:plugs = {
       \"Yank Hard":               ["Hard Yank",                  "both vim and VM registers"],
       \}
 
+" vim: et ts=2 sw=2 sts=2 :

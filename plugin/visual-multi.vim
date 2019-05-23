@@ -53,11 +53,12 @@ call vm#maps#default()
 " Autocommands
 
 augroup VM_start
-    au!
-    au ColorScheme  * call vm#themes#init()
+  au!
+  au ColorScheme  * call vm#themes#init()
 augroup END
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
+" vim: et ts=2 sw=2 sts=2 :

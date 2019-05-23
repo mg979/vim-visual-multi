@@ -276,3 +276,4 @@ fun! s:Search.menu() abort
     endif
     call feedkeys("\<cr>", 'n')
 endfun
+" vim: et ts=4 sw=4 sts=4 :
