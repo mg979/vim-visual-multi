@@ -64,15 +64,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:set_vcol()
-    "set the new wanted virtcol only if it hasn't been set yet
-    if !s:v.vertical_col
-        let s:v.vertical_col = getcurpos()[4]
-    endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:skip_shorter_lines()
     "when adding cursors below or above, don't add on shorter lines
     "we don't want cursors on final column('$'), except when adding at column 1
@@ -112,7 +103,7 @@ fun! vm#commands#add_cursor_down(extend, count)
     if s:last_line() | return | endif
     call s:set_extend_mode(a:extend)
     call s:check_block_mode()
-    call s:set_vcol()
+    let s:v.vertical_col = getcurpos()[4]
     call s:G.new_cursor()
     let N = a:count>1? a:count : 1
 
@@ -121,6 +112,7 @@ fun! vm#commands#add_cursor_down(extend, count)
         if !s:skip_shorter_lines() | let N -= 1 | endif
         if s:last_line()           | break      | endif
     endwhile
+    let s:v.vertical_col = 0
     call s:F.count_msg(0)
 endfun
 
@@ -130,7 +122,7 @@ fun! vm#commands#add_cursor_up(extend, count)
     if s:first_line() | return | endif
     call s:set_extend_mode(a:extend)
     call s:check_block_mode()
-    call s:set_vcol()
+    let s:v.vertical_col = getcurpos()[4]
     call s:G.new_cursor()
     let N = a:count>1? a:count : 1
 
@@ -139,6 +131,7 @@ fun! vm#commands#add_cursor_up(extend, count)
         if !s:skip_shorter_lines() | let N -= 1 | endif
         if s:first_line()          | break      | endif
     endwhile
+    let s:v.vertical_col = 0
     call s:F.count_msg(0)
 endfun
 
