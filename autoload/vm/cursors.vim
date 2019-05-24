@@ -208,7 +208,7 @@ fun! s:c_cursors(M, reg, n)
     call feedkeys('"'.reg."c")
     let s:v.multiline = oldmultiline
 
-  elseif s:forw(S)
+  elseif s:forw(S) || s:ia(S[:0])
     call vm#operators#select(1, 1, N.S)
     call feedkeys('"'.reg."c")
 
