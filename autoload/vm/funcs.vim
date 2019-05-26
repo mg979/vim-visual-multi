@@ -210,8 +210,15 @@ fun! s:Funcs.Scroll.force(line) abort
 endfun
 
 fun! s:Funcs.Scroll.restore(...) abort
-    """Restore viewport position when done."""
+    """Restore viewport position when done.
     if s:v.restore_scroll | let s:v.restore_scroll = 0 | else | return | endif
+
+    " restoring should be avoided if it's possible to see EOF or BOF
+    let can_see_BOF = line('.') <= winline()
+    let can_see_EOF = ( winheight(0) - winline() + line('.') ) >= line('$')
+
+    if (can_see_BOF || can_see_EOF) | return | endif
+
     let lines = winline() - s:v.winline
     if lines > 0
         silent! exe "normal! ".lines."\<C-e>"
