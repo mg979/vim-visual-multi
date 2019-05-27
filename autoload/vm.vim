@@ -70,7 +70,6 @@ fun! vm#init_buffer(empty, ...)
     let s:v.oldwhichwrap     = &whichwrap
     let s:v.oldlz            = &lz
     let s:v.oldch            = &ch
-    let s:v.oldhls           = v:hlsearch
     let s:v.oldcase          = [&smartcase, &ignorecase]
     let s:v.indentkeys       = &indentkeys
     let s:v.cinkeys          = &cinkeys
@@ -171,7 +170,10 @@ fun! vm#init_buffer(empty, ...)
     endif
 
     if !v:hlsearch && !a:empty
+        let s:v.oldhls = 1
         call feedkeys("\<Plug>(VM-Toggle-Hls)")
+    else
+        let s:v.oldhls = 0
     endif
 
     if empty(b:VM_Debug.lines) && !g:VM_manual_infoline
@@ -207,7 +209,7 @@ fun! vm#reset(...)
     let &indentkeys  = s:v.indentkeys
     let &clipboard   = s:v.clipboard
 
-    if !s:v.oldhls
+    if s:v.oldhls
         call feedkeys("\<Plug>(VM-Toggle-Hls)")
     endif
 
