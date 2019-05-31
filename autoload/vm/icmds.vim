@@ -16,22 +16,21 @@ endfun
 if v:version >= 800
     let s:R    = { -> s:V.Regions }
     let s:X    = { -> g:Vm.extend_mode }
-    let s:size = { -> line2byte(line('$') + 1) - 1 }
 else
     let s:R    = function('vm#v74#regions')
     let s:X    = function('vm#v74#extend_mode')
-    let s:size = function('vm#v74#size')
 endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#icmds#x(cmd)
-    let size = s:size()    | let s:change = 0 | let s:v.eco = 1
+    let size = s:F.size()
+    let change = 0 | let s:v.eco = 1
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
     for r in s:R()
 
-        call r.shift(s:change, s:change)
+        call r.shift(change, change)
         call s:F.Cursor(r.A)
 
         " we want to emulate the behaviour that <del> and <bs> have in insert
@@ -46,11 +45,11 @@ fun! vm#icmds#x(cmd)
             call r.shift(-1,-1)
         else                                "normal backspace
             normal! X
-            call r.shift(-1,-1)
+            call r.update_cursor(getpos('.')[1:2])
         endif
 
         "update changed size
-        let s:change = s:size() - size
+        let change = s:F.size() - size
     endfor
 
     call s:G.merge_regions()

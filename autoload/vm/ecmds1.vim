@@ -20,11 +20,9 @@ endfun
 if v:version >= 800
     let s:R    = { -> s:V.Regions }
     let s:X    = { -> g:Vm.extend_mode }
-    let s:size = { -> line2byte(line('$') + 1) - 1 }
 else
     let s:R    = function('vm#v74#regions')
     let s:X    = function('vm#v74#extend_mode')
-    let s:size = function('vm#v74#size')
 endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -70,7 +68,7 @@ fun! s:Edit.delete(X, register, count, hard) abort
         return vm#cursors#operation('d', a:count, a:register) | endif
 
     let winline      = winline()
-    let size         = s:size()
+    let size         = s:F.size()
     let change       = 0
     let ix           = s:G.select_region_at_pos('.').index
     let s:v.old_text = s:G.regions_text()
@@ -87,7 +85,7 @@ fun! s:Edit.delete(X, register, count, hard) abort
         normal! m]`["_d`]
 
         "update changed size
-        let change = s:size() - size
+        let change = s:F.size() - size
     endfor
 
     "write custom and possibly vim registers.
@@ -134,7 +132,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.block_paste(before) abort
-    let size = s:size() | let change = 0 | let text = copy(s:v.new_text) | let s:v.eco = 1
+    let size = s:F.size()
+    let text = copy(s:v.new_text)
+    let change = 0
+    let s:v.eco = 1
 
     for r in s:R()
         if !empty(text)
@@ -148,7 +149,7 @@ fun! s:Edit.block_paste(before) abort
             endif
 
             "update changed size
-            let change = s:size() - size
+            let change = s:F.size() - size
         else | break | endif
     endfor
     call s:F.restore_reg()

@@ -10,10 +10,6 @@ fun! vm#v74#extend_mode()
     return g:Vm.extend_mode
 endfun
 
-fun! vm#v74#size()
-    return line2byte(line('$') + 1) - 1
-endfun
-
 fun! vm#v74#block_mode()
     return g:Vm.is_active && b:VM_Selection.Vars.block_mode && g:Vm.extend_mode
 endfun

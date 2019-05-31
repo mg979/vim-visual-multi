@@ -17,7 +17,6 @@ fun! vm#edit#init()
     let s:v.storepos     = []
     let s:v.extra_spaces = []
     let s:v.cw_spaces    = []
-    let s:change         = 0
     let s:can_multiline  = 0
 
     call vm#icmds#init()
@@ -31,11 +30,9 @@ endfun
 if v:version >= 800
     let s:R    = { -> s:V.Regions }
     let s:X    = { -> g:Vm.extend_mode }
-    let s:size = { -> line2byte(line('$') + 1) - 1 }
 else
     let s:R    = function('vm#v74#regions')
     let s:X    = function('vm#v74#extend_mode')
-    let s:size = function('vm#v74#size')
 endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -185,14 +182,17 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.process(cmd, ...) abort
-    let size = s:size()    | let s:change = 0 | let cmd = a:cmd  | let s:v.eco = 1
+    let s:v.eco = 1             " turn on eco mode
+    let change  = 0             " each cursor will update this value
+    let txt     = []            " if text is deleted, it will be stored here
+    let size    = s:F.size()    " initial buffer size
+
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
     let store           = a:0 && exists('a:1.store') && a:1.store != "_"
     let backup_txt      = a:0 && exists('a:1.store')
     let stay_put        = a:0 && exists('a:1.stay_put')
     let do_cursor_moved = !exists("##TextYankPost")
-    let txt = []
 
     call s:G.backup_regions()
 
@@ -201,11 +201,11 @@ fun! s:Edit.process(cmd, ...) abort
         if !s:v.auto && r.index == self.skip_index | continue | endif
 
         " update cursor position on the base of previous text changes
-        call r.shift(s:change, s:change)
+        call r.shift(change, change)
 
         " execute command at cursor
         call cursor(r.l, r.a)
-        exe cmd
+        exe a:cmd
 
         " store deleted text during deletions/changes at cursors
         if store
@@ -219,7 +219,7 @@ fun! s:Edit.process(cmd, ...) abort
         endif
 
         " update changed size
-        let s:change = s:size() - size
+        let change = s:F.size() - size
 
         " let's force CursorMoved in case some yank command needs it
         if !diff && do_cursor_moved
@@ -241,8 +241,10 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.process_visual(cmd) abort
-    let size = s:size()                 | let change = 0
-    let s:v.storepos = getpos('.')[1:2] | let s:v.eco = 1
+    let s:v.eco = 1             " turn on eco mode
+    let change  = 0             " each cursor will update this value
+    let size    = s:F.size()    " initial buffer size
+    let s:v.storepos = getpos('.')[1:2]
 
     for r in s:R()
         call r.shift(change, change)
@@ -251,7 +253,7 @@ fun! s:Edit.process_visual(cmd) abort
         exe "normal ".a:cmd
 
         "update changed size
-        let change = s:size() - size
+        let change = s:F.size() - size
     endfor
 endfun
 

@@ -23,11 +23,9 @@ endfun
 if v:version >= 800
     let s:R    = { -> s:V.Regions }
     let s:X    = { -> g:Vm.extend_mode }
-    let s:size = { -> line2byte(line('$') + 1) - 1 }
 else
     let s:R    = function('vm#v74#regions')
     let s:X    = function('vm#v74#extend_mode')
-    let s:size = function('vm#v74#size')
 endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -123,7 +121,7 @@ fun! s:Insert.start(...) abort
 
     let I.index     = R.index
     let I.begin     = [R.l, R.a]
-    let I.size      = s:size()
+    let I.size      = s:F.size()
     let I.cursors   = []
     let I.lines     = {}
     let I.change    = 0

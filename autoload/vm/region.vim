@@ -173,6 +173,8 @@ endfun
 
 fun! s:Region.shift(x, y) abort
     """Shift region offsets by integer values.
+    "TODO: this will surely cause trouble in insert mode with multibyte chars
+    "all r.shift() in insert mode should be replaced with r.update_cursor()
     let r = self
 
     let r.A += a:x | let r.B += a:y

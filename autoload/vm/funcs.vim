@@ -91,6 +91,10 @@ fun! s:Funcs.default_reg() abort
     return "\""
 endfun
 
+fun! s:Funcs.size() abort
+    return line2byte(line('$') + 1) - 1
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.get_reg(...) abort
