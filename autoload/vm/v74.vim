@@ -11,7 +11,7 @@ fun! vm#v74#extend_mode()
 endfun
 
 fun! vm#v74#size()
-    return line2byte(line('$'))
+    return line2byte(line('$') + 1) - 1
 endfun
 
 fun! vm#v74#block_mode()
