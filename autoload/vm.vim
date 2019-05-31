@@ -38,159 +38,113 @@ call vm#plugs#buffer()
 " function classes (Global, Funcs, Edit, Search, Insert, etc)
 
 
-fun! vm#init_buffer(empty, ...)
+fun! vm#init_buffer(empty, ...) abort
     """If already initialized, return current instance."""
+    try
+        if exists('b:VM_Selection') && !empty(b:VM_Selection) | return s:V | endif
 
-    if exists('b:VM_Selection') && !empty(b:VM_Selection) | return s:V | endif
+        let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Groups': {}}
 
-    let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Funcs':  {}, 'Block': {}, 'Bytes': '',
-                \ 'Edit': {}, 'Global':  {}, 'Search': {}, 'Maps':  {}, 'Groups': {}
-                \}
+        let b:VM_mappings_loaded = get(b:, 'VM_mappings_loaded', 0)
+        let b:VM_Debug           = get(b:, 'VM_Debug', {'lines': []})
+        let b:VM_Backup          = {'ticks': [], 'last': 0, 'first': undotree().seq_cur}
 
-    let b:VM_mappings_loaded = get(b:, 'VM_mappings_loaded', 0)
-    let b:VM_Debug           = get(b:, 'VM_Debug', {'lines': []})
-    let b:VM_Backup          = {'ticks': [], 'last': 0, 'first': undotree().seq_cur}
+        "init classes
+        let s:V            = b:VM_Selection
+        let s:v            = s:V.Vars
+        let s:V.Funcs      = vm#funcs#init()
 
-    "init classes
-    let s:V            = b:VM_Selection
-    let s:v            = s:V.Vars
-    let s:Regions      = s:V.Regions
+        call vm#variables#init()
+        let @/ = a:empty ? '' : @/
 
-    let s:V.Funcs      = vm#funcs#init()
+        " call hook before applying mappings
+        if exists('*VM_Start') | call VM_Start() | endif
 
-    "init search
-    let s:v.def_reg          = s:V.Funcs.default_reg()
-    let s:v.oldreg           = s:V.Funcs.get_reg()
-    let s:v.oldregs_1_9      = s:V.Funcs.get_regs_1_9()
-    let s:v.oldsearch        = [getreg("/"), getregtype("/")]
-    let @/                   = a:empty? '' : @/
+        let s:V.Maps       = vm#maps#init()
+        let s:V.Global     = vm#global#init()
+        let s:V.Search     = vm#search#init()
+        let s:V.Edit       = vm#edit#init()
+        let s:V.Insert     = vm#insert#init()
+        let s:V.Block      = vm#block#init()
+        let s:V.Case       = vm#special#case#init()
 
-    "store old vars
-    let s:v.oldvirtual       = &virtualedit
-    let s:v.oldwhichwrap     = &whichwrap
-    let s:v.oldlz            = &lz
-    let s:v.oldch            = &ch
-    let s:v.oldcase          = [&smartcase, &ignorecase]
-    let s:v.indentkeys       = &indentkeys
-    let s:v.cinkeys          = &cinkeys
-    let s:v.synmaxcol        = &synmaxcol
-    let s:v.oldmatches       = getmatches()
-    let s:v.clipboard        = &clipboard
+        call s:V.Maps.enable()
+        call vm#region#init()
+        call vm#commands#init()
+        call vm#operators#init()
+        call vm#comp#init()
+        call vm#special#commands#init()
 
-    "init new vars
+        call vm#augroup(0)
+        call vm#au_cursor(0)
 
-    "block: [ left edge, right edge, min edge for all regions, au var ]
-
-    let s:v.block            = [0,0,0,0]
-    let s:v.search           = []
-    let s:v.IDs_list         = []
-    let s:v.ID               = 0
-    let s:v.active_group     = 0
-    let s:v.index            = -1
-    let s:v.direction        = 1
-    let s:v.nav_direction    = 1
-    let s:v.auto             = 0
-    let s:v.silence          = 0
-    let s:v.eco              = 0
-    let s:v.only_this        = 0
-    let s:v.only_this_always = 0
-    let s:v.using_regex      = 0
-    let s:v.multiline        = 0
-    let s:v.block_mode       = 0
-    let s:v.vertical_col     = 0
-    let s:v.yanked           = 0
-    let s:v.merge            = 0
-    let s:v.insert           = 0
-    let s:v.whole_word       = 0
-    let s:v.winline          = 0
-    let s:v.restore_scroll   = 0
-    let s:v.find_all_overlap = 0
-    let s:v.dot              = ''
-    let s:v.no_search        = 0
-    let s:v.no_msg           = g:VM_manual_infoline
-    let s:v.visual_regex     = 0
-
-    " call hook before applying mappings
-    if exists('*VM_Start') | call VM_Start() | endif
-
-    let s:V.Maps       = vm#maps#init()
-    let s:V.Global     = vm#global#init()
-    let s:V.Search     = vm#search#init()
-    let s:V.Edit       = vm#edit#init()
-    let s:V.Insert     = vm#insert#init()
-    let s:V.Block      = vm#block#init()
-    let s:V.Case       = vm#special#case#init()
-
-    call s:V.Maps.enable()
-    call vm#region#init()
-    call vm#commands#init()
-    call vm#operators#init()
-    call vm#comp#init()
-    call vm#special#commands#init()
-
-    call vm#augroup(0)
-    call vm#au_cursor(0)
-
-    " disable folding, but keep winline
-    if &foldenable
-        call s:V.Funcs.Scroll.get(1)
-        let s:v.oldfold = 1
-        set nofoldenable
-        call s:V.Funcs.Scroll.restore()
-    endif
-
-    if g:VM_case_setting ==? 'smart'
-        set smartcase
-        set ignorecase
-    elseif g:VM_case_setting ==? 'sensitive'
-        set nosmartcase
-        set noignorecase
-    else
-        set nosmartcase
-        set ignorecase
-    endif
-
-    "force use of unnamed register
-    set clipboard=
-
-    set virtualedit=onemore
-    set ww=h,l,<,>
-    set lz
-    set nofoldenable
-    if !g:VM_manual_infoline
-        let &ch = get(g:, 'VM_cmdheight', 2)
-    endif
-
-    if !empty(g:VM_highlight_matches)
-        if !has_key(g:Vm, 'Search')
-            call vm#themes#init()
+        " disable folding, but keep winline
+        if &foldenable
+            call s:V.Funcs.Scroll.get(1)
+            let s:v.oldfold = 1
+            set nofoldenable
+            call s:V.Funcs.Scroll.restore()
         endif
-        hi clear Search
-        exe g:Vm.Search
-    endif
 
-    if !v:hlsearch && !a:empty
-        let s:v.oldhls = 1
-        call feedkeys("\<Plug>(VM-Toggle-Hls)")
-    else
-        let s:v.oldhls = 0
-    endif
+        if g:VM_case_setting ==? 'smart'
+            set smartcase
+            set ignorecase
+        elseif g:VM_case_setting ==? 'sensitive'
+            set nosmartcase
+            set noignorecase
+        else
+            set nosmartcase
+            set ignorecase
+        endif
 
-    if empty(b:VM_Debug.lines) && !g:VM_manual_infoline
-        call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
-    endif
+        "force use of unnamed register
+        set clipboard=
 
-    " backup sync settings for the buffer
-    if !exists('b:VM_sync_minlines')
-        let b:VM_sync_minlines = s:V.Funcs.sync_minlines()
-    endif
+        set virtualedit=onemore
+        set ww=h,l,<,>
+        set lz
+        set nofoldenable
+        if !g:VM_manual_infoline
+            let &ch = get(g:, 'VM_cmdheight', 2)
+        endif
 
-    command! -bang -nargs=1 VMSmartChange
-                \ if <bang>0 | let s:v.smart_case_change = 0 |
-                \ else | let s:v.smart_case_change = function(<q-args>) | endif
+        if !empty(g:VM_highlight_matches)
+            if !has_key(g:Vm, 'Search')
+                call vm#themes#init()
+            endif
+            hi clear Search
+            exe g:Vm.Search
+        endif
 
-    let g:Vm.is_active = 1
-    return s:V
+        if !v:hlsearch && !a:empty
+            let s:v.oldhls = 1
+            call feedkeys("\<Plug>(VM-Toggle-Hls)")
+        else
+            let s:v.oldhls = 0
+        endif
+
+        if empty(b:VM_Debug.lines) && !g:VM_manual_infoline
+            call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
+        endif
+
+        " backup sync settings for the buffer
+        if !exists('b:VM_sync_minlines')
+            let b:VM_sync_minlines = s:V.Funcs.sync_minlines()
+        endif
+
+        command! -bang -nargs=1 VMSmartChange
+                    \ if <bang>0 | let s:v.smart_case_change = 0 |
+                    \ else | let s:v.smart_case_change = function(<q-args>) | endif
+
+        let g:Vm.is_active = 1
+        return s:V
+    catch
+        let b:VM_Backup = {}
+        let b:VM_Selection = {}
+        let g:Vm.is_active = 0
+        let g:Vm.extend_mode = 0
+        let g:Vm.selecting = 0
+    endtry
 endfun
 
 
