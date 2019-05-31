@@ -189,35 +189,40 @@ endfun
 " Insert numbers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit._numbers(start, step, sep, app) abort
+fun! s:Edit._numbers(start, step, separator, append) abort
     let start = str2nr(a:start)
     let step = str2nr(a:step)
 
+    "------------------------------------------------
+    " build string from expression
+
     let text = []
     for n in range(len(s:R()))
-      if a:app
-          let t = a:sep . string(start + step * n)
+      if a:append
+          let t = a:separator . string(start + step * n)
       else
-          let t = string(start + step * n) . a:sep
+          let t = string(start + step * n) . a:separator
       endif
       call add(text, t)
     endfor
 
+    "------------------------------------------------
+    " paste string before/after the cursor/selection
+
     if s:X()
-        call self.fill_register('"', map(copy(s:R()),
-              \ a:app ? '(v:val.txt).text[v:key]' : 'text[v:key].(v:val.txt)'), 0)
+        call self.fill_register('"', map(copy(s:R()), a:append ?
+              \ '(v:val.txt).text[v:key]' : 'text[v:key].(v:val.txt)'), 0)
         normal p
     else
         call self.fill_register('"', text, 0)
-        if a:app | normal p
-        else     | normal P
+        if a:append | normal p
+        else        | normal P
         endif
     endif
 endfun
 
 fun! s:Edit.numbers(start, app) abort
     if !len(s:R()) | return | endif
-    let X = s:X() | if !X | call s:G.change_mode() | endif
 
     " fill the command line with [count]/default_step
     let x = input('Expression > ', a:start . '/1/')
@@ -243,7 +248,7 @@ fun! s:Edit.numbers(start, app) abort
     call filter(x, '!empty(v:val)')
     let n = len(x)
 
-    " true for a number, not for a separator
+    " true for a number, false for a separator
     let l:Num = { x -> match(x, '^\d') >= 0 || match(x, '^\-\d') >= 0 }
 
     "------------------------------------------- start  step   separ.   append?
@@ -252,13 +257,10 @@ fun! s:Edit.numbers(start, app) abort
     elseif n == 2
 
         if l:Num(x[1])   | call self._numbers (  x[0],   x[1],  '',     a:app  )
-        else             | call self._numbers (  x[0],   1,     x[1],   a:app  ) | endif
+        else             | call self._numbers (  x[0],   1,     x[1],   a:app  )
+        endif
 
-    elseif n == 3        | call self._numbers (  x[0],   x[1],  x[2],   a:app  ) | endif
-
-    "if started in cursor mode, return to it
-    if !X && a:app | exe "normal o" | call s:G.change_mode()
-    elseif !X      | call s:G.change_mode()
+    elseif n == 3        | call self._numbers (  x[0],   x[1],  x[2],   a:app  )
     endif
 endfun
 
