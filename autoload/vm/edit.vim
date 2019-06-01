@@ -58,15 +58,14 @@ fun! s:Edit.run_normal(cmd, ...) abort
     "-----------------------------------------------------------------------
 
     " defaults: commands are recursive, count 1, disable buffer mappings
-    let args = { 'recursive': 1, 'count': 1 }
+    let args = { 'recursive': 1, 'count': 1, 'disable_maps': 1 }
     if a:0 | call extend(args, a:1) | endif
-    let args.maps = get(args, 'maps', args.recursive)
 
     let n = args.count > 1 ? args.count : ''
     let c = args.recursive ? ("normal ".n.cmd) : ("normal! ".n.cmd)
 
     call s:G.cursor_mode()
-    call self.before_commands(args.maps)
+    call self.before_commands(args.disable_maps)
 
     if a:cmd ==? 'x' | call s:bs_del(n.a:cmd)
     else             | call self.process(c, args)
@@ -167,7 +166,7 @@ fun! s:Edit.dot() abort
             call s:G.cursor_mode()
 
         elseif dot[1] ==? 's'                   "surround (ys, ds, cs)
-            call self.run_normal(dot, {'maps': 0})
+            call self.run_normal(dot, {'disable_maps': 0})
 
         else
             call self.run_normal(dot)
