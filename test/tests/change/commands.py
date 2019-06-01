@@ -1,0 +1,20 @@
+# various change commands
+L = '\\\\\\\\'
+
+keys(':set tw=79\<CR>')
+keys(':set autoindent\<CR>')
+keys('2\<C-Down>gciw')
+keys('smart case')
+keys('\<Esc>ea')
+keys('_text')
+keys('\<Esc>wTxcT_')
+keys('TEX')
+keys('\<Esc>f(gcib')
+keys('gcib')
+keys('\<Esc>\<Esc>}j$2\<C-Down>ciw')
+keys('CIW')
+keys('\<Esc>\<Esc>j2\<C-Down>c$')
+keys('_c$')
+keys('\<Esc>\<Esc>j03\<C-Down>cc')
+keys('keep indent please!')
+keys('\<Esc>\<Esc>')
