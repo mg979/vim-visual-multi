@@ -59,18 +59,17 @@ endfun
 
 fun! vm#icmds#cw()
     let s:v.storepos = getpos('.')[1:2]
-    let s:v.direction = 1 | let n = 0
-
     for r in s:R()
         if s:eol(r)
             "c-w requires an additional extra space, will be fixed on its own
             call setline(r.L, getline(r.L).'  ')
             call add(s:v.cw_spaces, r.index)
+            call r.move('l')
         endif
     endfor
-    call vm#operators#select(1, 1, 'b')
-    normal h"_d
+    call s:V.Edit.run_normal('db')
     call s:G.merge_regions()
+    call s:V.Insert.start(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

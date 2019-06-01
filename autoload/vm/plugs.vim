@@ -276,7 +276,7 @@ fun! s:Insert(key)
   elseif a:key == 'p'         "c-v
     return "\<esc>:call vm#icmds#paste()\<cr>".a
   elseif a:key == 'cw'        "c-w
-    return "\<esc>:call vm#icmds#cw()\<cr>".i
+    return "\<esc>:call vm#icmds#cw()\<cr>"
   endif
 endfun
 
