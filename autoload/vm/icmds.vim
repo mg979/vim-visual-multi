@@ -102,16 +102,18 @@ fun! vm#icmds#return()
         endif
 
         "append a line and get the indent
-        noautocmd exe "normal! o\<C-R>=<SID>get_indent()\<CR>"
+        noautocmd exe "silent normal! o\<C-R>=<SID>get_indent()\<CR>"
 
         "fill the line with tabs or spaces, according to the found indent
         "an extra space must be added, if not carrying over any text
+        "also keep the indent whitespace only, removing any non-space character
+        "such as comments, and everything after them
         let extra_space = at_eol ? ' ' : ''
-        let indent = substitute(g:.Vm.indent, '[^ \t]', '', 'g')
+        let indent = substitute(g:Vm.indent, '[^ \t].*', '', 'g')
         call setline('.', indent . extra_space)
 
         "if carrying over some text, paste it after the indent
-        "but strip preceding whitespace
+        "but strip preceding whitespace found in the text
         if !at_eol
             let @" = substitute(@", '^ *', '', '')
             normal! $p
@@ -137,10 +139,10 @@ fun! vm#icmds#insert_line(above)
     for r in s:R()
         "append a line below or above
         call cursor(r.l, r.a)
-        noautocmd exe "normal!" (a:above ? 'O' : 'o')."\<C-R>=<SID>get_indent()\<CR>"
+        noautocmd exe "silent normal!" (a:above ? 'O' : 'o')."\<C-R>=<SID>get_indent()\<CR>"
 
-        "fill the line with tabs or spaces
-        let indent = substitute(g:.Vm.indent, '[^ \t]', '', 'g')
+        "remove comment or other chars, fill the line with tabs or spaces
+        let indent = substitute(g:Vm.indent, '[^ \t].*', '', 'g')
         call setline('.', indent . ' ')
 
         "cursor line will be moved down by the next cursors
