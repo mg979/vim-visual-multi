@@ -2,7 +2,7 @@
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#icmds#init()
+fun! vm#icmds#init() abort
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
     let s:G = s:V.Global
@@ -23,7 +23,7 @@ endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#icmds#x(cmd)
+fun! vm#icmds#x(cmd) abort
     let size = s:F.size()
     let change = 0 | let s:v.eco = 1
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
@@ -57,7 +57,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#icmds#cw()
+fun! vm#icmds#cw() abort
     let size = s:F.size()
     let change = 0 | let s:v.eco = 1
     let s:v.storepos = getpos('.')[1:2]
@@ -97,7 +97,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#icmds#paste()
+fun! vm#icmds#paste() abort
     call s:G.select_region(-1)
     call s:V.Edit.paste(1, 0, 1, '"')
     call s:G.select_region(s:V.Insert.index)
@@ -105,7 +105,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#icmds#return()
+fun! vm#icmds#return() abort
     "invert regions order, so that they are processed from bottom to top
     let s:V.Regions = reverse(s:R())
 
@@ -154,7 +154,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#icmds#insert_line(above)
+fun! vm#icmds#insert_line(above) abort
     "invert regions order, so that they are processed from bottom to top
     let s:V.Regions = reverse(s:R())
 
@@ -181,7 +181,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:get_indent()
+fun! s:get_indent() abort
     let g:Vm.indent = getline('.')
     return ''
 endfun
@@ -192,11 +192,11 @@ if v:version >= 800
     finish
 endif
 
-fun! s:E(r)
+fun! s:E(r) abort
     return col([a:r.l, '$'])
 endfun
 
-fun! s:eol(r)
+fun! s:eol(r) abort
     return a:r.a == (s:E(a:r) - 1)
 endfun
 " vim: et ts=4 sw=4 sts=4 :

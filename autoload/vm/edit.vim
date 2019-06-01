@@ -4,7 +4,7 @@
 
 let s:Edit = {'skip_index': -1}
 
-fun! vm#edit#init()
+fun! vm#edit#init() abort
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
     let s:G = s:V.Global
@@ -373,7 +373,7 @@ endfun
 " Helpers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:count(c)
+fun! s:count(c) abort
     "forbid count
     if a:c > 1
         if !g:Vm.is_active | return 1 | endif
@@ -385,7 +385,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:bs_del(cmd)
+fun! s:bs_del(cmd) abort
     if s:v.insert
         return vm#icmds#x(a:cmd)
     else
@@ -405,7 +405,7 @@ endfun
 
 "------------------------------------------------------------------------------
 
-fun! s:visual_reselect(cmd)
+fun! s:visual_reselect(cmd) abort
     """Ensure selections are reselected after some commands.
     let reselect = a:cmd == '~' || a:cmd =~? 'gu'
     return s:X() && reselect

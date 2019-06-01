@@ -2,7 +2,7 @@
 "Plugs
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#plugs#permanent()
+fun! vm#plugs#permanent() abort
   nnoremap   <silent>     <Plug>(VM-Select-Operator)         :<c-u>call vm#operators#select(0, 0)<cr>y
   xmap <expr><silent>     <Plug>(VM-Visual-Find)             vm#operators#find(1, 1)
 
@@ -36,7 +36,7 @@ fun! vm#plugs#permanent()
 
 endfun
 
-fun! vm#plugs#buffer()
+fun! vm#plugs#buffer() abort
 
   let g:Vm.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '$', '0', '^', '%', 'ge', 'gE', '\|']
   let g:Vm.find_motions   = ['f', 'F', 't', 'T']
@@ -235,7 +235,7 @@ endfun
 " Helper functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Star(type)
+fun! s:Star(type) abort
   set nosmartcase
   set noignorecase
 
@@ -250,7 +250,7 @@ fun! s:Star(type)
   endif
 endfun
 
-fun! s:Insert(key)
+fun! s:Insert(key) abort
   if pumvisible()
     if a:key == 'j'     | return "\<C-n>"
     elseif a:key == 'k' | return "\<C-p>"
@@ -280,7 +280,7 @@ fun! s:Insert(key)
   endif
 endfun
 
-fun! s:Yank(hard)
+fun! s:Yank(hard) abort
   if empty(b:VM_Selection.Global.is_region_at_pos('.'))
     let b:VM_Selection.Vars.yanked = 1 | return 'y'
   endif
@@ -290,12 +290,12 @@ fun! s:Yank(hard)
   return ":\<C-u>call b:VM_Selection.Edit.yank(".hard.", 0, 0, 1)\<cr>"
 endfun
 
-fun! s:Mode()
+fun! s:Mode() abort
   let mode = g:Vm.extend_mode? ' (extend mode)' : ' (cursor mode)'
   call b:VM_Selection.Funcs.msg([["Enter regex".mode.":", 'WarningMsg'], ["\n/", 'None']], 1)
 endfun
 
-fun! s:Visual(cmd)
+fun! s:Visual(cmd) abort
   """Restore register after a visual yank."""
   if !g:Vm.is_active
     let g:Vm.visual_reg = ['"', getreg('"'), getregtype('"')]

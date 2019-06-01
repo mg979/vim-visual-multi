@@ -49,7 +49,7 @@ let s:base = {
       \"Mouse Column":            ['', 'n'],
       \}
 
-fun! vm#maps#all#permanent()
+fun! vm#maps#all#permanent() abort
   """Default permanent mappings dictionary."""
   let maps = s:base
   let leader = g:Vm.leader
@@ -83,7 +83,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#maps#all#buffer()
+fun! vm#maps#all#buffer() abort
   """Default buffer mappings dictionary."""
 
   let maps = {}

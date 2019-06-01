@@ -1,6 +1,6 @@
 " Special commands that can be selected through the Tools Menu (<leader>x)
 
-fun! vm#special#commands#init()
+fun! vm#special#commands#init() abort
     let s:V = b:VM_Selection
     let s:F = s:V.Funcs
     let s:G = s:V.Global
@@ -16,7 +16,7 @@ endif
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#special#commands#menu()
+fun! vm#special#commands#menu() abort
     let opts = [
                 \["\"    - ", "Show VM registers"],
                 \["i    - ", "Show regions info"],
@@ -55,7 +55,7 @@ endfun
 
 "------------------------------------------------------------------------------
 
-fun! s:temp_buffer()
+fun! s:temp_buffer() abort
     setlocal buftype=acwrite
     setlocal bufhidden=wipe
     setlocal noswapfile
@@ -67,7 +67,7 @@ endfun
 " Filter lines
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#special#commands#filter_lines(strip)
+fun! vm#special#commands#filter_lines(strip) abort
     """Filter lines containing regions, and paste them in a new buffer.
     if !len(s:R()) | return | endif
 
@@ -94,7 +94,7 @@ endfun
 
 "------------------------------------------------------------------------------
 
-fun! s:save_lines(buf)
+fun! s:save_lines(buf) abort
     setlocal nomodified
     if len(b:VM_lines) != line("$")
         return s:F.msg("Number of lines doesn't match, aborting", 1)
@@ -114,7 +114,7 @@ endfun
 " Regions to buffer
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#special#commands#regions_to_buffer()
+fun! vm#special#commands#regions_to_buffer() abort
     """Paste selected regions in a new buffer.
     if !s:X() || !len(s:R()) | return | endif
 
@@ -139,7 +139,7 @@ endfun
 
 "------------------------------------------------------------------------------
 
-fun! s:save_regions(buf)
+fun! s:save_regions(buf) abort
     setlocal nomodified
     if len(b:VM_regions) != line("$")
         return s:F.msg("Number of lines doesn't match number of regions", 1)
@@ -158,7 +158,7 @@ endfun
 " Filter by expression
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#special#commands#filter_regions(type, fill, ...)
+fun! vm#special#commands#filter_regions(type, fill, ...) abort
     """Filter regions based on pattern or expression."""
     if s:not_active() | return | endif
     if a:type == 0 || a:type > 2
@@ -182,7 +182,7 @@ fun! vm#special#commands#filter_regions(type, fill, ...)
     endif
 endfun
 
-fun! s:filter_regions(fill)
+fun! s:filter_regions(fill) abort
     let s:filter_type += 1
     let args = s:filter_type . ", '" . a:fill . "'"
     return "\<C-U>\<Esc>:call vm#special#commands#filter_regions(".args.")\<cr>"
@@ -190,7 +190,7 @@ endfun
 
 "------------------------------------------------------------------------------
 
-fun! s:not_active()
+fun! s:not_active() abort
     if !g:Vm.is_active
         echohl ErrorMsg | echo "VM is not enabled" | echohl None | return 1
     endif

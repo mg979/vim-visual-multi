@@ -13,7 +13,7 @@ exe "highlight link MultiCursor ".g:Vm.hi.cursor
 
 let s:Themes = {}
 
-fun! vm#themes#init()
+fun! vm#themes#init() abort
   if !exists('g:Vm') | return | endif
   let default = &background == 'light' ? 'lightblue1' : 'blue1'
   let theme = get(g:, 'VM_theme', 'default')
@@ -62,7 +62,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#themes#load(theme)
+fun! vm#themes#load(theme) abort
   """Load a theme."""
   if empty(a:theme)
     let g:VM_theme = 'default'
@@ -72,7 +72,7 @@ fun! vm#themes#load(theme)
   call vm#themes#init()
 endfun
 
-fun! vm#themes#complete(A, L, P)
+fun! vm#themes#complete(A, L, P) abort
   let valid = []
   for k in keys(s:Themes)
     if     &background=='light' && has_key(s:Themes[k], 'type') && s:Themes[k].type != 'light'

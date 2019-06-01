@@ -106,7 +106,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Reset vim variables to previous values
 
-fun! vm#variables#reset() abort
+fun! vm#variables#reset()
   let v = b:VM_Selection.Vars
 
   let &virtualedit = v.oldvirtual
@@ -123,6 +123,17 @@ fun! vm#variables#reset() abort
 
   let &conceallevel = v.conceallevel
   let &concealcursor = v.concealcursor
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Reset VM global variables
+
+fun! vm#variables#reset_globals()
+  let b:VM_Backup = {}
+  let b:VM_Selection = {}
+  let g:Vm.is_active = 0
+  let g:Vm.extend_mode = 0
+  let g:Vm.selecting = 0
 endfun
 
 " vim: et ts=2 sw=2 sts=2 :

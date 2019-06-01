@@ -1,4 +1,4 @@
-fun! vm#region#init()
+fun! vm#region#init() abort
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
     let s:G = s:V.Global
@@ -34,7 +34,7 @@ endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#region#new(cursor, ...)
+fun! vm#region#new(cursor, ...) abort
 
     "----------------------------------------------------------------------
 
@@ -90,7 +90,7 @@ endfun
 
 let s:Region = {}
 
-fun! s:Region.new(cursor, ...)
+fun! s:Region.new(cursor, ...) abort
     """Initialize region variables and methods.
     "
     " Uppercase variables (A,B,K) are for byte offsets, except L (end line).
@@ -143,29 +143,29 @@ fun! s:Region.empty() abort
     return self.A == self.B
 endfun
 
-fun! s:Region.A_()
+fun! s:Region.A_() abort
     return line2byte(self.l) + self.a - 1
 endfun
 
-fun! s:Region.B_()
+fun! s:Region.B_() abort
     " the final byte will be higher than the byte of the column, if multibyte
     let bytes = len(self.txt) ? strlen(self.txt[-1:-1]) : 1
     return line2byte(self.L) + self.b + bytes - 2
 endfun
 
-fun! s:Region.cur_ln()
+fun! s:Region.cur_ln() abort
     return self.dir ? self.L : self.l
 endfun
 
-fun! s:Region.cur_col()
+fun! s:Region.cur_col() abort
     return self.dir ? self.b : self.a
 endfun
 
-fun! s:Region.cur_Col()
+fun! s:Region.cur_Col() abort
     return self.cur_col() == self.b ? self.B : self.A
 endfun
 
-fun! s:Region.char()
+fun! s:Region.char() abort
     return s:X()? s:F.char_at_pos(self.l, self.cur_col()) : ''
 endfun
 
@@ -255,13 +255,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:vertical()
+fun! s:vertical() abort
     return index(['j', 'k'], s:motion[0]) >=0
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:move_cursor(r)
+fun! s:move_cursor(r) abort
     """If not in extend mode, just move the cursors."""
 
     call cursor(a:r.l, a:r.a)
@@ -277,7 +277,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:keep_line(r, ln)
+fun! s:keep_line(r, ln) abort
     """Ensure line boundaries aren't crossed. Force cursor merging."""
     let r = a:r
 
@@ -289,7 +289,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:keep_vertical_col(r)
+fun! s:keep_vertical_col(r) abort
     """Keep the vertical column if moving vertically."""
     let vcol    = a:r.vcol
     let lnum    = line('.')
@@ -304,7 +304,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:move_region(r)
+fun! s:move_region(r) abort
     let r = a:r | let a = r.a | let b = r.b | let up = 0 | let down = 0
 
     "move the cursor to the current head and perform the motion
@@ -533,7 +533,7 @@ endfun
 " Misc functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:pattern(r)
+fun! s:pattern(r) abort
     """Find the search pattern associated with the region."""
 
     if empty(s:v.search) | return s:V.Search.escape_pattern(a:r.txt) | endif
@@ -551,7 +551,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:fix_pos(r)
+fun! s:fix_pos(r) abort
     "fix positions in endline
     let r = a:r
     let eol = col([r.l, '$']) - 1
@@ -568,7 +568,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:region_vars(r, cursor, ...)
+fun! s:region_vars(r, cursor, ...) abort
     let R = a:r
 
     if !a:0 && a:cursor    "/////////// CURSOR ////////////

@@ -1,7 +1,7 @@
 "commands to add/subtract regions with visual selection
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#visual#add(mode)
+fun! vm#visual#add(mode) abort
 
     let w = s:create_group()
     let h = 0
@@ -32,7 +32,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#visual#subtract(mode)
+fun! vm#visual#subtract(mode) abort
 
     call s:create_group()
 
@@ -50,7 +50,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#visual#cursors(mode)
+fun! vm#visual#cursors(mode) abort
     """Create cursors, one for each line of the visual selection."""
 
     call s:create_group()
@@ -80,7 +80,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#visual#split()
+fun! vm#visual#split() abort
     """Split regions with regex pattern."""
     call s:init() | if !len(s:R()) | return | endif
 
@@ -116,19 +116,19 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:vchar()
+fun! s:vchar() abort
     "characterwise
     silent keepjumps normal! `<y`>`]
     call s:G.check_mutliline(0, s:G.new_region())
 endfun
 
-fun! s:vline()
+fun! s:vline() abort
     "linewise
     silent keepjumps normal! '<y'>`]
     call s:G.new_region()
 endfun
 
-fun! s:vblock()
+fun! s:vblock() abort
     "blockwise
     let start = getpos("'<")[1:2]
     let end = getpos("'>")[1:2]
@@ -144,7 +144,7 @@ fun! s:vblock()
     return w
 endfun
 
-fun! s:create_group()
+fun! s:create_group() abort
     "use a temporary regions group, so that it won't interfere with previous regions
     call s:init()
     let s:old_group      = s:v.active_group
@@ -154,7 +154,7 @@ fun! s:create_group()
     let s:v.eco = 1
 endfun
 
-fun! s:remove_group(subtract)
+fun! s:remove_group(subtract) abort
     "remove temporary region group
     for r in s:V.Groups[-1]
         if a:subtract | call r.clear(1)
@@ -165,7 +165,7 @@ fun! s:remove_group(subtract)
     let s:v.silence = 0
 endfun
 
-fun! s:init()
+fun! s:init() abort
     "init script vars
     let s:V = b:VM_Selection
     let s:v = s:V.Vars

@@ -12,13 +12,13 @@ let g:VM_check_mappings    = get(g:, 'VM_check_mappings', 1)
 let g:VM_default_mappings  = get(g:, 'VM_default_mappings', 1)
 let g:VM_mouse_mappings    = get(g:, 'VM_mouse_mappings', 0)
 
-fun! vm#maps#default()
+fun! vm#maps#default() abort
     """At vim start, permanent mappings are generated and applied.
     call s:build_permanent_maps()
     for m in g:Vm.maps.permanent | exe m | endfor
 endfun
 
-fun! vm#maps#init()
+fun! vm#maps#init() abort
     """At VM start, buffer mappings are generated (once per buffer) and applied.
     let s:V = b:VM_Selection
     if !b:VM_mappings_loaded | call s:build_buffer_maps() | endif
@@ -28,7 +28,7 @@ fun! vm#maps#init()
     return s:Maps
 endfun
 
-fun! vm#maps#reset()
+fun! vm#maps#reset() abort
     """At VM reset, last buffer mappings are reset, and permanent maps are restored.
     call s:unmap_esc_and_toggle()
     for m in g:Vm.maps.permanent | exe m | endfor
@@ -110,7 +110,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:build_permanent_maps()
+fun! s:build_permanent_maps() abort
     """Run at vim start. Generate permanent mappings and integrate custom ones.
 
     "set default VM leader
@@ -144,7 +144,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:build_buffer_maps()
+fun! s:build_buffer_maps() abort
     """Run once per buffer. Generate buffer mappings and integrate custom ones.
     let b:VM_mappings_loaded = 1
     let check_maps = get(b:, 'VM_check_mappings', g:VM_check_mappings)
@@ -201,7 +201,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:assign(plug, key, buffer, ...)
+fun! s:assign(plug, key, buffer, ...) abort
     """Create a map command that will be executed."""
     let k = a:key[0] | if empty(k) | return '' | endif
     let m = a:key[1]
@@ -234,7 +234,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:unmap(key, buffer)
+fun! s:unmap(key, buffer) abort
     """Create an unmap command that will be executed."""
     let k = a:key[0]
     if empty(k) | return '' | endif

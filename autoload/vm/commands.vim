@@ -1,4 +1,4 @@
-fun! vm#commands#init()
+fun! vm#commands#init() abort
     let s:V        = b:VM_Selection
     let s:v        = s:V.Vars
     let s:G        = s:V.Global
@@ -10,7 +10,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:init(whole, empty, extend_mode)
+fun! s:init(whole, empty, extend_mode) abort
     if a:extend_mode | let g:Vm.extend_mode = 1 | endif
 
     "return true if already initialized
@@ -28,7 +28,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:set_extend_mode(X)
+fun! s:set_extend_mode(X) abort
     """If just starting, enable extend mode if appropriate.
 
     if s:X() || a:X | return s:init(0, 1, 1)
@@ -39,7 +39,7 @@ endfun
 " Add cursor
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#add_cursor_at_word(yank, search)
+fun! vm#commands#add_cursor_at_word(yank, search) abort
     call s:init(0, 1, 0)
 
     if a:yank
@@ -55,7 +55,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:check_block_mode()
+fun! s:check_block_mode() abort
     "enable block mode when adding cursors up/down from extend mode
     if s:X() && get(g:, 'VM_auto_block_mode', 1)
         call s:V.Block.start()
@@ -64,7 +64,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:skip_shorter_lines()
+fun! s:skip_shorter_lines() abort
     "when adding cursors below or above, don't add on shorter lines
     "we don't want cursors on final column('$'), except when adding at column 1
     "in this case, moving to an empty line would give:
@@ -90,7 +90,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:went_too_far()
+fun! s:went_too_far() abort
     " if gone too far (because it skipped all lines), reselect region
     if empty(s:G.is_region_at_pos('.'))
         call s:G.select_region(s:v.index)
@@ -99,7 +99,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#add_cursor_at_pos(extend)
+fun! vm#commands#add_cursor_at_pos(extend) abort
     call s:set_extend_mode(a:extend)
     call s:Block.stop()
     call s:G.new_cursor(1)
@@ -108,7 +108,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#add_cursor_down(extend, count)
+fun! vm#commands#add_cursor_down(extend, count) abort
     if s:last_line() | return | endif
     call s:set_extend_mode(a:extend)
     call s:check_block_mode()
@@ -128,7 +128,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#add_cursor_up(extend, count)
+fun! vm#commands#add_cursor_up(extend, count) abort
     if s:first_line() | return | endif
     call s:set_extend_mode(a:extend)
     call s:check_block_mode()
@@ -148,7 +148,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#erase_regions(...)
+fun! vm#commands#erase_regions(...) abort
     """Clear all regions, but stay in visual-multi mode.
     "empty start
     if !g:Vm.is_active | call s:init(0,1,0) | return | endif
@@ -160,7 +160,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#expand_line(down)
+fun! vm#commands#expand_line(down) abort
     call s:set_extend_mode(1)
     if !s:v.multiline | call s:F.toggle_option('multiline') | endif
 
@@ -188,7 +188,7 @@ endfun
 " Find by regex
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#regex_reset(...)
+fun! vm#commands#regex_reset(...) abort
     silent! cunmap <buffer> <cr>
     let s:v.using_regex = 0
     if a:0 | return a:1 | endif
@@ -196,7 +196,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#regex_abort()
+fun! vm#commands#regex_abort() abort
     let @/ = s:regex_reg
     call s:F.msg('Regex search aborted. ', 0) | call s:F.count_msg(0)
     call setpos('.', s:regex_pos)             | call vm#commands#regex_reset()
@@ -204,7 +204,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#regex_done()
+fun! vm#commands#regex_done() abort
     let s:v.visual_regex = s:v.using_regex == 2
     call vm#commands#regex_reset()
 
@@ -226,7 +226,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_by_regex(mode)
+fun! vm#commands#find_by_regex(mode) abort
     if !g:Vm.is_active | call s:init(0, 1, 1) | endif
     let s:v.using_regex = a:mode
 
@@ -249,7 +249,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:yank(inclusive)
+fun! s:yank(inclusive) abort
     if a:inclusive | silent keepjumps normal! yiW`]
     else           | silent keepjumps normal! yiw`]
     endif
@@ -257,7 +257,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#ctrln(count)
+fun! vm#commands#ctrln(count) abort
     call s:init(1, 0, 0)
     let no_reselect = get(g:, 'VM_notify_previously_selected', 0) == 2
 
@@ -280,7 +280,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_under(visual, whole, inclusive, ...)
+fun! vm#commands#find_under(visual, whole, inclusive, ...) abort
     call s:init(a:whole, 0, 1)
 
     "C-d command
@@ -303,7 +303,7 @@ endfun
 " Find all
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_all(visual, whole, inclusive)
+fun! vm#commands#find_all(visual, whole, inclusive) abort
     call s:init(a:whole, 0, 1)
 
     let pos = getpos('.')[1:2]
@@ -332,7 +332,7 @@ endfun
 " Find next/previous
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:get_region(next)
+fun! s:get_region(next) abort
     """Call the needed function and notify if reselecting a region.
     if !get(g:, 'VM_notify_previously_selected', 0)
         return a:next ? s:get_next() : s:get_prev()
@@ -351,7 +351,7 @@ fun! s:get_region(next)
     return R
 endfun
 
-fun! s:get_next()
+fun! s:get_next() abort
     if s:X()
         keepjumps normal! ngny`]
         let R = s:G.new_region()
@@ -364,7 +364,7 @@ fun! s:get_next()
     return R
 endfun
 
-fun! s:get_prev()
+fun! s:get_prev() abort
     if s:X()
         keepjumps normal! NgNy`]
         let R = s:G.new_region()
@@ -377,7 +377,7 @@ fun! s:get_prev()
     return R
 endfun
 
-fun! s:navigate(force, dir)
+fun! s:navigate(force, dir) abort
     if a:force && s:v.nav_direction != a:dir
         call s:F.count_msg(0, ['Reversed direction. ', 'WarningMsg'])
         let s:v.nav_direction = a:dir
@@ -390,20 +390,20 @@ fun! s:navigate(force, dir)
     endif
 endfun
 
-fun! s:skip()
+fun! s:skip() abort
     let r = s:G.is_region_at_pos('.')
     if empty(r) | call s:navigate(1, s:v.nav_direction)
     else        | call r.clear()
     endif
 endfun
 
-fun! s:keep_block()
+fun! s:keep_block() abort
     if s:v.block_mode | let s:v.block[3] = 1 | endif | return 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_next(skip, nav)
+fun! vm#commands#find_next(skip, nav) abort
     if ( a:nav || a:skip ) && s:F.no_regions()                 | return | endif
     if !s:X() && a:skip && s:is_r() | call vm#commands#skip(1) | return | endif
 
@@ -420,7 +420,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_prev(skip, nav)
+fun! vm#commands#find_prev(skip, nav) abort
     if ( a:nav || a:skip ) && s:F.no_regions()                 | return | endif
     if !s:X() && a:skip && s:is_r() | call vm#commands#skip(1) | return | endif
 
@@ -444,7 +444,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#skip(just_remove)
+fun! vm#commands#skip(just_remove) abort
     if s:F.no_regions() | return | endif
 
     if a:just_remove
@@ -463,7 +463,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#invert_direction(...)
+fun! vm#commands#invert_direction(...) abort
     """Invert direction and reselect region."""
     if s:F.no_regions() || s:v.auto | return | endif
 
@@ -485,7 +485,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#split_lines()
+fun! vm#commands#split_lines() abort
     if s:F.no_regions() | return | endif
     call s:G.split_lines()
     if get(g:, 'VM_autoremove_empty_lines', 1)
@@ -494,14 +494,14 @@ fun! vm#commands#split_lines()
     call s:G.update_and_select_region()
 endfun
 
-fun! vm#commands#remove_empty_lines()
+fun! vm#commands#remove_empty_lines() abort
     call s:G.remove_empty_lines()
     call s:G.update_and_select_region()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#from_visual(t)
+fun! vm#commands#from_visual(t) abort
     let mode = visualmode()
     call s:set_extend_mode(1)
     let s:v.silence = 1
@@ -514,7 +514,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#remove_every_n_regions(count)
+fun! vm#commands#remove_every_n_regions(count) abort
     """Remove every n regions, given by [count] (min 2).
     if s:F.no_regions() | return | endif
     let R = s:R() | let i = 1 | let cnt = a:count < 2 ? 2 : a:count
@@ -529,7 +529,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#mouse_column()
+fun! vm#commands#mouse_column() abort
     call s:set_extend_mode(0)
     let start = getpos('.')[1:2]
     exe "normal! \<LeftMouse>"
@@ -561,7 +561,7 @@ endfun
 " Motion commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#motion(motion, count, select, this)
+fun! vm#commands#motion(motion, count, select, this) abort
 
     "create cursor if needed
     if !g:Vm.is_active      | call s:init(0, 1, 1)     | call s:G.new_cursor()
@@ -590,7 +590,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#remap_motion(motion)
+fun! vm#commands#remap_motion(motion) abort
     if s:F.no_regions() | return | endif
     let s:v.motion = a:motion
     call s:call_motion(a:this)
@@ -598,7 +598,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#merge_to_beol(eol, this)
+fun! vm#commands#merge_to_beol(eol, this) abort
     if s:F.no_regions() | return | endif
     call s:G.cursor_mode()
 
@@ -609,7 +609,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_motion(motion, char, this, ...)
+fun! vm#commands#find_motion(motion, char, this, ...) abort
     if s:F.no_regions() | return | endif
 
     if a:char != ''
@@ -623,7 +623,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#shrink_or_enlarge(shrink, this)
+fun! vm#commands#shrink_or_enlarge(shrink, this) abort
     """Reduce/enlarge selection size by 1."""
     if s:F.no_regions() | return | endif
     call s:G.extend_mode()
@@ -645,7 +645,7 @@ endfun
 " Motion event
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:call_motion(this)
+fun! s:call_motion(this) abort
     if s:F.no_regions() | return | endif
     let s:v.only_this = a:this
     call s:F.Scroll.get()
@@ -661,7 +661,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:before_move()
+fun! s:before_move() abort
     call s:G.reset_byte_map(0)
     if !s:X() | let s:v.merge = 1 | endif
 
@@ -675,7 +675,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:after_move(R)
+fun! s:after_move(R) abort
     let s:v.direction = a:R.dir
     let s:v.only_this = 0
     let s:v.restore_scroll = !s:v.insert
@@ -697,12 +697,12 @@ endfun
 " Cycle regions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:seek_select(i)
+fun! s:seek_select(i) abort
     normal! z.
     call s:G.select_region(a:i)
 endfun
 
-fun! vm#commands#seek_down()
+fun! vm#commands#seek_down() abort
     if !len(s:R()) | return | endif
 
     exe "keepjumps normal! \<C-f>"
@@ -716,7 +716,7 @@ fun! vm#commands#seek_down()
     call s:seek_select(len(s:R()) - 1)
 endfun
 
-fun! vm#commands#seek_up()
+fun! vm#commands#seek_up() abort
     if !len(s:R()) | return | endif
 
     exe "keepjumps normal! \<C-b>"
@@ -735,7 +735,7 @@ endfun
 " Align
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#align()
+fun! vm#commands#align() abort
     if s:F.no_regions() | return | endif
     let s:v.restore_index = s:v.index
     let winline = winline()
@@ -743,7 +743,7 @@ fun! vm#commands#align()
     call s:F.Scroll.force(winline)
 endfun
 
-fun! vm#commands#align_char(count)
+fun! vm#commands#align_char(count) abort
     if s:F.no_regions() | return | endif
     call s:G.cursor_mode()
 
@@ -785,7 +785,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#align_regex()
+fun! vm#commands#align_regex() abort
     if s:F.no_regions() | return | endif
     call s:G.cursor_mode()
     let s:v.restore_index = s:v.index

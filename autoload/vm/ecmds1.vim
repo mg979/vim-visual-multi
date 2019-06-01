@@ -4,7 +4,7 @@
 
 let s:Edit = {}
 
-fun! vm#ecmds1#init()
+fun! vm#ecmds1#init() abort
     let s:V       = b:VM_Selection
     let s:v       = s:V.Vars
     let s:G       = s:V.Global
@@ -243,11 +243,11 @@ endfun
 " Helper functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:min(n)
+fun! s:min(n) abort
     return s:X() && len(s:R()) >= a:n
 endfun
 
-fun! s:fix_regions_text(replacement)
+fun! s:fix_regions_text(replacement) abort
     """Ensure there are enough elements for all regions.
     let L = a:replacement
     let i = len(s:R()) - len(L)
@@ -291,7 +291,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.store_widths(...)
+fun! s:Edit.store_widths(...) abort
     "Build a list that holds the widths(integers) of each region
     "It will be used for various purposes (reselection, paste as block...)
 

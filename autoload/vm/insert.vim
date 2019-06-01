@@ -6,7 +6,7 @@ let s:Insert = {'index': -1, 'cursors': []}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#insert#init()
+fun! vm#insert#init() abort
     let s:V    = b:VM_Selection
     let s:v    = s:V.Vars
     let s:G    = s:V.Global
@@ -435,7 +435,7 @@ fun! s:Insert.auto_start() abort
     augroup END
 endfun
 
-fun! s:Insert.auto_end()
+fun! s:Insert.auto_end() abort
     autocmd! VM_insert
     augroup! VM_insert
 endfun
@@ -467,7 +467,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:do_reindent()
+fun! s:do_reindent() abort
     """Check if lines must be reindented when exiting insert mode.
     if empty(&ft) | return | endif
 
@@ -478,7 +478,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:step_back()
+fun! s:step_back() abort
     """Go back one char after exiting insert mode, as vim does.
     for r in s:R()
         if r.a != col([r.l, '$']) && r.a > 1

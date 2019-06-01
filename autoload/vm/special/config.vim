@@ -1,7 +1,7 @@
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#special#config#start()
+fun! vm#special#config#start() abort
   """Call VM configurator."""
 
   redraw!
@@ -55,7 +55,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#special#config#generate()
+fun! vm#special#config#generate() abort
   """Copy the current config to registers."""
   echohl WarningMsg | echo "\n\nYour configuration has been copied to the \" and + registers.\n"
 
@@ -84,7 +84,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#special#config#help()
+fun! vm#special#config#help() abort
   """Options help."""
 
   redraw!

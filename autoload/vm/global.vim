@@ -4,7 +4,7 @@
 
 let s:Global = {}
 
-fun! vm#global#init()
+fun! vm#global#init() abort
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
     let s:F = s:V.Funcs
@@ -77,7 +77,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.get_all_regions(...)
+fun! s:Global.get_all_regions(...) abort
     """Get all regions, optionally between two byte offsets.
     let ows = &wrapscan
     set nowrapscan
@@ -402,7 +402,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.merge_overlapping(R)
+fun! s:Global.merge_overlapping(R) abort
     """Return merged regions if region had overlapping regions.
     let overlap = self.overlapping_regions(a:R)
     return overlap ? self.merge_regions() : a:R
@@ -628,7 +628,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.remove_regions_by_id(list)
+fun! s:Global.remove_regions_by_id(list) abort
     """Remove a list of regions by id.
     for id in a:list
         call s:F.region_with_id(id).remove()

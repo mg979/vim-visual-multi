@@ -4,7 +4,7 @@
 
 let s:Edit = {}
 
-fun! vm#ecmds2#init()
+fun! vm#ecmds2#init() abort
     let s:V       = b:VM_Selection
     let s:v       = s:V.Vars
     let s:G       = s:V.Global
@@ -266,7 +266,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:min(n)
+fun! s:min(n) abort
     return s:X() && len(s:R()) >= a:n
 endfun
 

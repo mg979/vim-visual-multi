@@ -184,7 +184,7 @@ endfun
 " Autocommands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#augroup(end)
+fun! vm#augroup(end) abort
     if a:end
         autocmd! VM_global
         augroup! VM_global
@@ -207,7 +207,7 @@ fun! vm#augroup(end)
     augroup END
 endfun
 
-fun! vm#au_cursor(end)
+fun! vm#au_cursor(end) abort
     if a:end
         autocmd! VM_cursormoved
         augroup! VM_cursormoved
@@ -220,7 +220,7 @@ fun! vm#au_cursor(end)
     augroup END
 endfun
 
-fun! s:cursor_moved()
+fun! s:cursor_moved() abort
     if s:v.block_mode
         if !s:v.block[3]
             call s:V.Block.stop()
@@ -237,19 +237,19 @@ fun! s:cursor_moved()
     endif
 endfun
 
-fun! s:buffer_leave()
+fun! s:buffer_leave() abort
     if !empty(get(b:, 'VM_Selection', {})) && !b:VM_Selection.Vars.insert
         call vm#reset(1)
     endif
 endfun
 
-fun! s:buffer_enter()
+fun! s:buffer_enter() abort
     if empty(get(b:, 'VM_Selection', {}))
         let b:VM_Selection = {}
     endif
 endfun
 
-fun! s:set_reg()
+fun! s:set_reg() abort
     "Replace old default register if yanking in VM outside a region or cursor
     if s:v.yanked
         let s:v.yanked = 0
@@ -264,7 +264,7 @@ endfun
 
 let g:VM_persistent_registers = get(g:, 'VM_persistent_registers', 0)
 
-fun! s:vm_regs()
+fun! s:vm_regs() abort
     if !g:VM_persistent_registers | return | endif
 
     let is_win = has('win32') || has('win64') || has('win16')
@@ -280,7 +280,7 @@ fun! s:vm_regs()
     endif
 endfun
 
-fun! s:vm_regs_from_json()
+fun! s:vm_regs_from_json() abort
     if !g:VM_persistent_registers || !filereadable(g:Vm.regs_file)
         return {'"': []}
     endif

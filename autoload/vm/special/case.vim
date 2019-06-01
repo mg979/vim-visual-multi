@@ -2,7 +2,7 @@
 "abolish.vim by Tim Pope <http://tpo.pe/>
 "https://github.com/tpope/vim-abolish
 
-fun! vm#special#case#init()
+fun! vm#special#case#init() abort
   let s:V = b:VM_Selection
   return s:Case
 endfun

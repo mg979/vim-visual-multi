@@ -7,7 +7,7 @@
 "script, and then included in the global variable, so that they can be
 "accessed from anywhere.
 
-fun! vm#funcs#init()
+fun! vm#funcs#init() abort
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
     return s:Funcs
@@ -185,7 +185,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.syntax(pos)
+fun! s:Funcs.syntax(pos) abort
     """Find syntax element at position."""
     if type(a:pos) == type([])    "list [line, col]
         let line = a:pos[0]
@@ -213,7 +213,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.sync_minlines()
+fun! s:Funcs.sync_minlines() abort
     """Get the current sync minlines setting for the buffer.
     let sync = split(execute('syn sync'), '\n')
     let sync = len(sync) > 1 ? sync[1] : sync[0]
@@ -424,25 +424,25 @@ fun! s:Funcs.region_txt(r) abort
     echohl None
 endfun
 
-fun! s:Funcs.external_before_macro()
+fun! s:Funcs.external_before_macro() abort
     if exists('*VM_before_macro')
         call VM_before_macro()
     endif
 endfun
 
-fun! s:Funcs.external_after_macro()
+fun! s:Funcs.external_after_macro() abort
     if exists('*VM_after_macro')
         call VM_after_macro()
     endif
 endfun
 
-fun! s:Funcs.external_before_auto()
+fun! s:Funcs.external_before_auto() abort
     if exists('*VM_before_auto')
         call VM_before_auto()
     endif
 endfun
 
-fun! s:Funcs.external_after_auto()
+fun! s:Funcs.external_after_auto() abort
     if exists('*VM_after_auto')
         call VM_after_auto()
     endif

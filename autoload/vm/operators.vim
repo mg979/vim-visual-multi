@@ -2,7 +2,7 @@
 " Select operator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#operators#init()
+fun! vm#operators#init() abort
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
     let s:G = s:V.Global
@@ -10,7 +10,7 @@ fun! vm#operators#init()
     let s:v.finding = 0
 endfun
 
-fun! s:init()
+fun! s:init() abort
     let g:Vm.extend_mode = 1
     if !g:Vm.is_active       | call vm#init_buffer(0) | endif
 endfun
@@ -31,7 +31,7 @@ endif
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#operators#select(all, count, ...)
+fun! vm#operators#select(all, count, ...) abort
     """Perform a yank, the autocmd will create the region.
     call s:init()
 
@@ -82,7 +82,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:select(cmd)
+fun! s:select(cmd) abort
 
     call s:updatetime()
     call s:V.Maps.disable(1)
@@ -121,7 +121,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:get_region(add_pattern)
+fun! s:get_region(add_pattern) abort
     """Create region with select operator.
     let R = s:G.is_region_at_pos('.')
     if !empty(R) | return R | endif
@@ -139,7 +139,7 @@ endfun
 " Find operator
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#operators#find(start, visual, ...)
+fun! vm#operators#find(start, visual, ...) abort
     if a:start
         if !g:Vm.is_active
             call s:init()
@@ -218,7 +218,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#operators#after_yank()
+fun! vm#operators#after_yank() abort
     if g:Vm.selecting
         let g:Vm.selecting = 0
 
@@ -243,14 +243,14 @@ endfun
 " Helpers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:updatetime()
+fun! s:updatetime() abort
     """If not using TextYankPost, use CursorHold and reduce &updatetime.
     if g:Vm.oldupdate
         let &updatetime = 100
     endif
 endfun
 
-fun! s:old_updatetime()
+fun! s:old_updatetime() abort
     """Restore old &updatetime value.
     if g:Vm.oldupdate
         let &updatetime = g:Vm.oldupdate

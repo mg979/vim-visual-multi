@@ -2,7 +2,7 @@
 " Initialize
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#search#init()
+fun! vm#search#init() abort
     let s:V        = b:VM_Selection
     let s:v        = s:V.Vars
     let s:F        = s:V.Funcs
@@ -38,7 +38,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:update_search(p)
+fun! s:update_search(p) abort
     """Update search patterns, unless s:v.no_search is set.
     if s:v.no_search | return | endif
 
@@ -215,7 +215,7 @@ endfun
 "the selected text.
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:pattern_found(t, i)
+fun! s:pattern_found(t, i) abort
     if @/ == '' | return | endif
 
     let p = s:v.search[a:i]

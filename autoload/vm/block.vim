@@ -1,4 +1,4 @@
-fun! vm#block#init()
+fun! vm#block#init() abort
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
     let s:G = s:V.Global

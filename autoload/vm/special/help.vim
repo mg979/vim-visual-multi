@@ -2,7 +2,7 @@
 " Debug
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#special#help#debug()
+fun! vm#special#help#debug() abort
   if !exists('b:VM_Debug')
     return
   elseif empty(b:VM_Debug.lines)
@@ -21,7 +21,7 @@ endfun
 " Mappings help
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:dict()
+fun! s:dict() abort
 
   let regions   = ['Find Under',                        'Find Prev',
                   \'Select All',                        'Find Next',
@@ -163,15 +163,15 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Pad(t, n)
+fun! s:Pad(t, n) abort
   return b:VM_Selection.Funcs.pad(a:t, a:n, 1)
 endfun
 
-fun! s:Sep(c)
+fun! s:Sep(c) abort
   return b:VM_Selection.Funcs.repeat_char(a:c)
 endfun
 
-fun! s:Txt(i, m)
+fun! s:Txt(i, m) abort
   let n = &columns > 180 ? 18 : 20
   let p = match(a:m, '"') >= 0? n+1 : n
   let p = match(a:m, '\') >= 0? p+1 : p
@@ -179,7 +179,7 @@ fun! s:Txt(i, m)
 endfun
 
 
-fun! vm#special#help#show()
+fun! vm#special#help#show() abort
 
   let _  = "\n".b:VM_Selection.Funcs.repeat_char("=")."\n"
   let sp = b:VM_Selection.Funcs.repeat_char(" ")

@@ -2,7 +2,7 @@
 " Operations at cursors (yank, delete, change)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#cursors#operation(op, n, register, ...)
+fun! vm#cursors#operation(op, n, register, ...) abort
   call s:init()
   let reg = a:register   | let r = "\"".reg
   let hl1 = 'WarningMsg' | let hl2 = 'Label'
@@ -59,7 +59,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#cursors#process(op, M, reg, n)
+fun! vm#cursors#process(op, M, reg, n) abort
   call s:init() | let s:init_done = 0
   let s:v.dot = a:M
 
@@ -71,7 +71,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:reorder_cmd(M, r, n, op)
+fun! s:reorder_cmd(M, r, n, op) abort
   """Reorder command, so that the exact count is found.
   "remove register
   let S = substitute(a:M, a:r, '', '')
@@ -97,7 +97,7 @@ endfun
 "delete
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:d_cursors(M, reg, n)
+fun! s:d_cursors(M, reg, n) abort
   let M = a:M | let r = '"'.a:reg
 
   "ds surround
@@ -121,7 +121,7 @@ endfun
 "yank
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:y_cursors(M, reg, n)
+fun! s:y_cursors(M, reg, n) abort
   let M = a:M | let r = '"'.a:reg
 
   "ys surround
@@ -159,7 +159,7 @@ endfun
 "change
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:c_cursors(M, reg, n)
+fun! s:c_cursors(M, reg, n) abort
   let M = a:M | let r = '"'.a:reg
 
   "cs surround
@@ -227,7 +227,7 @@ endfun
 
 let s:init_done = 0
 
-fun! s:init()
+fun! s:init() abort
   if s:init_done | return | endif
   let s:V         = b:VM_Selection
   let s:v         = s:V.Vars
@@ -239,7 +239,7 @@ fun! s:init()
   call s:G.cursor_mode()
 endfun
 
-fun! s:backup_changed_text()
+fun! s:backup_changed_text() abort
   "backup original regions text since it could used
   let s:v.changed_text = map(copy(s:R()), 'v:val.txt')
 endfun
