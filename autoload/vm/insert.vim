@@ -91,10 +91,18 @@ fun! s:Insert.start(...) abort
         call s:G.backup_regions()
     endif
 
-    " check synmaxcol settings
+    " s:v.insert is true if re-entering insert mode after BS/CR/arrows etc.
+
+    " syn minlines/synmaxcol settings
     if !s:v.insert
         if g:VM_disable_syntax_in_imode
             let &synmaxcol = 1
+        elseif get(g:, 'VM_reduce_sync_minlines', 1) && len(b:VM_sync_minlines)
+            if get(b:, 'VM_minlines', 0)
+                exe 'syn sync minlines='.b:VM_minlines
+            else
+                syn sync minlines=1
+            endif
         elseif g:VM_dynamic_synmaxcol && s:v.index > g:VM_dynamic_synmaxcol
             let scol = 40 - s:v.index + g:VM_dynamic_synmaxcol
             let &synmaxcol = scol>1? scol : 1
@@ -127,7 +135,7 @@ fun! s:Insert.start(...) abort
     let I.change    = 0
     let I.col       = col('.')
 
-    " remove regular regions highlight
+    " remove current regions highlight
     call s:G.remove_highlight()
 
     for r in s:R()
@@ -154,18 +162,14 @@ fun! s:Insert.start(...) abort
     "start tracking text changes
     let s:v.insert = 1 | call I.auto_start()
 
-    "change cursor highlight
+    "change/update cursor highlight
     call s:G.update_cursor_highlight()
 
-    "disable indentkeys
+    "disable indentkeys and other settings that may mess up the text
+    "keep o,O to detect indent fo <CR>, though
     set indentkeys=o,O
     set cinkeys=o,O
     set textwidth=0
-
-    "set sync minlines to 1 for speed
-    if len(b:VM_sync_minlines)
-        syn sync minlines=1
-    endif
 
     "start insert mode
     call feedkeys("i", 'n')
