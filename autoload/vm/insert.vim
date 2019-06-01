@@ -160,6 +160,7 @@ fun! s:Insert.start(...) abort
     "disable indentkeys
     set indentkeys=o,O
     set cinkeys=o,O
+    set textwidth=0
 
     "set sync minlines to 1 for speed
     if len(b:VM_sync_minlines)
@@ -267,6 +268,7 @@ fun! s:Insert.stop(...) abort
     let &indentkeys = s:v.indentkeys
     let &cinkeys    = s:v.cinkeys
     let &synmaxcol  = s:v.synmaxcol
+    let &textwidth  = s:v.textwidth
 
     "restore sync minlines if possible
     if len(b:VM_sync_minlines)

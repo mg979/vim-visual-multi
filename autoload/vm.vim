@@ -49,17 +49,19 @@ fun! vm#init_buffer(empty, ...) abort
         let b:VM_Debug           = get(b:, 'VM_Debug', {'lines': []})
         let b:VM_Backup          = {'ticks': [], 'last': 0, 'first': undotree().seq_cur}
 
-        "init classes
+        " funcs script must be sourced first
         let s:V            = b:VM_Selection
         let s:v            = s:V.Vars
         let s:V.Funcs      = vm#funcs#init()
 
+        " init plugin variables
         call vm#variables#init()
         let @/ = a:empty ? '' : @/
 
         " call hook before applying mappings
         if exists('*VM_Start') | call VM_Start() | endif
 
+        " init classes
         let s:V.Maps       = vm#maps#init()
         let s:V.Global     = vm#global#init()
         let s:V.Search     = vm#search#init()
@@ -78,35 +80,8 @@ fun! vm#init_buffer(empty, ...) abort
         call vm#augroup(0)
         call vm#au_cursor(0)
 
-        " disable folding, but keep winline
-        if &foldenable
-            call s:V.Funcs.Scroll.get(1)
-            let s:v.oldfold = 1
-            set nofoldenable
-            call s:V.Funcs.Scroll.restore()
-        endif
-
-        if g:VM_case_setting ==? 'smart'
-            set smartcase
-            set ignorecase
-        elseif g:VM_case_setting ==? 'sensitive'
-            set nosmartcase
-            set noignorecase
-        else
-            set nosmartcase
-            set ignorecase
-        endif
-
-        "force use of unnamed register
-        set clipboard=
-
-        set virtualedit=onemore
-        set ww=h,l,<,>
-        set lz
-        set nofoldenable
-        if !g:VM_manual_infoline
-            let &ch = get(g:, 'VM_cmdheight', 2)
-        endif
+        " set vim variables
+        call vm#variables#set()
 
         if !empty(g:VM_highlight_matches)
             if !has_key(g:Vm, 'Search')
@@ -153,15 +128,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#reset(...)
-    let &virtualedit = s:v.oldvirtual
-    let &whichwrap   = s:v.oldwhichwrap
-    let &smartcase   = s:v.oldcase[0]
-    let &ignorecase  = s:v.oldcase[1]
-    let &lz          = s:v.oldlz
-    let &ch          = s:v.oldch
-    let &synmaxcol   = s:v.synmaxcol
-    let &indentkeys  = s:v.indentkeys
-    let &clipboard   = s:v.clipboard
+    call vm#variables#reset()
 
     if s:v.oldhls
         call feedkeys("\<Plug>(VM-Toggle-Hls)")
