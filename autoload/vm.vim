@@ -40,6 +40,7 @@ call vm#plugs#buffer()
 
 fun! vm#init_buffer(empty, ...) abort
     """If already initialized, return current instance."""
+    let v:errmsg = ""
     try
         if exists('b:VM_Selection') && !empty(b:VM_Selection) | return s:V | endif
 
@@ -56,6 +57,14 @@ fun! vm#init_buffer(empty, ...) abort
 
         " init plugin variables
         call vm#variables#init()
+
+        if s:V.Funcs.size() > get(g:, 'VM_filesize_limit', 200000)
+            call vm#variables#reset_globals()
+            let v:errmsg = 'VM cannot start, buffer too big.'
+            return v:errmsg
+        endif
+
+        " init search register
         let @/ = a:empty ? '' : @/
 
         " call hook before applying mappings
@@ -114,11 +123,9 @@ fun! vm#init_buffer(empty, ...) abort
         let g:Vm.is_active = 1
         return s:V
     catch
-        let b:VM_Backup = {}
-        let b:VM_Selection = {}
-        let g:Vm.is_active = 0
-        let g:Vm.extend_mode = 0
-        let g:Vm.selecting = 0
+        let v:errmsg = 'VM cannot start, unhandled exception.'
+        call vm#variables#reset_globals()
+        return v:errmsg
     endtry
 endfun
 
@@ -153,11 +160,7 @@ fun! vm#reset(...)
         call s:V.Funcs.Scroll.restore()
     endif
 
-    let b:VM_Backup = {}
-    let b:VM_Selection = {}
-    let g:Vm.is_active = 0
-    let g:Vm.extend_mode = 0
-    let g:Vm.selecting = 0
+    call vm#variables#reset_globals()
 
     "exiting manually
     if !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif

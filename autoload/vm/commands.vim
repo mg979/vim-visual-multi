@@ -20,7 +20,8 @@ fun! s:init(whole, empty, extend_mode) abort
         let s:v.whole_word = a:whole
         return 1
     else
-        call vm#init_buffer(a:empty)
+        let error = vm#init_buffer(a:empty)
+        if type(error) == v:t_string | throw error | endif
         call s:F.Scroll.get()
         let s:v.whole_word = a:whole
     endif
