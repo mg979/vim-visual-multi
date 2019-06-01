@@ -261,6 +261,12 @@ fun! s:cursor_moved()
         else
             let s:v.block[3] = 0
         endif
+
+    elseif !s:v.eco
+        " if currently on a region, set the index to this region
+        " so that it's possible to select next/previous from it
+        let r = s:V.Global.is_region_at_pos('.')
+        if !empty(r) | let s:v.index = r.index | endif
     endif
 endfun
 
@@ -309,7 +315,8 @@ endfun
 
 fun! s:vm_regs_from_json()
     if !g:VM_persistent_registers || !filereadable(g:Vm.regs_file)
-        return {'"': []} | endif
+        return {'"': []}
+    endif
     let regs = json_decode(readfile(g:Vm.regs_file)[0])
     let regs['"'] = []
     return regs
