@@ -43,7 +43,6 @@ fun! vm#variables#init() abort
   let v.using_regex      = 0
   let v.multiline        = 0
   let v.block_mode       = 0
-  let v.vertical_col     = 0
   let v.yanked           = 0
   let v.merge            = 0
   let v.insert           = 0

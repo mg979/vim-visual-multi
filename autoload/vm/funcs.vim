@@ -65,6 +65,19 @@ fun! s:Funcs.Cursor(A) abort
     return [ln, cl]
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.get_vertcol() abort
+    " getcurpos() is unreliable at $ (https://github.com/vim/vim/issues/4464)
+    " if > eol, reposition the cursor, so that curwant is reset
+    let curwant = getcurpos()[4]
+    if curwant > col('$')
+        call cursor(getpos('.')[1:2])
+        let curwant = getcurpos()[4]
+    endif
+    return curwant
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.no_regions() abort

@@ -76,7 +76,7 @@ fun! s:skip_shorter_lines()
     if get(g:, 'VM_skip_shorter_lines', 1)
         let vcol    = s:v.vertical_col
         let col     = virtcol('.')
-        let endline = get(g:, 'VM_skip_empty_lines', 0)?  virtcol('$') :
+        let endline = get(g:, 'VM_skip_empty_lines', 0) ? virtcol('$') :
                     \                                     virtcol('$') > 1 ?
                     \                                     virtcol('$') : 2
 
@@ -84,8 +84,17 @@ fun! s:skip_shorter_lines()
         if ( col < vcol || col == endline ) | return 1 | endif
     endif
 
-    "in block mode, cursor add is handled in block script
+    "in block mode, cursor creation is handled in block script
     if !s:V.Block.vertical() | call s:G.new_cursor() | endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:went_too_far()
+    " if gone too far (because it skipped all lines), reselect region
+    if empty(s:G.is_region_at_pos('.'))
+        call s:G.select_region(s:v.index)
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -103,16 +112,17 @@ fun! vm#commands#add_cursor_down(extend, count)
     if s:last_line() | return | endif
     call s:set_extend_mode(a:extend)
     call s:check_block_mode()
-    let s:v.vertical_col = getcurpos()[4]
+    let s:v.vertical_col = s:F.get_vertcol()
     call s:G.new_cursor()
-    let N = a:count>1? a:count : 1
+    let N = a:count
 
     while N
         keepjumps normal! j
         if !s:skip_shorter_lines() | let N -= 1 | endif
         if s:last_line()           | break      | endif
     endwhile
-    let s:v.vertical_col = 0
+
+    call s:went_too_far()
     call s:F.count_msg(0)
 endfun
 
@@ -122,16 +132,17 @@ fun! vm#commands#add_cursor_up(extend, count)
     if s:first_line() | return | endif
     call s:set_extend_mode(a:extend)
     call s:check_block_mode()
-    let s:v.vertical_col = getcurpos()[4]
+    let s:v.vertical_col = s:F.get_vertcol()
     call s:G.new_cursor()
-    let N = a:count>1? a:count : 1
+    let N = a:count
 
     while N
         keepjumps normal! k
         if !s:skip_shorter_lines() | let N -= 1 | endif
         if s:first_line()          | break      | endif
     endwhile
-    let s:v.vertical_col = 0
+
+    call s:went_too_far()
     call s:F.count_msg(0)
 endfun
 
@@ -668,9 +679,6 @@ fun! s:after_move(R)
     let s:v.direction = a:R.dir
     let s:v.only_this = 0
     let s:v.restore_scroll = !s:v.insert
-
-    "also reset the wanted virtcol (set when adding cursors down/up)
-    let s:v.vertical_col = 0
 
     if s:always_from_back() | call vm#commands#invert_direction() | endif
 
