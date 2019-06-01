@@ -272,7 +272,7 @@ fun! s:move_cursor(r)
     if s:vertical()       | call s:keep_vertical_col(a:r)
     elseif !s:v.multiline | call s:keep_line(a:r, line('.')) | endif
 
-    call a:r.update_cursor(getpos('.')[1:2])
+    call a:r.update_cursor_pos()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -371,7 +371,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_cursor(...) abort
-    """Update cursor vars from position [line, col] or offset."""
+    """Update cursor vars from position [line, col] or offset.
     let r = self
 
     if a:0 && !type(a:1)
@@ -383,6 +383,13 @@ fun! s:Region.update_cursor(...) abort
     endif
 
     call s:fix_pos(r)
+    call self.update_vars()
+endfun
+
+fun! s:Region.update_cursor_pos() abort
+    """Update cursor to current position.
+    let [ self.l, self.a ] = getpos('.')[1:2]
+    call s:fix_pos(self)
     call self.update_vars()
 endfun
 

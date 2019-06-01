@@ -45,7 +45,7 @@ fun! vm#icmds#x(cmd)
             call r.shift(-1,-1)
         else                                "normal backspace
             normal! X
-            call r.update_cursor(getpos('.')[1:2])
+            call r.update_cursor_pos()
         endif
 
         "update changed size
@@ -58,17 +58,40 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#icmds#cw()
+    let size = s:F.size()
+    let change = 0 | let s:v.eco = 1
     let s:v.storepos = getpos('.')[1:2]
+    let keep_line = get(g:, 'VM_icw_keeps_line', 1)
+
     for r in s:R()
-        if s:eol(r)
-            "c-w requires an additional extra space, will be fixed on its own
-            call setline(r.L, getline(r.L).'  ')
-            call add(s:v.cw_spaces, r.index)
+        call r.shift(change, change)
+
+        "TODO: deletion to line above can be bugged for now
+        if keep_line && r.a == 1 | continue | endif
+
+        call s:F.Cursor(r.A)
+
+        if r.a > 1 && s:eol(r) "add extra space and move right
+            call s:V.Edit.extra_spaces.add(r)
             call r.move('l')
         endif
+
+        let L = getline(r.l)
+        let ws_only = r.a > 1 && match(L[:(r.a-2)], '[^ \t]') < 0
+
+        if r.a == 1         "at bol, go up and join lines
+            normal! kgJ
+        elseif ws_only      "whitespace only before, delete it
+            normal! d0
+        else                "normal deletion
+            normal! db
+        endif
+        call r.update_cursor_pos()
+
+        "update changed size
+        let change = s:F.size() - size
     endfor
-    call s:V.Edit.run_normal('db')
-    call s:G.merge_regions()
+    call s:G.merge_cursors()
     call s:V.Insert.start(1)
 endfun
 
