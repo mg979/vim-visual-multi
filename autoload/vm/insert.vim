@@ -181,7 +181,7 @@ endfun
 
 fun! s:Insert.insert(...) abort
     """Update the text on TextChangedI event, and just after InsertLeave.
-    if !g:VM_live_editing && !a:0 | return | endif
+    if s:F.not_VM() || !g:VM_live_editing && !a:0 | return | endif
 
     call vm#comp#TextChangedI()  "compatibility tweaks
 
@@ -244,6 +244,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.stop(...) abort
+    if s:F.not_VM() | return | endif
+
     " text can be updated again after complete_done
     if &modified && ( s:v.complete_done || !g:VM_live_editing )
         call self.insert(1)

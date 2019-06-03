@@ -447,4 +447,9 @@ fun! s:Funcs.external_after_auto() abort
         call VM_after_auto()
     endif
 endfun
+
+fun! s:Funcs.not_VM() abort
+    return !exists('b:VM_Selection') || empty(b:VM_Selection)
+endfun
+
 " vim: et ts=4 sw=4 sts=4 :
