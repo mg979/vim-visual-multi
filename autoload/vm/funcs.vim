@@ -226,8 +226,16 @@ endfun
 
 let s:Funcs.Scroll = {}
 
+fun! s:Funcs.Scroll.can_see_eof() abort
+    return ( winheight(0) - winline() + line('.') ) >= line('$')
+endfun
+
+fun! s:Funcs.Scroll.can_see_bof() abort
+    return line('.') <= winline()
+endfun
+
 fun! s:Funcs.Scroll.get(...) abort
-    """Store winline()."""
+    """Store winline().
     let s:v.restore_scroll = a:0
     let s:v.winline = winline()
 endfun
@@ -244,10 +252,7 @@ fun! s:Funcs.Scroll.restore(...) abort
     if s:v.restore_scroll | let s:v.restore_scroll = 0 | else | return | endif
 
     " restoring should be avoided if it's possible to see EOF or BOF
-    let can_see_BOF = line('.') <= winline()
-    let can_see_EOF = ( winheight(0) - winline() + line('.') ) >= line('$')
-
-    if (can_see_BOF || can_see_EOF) | return | endif
+    if ( self.can_see_bof() || self.can_see_eof() ) | return | endif
 
     let lines = winline() - s:v.winline
     if lines > 0

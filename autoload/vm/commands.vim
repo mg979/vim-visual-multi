@@ -698,38 +698,46 @@ endfun
 " Cycle regions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:seek_select(i) abort
-    normal! z.
-    call s:G.select_region(a:i)
-endfun
-
 fun! vm#commands#seek_down() abort
-    if !len(s:R()) | return | endif
+    let nR = len(s:R())
+    if !nR | return | endif
 
-    exe "keepjumps normal! \<C-f>"
+    " don't jump down if nothing else to seek
+    if !s:F.Scroll.can_see_eof()
+        let r = s:G.is_region_at_pos('.')
+        if !empty(r) && r.index != nR - 1
+            exe "keepjumps normal! \<C-f>"
+        endif
+    endif
+
     let end = getpos('.')[1]
     for r in s:R()
         if r.l >= end
-            call s:seek_select(r.index)
-            return
+            return s:G.select_region(r.index)
         endif
     endfor
-    call s:seek_select(len(s:R()) - 1)
+    return s:G.select_region(nR - 1)
 endfun
 
 fun! vm#commands#seek_up() abort
     if !len(s:R()) | return | endif
 
-    exe "keepjumps normal! \<C-b>"
+    " don't jump up if nothing else to seek
+    if !s:F.Scroll.can_see_bof()
+        let r = s:G.is_region_at_pos('.')
+        if !empty(r) && r.index != 0
+            exe "keepjumps normal! \<C-b>"
+        endif
+    endif
+
     let end = getpos('.')[1]
 
     for r in reverse(copy(s:R()))
         if r.l <= end
-            call s:seek_select(r.index)
-            return
+            return s:G.select_region(r.index)
         endif
     endfor
-    call s:seek_select(0)
+    return s:G.select_region(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
