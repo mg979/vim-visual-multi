@@ -59,6 +59,27 @@ augroup END
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! VMInfos() abort
+    if !exists('b:VM_Selection') || empty(b:VM_Selection)
+        return {}
+    endif
+
+    let infos = {}
+    let VM = b:VM_Selection
+
+    let m = g:Vm.mappings_enabled ?    'M' : 'm'
+    let b = VM.Vars.block_mode ?       'B' : 'b'
+    let o = VM.Vars.only_this_always ? 'O' : 'o'
+    let l = VM.Vars.multiline ?        'V' : 'v'
+
+    let infos.current = VM.Vars.index + 1
+    let infos.total = len(VM.Regions)
+    let infos.ratio = infos.current . ' / ' . infos.total
+    let infos.patterns = VM.Vars.search
+    let infos.status = m.b.o.l
+    return infos
+endfun
+
 let &cpo = s:save_cpo
 unlet s:save_cpo
 " vim: et ts=2 sw=2 sts=2 :
