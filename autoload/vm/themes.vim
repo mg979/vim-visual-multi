@@ -25,10 +25,9 @@ fun! vm#themes#init() abort
   silent! hi clear MultiCursor
 
   if !empty(g:VM_highlight_matches)
-    redir => out
-    silent! highlight Search
-    redir END
-    let hi = substitute(out, '^.*xxx ', '', '')
+    let out = execute('highlight Search')
+    let hi = strtrans(substitute(out, '^.*xxx ', '', ''))
+    let hi = substitute(hi, '\^.', '', 'g')
     if match(hi, ' links to ') >= 0
       let hi = substitute(out, '^.*links to ', '', '')
       let g:Vm.search_hi = "hi! link Search ".hi
