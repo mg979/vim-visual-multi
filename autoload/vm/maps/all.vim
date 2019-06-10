@@ -218,6 +218,7 @@ fun! vm#maps#all#buffer() abort
         \"I Del":                   ['<Del>',       'i'],
         \"I Home":                  ['<Home>',      'i'],
         \"I End":                   ['<End>',       'i'],
+        \"I Tab":                   ['<Tab>',       'i'],
         \"I CtrlA":                 ['<C-a>',       'i'],
         \"I CtrlE":                 ['<C-e>',       'i'],
         \"I CtrlB":                 ['<C-b>',       'i'],

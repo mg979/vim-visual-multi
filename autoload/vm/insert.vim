@@ -218,9 +218,9 @@ fun! s:Insert.insert(...) abort
     " inserted character is multibyte, we do so by checking last char of @.,
     " that has just been updated
 
-    " the extra coln adjustment will take into account:
+    " the extra coln adjustment will be strlen(lastchar), that is:
+    "   -  extra bytes of last entered character (strlen(lastchar) -1)
     "   -  +1 because exiting insert mode
-    "   -  extra bytes of last entered character (strlen -1), if multibyte
 
     let lastchar = strcharpart(@., strchars(@.)-1)
     let extra = a:0 ? strlen(lastchar) : 0
