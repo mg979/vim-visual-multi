@@ -266,8 +266,12 @@ fun! s:Insert(key) abort
     return "\<esc>:call vm#icmds#return()\<cr>".i
   elseif a:key ==? 'x'        "x/X
     return "\<esc>:call vm#icmds#x('".a:key."')\<cr>".i
-  elseif index(split('hjklwbWBeE0', '\zs'), a:key) >= 0
+  elseif index(split('hjklwbWB0', '\zs'), a:key) >= 0
     return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
+  elseif a:key =~? 'ge'
+    return "\<esc>:call vm#commands#motion('h".a:key."l', 1, 0, 0)\<cr>".i
+  elseif a:key =~? 'e'
+    return "\<esc>:call vm#commands#motion('".a:key."l', 1, 0, 0)\<cr>".i
   elseif a:key ==? 'ge'
     return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
   elseif a:key == '$'
