@@ -220,7 +220,7 @@ fun! vm#plugs#buffer() abort
   inoremap <silent><expr> <Plug>(VM-I-Del)              <sid>Insert('x')
   inoremap <silent><expr> <Plug>(VM-I-Home)             <sid>Insert('0')
   inoremap <silent><expr> <Plug>(VM-I-End)              <sid>Insert('$')
-  inoremap <silent><expr> <Plug>(VM-I-Tab)              &expandtab ? "\<Tab>" : "\<C-V>\<Tab>"
+  inoremap <silent><expr> <Plug>(VM-I-Tab)              pumvisible() ? "\<C-n>" : &expandtab ? "\<Tab>" : "\<C-V>\<Tab>"
   inoremap <silent><expr> <Plug>(VM-I-CtrlA)            <sid>Insert('^')
   inoremap <silent><expr> <Plug>(VM-I-CtrlE)            <sid>Insert('$')
   inoremap <silent><expr> <Plug>(VM-I-CtrlB)            <sid>Insert('h')
