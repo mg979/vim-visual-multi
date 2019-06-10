@@ -80,9 +80,13 @@ fun! s:Edit.delete(X, register, count, hard) abort
         call r.shift(change, change)
         call self.extra_spaces.add(r)
         call cursor(r.l, r.a)
-        normal! m[
-        call cursor(r.L, r.b>1? r.b+1 : 1)
-        normal! m]`["_d`]
+        if r.w == 1
+          normal! "_dl
+        else
+          normal! m[
+          call cursor(r.L, r.b>1? r.b+1 : 1)
+          normal! m]`["_d`]
+        endif
 
         "update changed size
         let change = s:F.size() - size
