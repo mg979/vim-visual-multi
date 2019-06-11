@@ -67,6 +67,7 @@ fun! vm#variables#init() abort
   let v.textwidth        = &textwidth
   let v.conceallevel     = &conceallevel
   let v.concealcursor    = &concealcursor
+  let v.softtabstop      = &softtabstop
 
   "init new vars
 
@@ -120,6 +121,7 @@ fun! vm#variables#reset()
   let &cinkeys     = v.cinkeys
   let &synmaxcol   = v.synmaxcol
   let &textwidth   = v.textwidth
+  let &softtabstop  = v.softtabstop
 
   let &conceallevel = v.conceallevel
   let &concealcursor = v.concealcursor

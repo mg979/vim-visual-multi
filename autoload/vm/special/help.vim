@@ -119,7 +119,6 @@ fun! s:dict() abort
                   \'I CtrlD',                 'I Del',
                   \'I CtrlA',                 'I CtrlE',
                   \'I CtrlB',                 'I CtrlF',
-                  \'I Tab',
                   \]
 
   let arrows    = []
@@ -362,7 +361,6 @@ let s:plugs = {
       \"I Del":                   ["(I) Del",                    ""],
       \"I Home":                  ["(I) Home",                   ""],
       \"I End":                   ["(I) End",                    ""],
-      \"I Tab":                   ["(I) Tab",                    ""],
       \"I CtrlA":                 ["(I) CtrlA",                  "moves to the beginning of the line"],
       \"I CtrlE":                 ["(I) CtrlE",                  "moves to the end of the line"],
       \"I CtrlB":                 ["(I) CtrlB",                  "same as left arrow"],

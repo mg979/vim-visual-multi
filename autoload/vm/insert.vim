@@ -170,6 +170,9 @@ fun! s:Insert.start(...) abort
     set indentkeys=o,O
     set cinkeys=o,O
     set textwidth=0
+    if !&expandtab
+        set softtabstop=0
+    endif
 
     "start insert mode
     call feedkeys("i", 'n')
@@ -271,10 +274,11 @@ fun! s:Insert.stop(...) abort
     call s:V.Edit.post_process(0,0)
     call s:V.Edit.extra_spaces.remove_cw()
 
-    let &indentkeys = s:v.indentkeys
-    let &cinkeys    = s:v.cinkeys
-    let &synmaxcol  = s:v.synmaxcol
-    let &textwidth  = s:v.textwidth
+    let &indentkeys   = s:v.indentkeys
+    let &cinkeys      = s:v.cinkeys
+    let &synmaxcol    = s:v.synmaxcol
+    let &textwidth    = s:v.textwidth
+    let &softtabstop  = s:v.softtabstop
 
     "restore sync minlines if possible
     if len(b:VM_sync_minlines)
