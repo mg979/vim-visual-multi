@@ -1,3 +1,13 @@
+### Documentation
+
+Documentation has been added (still not complete but a good start)
+
+`:help visual-multi.txt`
+
+You may need to run `:helptags` if your plugin manager doesn't do it
+
+`:help helptags`
+
 ### [Wiki](https://github.com/mg979/vim-visual-multi/wiki)
 Work in progress. Most functionalities should work as expected and described in the documentation.  
 Testers are welcome. Please consider that the wiki reflects more the feature of the test branch, rather than master. If you use master branch and something doesn't work as expected, please try the test branch.
@@ -18,6 +28,12 @@ Insert mode with autocomplete, alignment
 Select operator, here shown with 'wellle/targets.vim' plugin: sib, sia, saa + selection shift
 
 ![Imgur](https://i.imgur.com/yM3Fele.gif)
+
+-------
+Undo/Redo edits and selections
+
+![Imgur](https://i.imgur.com/ZBWrTn4.gif)
+
 
 -------
 Add numbering with expression
@@ -73,4 +89,15 @@ Macros. Shorter lines are skipped when adding cursors above/below.
 Some editing functions: yank, delete, paste from register, paste block from yanked regions
 
 ![Imgur](https://i.imgur.com/0jRkVdp.gif)
+
+-------
+Alignment (mappings in pic have changed, don't trust them)
+
+![Imgur](https://i.imgur.com/y4mR7Vt.gif)
+
+----------------------------------------
+
+Case conversion
+
+![Imgur](https://i.imgur.com/W6EP0dy.gif)
 
