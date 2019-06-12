@@ -33,7 +33,7 @@ fun! s:Edit.duplicate() abort
 
     call self.yank(0, 1, 1)
     call s:G.change_mode()
-    call self.paste(1, 1, 1, '"')
+    call self.paste(1, 0, 1, '"')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
