@@ -2,7 +2,7 @@
 
 Documentation has been added (still not complete but a good start)
 
-`:help visual-multi.txt`
+`:help visual-multi`
 
 You may need to run `:helptags` if your plugin manager doesn't do it
 

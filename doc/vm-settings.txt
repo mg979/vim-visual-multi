@@ -1,0 +1,56 @@
+*vm-settings.txt*    Version 0.3.0    Last change: June 13 2019
+
+SETTINGS                                                *visual-multi-settings*
+===============================================================================
+
+Hopefully you won't need to alter any of these.
+
+
+                                                       *g:VM_highlight_matches*
+Default: 'underline'
+
+  Controls VM default highlighting style for patterns matched, but not
+  selected. Possible useful values are 'underline' and 'red'
+
+
+                                                         *g:VM_manual_infoline*
+Default: 1
+
+  Keeps the infoline visible, if set to 0.
+
+
+                                                            *g:VM_live_editing*
+Default: 1
+
+  Controls how often text is updated in insert mode.
+
+
+                                                          *g:VM_reselect_first*
+Default: 0
+
+  The first region will be reselected after most commands, if set to 1.
+
+
+                                                            *g:VM_case_setting*
+Default: 'smart'
+
+  Starting case matching for patterns. Other values: 'sensitive', 'ignore'
+  Can be switched inside VM.
+
+
+                                                 *g:VM_disable_syntax_in_imode*
+Default: 0
+
+  You could want to do it for performance reasons.
+
+
+                                                   *g:VM_exit_on_1_cursor_left*
+Default: 0
+
+  Automatically exit VM if there's a single cursor left after a command.
+
+
+
+
+
+ vim: ft=help et sw=2 ts=2 sts=2 tw=79

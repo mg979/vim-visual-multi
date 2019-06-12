@@ -2,10 +2,10 @@
 
 MAPPINGS ~
 ===============================================================================
-                                                                    *g:VM_Maps*
+                                                                    *g:VM_maps*
 To change any mapping you must first initialize the variable:
 >
-    let g:VM_Maps = {}
+    let g:VM_maps = {}
 <
 Then you can assign it to a new key:
 >
@@ -39,10 +39,15 @@ Example of |vim-multiple-cursors| -like mappings:
 Non-buffer mappings, except <C-n>, can be disabled with:
 >
     let g:VM_default_mappings = 0
-
+<                                                          *g:VM_mouse_mappings*
+Mouse mappings can be enabled with:
+>
+    let g:VM_mouse_mappings = 1
+<
 -------------------------------------------------------------------------------
   Name                Keys        Notes ~
 -------------------------------------------------------------------------------
+                                                              *visual-multi-qr*
 Find Under            <C-n>       select the word under cursor
 Find Subword Under    <C-n>       from visual mode, without word boundaries
 Add Cursor Down       <C-Down>    create cursors vertically
@@ -57,11 +62,6 @@ Visual Find             \\f       find all patterns ( or @/ ) from visual mode
 Visual Cursors          \\c       create a column of cursors from visual mode
 Visual Add              \\a       create a selection from visual mode
 
-                                                          *g:VM_mouse_mappings*
-Mouse mappings can be enabled with:
->
-    let g:VM_mouse_mappings = 1
-<
 Mouse Cursor    <C-LeftMouse>     create a cursor where clicked
 Mouse Word      <C-RightMouse>    select a word where clicked
 Mouse Column    <M-C-RightMouse>  create a column, from current cursor to

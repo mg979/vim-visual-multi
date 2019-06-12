@@ -10,11 +10,14 @@ Regions and patterns                           |visual-multi-regions|
 Mappings                                       |visual-multi-mappings|
 Run ... at cursors                             |visual-multi-run-at-cursors|
 Commands                                       |visual-multi-commands|
-Settings                                       |visual-multi-settings|
+Other features                                 |visual-multi-other|
 Credits                                        |visual-multi-credits|
 License                                        |visual-multi-license|
 
+Additional resources:
 
+Settings                                       |visual-multi-settings|
+Quick reference                                |visual-multi-qr|
 
 
 
@@ -96,6 +99,8 @@ Some commands are specific to |extend-mode|, such as:
 
 And more, commands will be covered further on.
 
+Another feature of |extend-mode| is |smart-case-change|, started with `gc`.
+
 -------------------------------------------------------------------------------
                                                             *vm-multiline-mode*
 
@@ -174,7 +179,8 @@ MAPPINGS                                                *visual-multi-mappings*
 ===============================================================================
 
 What follows are the default mappings, and an overview of most commands.
-For a quick reference of the mappings, and instructions on how to change them:
+For a quick reference of the mappings, and instructions on how to change them,
+see |g:VM_maps| or:
 >
     :help vm-mappings.txt
 <
@@ -353,57 +359,6 @@ Show Infoline ~
     [n] : index of currently selected region
     number of regions/cursors
     current patterns
-
-
-
-
-
-
-SETTINGS                                                *visual-multi-settings*
-===============================================================================
-
-Hopefully you won't need to alter any of these.
-
-                                                       *g:VM_highlight_matches*
-Default: 'underline'
-
-  Controls VM default highlighting style for patterns matched, but not
-  selected. Possible useful values are 'underline' and 'red'
-
-                                                         *g:VM_manual_infoline*
-Default: 1
-
-  Keep the infoline visible.
-
-                                                            *g:VM_live_editing*
-Default: 1
-
-  Controls how often text is updated in insert mode.
-
-                                                          *g:VM_reselect_first*
-Default: 0
-
-  Other possible values are:  >
-  1   always reselect first region after commands
-  2   reselect first region after insert mode
-<
-                                                            *g:VM_case_setting*
-Default: 'smart'
-
-  Case matching for patterns. Other values: 'sensitive', 'ignore'
-
-                                                 *g:VM_disable_syntax_in_imode*
-Default: 0
-
-  You could want to do it for performance reasons.
-
-                                                   *g:VM_exit_on_1_cursor_left*
-Default: 0
-
-  Automatically exit VM if there's a single cursor left after a command.
-
-
-
 
 
 
@@ -597,6 +552,52 @@ Transform regions with expression ~
 
 
 
+
+OTHER FEATURES                                             *visual-multi-other*
+===============================================================================
+
+Smart case change~
+                                                         *vm-smart-case-change*
+
+In |extend-mode|, if a change command is started with `gc` rather than `c`,
+text will be "smartcased", that is:
+
+* at main cursor, text is always inserted as typed
+* at other cursors, if region text was fully uppercased, replacement will be
+  uppercased as well
+* if the region text was capitalized, the replacement will be as well
+
+
+Undo/Redo ~
+                                                                 *vm-undo-redo*
+This feature is still experimental. It allows to undo edits done inside VM, and
+restore the selections or the cursor positions to the state prior to the undone
+change. It will not allow you to undo changes that were made before entering VM
+(you need to exit VM first).
+
+To enable it (see |g:VM_maps|):
+>
+    let g:VM_maps["Undo"] = 'u'
+    let g:VM_maps["Redo"] = '<C-r>'
+<
+
+
+
+
+CREDITS                                                  *visual-multi-credits*
+===============================================================================
+
+Bram Moolenaar for Vim
+Tim Pope for |vim-abolish|                 https://github.com/tpope/vim-abolish
+
+
+
+
+
+LICENSE                                                  *visual-multi-license*
+===============================================================================
+
+MIT
 
 
  vim: ft=help et sw=2 ts=2 sts=2 tw=79
