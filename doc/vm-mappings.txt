@@ -1,0 +1,139 @@
+*vm-mappings.txt*    Version 0.3.0    Last change: June 11 2019
+
+MAPPINGS                                                *visual-multi-mappings*
+===============================================================================
+                                                                    *g:VM_Maps*
+To change any mapping you must first initialize the variable:
+>
+    let g:VM_Maps = {}
+<
+Then you can assign it to a new key:
+>
+    let g:VM_maps["Get Operator"] = 'gs'
+<
+Mappings preceded by \\ are meant prefixed with |g:VM_Leader|.
+
+To enable undo/redo (still experimental):
+>
+    let g:VM_maps["Undo"] = 'u'
+    let g:VM_maps["Redo"] = '<C-r>'
+
+Example of SublimeText-like mappings:
+>
+    let g:VM_maps['Find Under']         = '<C-d>'
+    let g:VM_maps['Find Subword Under'] = '<C-d>'
+    let g:VM_maps["Select Cursor Down"] = '<M-C-Down>'
+    let g:VM_maps["Select Cursor Up"]   = '<M-C-Up>'
+<
+Example of |vim-multiple-cursors| -like mappings:
+>
+    let g:VM_maps['Select All']  = '<M-n>'
+    let g:VM_maps['Visual All']  = '<M-n>'
+    let g:VM_maps['Skip Region'] = '<C-x>'
+    let g:VM_maps['Increase']    = '+'
+    let g:VM_maps['Decrease']    = '-'
+<
+
+-------------------------------------------------------------------------------
+                                                        *g:VM_default_mappings*
+Non-buffer mappings, except <C-n>, can be disabled with:
+>
+    let g:VM_default_mappings = 0
+
+-------------------------------------------------------------------------------
+  Name                Keys        Notes ~
+-------------------------------------------------------------------------------
+Find Under            <C-n>       select the word under cursor
+Find Subword Under    <C-n>       from visual mode, without word boundaries
+Add Cursor Down       <C-Down>    create cursors vertically
+Add Cursor Up         <C-Up>      ,,       ,,      ,,
+Select All              \\A       select all occurrences of a word
+Visual All              \\A       select all occurrences of visual selection
+Start Regex Search      \\/       create a selection with regex search
+Visual Regex            \\/       find a pattern in visual selection
+Get Operator            \\gs      see |vm-get-operator|
+Add Cursor At Pos       \\\       add a single cursor at current position
+Visual Find             \\f       find all patterns ( or @/ ) from visual mode
+Visual Cursors          \\c       create a column of cursors from visual mode
+Visual Add              \\a       create a selection from visual mode
+
+                                                          *g:VM_mouse_mappings*
+Mouse mappings can be enabled with:
+>
+    let g:VM_mouse_mappings = 1
+<
+Mouse Cursor    <C-LeftMouse>     create a cursor where clicked
+Mouse Word      <C-RightMouse>    select a word where clicked
+Mouse Column    <M-C-RightMouse>  create a column, from current cursor to
+                                  clicked position
+
+-------------------------------------------------------------------------------
+  Name                Keys        Notes ~
+-------------------------------------------------------------------------------
+                                                           *vm-buffer-mappings*
+Find Next               ]         find next occurrence
+Find Prev               [         find previous occurrence
+Goto Next               }         go to next selected region
+Goto Prev               {         go to previous selected region
+Seek Next             <C-f>       fast go to next (from next page)
+Seek Prev             <C-b>       fast go to previous (from previous page)
+Skip Region           <C-s>       skip and find to next
+Alt Skip                q         ,,    ,,      ,,
+Remove Region           Q         remove region under cursor
+
+The following are valid in extend-mode: ~
+
+Invert Direction        o         as |o| in visual mode
+Replace Pattern         R         replace pattern in regions
+Surround                S         requires |vim-surround| plugin
+Move Right          <M-S-Right>   move all selections to the right
+Move Left           <M-S-Left>    ,,      ,,          to the left
+
+Operators: ~
+
+Select Operator         s         see |vm-select-operator|
+Find Operator           m         see |vm-find-operator|
+
+Special commands: ~
+
+Increase              <C-A>       increase numbers
+Decrease              <C-X>       decrease numbers
+
+Commands:~
+
+Transpose             \\t         transpose
+Align                 \\a         align regions
+Align Char            \\<         align by character
+Align Regex           \\>         align by regex
+Split Regions         \\s         subtract pattern from regions
+Filter Regions        \\f         filter regions by pattern/expression
+Transform Regions     \\e         transform regions with expression
+Rewrite Last Search   \\r         rewrite last pattern to match current region
+Merge Regions         \\m         merge overlapping regions
+Duplicate             \\d         duplicate regions
+Shrink                \\-         reduce regions from the sides
+Enlarge               \\+         enlarge regions from the sides
+Numbers               \\n         see |vm-numbering|
+Numbers Append        \\N         ,,
+
+Run Normal            \\z         Run Normal
+Run Visual            \\v         Run Visual
+Run Ex                \\x         Run Ex
+Run Last Normal       \\Z         Run Last Normal
+Run Last Visual       \\V         Run Last Visual
+Run Last Ex           \\X         Run Last Ex
+Run Macro             \\@         Run Macro
+
+Options and menus: ~
+
+Tools Menu            \\`         filter lines to buffer, etc
+Case Conversion Menu  \\C         works better in extend mode
+Show Registers        \\"         show VM registers in the command line
+Toggle Whole Word     \\w         toggle whole word search
+Case Setting          \\c         cycle case setting ('scs' -> 'noic' -> 'ic')
+Toggle Multiline      \\M         see |vm-multiline-mode|
+Toggle Mappings       \\<Space>   toggle VM mappings
+Toggle Block          \\<BS>      toggle block mode
+Toggle Single Region  \\<CR>      toggle single region mode
+
+ vim: ft=help et sw=2 ts=2 sts=2 tw=79
