@@ -65,6 +65,8 @@ fun! vm#maps#all#permanent() abort
     let maps["Select All"][0]            = leader.'A'
     let maps["Add Cursor Down"][0]       = '<C-Down>'
     let maps["Add Cursor Up"][0]         = '<C-Up>'
+    let maps["Select l"][0]              = '<S-Right>'
+    let maps["Select h"][0]              = '<S-Left>'
     let maps["Visual Regex"][0]          = leader.'/'
     let maps["Visual All"][0]            = leader.'A'
     let maps["Visual Add"][0]            = leader.'a'
