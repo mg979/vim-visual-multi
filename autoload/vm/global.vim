@@ -247,7 +247,7 @@ fun! s:Global.update_and_select_region(...) abort
     "             ->  (0, id)
     let nR = len(s:R())
 
-    if !g:VM_reselect_first_always
+    if !g:VM_reselect_first
         if exists('s:v.restore_index')
             let i = s:v.restore_index >= nR? nR - 1 : s:v.restore_index
             let R = self.select_region(i)

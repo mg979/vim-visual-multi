@@ -103,18 +103,12 @@ fun! s:Insert.start(...) abort
             else
                 syn sync minlines=1
             endif
-        elseif g:VM_dynamic_synmaxcol && s:v.index > g:VM_dynamic_synmaxcol
-            let scol = 40 - s:v.index + g:VM_dynamic_synmaxcol
-            let &synmaxcol = scol>1? scol : 1
         endif
     endif
 
     if s:v.insert
         let i = I.index >= len(s:R())? len(s:R())-1 : I.index
         let R = s:G.select_region(i)
-    elseif g:VM_pick_first_after_n_cursors && len(s:R()) > g:VM_pick_first_after_n_cursors
-        let self._index = s:v.index
-        let R = s:G.select_region(0)
     elseif g:VM_use_first_cursor_in_line
         let R = s:G.select_region_at_pos('.')
         let ix = s:G.lines_with_regions(0, R.l)[R.l][0]
@@ -288,7 +282,7 @@ fun! s:Insert.stop(...) abort
     "reindent all and adjust cursors position, only if filetype/options allow
     if s:do_reindent() | call s:V.Edit.run_normal('==', {'recursive': 0, 'stay_put': 1}) | endif
 
-    if g:VM_reselect_first_insert
+    if g:VM_reselect_first
         call s:G.select_region(0)
     elseif self._index >= 0
         call s:G.select_region(self._index)
@@ -297,7 +291,7 @@ fun! s:Insert.stop(...) abort
     endif
 
     " now insert mode has really ended, restore winline and clear variable
-    if !g:VM_reselect_first_insert
+    if !g:VM_reselect_first
         call s:F.Scroll.force(s:v.winline_insert)
     endif
     unlet s:v.winline_insert

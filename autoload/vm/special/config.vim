@@ -8,11 +8,8 @@ fun! vm#special#config#start() abort
   let opt = [
             \['Default mappings',               "VM_default_mappings"],
             \['Mouse mappings',                 "VM_mouse_mappings"],
-            \['Reselect first insert',          "VM_reselect_first_insert"],
-            \['Reselect first always',          "VM_reselect_first_always"],
+            \['Reselect first',                 "VM_reselect_first"],
             \['Case setting',                   "VM_case_setting"],
-            \['Pick first after n cursors',     "VM_pick_first_after_n_cursors"],
-            \['Dynamic synmaxcol',              "VM_dynamic_synmaxcol"],
             \['Disable syntax in insert-mode',  "VM_disable_syntax_in_imode"],
             \['Auto-exit with 1 cursor left',   "VM_exit_on_1_cursor_left"],
             \['Manual infoline',                "VM_manual_infoline"],
@@ -40,12 +37,6 @@ fun! vm#special#config#start() abort
     if g:VM_case_setting == 'smart'         | let g:VM_case_setting = 'sensitive'
     elseif g:VM_case_setting == 'sensitive' | let g:VM_case_setting = 'ignore'
     else                                    | let g:VM_case_setting = 'smart' | endif
-  elseif o == 5
-    let new = input("\nEnter a new value for g:VM_pick_first_after_n_cursors (0 disables it) > ")
-    if !empty(new) | let g:VM_pick_first_after_n_cursors = new | endif
-  elseif o == 6
-    let new = input("\nEnter a new value for g:VM_dynamic_synmaxcol (0 disables it) > ")
-    if !empty(new) | let g:VM_dynamic_synmaxcol = new | endif
   else
     exe "let g:".opt[o][1]." = ".!eval("g:".opt[o][1])
   endif
@@ -65,11 +56,8 @@ fun! vm#special#config#generate() abort
         \'',
         \'let g:VM_default_mappings           = '.g:VM_default_mappings,
         \'let g:VM_mouse_mappings             = '.g:VM_mouse_mappings,
-        \'let g:VM_reselect_first_insert      = '.g:VM_reselect_first_insert,
-        \'let g:VM_reselect_first_always      = '.g:VM_reselect_first_always,
+        \'let g:VM_reselect_first             = '.g:VM_reselect_first,
         \'let g:VM_case_setting               = "'.g:VM_case_setting.'"',
-        \'let g:VM_pick_first_after_n_cursors = '.g:VM_pick_first_after_n_cursors,
-        \'let g:VM_dynamic_synmaxcol          = '.g:VM_dynamic_synmaxcol,
         \'let g:VM_disable_syntax_in_imode    = '.g:VM_disable_syntax_in_imode,
         \'let g:VM_exit_on_1_cursor_left      = '.g:VM_exit_on_1_cursor_left,
         \'let g:VM_manual_infoline            = '.g:VM_manual_infoline,
@@ -97,8 +85,7 @@ fun! vm#special#config#help() abort
   echohl WarningMsg | echo _ | echohl None
 
   echohl Special
-  echohl Special | echo "g:VM_reselect_first_insert\t\t" | echohl None | echon "reselect first cursor after exiting insert mode"
-  echohl Special | echo "g:VM_reselect_first_always\t\t" | echohl None | echon "reselect first cursor after most commands\n\n"
+  echohl Special | echo "g:VM_reselect_first\t\t"      | echohl None | echon "reselect first cursor after most commands\n\n"
 
   echohl WarningMsg | echo _ | echohl None
 
@@ -108,10 +95,6 @@ fun! vm#special#config#help() abort
   echohl WarningMsg | echo _ | echohl None
 
   echo "Performance-related settings for insert mode. Type :help 'synmaxcol' for more info.\n\n"
-  echohl Special | echo "g:VM_pick_first_after_n_cursors"
-  echohl None | echon "\t\tcan improve performance when there are lots of cursors"
-  echohl Special | echo "g:VM_dynamic_synmaxcol"
-  echohl None | echon "\t\t\tsyntax highlighting max column will be gradually decreased"
   echohl Special | echo "g:VM_disable_syntax_in_imode"
   echohl None | echon "\t\tdrops synmaxcol to 1, while in insert mode\n\n"
   echohl None
