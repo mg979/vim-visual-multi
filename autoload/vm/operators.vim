@@ -83,7 +83,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:select(cmd) abort
-
     call s:updatetime()
     call s:V.Maps.disable(1)
 

@@ -13,7 +13,7 @@
 "       4. in the help file, add an entry in a section of s:dict to assign a category
 
 let s:base = {
-      \"Select Operator":         ['', 'n'],
+      \"Get Operator":            ['', 'n'],
       \"Erase Regions":           ['', 'n'],
       \"Add Cursor At Pos":       ['', 'n'],
       \"Add Cursor At Word":      ['', 'n'],
@@ -59,7 +59,7 @@ fun! vm#maps#all#permanent() abort
   let maps["Find Subword Under"][0]      = '<C-n>'
 
   if g:VM_default_mappings
-    let maps["Select Operator"][0]       = leader.'gs'
+    let maps["Get Operator"][0]          = leader.'gs'
     let maps["Add Cursor At Pos"][0]     = leader.'\'
     let maps["Start Regex Search"][0]    = leader.'/'
     let maps["Select All"][0]            = leader.'A'
@@ -118,7 +118,7 @@ fun! vm#maps#all#buffer() abort
         \"Hash":                    ['',          'n'],
         \"Visual Star":             ['',          'x'],
         \"Visual Hash":             ['',          'x'],
-        \"Select All Operator":     ['s',         'n'],
+        \"Select Operator":         ['s',         'n'],
         \"Find Operator":           ['m',         'n'],
         \"Add Cursor Down":         ['<C-Down>',  'n'],
         \"Add Cursor Up":           ['<C-Up>',    'n'],

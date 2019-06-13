@@ -49,7 +49,7 @@ fun! s:dict() abort
                   \'Visual Regex',
                   \]
 
-  let operators = ['Select Operator',                   'Select All Operator',
+  let operators = ['Get Operator',                      'Select Operator',
                   \'Find Operator',                     '',
                   \]
 
@@ -298,8 +298,8 @@ let s:plugs = {
       \"Visual Hash":             ["Visual Hash",                "select around (sub)word, case sensitive"],
       \"Merge To Eol":            ["Merge to EOL",               "collapse cursors to end of line"],
       \"Merge To Bol":            ["Merge to BOL",               "collapse cursors to indent level"],
-      \"Select Operator":         ["Select Operator",            "accepts motions and text objects"],
-      \"Select All Operator":     ["Select All Operator",        "applies to all cursors"],
+      \"Get Operator":            ["Get Operator",               "accepts motions and text objects"],
+      \"Select Operator":         ["Select Operator",            "applies to all cursors"],
       \"Find Operator":           ["Find Operator",              "matches patterns in motion/text object"],
       \"This Motion h":           ["Extend This Left",           ""],
       \"This Motion l":           ["Extend This Right",          ""],
