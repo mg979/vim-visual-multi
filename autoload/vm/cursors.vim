@@ -132,7 +132,7 @@ fun! s:y_cursors(M, reg, n) abort
 
   call s:G.change_mode()
 
-  "reorder command; Y = 'yy'
+  "reorder command; YY = 'yy'
   let [S, N, YY] = s:reorder_cmd(M, r, a:n, 'y')
 
   "for Y, y$, yy, ensure there is only one region per line

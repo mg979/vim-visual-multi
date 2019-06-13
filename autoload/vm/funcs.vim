@@ -368,7 +368,7 @@ endfun
 fun! s:Funcs.show_registers() abort
     echohl Label | echo " Register\tLine\t--- Register contents ---" | echohl None
     for r in keys(g:Vm.registers)
-        "skip temmporary register
+        "skip temporary register
         if r == '§' | continue | endif
 
         echohl Directory  | echo "\n    ".r

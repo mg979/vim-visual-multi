@@ -323,22 +323,28 @@ endfun
 
 fun! s:Edit.fill_register(reg, text, hard) abort
     """Write custom and possibly vim registers.
-    if a:reg == "_" | return | endif
+    if a:reg == "_"
+        return
+    else
+        let reg       = empty(a:reg) ? '"' : a:reg
+        let temp_reg  = reg == '§'
+        let overwrite = reg ==# s:v.def_reg || ( a:hard && !temp_reg )
+    endif
 
     let text = a:text
     let maxw = max(map(copy(text), 'len(v:val)'))
 
     " set VM register, overwrite unnamed unless temporary VM register
-    if a:reg != '§'
+    if !temp_reg
         let g:Vm.registers[s:v.def_reg] = text
     endif
-    let g:Vm.registers[a:reg] = text
+    let g:Vm.registers[reg] = text
 
     let type = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
 
     "vim register is overwritten if unnamed, or if hard yank
-    if a:reg ==# s:v.def_reg || ( a:hard && a:reg != '§' )
-        call setreg(a:reg, join(text, "\n"), type)
+    if overwrite
+        call setreg(reg, join(text, "\n"), type)
         if a:hard   "also overwrite the old saved register
             let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type]
         endif
