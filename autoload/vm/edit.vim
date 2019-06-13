@@ -58,7 +58,7 @@ fun! s:Edit.run_normal(cmd, ...) abort
     "-----------------------------------------------------------------------
 
     " defaults: commands are recursive, count 1, disable buffer mappings
-    let args = { 'recursive': 1, 'count': 1, 'disable_maps': 1 }
+    let args = { 'recursive': 1, 'count': 1, 'vimreg': 0, 'disable_maps': 1 }
     if a:0 | call extend(args, a:1) | endif
 
     let n = args.count > 1 ? args.count : ''
@@ -228,7 +228,8 @@ fun! s:Edit.process(cmd, ...) abort
 
     " fill VM register after deletions/changes at cursors
     if store
-        let hard = g:VM_overwrite_vim_registers || ( a:1.store == s:v.def_reg )
+        let hard = g:VM_overwrite_vim_registers
+                    \ || ( a:1.store == s:v.def_reg ) || a:1.vimreg
         call self.fill_register(a:1.store, txt, hard)
     endif
     " backup original regions text since it could used

@@ -138,18 +138,7 @@ fun! s:y_cursors(M, reg, n) abort
   "for Y, y$, yy, ensure there is only one region per line
   if (S == '$' || S == 'y') | call s:G.one_region_per_line() | endif
 
-  "NOTE: yy doesn't accept count.
-  if YY
-    call vm#commands#motion('0', 1, 0, 0)
-    call vm#commands#motion('$', 1, 0, 0)
-    let s:v.multiline = 1
-    call vm#commands#motion('l', 1, 0, 0)
-    call feedkeys('y')
-  else
-    call vm#operators#select(1, N.S)
-    let r = a:reg == s:v.def_reg ? '' : "\"".a:reg
-    call feedkeys(r.'y')
-  endif
+  call s:V.Edit.run_normal('y'.S, {'count': N, 'store': a:reg, 'vimreg': 1})
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
