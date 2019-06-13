@@ -264,7 +264,7 @@ fun! vm#commands#ctrln(count) abort
 
     if !s:X() && s:is_r()
         let pos = getpos('.')[1:2]
-        call vm#operators#select(1, 1, "iw")
+        call vm#operators#select(1, "iw")
         call s:G.update_and_select_region(pos)
     else
         let s:v.silence = 1

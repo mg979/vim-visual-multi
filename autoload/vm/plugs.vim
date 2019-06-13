@@ -3,7 +3,7 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#plugs#permanent() abort
-  nnoremap   <silent>     <Plug>(VM-Get-Operator)            :<c-u>call vm#operators#select(0, 0)<cr>y
+  nnoremap <expr><silent> <Plug>(VM-Get-Operator)            vm#operators#get(v:count)
   xmap <expr><silent>     <Plug>(VM-Visual-Find)             vm#operators#find(1, 1)
 
   nnoremap <silent>       <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0)<cr>
@@ -41,7 +41,7 @@ fun! vm#plugs#buffer() abort
   let g:Vm.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '$', '0', '^', '%', 'ge', 'gE', '\|']
   let g:Vm.find_motions   = ['f', 'F', 't', 'T']
 
-  nnoremap <silent>   <Plug>(VM-Select-Operator)     :<c-u>call vm#operators#select(1, v:count)<cr>
+  nnoremap <silent>   <Plug>(VM-Select-Operator)     :<c-u>call vm#operators#select(v:count)<cr>
   nmap <expr><silent> <Plug>(VM-Find-Operator)       vm#operators#find(1, 0)
 
   nnoremap <silent>       <Plug>(VM-Select-Line-Down)        :call vm#commands#expand_line(1)<cr>

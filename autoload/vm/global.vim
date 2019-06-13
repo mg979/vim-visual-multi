@@ -509,7 +509,7 @@ fun! s:Global.check_mutliline(all, ...) abort
     """Check if multiline must be enabled.
 
     for r in a:0? [a:1] : s:R()
-        if r.h && !s:v.multiline
+        if !s:v.multiline && r.h
             call s:F.toggle_option('multiline') | break
         endif
     endfor

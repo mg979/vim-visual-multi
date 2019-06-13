@@ -146,7 +146,7 @@ fun! s:y_cursors(M, reg, n) abort
     call vm#commands#motion('l', 1, 0, 0)
     call feedkeys('y')
   else
-    call vm#operators#select(1, 1, N.S)
+    call vm#operators#select(1, N.S)
     if s:back(S)
       normal h
     endif
@@ -185,7 +185,7 @@ fun! s:c_cursors(M, reg, n) abort
   let reg = a:reg != s:v.def_reg? a:reg : "_"
 
   if CC
-    call vm#operators#select(1, 1, '$')
+    call vm#operators#select(1, '$')
     call vm#commands#motion('^', 1, 0, 0)
     call s:backup_changed_text()
     call s:V.Edit.delete(1, reg, 1, 0)
@@ -196,7 +196,7 @@ fun! s:c_cursors(M, reg, n) abort
     call s:V.Insert.key('O')
 
   elseif S=='$'
-    call vm#operators#select(1, 1, '$')
+    call vm#operators#select(1, '$')
     call s:backup_changed_text()
     call s:V.Edit.delete(1, reg, 1, 0)
     call s:V.Insert.key('i')
@@ -204,14 +204,14 @@ fun! s:c_cursors(M, reg, n) abort
   elseif S=='l'
     let oldmultiline = s:v.multiline
     let s:v.multiline = 1
-    call vm#operators#select(1, 1, N.S)
+    call vm#operators#select(1, N.S)
     call vm#commands#motion('h', 1, 0, 0)
     let s:v.multiline = 0
     call feedkeys('"'.reg."c")
     let s:v.multiline = oldmultiline
 
   elseif s:forw(S) || s:ia(S[:0])
-    call vm#operators#select(1, 1, N.S)
+    call vm#operators#select(1, N.S)
     call feedkeys('"'.reg."c")
 
   else

@@ -161,7 +161,7 @@ fun! s:Edit.dot() abort
     if !s:X() && !empty(dot)
 
         if dot[0] ==? 'c' && dot[1] !=? 's'     "repeat last change operator
-            call vm#operators#select(1, 1, dot[1:])
+            call vm#operators#select(1, dot[1:])
             normal ".p
             call s:G.cursor_mode()
 

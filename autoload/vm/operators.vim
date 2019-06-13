@@ -12,7 +12,7 @@ endfun
 
 fun! s:init() abort
     let g:Vm.extend_mode = 1
-    if !g:Vm.is_active       | call vm#init_buffer(0) | endif
+    if !g:Vm.is_active | call vm#init_buffer(0) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -31,25 +31,27 @@ endif
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#operators#select(all, count, ...) abort
+fun! vm#operators#get(cnt) abort
     """Perform a yank, the autocmd will create the region.
     call s:init()
+    let g:Vm.selecting = 1
+    call s:updatetime()
+    silent! nunmap <buffer> y
 
-    if !a:all
-        let g:Vm.selecting = 1
-        call s:updatetime()
-        silent! nunmap <buffer> y
-        return
-    endif
+    let n = a:cnt>1? a:cnt : ''
+    return n . 'y'
+endfun
 
+fun! vm#operators#select(count, ...) abort
+    call s:init()
     let s:v.storepos = getpos('.')[1:2]
     call s:F.Scroll.get()
 
     if a:0 | return s:select('y'.a:1) | endif
 
-    let abort = 0
-    let s = ''                     | let n = ''
-    let x = a:count>1? a:count : 1 | echo "Selecting: ".(x>1? x : '')
+    let [ abort, s, n ] = [ 0, '', '' ]
+    let x = a:count>1? a:count : 1
+    echo "Selecting: ".(x>1? x : '')
 
     while 1
         let c = getchar()
@@ -118,6 +120,29 @@ fun! s:select(cmd) abort
     call s:old_updatetime()
 endfun
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#operators#after_yank() abort
+    if g:Vm.selecting
+        let g:Vm.selecting = 0
+
+        "find operator
+        if s:v.finding
+            let s:v.finding = 0
+            call vm#operators#find(0, s:v.visual_regex)
+            let s:v.visual_regex = 0
+        else
+            "select operator
+            call s:get_region(1)
+            let R = s:G.select_region_at_pos('.')
+            call s:G.check_mutliline(0, R)
+        endif
+
+        call s:old_updatetime()
+        nmap <silent> <nowait> <buffer> y <Plug>(VM-Yank)
+    endif
+endfun
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:get_region(add_pattern) abort
@@ -153,7 +178,8 @@ fun! vm#operators#find(start, visual, ...) abort
         "ensure there is an active search
         if empty(s:v.search)
             if !len(s:R()) | call s:V.Search.get_slash_reg()
-            else           | call s:V.Search.get() | endif
+            else           | call s:V.Search.get()
+            endif
         endif
 
         call s:updatetime()
@@ -212,29 +238,6 @@ fun! vm#operators#find(start, visual, ...) abort
         call vm#reset(1)
     else
         call s:G.update_map_and_select_region()
-    endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#operators#after_yank() abort
-    if g:Vm.selecting
-        let g:Vm.selecting = 0
-
-        "find operator
-        if s:v.finding
-            let s:v.finding = 0
-            call vm#operators#find(0, s:v.visual_regex)
-            let s:v.visual_regex = 0
-        else
-            "select operator
-            call s:get_region(1)
-            let R = s:G.select_region_at_pos('.')
-            call s:G.check_mutliline(0, R)
-        endif
-
-        call s:old_updatetime()
-        nmap <silent> <nowait> <buffer> y <Plug>(VM-Yank)
     endif
 endfun
 
