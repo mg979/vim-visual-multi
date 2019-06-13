@@ -147,9 +147,6 @@ fun! s:y_cursors(M, reg, n) abort
     call feedkeys('y')
   else
     call vm#operators#select(1, N.S)
-    if s:back(S)
-      normal h
-    endif
     let r = a:reg == s:v.def_reg ? '' : "\"".a:reg
     call feedkeys(r.'y')
   endif
@@ -205,7 +202,6 @@ fun! s:c_cursors(M, reg, n) abort
     let oldmultiline = s:v.multiline
     let s:v.multiline = 1
     call vm#operators#select(1, N.S)
-    call vm#commands#motion('h', 1, 0, 0)
     let s:v.multiline = 0
     call feedkeys('"'.reg."c")
     let s:v.multiline = oldmultiline
@@ -251,14 +247,12 @@ endfun
 if v:version >= 800
   let s:R      = { -> s:V.Regions      }
   let s:forw   = { c -> index(split('weWE%', '\zs'), c) >= 0                }
-  let s:back   = { c -> index(split('FThbB0N^{(', '\zs'), c[0]) >= 0        }
   let s:ia     = { c -> index(['i', 'a'], c) >= 0                           }
   let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
   let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
 else
   let s:R                = function('vm#v74#regions')
   let s:forw   = function('vm#v74#forw')
-  let s:back   = function('vm#v74#back')
   let s:ia     = function('vm#v74#ia')
   let s:single = function('vm#v74#single')
   let s:double = function('vm#v74#double')

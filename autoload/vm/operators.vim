@@ -79,7 +79,7 @@ fun! vm#operators#select(count, ...) abort
     let n = n<1? 1 : n
     let n = n*x>1? n*x : ''
     call s:select('y'.n.s)
-    call s:G.select_region_at_pos('.')
+    call s:G.update_and_select_region()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -106,13 +106,17 @@ fun! s:select(cmd) abort
         call s:get_region(0)
     endfor
 
+    if cmd =~# 'y\d*[hl]'
+        for r in s:R()
+            let l = strlen(r.txt[-1:]) * -1
+            call r.shift(0, l)
+        endfor
+    endif
+
     call s:V.Maps.enable()
     let s:v.silence    = 0
 
-    if !s:v.multiline
-        for r in s:R()
-            if r.h | call s:F.toggle_option('multiline') | break | endif
-        endfor | endif
+    call s:G.check_mutliline(1)
 
     nmap <silent><nowait><buffer> y <Plug>(VM-Yank)
 
@@ -132,10 +136,14 @@ fun! vm#operators#after_yank() abort
             call vm#operators#find(0, s:v.visual_regex)
             let s:v.visual_regex = 0
         else
-            "select operator
-            call s:get_region(1)
-            let R = s:G.select_region_at_pos('.')
+            "get operator
+            let R = s:get_region(1)
             call s:G.check_mutliline(0, R)
+            if !s:v.multiline && R.w > strlen(R.txt)    " yl motion
+                let l = strlen(R.txt[-1:]) * -1
+                call R.shift(0, l)
+            endif
+            call s:G.update_and_select_region()
         endif
 
         call s:old_updatetime()
