@@ -78,7 +78,7 @@ fun! vm#operators#select(count, ...) abort
 
     let n = n<1? 1 : n
     let n = n*x>1? n*x : ''
-    call s:select('y'.n.s)
+    call s:select('v'.n.s.'y')
     call s:G.update_and_select_region()
 endfun
 
@@ -93,25 +93,11 @@ fun! s:select(cmd) abort
     let Rs = map(copy(s:R()), '[v:val.l, v:val.a]')
     call vm#commands#erase_regions()
 
-    " issue #44: when using quotes text objects (i', i", etc), the marker ']
-    " is positioned on the quote, not on the end of the yanked region
-    " to correct this, select visually, then yank
-
-    let cmd = index(['''', '"', '`'], a:cmd[-1:-1]) >= 0 ?
-                \ 'v' . a:cmd[1:] . 'y' : a:cmd
-
     for r in Rs
         call cursor(r[0], r[1])
-        exe "normal ".cmd
+        exe "normal" a:cmd
         call s:get_region(0)
     endfor
-
-    if cmd =~# 'y\d*[hl]'
-        for r in s:R()
-            let l = strlen(r.txt[-1:]) * -1
-            call r.shift(0, l)
-        endfor
-    endif
 
     call s:V.Maps.enable()
     let s:v.silence    = 0
@@ -139,10 +125,6 @@ fun! vm#operators#after_yank() abort
             "get operator
             let R = s:get_region(1)
             call s:G.check_mutliline(0, R)
-            if !s:v.multiline && R.w > strlen(R.txt)    " yl motion
-                let l = strlen(R.txt[-1:]) * -1
-                call R.shift(0, l)
-            endif
             call s:G.update_and_select_region()
         endif
 
@@ -159,6 +141,8 @@ fun! s:get_region(add_pattern) abort
     if !empty(R) | return R | endif
 
     let R = vm#region#new(0)
+    "R.txt can be different because yank != visual yank
+    call R.update_content()
     if a:add_pattern
         call s:V.Search.add_if_empty()
     endif

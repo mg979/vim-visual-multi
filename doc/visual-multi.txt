@@ -316,7 +316,6 @@ Select Operator ~
   Only after VM has started. It acts on all regions, reshaping the selections
   on the given text object. Example: `si[` would select inside brackets.
 
-
 -------------------------------------------------------------------------------
 Find Operator ~
 
