@@ -185,7 +185,7 @@ endfun
 
 fun! s:Global.remove_highlight() abort
     """Remove all regions' highlight.
-    if s:v.clearmatches
+    if !s:v.keep_matches
         call clearmatches()
     else
         for r in s:R()

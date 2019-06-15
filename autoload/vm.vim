@@ -146,7 +146,7 @@ fun! vm#reset(...)
     silent! call s:V.Insert.auto_end()
 
     call vm#maps#reset()
-    let matches = vm#comp#reset()
+    call vm#comp#reset()
     call vm#augroup(1)
     call vm#au_cursor(1)
 
@@ -171,9 +171,6 @@ fun! vm#reset(...)
         let &updatetime = g:Vm.oldupdate
     endif
 
-    if !empty(matches)
-        call setmatches(matches)
-    endif
     call garbagecollect()
     call vm#comp#exit()
     delcommand VMSmartChange

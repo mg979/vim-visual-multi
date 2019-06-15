@@ -28,7 +28,7 @@ fun! vm#variables#set() abort
   set clipboard=
 
   "disable conceal
-  set conceallevel=0
+  let &conceallevel = vm#comp#conceallevel()
   set concealcursor=
 
   set virtualedit=onemore
@@ -102,7 +102,8 @@ fun! vm#variables#init() abort
   let v.no_search        = 0
   let v.no_msg           = g:VM_manual_infoline
   let v.visual_regex     = 0
-  let v.clearmatches     = get(g:, 'VM_clear_buffer_hl', 0)
+  let v.keep_matches     = get(g:, 'VM_keep_buffer_hl', 1) ||
+        \                  get(b:, 'VM_keep_buffer_hl', 0)
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

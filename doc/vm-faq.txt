@@ -30,7 +30,20 @@ or use |g:VM_custom_remaps| (normal mode only), e.g.:  >
 This will preserve the function of the original mapping. If you want to replace
 it entirely, see |g:VM_maps|.
 
+                                                             *vm-faq-find-char*
+How can I select a single character and search it? ~
 
+<C-n> generally can't do this because non-word characters are often included in
+some bigger pattern. You can add a mapping like this:
+>
+  nmap gl \\\<Tab>\\r
+<
+assuming you use default leader. That would be: add a cursor, switch mode and
+add a search pattern. Similarly, you can create mappings like:
+>
+  nmap cp vip\\c
+<
+This would create a column of cursors that spans the current inner paragraph.
 
 
 

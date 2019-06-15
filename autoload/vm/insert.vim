@@ -303,7 +303,7 @@ endfun
 
 fun! s:Insert.clear_hi() abort
     """Clear cursors highlight.
-    if s:v.clearmatches
+    if !s:v.keep_matches
         call clearmatches()
     else
         for c in self.cursors

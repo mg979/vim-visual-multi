@@ -4,7 +4,6 @@ let s:plugins = extend({
                 \'ctrlsf':    {
                                 \'ft': ['ctrlsf'],
                                 \'maps': 'call ctrlsf#buf#ToggleMap(1)',
-                                \'matches': 1,
                                 \'var': 'g:ctrlsf_loaded'},
                 \'AutoPairs': {
                                 \'maps': 'call AutoPairsInit()',
@@ -25,8 +24,6 @@ fun! vm#comp#init() abort
     if exists('g:loaded_youcompleteme')
         let g:VM_use_first_cursor_in_line = 1
     endif
-
-    call s:check_clearmatches()
 
     for plugin in keys(s:plugins)
         let p = s:plugins[plugin]
@@ -63,10 +60,15 @@ fun! vm#comp#icmds() abort
     endif
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#comp#conceallevel() abort
+    return exists('b:indentLine_ConcealOptionSet') && b:indentLine_ConcealOptionSet
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#reset() abort
-    let oldmatches = []
     if exists('g:loaded_deoplete') && s:disabled_deoplete
         call deoplete#enable()
         let s:disabled_deoplete = 0
@@ -85,22 +87,16 @@ fun! vm#comp#reset() abort
             if s:ftype(p) || s:noftype(p) | exe p.maps | endif
         endif
 
-        if s:restore_matches(p)
-            if s:ftype(p) || s:noftype(p) | let oldmatches = s:v.oldmatches | endif
-        endif
-
         if has_key(p, 'enable')
             if s:ftype(p) || s:noftype(p) | exe p.enable | endif
         endif
     endfor
-    return oldmatches
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#exit() abort
     """Called last on VM exit."""
-    call s:restore_indentLine()
     if exists('*VM_Exit') | call VM_Exit() | endif
 endfun
 
@@ -126,25 +122,6 @@ fun! vm#comp#no_reindents() abort
     return g:VM_no_reindent_filetype + ['ctrlsf']
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" indentLine plugin
-
-fun! s:check_clearmatches() abort
-    let indent_lines = exists('g:indentLine_loaded') &&
-                \ exists('b:indentLine_ConcealOptionSet') &&
-                \ b:indentLine_ConcealOptionSet
-    if indent_lines && s:v.clearmatches
-        let b:VM_indentLine = 1
-    endif
-endfun
-
-fun! s:restore_indentLine() abort
-    if exists('b:VM_indentLine')
-        IndentLinesEnable
-        unlet b:VM_indentLine
-    endif
-endfun
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Helpers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -155,10 +132,6 @@ endfun
 
 fun! s:noftype(p) abort
     return !has_key(a:p, 'ft') || empty(a:p.ft)
-endfun
-
-fun! s:restore_matches(p) abort
-    return s:v.clearmatches && has_key(a:p, 'matches') && a:p.matches
 endfun
 
 
