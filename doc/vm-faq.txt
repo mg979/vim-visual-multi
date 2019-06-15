@@ -1,0 +1,38 @@
+*vm-faq.txt*    Version 0.3.0    Last change: June 15 2019
+
+FREQUENTLY ASKED QUESTIONS                                   *visual-multi-faq*
+===============================================================================
+
+                                                             *vm-faq-functions*
+How can I do something before VM starts, or after VM ends? ~
+
+You can create these functions: >
+  function! VM_Start()
+  function! VM_Exit()
+<
+                                                                 *vm-faq-remap*
+How can I remap x in VM? ~
+
+There are two ways: either do a remap using the functions above, e.g.:  >
+  function! VM_Start()
+    nmap <buffer> <C-C> <Esc>
+    imap <buffer> <C-C> <Esc>
+  endfunction
+
+  function! VM_Exit()
+    nunmap <buffer> <C-C>
+    iunmap <buffer> <C-C>
+  endfunction
+<
+or use |g:VM_custom_remaps| (normal mode only), e.g.:  >
+  let g:VM_custom_remaps = {'<c-p>': '[', '<c-s>': 'q'}
+<
+This will preserve the function of the original mapping. If you want to replace
+it entirely, see |g:VM_maps|.
+
+
+
+
+
+
+ vim: ft=help et sw=2 ts=2 sts=2 tw=79

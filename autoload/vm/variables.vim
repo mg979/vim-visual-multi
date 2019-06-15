@@ -102,6 +102,7 @@ fun! vm#variables#init() abort
   let v.no_search        = 0
   let v.no_msg           = g:VM_manual_infoline
   let v.visual_regex     = 0
+  let v.clearmatches     = get(g:, 'VM_clear_buffer_hl', 0)
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

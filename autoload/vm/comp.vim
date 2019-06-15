@@ -133,7 +133,6 @@ fun! s:check_clearmatches() abort
     let indent_lines = exists('g:indentLine_loaded') &&
                 \ exists('b:indentLine_ConcealOptionSet') &&
                 \ b:indentLine_ConcealOptionSet
-    let s:v.clearmatches = get(g:, 'VM_clear_buffer_hl', !indent_lines)
     if indent_lines && s:v.clearmatches
         let b:VM_indentLine = 1
     endif

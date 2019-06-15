@@ -18,6 +18,7 @@ Additional resources:
 
 Settings                                       |visual-multi-settings|
 Quick reference                                |visual-multi-qr|
+Frequently asked questions                     |visual-multi-faq|
 
 
 
@@ -229,19 +230,27 @@ Find Word ~
 
   After VM has started, you can also use the following mappings:
 
-    ]           find next
-    [, <C-p>    find previous
-    q, <C-s>    skip and find next (or previous if searching backwards)
+    ]        find next
+    [        find previous
+    }        go to next
+    {        go to previous
+    <C-f>    go to next (by page)
+    <C-b>    go to previous (by page)
+    q        skip and find next (or previous if searching backwards)
 
   NOTE: <C-n> behaves both as `find next` if pressed on an existing region, or
   `find word` otherwise, adding a new pattern.
 
-  NOTE: when you change direction of search with <C-p>, skipping a region will
+  NOTE: when you change direction of search with [, skipping a region will
   keep searching backwards.
 
   NOTE: you can press <C-n> also in cursor mode: all words under cursors will
   be selected, but in this case no patterns will be added. A new pattern is
   only added when you press <C-n> on some text without any region.
+
+  NOTE: you can remap these keys, e.g.: 
+>
+    let g:VM_custom_remaps = {'<c-p>': '[', '<c-s>': 'q'}
 
 -------------------------------------------------------------------------------
 Add Cursors Down/Up ~

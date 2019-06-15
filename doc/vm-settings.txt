@@ -13,6 +13,13 @@ Default: 'underline'
   selected. Possible useful values are 'underline' and 'red'
 
 
+                                                         *g:VM_clear_buffer_hl*
+Default: 0
+
+  Uses clearmatches() to clear VM highlight. It's faster but it is not
+  compatible with plugins that apply special highlights.
+
+
                                                          *g:VM_manual_infoline*
 Default: 1
 
@@ -48,6 +55,12 @@ Default: 0
 Default: 0
 
   Automatically exit VM if there's a single cursor left after a command.
+
+
+                                                           *g:VM_custom_remaps*
+Default: {}
+
+  To remap VM keys. See |vm-faq-remap|.
 
 
 
