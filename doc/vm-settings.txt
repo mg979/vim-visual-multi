@@ -10,8 +10,12 @@ Hopefully you won't need to alter any of these.
 Default: 'underline'
 
   Controls VM default highlighting style for patterns matched, but not
-  selected. Possible useful values are 'underline' and 'red'
-
+  selected. Possible useful values are 'underline' and 'red'.
+  Otherwise an empty string if you want the normal |Search| highlight, or
+  a full highlight command (help |:hi|), e.g.:  >
+    let g:VM_highlight_matches = 'hi Search ctermfg=228 cterm=underline'
+    let g:VM_highlight_matches = 'hi! link Search PmenuSel'
+<
 
                                                           *g:VM_keep_buffer_hl*
 Default: 1

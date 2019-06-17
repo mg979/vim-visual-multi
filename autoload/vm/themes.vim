@@ -35,8 +35,7 @@ fun! vm#themes#init() abort
       let g:Vm.search_hi = "hi! Search ".hi
     endif
 
-    let g:Vm.Search = g:VM_highlight_matches == 'underline' ? 'hi Search term=underline cterm=underline gui=underline' :
-          \           g:VM_highlight_matches == 'red'       ? 'hi Search ctermfg=196 guifg=#ff0000' : g:VM_highlight_matches
+    call vm#themes#hi()
   endif
 
   if theme == 'default'
@@ -57,6 +56,14 @@ fun! vm#themes#init() abort
   let g:Vm.hi.insert  = 'VM_Insert'
   let g:Vm.hi.cursor  = 'VM_Cursor'
   highlight link MultiCursor VM_Cursor
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#themes#hi() abort
+  """Init Search highlight.
+  let g:Vm.Search = g:VM_highlight_matches == 'underline' ? 'hi Search term=underline cterm=underline gui=underline' :
+        \           g:VM_highlight_matches == 'red'       ? 'hi Search ctermfg=196 guifg=#ff0000' : g:VM_highlight_matches
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

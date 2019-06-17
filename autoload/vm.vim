@@ -92,6 +92,8 @@ fun! vm#init_buffer(empty, ...) abort
         if !empty(g:VM_highlight_matches)
             if !has_key(g:Vm, 'Search')
                 call vm#themes#init()
+            else
+                call vm#themes#hi()
             endif
             hi clear Search
             exe g:Vm.Search
