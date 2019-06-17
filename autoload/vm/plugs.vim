@@ -218,6 +218,7 @@ fun! vm#plugs#buffer() abort
   inoremap <silent><expr> <Plug>(VM-I-BS)               <sid>Insert('X')
   inoremap <silent><expr> <Plug>(VM-I-Paste)            <sid>Insert('p')
   inoremap <silent><expr> <Plug>(VM-I-CtrlW)            <sid>Insert('cw')
+  inoremap <silent><expr> <Plug>(VM-I-CtrlU)            <sid>Insert('cu')
   inoremap <silent><expr> <Plug>(VM-I-CtrlD)            <sid>Insert('x')
   inoremap <silent><expr> <Plug>(VM-I-Del)              <sid>Insert('x')
   inoremap <silent><expr> <Plug>(VM-I-Home)             <sid>Insert('0')
@@ -282,7 +283,9 @@ fun! s:Insert(key) abort
   elseif a:key == 'p'         "c-v
     return "\<esc>:call vm#icmds#paste()\<cr>".a
   elseif a:key == 'cw'        "c-w
-    return "\<esc>:call vm#icmds#cw()\<cr>"
+    return "\<esc>:call vm#icmds#cw(0)\<cr>"
+  elseif a:key == 'cu'        "c-u
+    return "\<esc>:call vm#icmds#cw(1)\<cr>"
   endif
 endfun
 

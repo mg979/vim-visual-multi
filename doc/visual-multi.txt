@@ -125,6 +125,7 @@ should be aware of:
 * don't expect snippets, or complex interactions with other plugins, to work
 * autocomplete, abbreviations and <C-R> work normally
 * <C-W> works, but by default is limited to the current line
+* <C-U> works normally (for all cursors)
 * <CR> will respect indentation, but not comments
 * code autoreindentation is disabled
 
@@ -248,7 +249,7 @@ Find Word ~
   be selected, but in this case no patterns will be added. A new pattern is
   only added when you press <C-n> on some text without any region.
 
-  NOTE: you can remap these keys, e.g.: 
+  NOTE: you can remap these keys, e.g.:
 >
     let g:VM_custom_remaps = {'<c-p>': '[', '<c-s>': 'q'}
 

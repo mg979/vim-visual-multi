@@ -215,6 +215,7 @@ fun! vm#maps#all#buffer() abort
         \"I BS":                    ['<BS>',        'i'],
         \"I Paste":                 ['<C-v>',       'i'],
         \"I CtrlW":                 ['<C-w>',       'i'],
+        \"I CtrlU":                 ['<C-u>',       'i'],
         \"I CtrlD":                 ['<C-d>',       'i'],
         \"I Del":                   ['<Del>',       'i'],
         \"I Home":                  ['<Home>',      'i'],

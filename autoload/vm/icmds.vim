@@ -57,7 +57,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#icmds#cw() abort
+fun! vm#icmds#cw(ctrlu) abort
     let size = s:F.size()
     let change = 0 | let s:v.eco = 1
     let s:v.storepos = getpos('.')[1:2]
@@ -79,7 +79,9 @@ fun! vm#icmds#cw() abort
         let L = getline(r.l)
         let ws_only = r.a > 1 && match(L[:(r.a-2)], '[^ \t]') < 0
 
-        if r.a == 1         "at bol, go up and join lines
+        if a:ctrlu          "ctrl-u
+            normal! d^
+        elseif r.a == 1     "at bol, go up and join lines
             normal! kgJ
         elseif ws_only      "whitespace only before, delete it
             normal! d0
