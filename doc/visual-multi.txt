@@ -315,7 +315,8 @@ Get Operator ~
 
   Default mapping: \\gs                                       *vm-get-operator*
 
-  Creates a new selection from a text object.
+  Creates a new selection from a text object. It can also create a pattern, but
+  only if there are no patterns yet.
 
 -------------------------------------------------------------------------------
 Select Operator ~

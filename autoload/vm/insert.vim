@@ -266,7 +266,6 @@ fun! s:Insert.stop(...) abort
 
     call s:step_back()
     call s:V.Edit.post_process(0,0)
-    call s:V.Edit.extra_spaces.remove_cw()
 
     let &indentkeys   = s:v.indentkeys
     let &cinkeys      = s:v.cinkeys

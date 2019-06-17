@@ -16,7 +16,6 @@ fun! vm#edit#init() abort
     let s:v.W            = []
     let s:v.storepos     = []
     let s:v.extra_spaces = []
-    let s:v.cw_spaces    = []
     let s:can_multiline  = 0
 
     call vm#icmds#init()
@@ -296,21 +295,6 @@ fun! s:Edit.extra_spaces.remove(...) abort
         endif
     endfor
     let s:v.extra_spaces = []
-endfun
-
-fun! s:Edit.extra_spaces.remove_cw() abort
-    "remove the extra space added by insert mode <C-W>
-    for i in s:v.cw_spaces
-        "some region has been removed for some reason(merge, ...)
-        if i >= len(s:R()) | break | endif
-
-        let l = s:R()[i].L
-        let Line = getline(l)
-        if Line[-2:-1] ==# '  '
-            call setline(l, Line[:-3])
-        endif
-    endfor
-    let s:v.cw_spaces = []
 endfun
 
 fun! s:Edit.extra_spaces.add(r) abort
