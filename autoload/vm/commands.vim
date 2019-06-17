@@ -624,6 +624,41 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! vm#commands#regex_motion(regex, count, remove, this) abort
+    if s:F.no_regions() | return | endif
+
+    let regex = empty(a:regex) ? s:F.search_chars(a:count) : a:regex
+    let case =    g:VM_case_setting == 'smart'  ? '' :
+                \ g:VM_case_setting == 'ignore' ? '\c' : '\C'
+
+    if empty(regex)
+      return s:F.msg('Cancel', 1)
+    endif
+
+    call s:F.Scroll.get()
+    let [ R, X ] = [ s:R()[ s:v.index ], s:X() ]
+    call s:before_move()
+
+    for r in ( a:this ? [R] : s:RS() )
+        call cursor(r.l, r.a)
+        if !search(regex.case, 'zp', r.l)
+            if a:remove | call r.remove() | endif
+            continue
+        endif
+        if X
+            let r.b = getpos('.')[2]
+            call r.update_region()
+        else
+            call r.update_cursor_pos()
+        endif
+    endfor
+
+    "update variables, facing direction, highlighting
+    call s:after_move(R)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#commands#shrink_or_enlarge(shrink, this) abort
     """Reduce/enlarge selection size by 1."""
     if s:F.no_regions() | return | endif

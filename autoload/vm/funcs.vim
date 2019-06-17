@@ -220,6 +220,42 @@ fun! s:Funcs.sync_minlines() abort
     return matchstr(sync, '\d\+')
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:add_char(c)
+  let s:chars .= nr2char(a:c)
+  echon nr2char(a:c)
+endfun
+
+fun! s:ask_char()
+  let c = getchar()
+  if c == 27                        " escape
+    return
+  elseif s:char_escape              " escaped character
+  elseif c == 92                    " backslash
+    call s:add_char(c)
+    let s:char_escape = 1
+    return s:ask_char()
+  endif
+  call s:add_char(c)
+  let s:chars2go -= 1
+  let s:char_escape = 0
+  return 1
+endfun
+
+fun! s:Funcs.search_chars(n) abort
+  """Ask for [count] or 1 regex-interpretable character(s).
+  let [ s:chars, s:chars2go, s:char_escape ] = [ '', a:n, 0 ]
+  let ns = a:n > 1 ? 's' : ''
+  let pre = printf('Find regex [%d char'.ns.'] ', a:n)
+  echohl Label  | echo pre
+  echohl None   | echon '> '
+  while s:chars2go
+    if !s:ask_char() | return '' | endif
+  endwhile
+  return s:chars
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Keep viewport position
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

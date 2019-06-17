@@ -41,8 +41,8 @@ fun! vm#plugs#buffer() abort
   let g:Vm.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '$', '0', '^', '%', 'ge', 'gE', '\|']
   let g:Vm.find_motions   = ['f', 'F', 't', 'T']
 
-  nnoremap <silent>   <Plug>(VM-Select-Operator)     :<c-u>call vm#operators#select(v:count)<cr>
-  nmap <expr><silent> <Plug>(VM-Find-Operator)       vm#operators#find(1, 0)
+  nnoremap <silent>       <Plug>(VM-Select-Operator)         :<c-u>call vm#operators#select(v:count)<cr>
+  nmap <expr><silent>     <Plug>(VM-Find-Operator)           vm#operators#find(1, 0)
 
   nnoremap <silent>       <Plug>(VM-Select-Line-Down)        :call vm#commands#expand_line(1)<cr>
   nnoremap <silent>       <Plug>(VM-Select-Line-Up)          :call vm#commands#expand_line(0)<cr>
@@ -50,6 +50,8 @@ fun! vm#plugs#buffer() abort
   xnoremap <silent>       <Plug>(VM-Visual-Subtract)         :<c-u>call vm#commands#from_visual('subtract')<cr>
   nnoremap                <Plug>(VM-Split-Regions)           :<c-u>call vm#visual#split()<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Empty-Lines)      :<c-u>call vm#commands#remove_empty_lines()<cr>
+  nnoremap <silent>       <Plug>(VM-Goto-Regex)              :<c-u>call vm#commands#regex_motion('', v:count1, 0, 0)<cr>
+  nnoremap <silent>       <Plug>(VM-Goto-Regex!)             :<c-u>call vm#commands#regex_motion('', v:count1, 1, 0)<cr>
 
   nnoremap <silent>       <Plug>(VM-Find-I-Word)             :<c-u>call vm#commands#find_under(0, 0, 0)<cr>
   nnoremap <silent>       <Plug>(VM-Find-A-Word)             :<c-u>call vm#commands#find_under(0, 0, 1)<cr>

@@ -169,6 +169,8 @@ fun! vm#maps#all#buffer() abort
         \"Zero Numbers Append":     [leader.'0N', 'n'],
         \"Shrink":                  [leader.'-',  'n'],
         \"Enlarge":                 [leader.'+',  'n'],
+        \"Goto Regex":              [leader.'g',  'n'],
+        \"Goto Regex!":             [leader.'G',  'n'],
         \})
 
   "arrows

@@ -166,7 +166,7 @@ You may add as many patterns as you wish.
 
 Sometimes regions are created without a pattern: for example when you add
 single cursors, or create a column of cursors, or when you start selecting with
-<Shift> + arrow keys (not mapped by default).
+<Shift> + arrow keys.
 
 In all these cases, the pattern will be automatically added when possible, that
 is, when you are in extend mode and look for the next occurrence. A pattern
@@ -411,6 +411,7 @@ arguably usefulness), so if you think as you go on reading, that something is
 
 Quick reference ~
 
+Go-to-regex motion            \\g, \\G                   |vm-goto-regex|
 Alignment                     \\a, \\<, \\>              |vm-align|
 Replace in regions            R                          |vm-replace-pattern|
 Subtract from regions         \\s                        |vm-subtract-pattern|
@@ -423,6 +424,21 @@ Numbering                     \\n, \\N                   |vm-numbering|
 Filter regions                \\f                        |vm-filter|
 Transform with expression     \\e                        |vm-transform|
 
+
+-------------------------------------------------------------------------------
+Go-to-regex motion ~
+                                                                *vm-goto-regex*
+  Default mappings: \\g, \\G
+
+  It is similar to a |f| motion (find character), but it accepts a regex
+  pattern and a [count]. \\G does the same, but additionally it will remove
+  regions for which the motion failed (the character[s] could not be found).
+
+  Examples:  >
+    \\g   ->  a     ->  will search for the letter 'a' in the same line
+    \\g   ->  \d    ->  will search for a digit
+    \\G   ->  \d    ->  will also remove cursors where a digit was not found
+    2\\g  ->  \d\d  ->  will search for 2 consecutive digits
 
 -------------------------------------------------------------------------------
 Alignment ~
