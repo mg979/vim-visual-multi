@@ -68,6 +68,13 @@ Default: {}
   To remap VM keys. See |vm-faq-remap|.
 
 
+                                                           *g:VM_announce_exit*
+Default: 1
+
+  Controls if "Exited Visual-Multi." is displayed when manually exiting
+  |cursor-mode| or |extend-mode|.
+
+
 
 
 
