@@ -68,6 +68,13 @@ Default: {}
   To remap VM keys. See |vm-faq-remap|.
 
 
+                                                             *g:VM_silent_exit*
+Default: 0
+
+  When manually exiting |cursor-mode| or |extend-mode|, don't display "Exited
+  Visual-Multi."
+
+
 
 
 
