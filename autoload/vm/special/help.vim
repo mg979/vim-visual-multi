@@ -211,7 +211,8 @@ fun! vm#special#help#show() abort
   elseif ask == '2' | redraw! | let show_groups = groups[4:7]
   elseif ask == '3' | redraw! | let show_groups = groups[8:10]
   elseif ask == '4' | redraw! | let show_groups = groups[-3:-1]
-  else              | return  | endif
+  else              | return
+  endif
 
   let D = s:dict()
 
@@ -222,13 +223,15 @@ fun! vm#special#help#show() abort
     "iterate s:dict chosen groups and print keys / desctiptions / notes
     for plug in D[dict_key]
       if !has_key(g:Vm.help, plug)   | continue
-      elseif !has_key(s:plugs, plug) | let s:plugs[plug] = [plug, ""] | endif
+      elseif !has_key(s:plugs, plug) | let s:plugs[plug] = [plug, ""]
+      endif
       let Map  = g:Vm.help[plug]
       let Desc = s:plugs[plug][0]
       let Note = s:plugs[plug][1]
       echohl Special | exe s:Txt(i, Map)
       echohl Type    | echon s:Pad(Desc, &columns > 180 ? 25 : 30)
-      echohl None    | if &columns > 180 | echon s:Pad(Note, 50) | endif
+      echohl None
+      if &columns > 180 | echon s:Pad(Note, 50) | endif
       let i += 1
     endfor
     echo "\n"

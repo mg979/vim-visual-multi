@@ -39,7 +39,8 @@ fun! s:Block.vertical() abort
     if s:v.direction
         if s:v.block[1] <= vcol | let s:v.block[1] = vcol | endif
 
-    elseif s:v.block[1] >= vcol | let s:v.block[1] = vcol | endif
+    elseif s:v.block[1] >= vcol | let s:v.block[1] = vcol
+    endif
 
     call s:G.new_cursor()
     call s:G.merge_regions()
@@ -61,7 +62,8 @@ fun! s:Block.horizontal(before) abort
         let is_region = !empty(s:G.is_region_at_pos('.'))
 
         if !is_region         | call self.stop()
-        elseif !s:v.block[0]  | let s:v.block[0] = vcol | endif
+        elseif !s:v.block[0]  | let s:v.block[0] = vcol
+        endif
 
         "-----------------------------------------------------------------------
         "after motion
@@ -70,12 +72,14 @@ fun! s:Block.horizontal(before) abort
         let [ b0, b1 ] = [ s:v.block[0], s:v.block[1] ]
 
         if vcol < b0      | let s:v.block[0] = vcol
-        elseif vcol < b1  | let s:v.block[1] = vcol | endif
+        elseif vcol < b1  | let s:v.block[1] = vcol
+        endif
 
         "set minimum edge
         let bs = map(copy(s:R()), 'v:val.b')
         if count(bs, bs[0]) == len(bs) | let s:v.block[2] = s:v.block[0]
-        else                           | let s:v.block[2] = min(bs) | endif
+        else                           | let s:v.block[2] = min(bs)
+        endif
     endif
 endfun
 

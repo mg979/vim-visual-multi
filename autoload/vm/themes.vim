@@ -73,8 +73,12 @@ fun! vm#themes#load(theme) abort
   if empty(a:theme)
     let g:VM_theme = 'default'
     echo 'Theme set to default'
-  elseif index(keys(s:Themes), a:theme) < 0 | echo "No such theme."      | return
-  else                                      | let g:VM_theme = a:theme   | endif
+  elseif index(keys(s:Themes), a:theme) < 0
+    echo "No such theme."
+    return
+  else
+    let g:VM_theme = a:theme
+  endif
   call vm#themes#init()
 endfun
 

@@ -51,8 +51,8 @@ endfun
 fun! s:Funcs.byte2pos(byte) abort
     """Return the (line, col) position of a byte offset.
 
-    let line   = byte2line(a:byte)
-    let col    = a:byte - line2byte(line) + 1
+    let line = byte2line(a:byte)
+    let col  = a:byte - line2byte(line) + 1
     return [line, col]
 endfun
 
@@ -69,13 +69,13 @@ endfun
 
 fun! s:Funcs.get_vertcol() abort
     " getcurpos() is unreliable at $ (https://github.com/vim/vim/issues/4464)
-    " if > eol, reposition the cursor, so that curwant is reset
-    let curwant = getcurpos()[4]
-    if curwant > col('$')
+    " if > eol, reposition the cursor, so that curswant is reset
+    let curswant = getcurpos()[4]
+    if curswant > col('$')
         call cursor(getpos('.')[1:2])
-        let curwant = getcurpos()[4]
+        let curswant = getcurpos()[4]
     endif
-    return curwant
+    return curswant
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -132,7 +132,8 @@ endfun
 
 fun! s:Funcs.vm_regs_from_json() abort
     if !get(g:, 'VM_persistent_registers', 0) || !filereadable(g:Vm.regs_file)
-        return {'"': []} | endif
+        return {'"': []}
+    endif
     let regs = json_decode(readfile(g:Vm.regs_file)[0])
     let regs['"'] = []
     return regs
@@ -306,13 +307,15 @@ endfun
 
 fun! s:Funcs.msg(text, force) abort
     if s:v.eco                     | return
-    elseif s:v.silence && !a:force | return | endif
+    elseif s:v.silence && !a:force | return
+    endif
 
     redraw
     if type(a:text) == type("")
         exe "echohl" g:Vm.hi.message
         echon a:text
-        echohl None | return | endif
+        echohl None | return
+    endif
 
     for txt in a:text
         exe "echohl ".txt[1]
@@ -325,7 +328,8 @@ fun! s:Funcs.count_msg(force, ...) abort
     if s:v.eco || s:v.insert            | return
     elseif s:v.silence && !a:force      | return
     elseif s:v.no_msg  && a:force < 2   | return
-    elseif s:v.index < 0                | call self.msg("No selected regions.", 1) | return | endif
+    elseif s:v.index < 0                | return self.msg("No selected regions.", 1)
+    endif
     let r = s:R()[s:v.index]
 
     let hl = 'Directory' | let H1 = 'Type' | let H2 = 'WarningMsg'
@@ -344,7 +348,8 @@ fun! s:Funcs.count_msg(force, ...) abort
     let s1 = ['   Current patterns: ', hl]
     let s2 = [self.pad(string(s:v.search), &columns - 1), H1]
     let msg = [i1, m1, i2, m2, i3, m3, i4, m4, ix, R, s1, s2]
-    if a:0 | call insert(msg, a:1, 9) | endif | call self.msg(msg, a:force)
+    if a:0 | call insert(msg, a:1, 9) | endif
+    call self.msg(msg, a:force)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -361,16 +366,19 @@ fun! s:Funcs.toggle_option(option, ...) abort
         if s:v.multiline
             call s:V.Block.stop()
         else
-            call vm#commands#split_lines() | endif
+            call vm#commands#split_lines()
+        endif
 
     elseif a:option == 'block_mode'
         if s:v.block_mode
             if s:v.multiline
                 let s:v.multiline = 0
-                call vm#commands#split_lines() | endif
+                call vm#commands#split_lines()
+            endif
             call s:V.Block.start()
         else
-            call s:V.Block.stop() | endif
+            call s:V.Block.stop()
+        endif
 
     elseif a:option == 'whole_word'
         if empty(s:v.search) | call self.msg('No search patterns.', 1) | return | endif

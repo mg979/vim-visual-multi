@@ -48,7 +48,8 @@ fun! s:Global.new_region() abort
     if !s:v.eco
         call self.select_region(R.index)
         call s:V.Search.check_pattern()
-        call s:F.restore_reg() | endif
+        call s:F.restore_reg()
+    endif
     return R
 endfun
 
@@ -72,7 +73,8 @@ fun! s:Global.regions(...) abort
     """Return current working set of regions.
     if s:only_this()        | return [s:V.Regions[s:v.index]]
     elseif s:v.active_group | return s:Group()
-    else                    | return s:V.Regions | endif
+    else                    | return s:V.Regions
+    endif
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -110,7 +112,8 @@ fun! s:Global.change_mode(...) abort
     " merge cursors if transitioning from cursor mode, but
     " reset direction transitioning from extend mode
     if !s:X() | call self.merge_cursors()
-    else      | let s:v.direction = 1 | endif
+    else      | let s:v.direction = 1
+    endif
 
     let g:Vm.extend_mode = !s:X()
 
@@ -204,7 +207,8 @@ fun! s:Global.all_empty() abort
     for r in s:R()
         if r.a != r.b
             if !s:X() | let g:Vm.extend_mode = 1 | endif
-            return 0  | endif
+            return 0
+        endif
     endfor
     return 1
 endfun
@@ -262,7 +266,8 @@ fun! s:Global.update_and_select_region(...) abort
             let R = self.select_region_at_pos(a:0? a:1 : '.')
         endif
     else
-        let R = self.select_region(0) | endif
+        let R = self.select_region(0)
+    endif
 
     if g:VM_exit_on_1_cursor_left && nR == 1
         call vm#reset()
@@ -279,7 +284,8 @@ fun! s:Global.update_map_and_select_region(...) abort
     "Use when regions have been just created and there's no need to update them.
     if s:v.find_all_overlap
         let s:v.find_all_overlap = 0
-        return self.merge_regions() | endif
+        return self.merge_regions()
+    endif
 
     call self.reset_vars()
     call self.update_indices()
@@ -397,7 +403,9 @@ endfun
 fun! s:Global.overlapping_regions(R) abort
     """Check if two regions are overlapping.
     let B = range(a:R.A, a:R.B)
-    for b in B | if s:V.Bytes[b] > 1 | return 1 | endif | endfor
+    for b in B
+        if s:V.Bytes[b] > 1 | return 1 | endif
+    endfor
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -426,7 +434,8 @@ fun! s:Global.reset_byte_map(update) abort
 
     if s:only_this()        | call s:R()[s:v.index].remove_from_byte_map(0)
     elseif s:v.active_group | for r in s:Group() | call r.remove_from_byte_map(0) | endfor
-    else                    | let s:V.Bytes = {} | endif
+    else                    | let s:V.Bytes = {}
+    endif
 
     if a:update
         for r in self.regions() | call r.update_bytes_map() | endfor
@@ -473,7 +482,9 @@ fun! s:Global.update_indices(...) abort
         for r in s:R()[i:]
             let r.index = i
             let i += 1
-        endfor | return | endif
+        endfor
+        return
+    endif
 
     let i = 0
     for r in s:R()
@@ -678,8 +689,12 @@ fun! s:Global.rebuild_from_map(...) abort
     call vm#commands#erase_regions()
 
     for i in By[1:]
-        if i == B+1 | let B = i
-        else        | call vm#region#new(0, A, B) | let A = i | let B = i | endif
+        if i == B+1
+            let B = i
+        else
+            call vm#region#new(0, A, B)
+            let A = i | let B = i
+        endif
     endfor
     call vm#region#new(0, A, B)
 endfun

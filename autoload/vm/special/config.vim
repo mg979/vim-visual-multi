@@ -36,7 +36,8 @@ fun! vm#special#config#start() abort
   elseif o == 4
     if g:VM_case_setting == 'smart'         | let g:VM_case_setting = 'sensitive'
     elseif g:VM_case_setting == 'sensitive' | let g:VM_case_setting = 'ignore'
-    else                                    | let g:VM_case_setting = 'smart' | endif
+    else                                    | let g:VM_case_setting = 'smart'
+    endif
   else
     exe "let g:".opt[o][1]." = ".!eval("g:".opt[o][1])
   endif

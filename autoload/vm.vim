@@ -14,7 +14,6 @@ let g:VM_disable_syntax_in_imode          = get(g:, 'VM_disable_syntax_in_imode'
 let g:VM_exit_on_1_cursor_left            = get(g:, 'VM_exit_on_1_cursor_left', 0)
 let g:VM_manual_infoline                  = get(g:, 'VM_manual_infoline', 1)
 let g:VM_overwrite_vim_registers          = get(g:, 'VM_overwrite_vim_registers', 0)
-let g:VM_silent_exit                      = get(g:, 'VM_silent_exit', 0)
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Reindentation after insert mode
@@ -163,7 +162,9 @@ fun! vm#reset(...)
     call vm#variables#reset_globals()
 
     "exiting manually
-    if !g:VM_silent_exit && !a:0 | call s:V.Funcs.msg('Exited Visual-Multi.', 1) | endif
+    if !get(g:, 'VM_silent_exit', 0) && !a:0
+        call s:V.Funcs.msg('Exited Visual-Multi.', 1)
+    endif
 
     if !empty(g:VM_highlight_matches)
         hi clear Search

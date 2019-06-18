@@ -82,7 +82,8 @@ endfun
 
 fun! vm#visual#split() abort
     """Split regions with regex pattern."""
-    call s:init() | if !len(s:R()) | return | endif
+    call s:init()
+    if !len(s:R()) | return | endif
 
     echohl Type   | let pat = input('Pattern to remove > ') | echohl None
     if empty(pat) | call s:F.msg('Command aborted.', 1)     | return | endif
@@ -94,7 +95,8 @@ fun! vm#visual#split() abort
     if !search(pat, 'nczW', stop.L)     "search method: accept at cursor position
         call s:F.msg("\t\tPattern not found", 1)
         call s:G.select_region(s:v.index)
-        return | endif
+        return
+    endif
 
     let oldmap = copy(s:V.Bytes)
     call vm#commands#erase_regions()
@@ -158,7 +160,8 @@ fun! s:remove_group(subtract) abort
     "remove temporary region group
     for r in s:V.Groups[-1]
         if a:subtract | call r.clear(1)
-        else          | let r.group = s:old_group | endif
+        else          | let r.group = s:old_group
+        endif
     endfor
 
     let s:v.active_group = s:old_group | call remove(s:V.Groups, -1)

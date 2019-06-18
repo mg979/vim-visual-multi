@@ -47,7 +47,8 @@ fun! s:update_search(p) abort
     endif
 
     if s:v.eco | let @/ = s:v.search[0]
-    else       | let @/ = join(s:v.search, '\|') | endif
+    else       | let @/ = join(s:v.search, '\|')
+    endif
     set hlsearch
 endfun
 
@@ -75,12 +76,14 @@ fun! s:Search.get() abort
     let r = s:G.is_region_at_pos('.')
     if !empty(r)
         let pat = self.escape_pattern(r.txt)
-        call s:update_search(pat) | return | endif
+        call s:update_search(pat) | return
+    endif
 
     "fallback to first region.txt or @/, if no active search
     if !empty(s:v.search) | return
     elseif len(s:R())     | call self.add(self.escape_pattern(s:R()[0].txt))
-    else                  | call self.get_slash_reg() | endif
+    else                  | call self.get_slash_reg()
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -123,15 +126,18 @@ fun! s:Search.remove(also_regions) abort
         call remove(pats, i)
         call self.update_current()
     else
-        call s:F.msg('No search patters yet.', 0) | return | endif
+        call s:F.msg('No search patters yet.', 0) | return
+    endif
 
     if a:also_regions
         let i = len(s:R()) - 1 | let removed = 0
         while i>=0
             if s:R()[i].pat ==# pat
                 call s:R()[i].remove()
-                let removed += 1 | endif
-            let i -= 1 | endwhile
+                let removed += 1
+            endif
+            let i -= 1
+        endwhile
 
         if removed | call s:G.update_and_select_region() | endif
 
@@ -156,7 +162,8 @@ fun! s:Search.validate() abort
         for p in s:v.search
             if !search(@/, 'cnw') | call remove(s:v.search, i) | break | endif
             let i += 1
-        endfor | break
+        endfor
+        break
     endwhile
     let @/ = join(s:v.search, '\|')
 endfun
@@ -170,7 +177,8 @@ fun! s:Search.check_pattern(...) abort
         if index(s:v.search, p) >= 0 | return | endif
     endfor
     if a:0 | call self.get()
-    else   | call self.get_slash_reg() | endif
+    else   | call self.get_slash_reg()
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

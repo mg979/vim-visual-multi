@@ -45,7 +45,8 @@ fun! vm#region#new(cursor, ...) abort
 
         else                    "making a new region from positions
             let a = a:1 | let b = a:2 | let c = a:3 | let d = a:4
-        endif | endif
+        endif
+    endif
 
     "----------------------------------------------------------------------
 
@@ -199,7 +200,8 @@ fun! s:Region.remove() abort
     call remove(s:v.IDs_list, index(s:v.IDs_list, self.id))
 
     if len(s:R()) | call s:G.update_indices()
-    else          | let s:v.index = -1          | endif
+    else          | let s:v.index = -1
+    endif
 
     if s:v.index >= len(s:R()) | let s:v.index = len(s:R()) - 1 | endif
     return self
@@ -220,7 +222,8 @@ fun! s:Region.remove_from_byte_map(all) abort
     else
         for b in range(self.A, self.B)
             if s:V.Bytes[b] > 1 | let s:V.Bytes[b] -= 1
-            else                | call remove(s:V.Bytes, b) | endif
+            else                | call remove(s:V.Bytes, b)
+            endif
         endfor
     endif
 endfun
@@ -270,7 +273,8 @@ fun! s:move_cursor(r) abort
 
     "keep line or column
     if s:vertical()       | call s:keep_vertical_col(a:r)
-    elseif !s:v.multiline | call s:keep_line(a:r, line('.')) | endif
+    elseif !s:v.multiline | call s:keep_line(a:r, line('.'))
+    endif
 
     call a:r.update_cursor_pos()
 endfun
@@ -365,7 +369,8 @@ endfun
 
 fun! s:Region.update() abort
     if s:X() | call self.update_region()
-    else     | call self.update_cursor() | endif
+    else     | call self.update_cursor()
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -464,7 +469,8 @@ endfun
 fun! s:Region.highlight() abort
     """Create the highlight entries."""
 
-    if s:v.eco | return | endif | let R = self
+    if s:v.eco | return | endif
+    let R = self
 
     "------------------ cursor mode ----------------------------
 
@@ -479,7 +485,7 @@ fun! s:Region.highlight() abort
     let region = []
     let cursor = [R.cur_ln(), R.cur_col()]
 
-    "single line skip the for loop
+    "skip the for loop if single line
     if !max | let region = [[R.l, R.a, R.w]] | else | let max += 1 | endif
 
     "define highlight
@@ -538,7 +544,9 @@ fun! s:pattern(r) abort
 
     if empty(s:v.search) | return s:V.Search.escape_pattern(a:r.txt) | endif
 
-    for p in s:v.search | if a:r.txt =~ p | return p | endif | endfor
+    for p in s:v.search
+        if a:r.txt =~ p | return p | endif
+    endfor
 
     "return current search pattern in regex mode
     if !has_key(a:r, 'pat')

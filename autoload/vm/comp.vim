@@ -33,7 +33,8 @@ fun! vm#comp#init() abort
 
         elseif has_key(p, 'disable')
             if s:ftype(p)       | exe p.disable
-            elseif s:noftype(p) | exe p.disable | endif
+            elseif s:noftype(p) | exe p.disable
+            endif
         endif
     endfor
 endfun

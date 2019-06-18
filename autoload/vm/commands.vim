@@ -33,7 +33,8 @@ fun! s:set_extend_mode(X) abort
     """If just starting, enable extend mode if appropriate.
 
     if s:X() || a:X | return s:init(0, 1, 1)
-    else            | return s:init(0, 1, 0) | endif
+    else            | return s:init(0, 1, 0)
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -221,8 +222,12 @@ fun! vm#commands#regex_done() abort
     endif
     call s:Search.get_slash_reg()
 
-    if s:X() | call s:G.new_region()                     | call s:F.count_msg(0)
-    else     | call vm#commands#add_cursor_at_word(0, 0) | endif
+    if s:X()
+        call s:G.new_region()
+        call s:F.count_msg(0)
+    else
+        call vm#commands#add_cursor_at_word(0, 0)
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -399,7 +404,8 @@ fun! s:skip() abort
 endfun
 
 fun! s:keep_block() abort
-    if s:v.block_mode | let s:v.block[3] = 1 | endif | return 1
+    if s:v.block_mode | let s:v.block[3] = 1 | endif
+    return 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -413,8 +419,9 @@ fun! vm#commands#find_next(skip, nav) abort
 
     call s:Search.validate()
 
-    if s:navigate(a:nav, 1) | return 0                    "just navigate to previous
-    elseif a:skip           | call s:skip() | endif       "skip current match
+    if s:navigate(a:nav, 1) | return 0        "just navigate to previous
+    elseif a:skip           | call s:skip()   "skip current match
+    endif
 
     return s:get_region(1)
 endfun
@@ -433,10 +440,12 @@ fun! vm#commands#find_prev(skip, nav) abort
     let r = s:G.is_region_at_pos('.')
     if empty(r)  | let r = s:G.select_region(s:v.index) | endif
     if !empty(r) | let pos = [r.l, r.a]
-    else         | let pos = getpos('.')[1:2] | endif
+    else         | let pos = getpos('.')[1:2]
+    endif
 
-    if s:navigate(a:nav, 0) | return 0                    "just navigate to previous
-    elseif a:skip           | call s:skip() | endif       "skip current match
+    if s:navigate(a:nav, 0) | return 0        "just navigate to previous
+    elseif a:skip           | call s:skip()   "skip current match
+    endif
 
     "move to the beginning of the current match
     call cursor(pos)
@@ -566,7 +575,8 @@ fun! vm#commands#motion(motion, count, select, this) abort
 
     "create cursor if needed
     if !g:Vm.is_active      | call s:init(0, 1, 1)     | call s:G.new_cursor()
-    elseif s:F.no_regions() || ( a:this && !s:is_r() ) | call s:G.new_cursor() | endif
+    elseif s:F.no_regions() || ( a:this && !s:is_r() ) | call s:G.new_cursor()
+    endif
 
     "-----------------------------------------------------------------------
 
@@ -582,7 +592,8 @@ fun! vm#commands#motion(motion, count, select, this) abort
     if a:select && !s:X()  | let g:Vm.extend_mode = 1   | endif
 
     if a:select && !s:v.multiline && s:vertical()
-        call s:F.toggle_option('multiline') | endif
+        call s:F.toggle_option('multiline')
+    endif
 
     call s:V.Block.horizontal(1)
     call s:call_motion(a:this)

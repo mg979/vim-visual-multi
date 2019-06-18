@@ -51,7 +51,8 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) abort
     endif
 
     if !a:silent
-        call s:F.msg('Yanked the content of '.len(s:R()).' regions.', 1) | endif
+        call s:F.msg('Yanked the content of '.len(s:R()).' regions.', 1)
+    endif
     if a:0 | call s:G.change_mode() | endif
 endfun
 
@@ -65,7 +66,8 @@ fun! s:Edit.delete(X, register, count, hard) abort
     if !s:v.direction | call vm#commands#invert_direction() | endif
 
     if !a:X     "ask for motion
-        return vm#cursors#operation('d', a:count, a:register) | endif
+        return vm#cursors#operation('d', a:count, a:register)
+    endif
 
     let winline      = winline()
     let size         = s:F.size()
@@ -120,7 +122,8 @@ fun! s:Edit.paste(before, vim_reg, reselect, register, ...) abort
     if a:0         | let s:v.new_text = a:1
     elseif vim_V   | return self.run_normal(printf('"%s%s', a:register, a:before ? 'P' : 'p' ))
     elseif vim_reg | let s:v.new_text = self.convert_vimreg(a:vim_reg)
-    else           | let s:v.new_text = s:fix_regions_text(g:Vm.registers[a:register]) | endif
+    else           | let s:v.new_text = s:fix_regions_text(g:Vm.registers[a:register])
+    endif
 
     call s:G.backup_regions()
 
@@ -154,7 +157,9 @@ fun! s:Edit.block_paste(before) abort
 
             "update changed size
             let change = s:F.size() - size
-        else | break | endif
+        else
+            break
+        endif
     endfor
     call s:F.restore_reg()
 endfun
@@ -305,7 +310,8 @@ fun! s:Edit.store_widths(...) abort
 
     if a:0
         if type(a:1) == type("") | let text = len(a:1)-1 | let use_text = 1
-        else                     | let list = a:1        | let use_list = 1 | endif
+        else                     | let list = a:1        | let use_list = 1
+        endif
     endif
 
     "mismatching blocks must be corrected

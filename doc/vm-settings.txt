@@ -71,8 +71,8 @@ Default: {}
                                                              *g:VM_silent_exit*
 Default: 0
 
-  When manually exiting |cursor-mode| or |extend-mode|, don't display "Exited
-  Visual-Multi."
+  Don't display a message when exiting VM. It can be useful if you already set
+  up statusline integration.
 
 
 

@@ -42,7 +42,8 @@ fun! vm#cursors#operation(op, n, register, ...) abort
     elseif a:op ==# 'y' && c==?'s'  | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c
       if s:ia(c)
-        let c = nr2char(getchar())  | echon c | let M .= c | endif
+        let c = nr2char(getchar())  | echon c | let M .= c
+      endif
       let c = nr2char(getchar())    | echon c | let M .= c | break
 
     elseif a:op ==# 'd' && c==#'s'  | echon c | let M .= c
@@ -51,7 +52,8 @@ fun! vm#cursors#operation(op, n, register, ...) abort
     elseif s:single(c)                        | let M .= c | break
     elseif a:op ==# c                         | let M .= c | break
 
-    else | echon ' ...Aborted'      | return  | endif
+    else | echon ' ...Aborted'      | return
+    endif
   endwhile
 
   call vm#cursors#process(a:op, M, reg, n)
@@ -159,7 +161,8 @@ fun! s:c_cursors(M, reg, n) abort
 
   "convert w,W to e,E (if motions), also in dot
   if     S ==# 'w' | let S = 'e' | call substitute(s:v.dot, 'w', 'e', '')
-  elseif S ==# 'W' | let S = 'E' | call substitute(s:v.dot, 'W', 'E', '') | endif
+  elseif S ==# 'W' | let S = 'E' | call substitute(s:v.dot, 'W', 'E', '')
+  endif
 
   "for c$, cc, ensure there is only one region per line
   if (S == '$' || S == 'c') | call s:G.one_region_per_line() | endif

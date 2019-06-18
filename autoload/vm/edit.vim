@@ -52,7 +52,9 @@ fun! s:Edit.run_normal(cmd, ...) abort
     elseif empty(a:cmd)
         call s:F.msg('No last command.', 1) | return
 
-    else | let cmd = a:cmd | endif
+    else
+        let cmd = a:cmd
+    endif
 
     "-----------------------------------------------------------------------
 
@@ -88,7 +90,8 @@ fun! s:Edit.run_visual(cmd, recursive, ...) abort
         call s:F.msg('Command not found.', 1) | return
 
     elseif !a:0
-        let cmd = a:cmd | endif
+        let cmd = a:cmd
+    endif
 
     "-----------------------------------------------------------------------
 
@@ -113,7 +116,8 @@ fun! s:Edit.run_ex(count, ...) abort
     elseif !empty(a:1)
         let cmd = a:1
     else
-        call s:F.msg('Command not found.', 1) | return | endif
+        call s:F.msg('Command not found.', 1) | return
+    endif
 
     "-----------------------------------------------------------------------
 
