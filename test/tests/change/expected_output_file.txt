@@ -1,6 +1,6 @@
-Smart case ipsum_TEXt dolor sit amet, consectetur (GCIB) elit, sed do eiusmod tempor
-smart case ut_TEXt labore et dolore magna (Gcib). Ut enim ad minim veniam, quis
-smart case exercitation_TEXt ullamco laboris (gcib) ut aliquip ex ea commodo consequat.
+Smart Case ipsum_TEXt dolor sit amet, consectetur (GCIB) elit, sed do eiusmod temp2CL
+smart Case ut_TEXt labore et dolore magna (Gcib). Ut enim ad minim veniam, qu2CL
+smart Case exercitation_TEXt ullamco laboris (gcib) ut aliquip ex ea commodo consequa2CL
 
 Duis aute irure dolor CIW
 reprehenderit in CIW
@@ -8,7 +8,7 @@ velit esse cillum CIW eu
 fugiat nulla pariatu_c$
 Excepteur sint occae_c$
 cupidatat non proide_c$
-keep indent please!
-    keep indent please!
-keep indent please!
-        keep indent please!
+keep indent please
+    keep indent please
+keep indent please
+        keep indent please

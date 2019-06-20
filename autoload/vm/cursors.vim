@@ -191,12 +191,11 @@ fun! s:c_cursors(M, reg, n) abort
     call s:V.Insert.key('i')
 
   elseif S=='l'
-    let oldmultiline = s:v.multiline
-    let s:v.multiline = 1
-    call vm#operators#select(1, N.S)
-    let s:v.multiline = 0
+    call s:G.extend_mode()
+    if N > 1
+      call vm#commands#motion('l', N-1, 0, 0)
+    endif
     call feedkeys('"'.reg."c")
-    let s:v.multiline = oldmultiline
 
   elseif s:forw(S) || s:ia(S[:0])
     call vm#operators#select(1, N.S)
