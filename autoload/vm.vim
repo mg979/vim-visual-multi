@@ -55,7 +55,7 @@ fun! vm#init_buffer(empty, ...) abort
         " init plugin variables
         call vm#variables#init()
 
-        if s:V.Funcs.size() > get(g:, 'VM_filesize_limit', 200000)
+        if s:V.Funcs.size() > get(g:, 'VM_filesize_limit', 400000)
             call vm#variables#reset_globals()
             let v:errmsg = 'VM cannot start, buffer too big.'
             return v:errmsg

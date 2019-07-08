@@ -37,6 +37,12 @@ Default: 1
   Controls how often text is updated in insert mode.
 
 
+                                                          *g:VM_filesize_limit*
+Default: 400000
+
+  VM won't start if buffer size is greater.
+
+
                                                           *g:VM_reselect_first*
 Default: 0
 
