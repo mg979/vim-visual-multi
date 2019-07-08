@@ -119,8 +119,11 @@ fun! s:Edit.paste(before, vim_reg, reselect, register, ...) abort
 
     if empty(s:v.old_text) | let s:v.old_text = s:G.regions_text() | endif
 
-    if a:0         | let s:v.new_text = a:1
-    elseif vim_V   | return self.run_normal(printf('"%s%s', a:register, a:before ? 'P' : 'p' ))
+    if vim_V
+        let cmd = printf('"%s%s', a:register, a:before ? 'P' : 'p')
+        return self.run_normal(cmd, {'recursive': 0})
+
+    elseif a:0     | let s:v.new_text = a:1
     elseif vim_reg | let s:v.new_text = self.convert_vimreg(a:vim_reg)
     else           | let s:v.new_text = s:fix_regions_text(g:Vm.registers[a:register])
     endif
