@@ -141,7 +141,10 @@ fun! vm#reset(...)
     endif
 
     call vm#commands#regex_reset()
+
+    let s:v.clear_vm_matches = 1
     call s:V.Global.remove_highlight()
+
     call s:V.Funcs.save_vm_regs()
     call s:V.Funcs.restore_regs()
     call s:V.Maps.disable(1)

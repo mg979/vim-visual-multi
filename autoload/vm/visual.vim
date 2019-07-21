@@ -26,7 +26,7 @@ fun! vm#visual#add(mode) abort
     endif
 
     if h | let s:v.multiline = 1 | endif
-    call s:G.update_and_select_region(0, s:v.IDs_list[-1])
+    call s:G.update_and_select_region({'id': s:v.IDs_list[-1]})
     if w | call s:F.toggle_option('block_mode', 0) | endif
 endfun
 
@@ -45,7 +45,7 @@ fun! vm#visual#subtract(mode) abort
 
     call s:remove_group(1)
     call s:G.rebuild_from_map()
-    call s:G.update_and_select_region(0, s:v.IDs_list[-1])
+    call s:G.update_and_select_region({'id': s:v.IDs_list[-1]})
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -75,7 +75,7 @@ fun! vm#visual#cursors(mode) abort
         call s:G.cursor_mode()
     endif
 
-    call s:G.update_and_select_region(0, s:v.IDs_list[-1])
+    call s:G.update_and_select_region({'id': s:v.IDs_list[-1]})
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

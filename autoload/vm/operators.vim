@@ -189,7 +189,7 @@ fun! vm#operators#find(start, visual, ...) abort
 
     if !search(join(s:v.search, '\|'), 'znp', endline)
         call s:F.msg('No matches found.', 0)
-        call s:clearmatches()
+        let s:v.clear_vm_matches = 1
         if !len(s:R())
             call vm#reset(1)
         else
@@ -224,7 +224,7 @@ fun! vm#operators#find(start, visual, ...) abort
         call s:G.new_region()
     endwhile
     let &wrapscan = ows
-    call s:clearmatches()
+    let s:v.clear_vm_matches = 1
 
     if !len(s:R())
         call s:F.msg('No matches found. Exiting VM.', 0)
@@ -238,14 +238,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Helpers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:clearmatches()
-    for m in getmatches()
-        if m.group == 'VM_Extend' || m.group == 'MultiCursor'
-            call matchdelete(m.id)
-        endif
-    endfor
-endfun
 
 fun! s:updatetime() abort
     """If not using TextYankPost, use CursorHold and reduce &updatetime.

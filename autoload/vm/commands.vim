@@ -534,7 +534,7 @@ fun! vm#commands#remove_every_n_regions(count) abort
             let i += 1
         endif
     endfor
-    call s:G.update_and_select_region(1, 0)
+    call s:G.update_and_select_region({'index': 0})
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

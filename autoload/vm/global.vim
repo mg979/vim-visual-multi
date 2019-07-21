@@ -158,8 +158,9 @@ fun! s:Global.update_highlight(...) abort
     """Update highlight for all regions.
     if s:v.eco | return | endif
 
+    call self.remove_highlight()
     for r in s:R()
-        call r.update_highlight()
+        call r.highlight()
     endfor
 
     call self.update_cursor_highlight()
@@ -194,6 +195,14 @@ fun! s:Global.remove_highlight() abort
         for r in s:R()
             call r.remove_highlight()
         endfor
+        if exists('s:v.clear_vm_matches')
+            unlet s:v.clear_vm_matches
+            for m in getmatches()
+                if m.group == 'VM_Extend' || m.group == 'MultiCursor'
+                    call matchdelete(m.id)
+                endif
+            endfor
+        endif
     endif
 endfun
 
@@ -244,26 +253,33 @@ fun! s:Global.update_and_select_region(...) abort
     call self.update_regions()
 
     "a region is going to be reselected:
-    "   !a:0      ->  position '.'
-    "   a:0 == 1  ->  position a:1
-    "   a:0 > 1
-    "             ->  (1, index)
-    "             ->  (0, id)
+    "   no arguments        ->  position '.'
+    "   a:1 not a dict      ->  position (a string, a list [ln, col], an offset)
+    "   {'index': i}        ->  index
+    "   {'id': i}           ->  id
+
     let nR = len(s:R())
 
     if !g:VM_reselect_first
         if exists('s:v.restore_index')
             let i = s:v.restore_index >= nR? nR - 1 : s:v.restore_index
             let R = self.select_region(i)
-        elseif a:0 > 1
-            if a:1
-                let i = a:2 >= nR? nR - 1 : a:2
+            unlet s:v.restore_index
+        elseif a:0
+            if type (a:1) != v:t_dict
+                let R = self.select_region_at_pos(a:1)
+            elseif  has_key(a:1, 'index')
+                let i = a:1.index >= nR? nR - 1 : a:1.index
                 let R = self.select_region(i)
+            elseif has_key(a:1, 'id')
+                let R = self.select_region(s:F.region_with_id(a:1.id).index)
             else
-                let R = self.select_region(s:F.region_with_id(a:2).index)
+                return s:F.msg('[visual-multi] '.
+                            \  'update_and_select_region() '.
+                            \  'called with wrong arguments', 1)
             endif
         else
-            let R = self.select_region_at_pos(a:0? a:1 : '.')
+            let R = self.select_region_at_pos('.')
         endif
     else
         let R = self.select_region(0)
@@ -321,7 +337,7 @@ fun! s:Global.restore_regions(index) abort
     let tick = backup.ticks[a:index]
     let s:V.Regions = deepcopy(backup[tick].regions)
     let g:Vm.extend_mode = backup[tick].X
-    call self.update_and_select_region('.')
+    call self.update_and_select_region()
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
