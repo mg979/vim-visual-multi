@@ -6,8 +6,7 @@ SETTINGS                                                *visual-multi-settings*
 Hopefully you won't need to alter any of these.
 
 
-                                                       *g:VM_highlight_matches*
-Default: 'underline'
+*g:VM_highlight_matches*                           Default: 'underline'
 
   Controls VM default highlighting style for patterns matched, but not
   selected. Possible useful values are 'underline' and 'red'.
@@ -16,66 +15,65 @@ Default: 'underline'
     let g:VM_highlight_matches = 'hi Search ctermfg=228 cterm=underline'
     let g:VM_highlight_matches = 'hi! link Search PmenuSel'
 <
-
-                                                          *g:VM_keep_buffer_hl*
-Default: 1
+*g:VM_keep_buffer_hl*                              Default: 1
 
   If 0, VM will use clearmatches() to clear VM highlight. It's faster but it is
   not compatible with plugins that apply special highlights.
   `b:VM_keep_buffer_hl` will override this setting, if defined.
 
 
-                                                         *g:VM_manual_infoline*
-Default: 1
+*g:VM_skip_shorter_lines*                          Default: 1
+
+  When adding cursors up/down, skip shorter lines.
+
+
+*g:VM_skip_empty_lines*                            Default: 0
+
+  When adding cursors up/down, skip empty lines.
+
+
+*g:VM_manual_infoline*                             Default: 1
 
   Keeps the infoline visible, if set to 0.
 
 
-                                                            *g:VM_live_editing*
-Default: 1
+*g:VM_live_editing*                                Default: 1
 
   Controls how often text is updated in insert mode.
 
 
-                                                          *g:VM_filesize_limit*
-Default: 400000
+*g:VM_filesize_limit*                              Default: 0 (disabled)
 
   VM won't start if buffer size is greater.
 
 
-                                                          *g:VM_reselect_first*
-Default: 0
+*g:VM_reselect_first*                              Default: 0
 
   The first region will be reselected after most commands, if set to 1.
 
 
-                                                            *g:VM_case_setting*
-Default: 'smart'
+*g:VM_case_setting*                                Default: 'smart'
 
   Starting case matching for patterns. Other values: 'sensitive', 'ignore'
   Can be switched inside VM.
 
 
-                                                 *g:VM_disable_syntax_in_imode*
-Default: 0
+*g:VM_disable_syntax_in_imode*                     Default: 0
 
   You could want to do it for performance reasons.
 
 
-                                                   *g:VM_exit_on_1_cursor_left*
-Default: 0
+*g:VM_exit_on_1_cursor_left*                       Default: 0
 
   Automatically exit VM if there's a single cursor left after a command.
 
 
-                                                           *g:VM_custom_remaps*
-Default: {}
+*g:VM_custom_remaps*                               Default: {}
 
   To remap VM keys. See |vm-faq-remap|.
 
 
-                                                             *g:VM_silent_exit*
-Default: 0
+*g:VM_silent_exit*                                 Default: 0
 
   Don't display a message when exiting VM. It can be useful if you already set
   up statusline integration.

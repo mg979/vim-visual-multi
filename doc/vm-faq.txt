@@ -10,6 +10,7 @@ You can create these functions: >
   function! VM_Start()
   function! VM_Exit()
 <
+
                                                                  *vm-faq-remap*
 How can I remap x in VM? ~
 
@@ -30,20 +31,34 @@ or use |g:VM_custom_remaps| (normal mode only), e.g.:  >
 This will preserve the function of the original mapping. If you want to replace
 it entirely, see |g:VM_maps|.
 
+
+
                                                              *vm-faq-find-char*
 How can I select a single character and search it? ~
 
 <C-n> generally can't do this because non-word characters are often included in
 some bigger pattern. You can add a mapping like this:
 >
-  nmap gl \\\<Tab>\\r
+  nmap gl <Plug>(VM-Add-Cursor-At-Pos)<Plug>(VM-Switch-Mode)<Plug>(VM-Add-Search)
 <
-assuming you use default leader. That would be: add a cursor, switch mode and
-add a search pattern. Similarly, you can create mappings like:
+That would be: add a cursor, switch mode and add a search pattern.
+
+
+
+                                                     *vm-faq-creative-mappings*
+Can I have a mapping for...? ~
+
+If you find yourself repeating a certain action, you can create mappings like:
 >
-  nmap cp vip\\c
+  nmap cp vip<Plug>(VM-Visual-Cursors)
 <
 This would create a column of cursors that spans the current inner paragraph.
+>
+  nmap \v <Plug>(VM-Start-Regex-Search)<Up><CR>
+  nmap \V <Plug>(VM-Start-Regex-Search)<Up><CR><Plug>(VM-Select-All)
+<
+The first mapping would start VM by selecting the first occurrence of the
+current search register (|@/|). The second one would select all matches.
 
 
 
