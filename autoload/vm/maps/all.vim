@@ -9,8 +9,6 @@
 " When adding a new mapping, the following is required:
 "       1. add a <Plug> with a command
 "       2. add the reformatted plug name in this file (permanent or buffer section)
-"       3. update the help file: an entry in s:plugs is necessary
-"       4. in the help file, add an entry in a section of s:dict to assign a category
 
 let s:base = {
       \"Get Operator":            ['', 'n'],
@@ -128,9 +126,7 @@ fun! vm#maps#all#buffer() abort
   "utility
   call extend(maps, {
         \"Tools Menu":              [leader.'`',      'n'],
-        \"Show Help":               [leader.'<F1>',   'n'],
         \"Show Registers":          [leader.'"',      'n'],
-        \"Toggle Debug":            [leader.'<F12>',  'n'],
         \"Case Setting":            [leader.'c',      'n'],
         \"Toggle Whole Word":       [leader.'w',      'n'],
         \"Case Conversion Menu":    [leader.'C',      'n'],

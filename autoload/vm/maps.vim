@@ -120,7 +120,6 @@ fun! s:build_permanent_maps() abort
     let g:VM_maps   = get(g:, 'VM_maps', {})
     let g:Vm.maps   = {'permanent': [], 'buffer': []}
     let g:Vm.unmaps = []
-    let g:Vm.help   = {}
     let maps        = vm#maps#all#permanent()
 
     "integrate custom maps
@@ -193,10 +192,6 @@ fun! s:build_buffer_maps() abort
     for key in keys(maps)
         call add(g:Vm.unmaps, s:unmap(maps[key], 1))
     endfor
-
-    "extra help plugs
-    let g:Vm.help['Toggle Mappings'] = g:Vm.maps.toggle
-    let g:Vm.help['Exit Vm'] = '<Esc>'
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -226,7 +221,6 @@ fun! s:assign(plug, key, buffer, ...) abort
         endif
     endif
 
-    let g:Vm.help[a:plug] = k
     let p = substitute(a:plug, ' ', '-', 'g')
     let _ = a:buffer? '<buffer><nowait> ' : '<nowait> '
     return m."map "._.k.' <Plug>(VM-'.p.")"

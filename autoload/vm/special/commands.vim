@@ -196,4 +196,26 @@ fun! s:not_active() abort
     endif
 endfun
 
+
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Debug
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#special#commands#debug() abort
+  if !exists('b:VM_Debug')
+    return
+  elseif empty(b:VM_Debug.lines)
+    echomsg '[visual-multi] No errors'
+    return
+  endif
+
+  for line in b:VM_Debug.lines
+    if !empty(line)
+      echom line
+    endif
+  endfor
+endfun
+
 " vim: et ts=4 sw=4 sts=4 :
