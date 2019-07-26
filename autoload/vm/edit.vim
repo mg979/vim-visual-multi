@@ -59,8 +59,8 @@ fun! s:Edit.run_normal(cmd, ...) abort
     "-----------------------------------------------------------------------
 
     " defaults: commands are recursive, count 1, disable buffer mappings
-    let args = { 'recursive': 1, 'count': 1, 'silent': 0,
-                \'vimreg': 0, 'disable_maps': 1 }
+    let args = { 'recursive': 1, 'count': 1, 'vimreg': 0, 'disable_maps': 1,
+                \'silent': get(g:, 'VM_silent_ex_commands', 0) }
     if a:0 | call extend(args, a:1) | endif
 
     let n = args.count > 1 ? args.count : ''
@@ -69,13 +69,22 @@ fun! s:Edit.run_normal(cmd, ...) abort
 
     call s:G.cursor_mode()
     call self.before_commands(args.disable_maps)
+    let errors = ''
 
-    if a:cmd ==? 'x' | call s:bs_del(n.a:cmd)
-    else             | call self.process(c, args)
-    endif
+    try
+        if a:cmd ==? 'x' | call s:bs_del(n.a:cmd)
+        else             | call self.process(c, args)
+        endif
+    catch
+        let errors = v:errmsg
+    endtry
 
     let g:Vm.last_normal = [cmd, args.recursive]
     call self.after_commands(0)
+
+    if !empty(errors)
+        call s:F.msg('[visual-multi] errors while executing '.c, 1)
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -98,16 +107,26 @@ fun! s:Edit.run_visual(cmd, recursive, ...) abort
     "-----------------------------------------------------------------------
 
     call self.before_commands(!a:recursive)
-    call self.process_visual(cmd)
+    let errors = ''
+
+    try
+        call self.process_visual(cmd)
+    catch
+        let errors = v:errmsg
+    endtry
 
     let g:Vm.last_visual = [cmd, a:recursive]
     call self.after_commands(0)
     if !s:visual_reselect(cmd) | call s:G.change_mode() | endif
+
+    if !empty(errors)
+        call s:F.msg('[visual-multi] errors while executing '.cmd, 1)
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_ex(count, ...) abort
+fun! s:Edit.run_ex(...) abort
 
     "-----------------------------------------------------------------------
 
@@ -129,12 +148,21 @@ fun! s:Edit.run_ex(count, ...) abort
 
     let g:Vm.last_ex = cmd
     call s:G.cursor_mode()
+    let errors = ''
 
     call self.before_commands(1)
-    for n in range(a:count)
+
+    try
         call self.process(cmd)
-    endfor
+    catch
+        let errors = v:errmsg
+    endtry
+
     call self.after_commands(0)
+
+    if !empty(errors)
+        call s:F.msg('[visual-multi] errors while executing '.cmd, 1)
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -250,6 +278,8 @@ fun! s:Edit.process_visual(cmd) abort
     let change  = 0             " each cursor will update this value
     let size    = s:F.size()    " initial buffer size
     let s:v.storepos = getpos('.')[1:2]
+
+    call s:G.backup_regions()
 
     for r in s:R()
         call r.shift(change, change)

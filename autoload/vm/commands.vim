@@ -866,18 +866,20 @@ fun! vm#commands#undo() abort
     let ticks = b:VM_Backup.ticks
     let index = index(ticks, b:VM_Backup.last)
 
-    if index <= 0
-        call s:V.Funcs.msg('Undo not possible.', 1)
-        if undotree().seq_cur != first
-            exe "undo" first
-            call s:G.restore_regions(0)
+    try
+        if index <= 0
+            if undotree().seq_cur != first
+                exe "undo" first
+                call s:G.restore_regions(0)
+            endif
+        else
+            exe "undo" ticks[index-1]
+            call s:G.restore_regions(index-1)
+            let b:VM_Backup.last = ticks[index - 1]
         endif
-    else
-        if &cmdheight > 1 | echo 'Backup' index '/' len(ticks) | endif
-        exe "undo" ticks[index-1]
-        call s:G.restore_regions(index-1)
-        let b:VM_Backup.last = ticks[index - 1]
-    endif
+    catch
+        call s:V.Funcs.msg('[visual-multi] errors during undo operation.', 1)
+    endtry
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -886,14 +888,15 @@ fun! vm#commands#redo() abort
     let ticks = b:VM_Backup.ticks
     let index = index(ticks, b:VM_Backup.last)
 
-    if index == len(ticks) - 1
-        call s:V.Funcs.msg('Redo not possible.', 1)
-    else
-        echo 'Backup' index+2 '/' len(ticks)
-        exe "undo" ticks[index+1]
-        call s:G.restore_regions(index+1)
-        let b:VM_Backup.last = ticks[index + 1]
-    endif
+    try
+        if index != len(ticks) - 1
+            exe "undo" ticks[index+1]
+            call s:G.restore_regions(index+1)
+            let b:VM_Backup.last = ticks[index + 1]
+        endif
+    catch
+        call s:V.Funcs.msg('[visual-multi] errors during redo operation.', 1)
+    endtry
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -82,7 +82,7 @@ fun! s:Edit.surround() abort
 
     "not possible
     if c == '<' || c == '>'
-        return s:F.msg('Not possible. Use visual command (zv) instead. ', 1)
+        return s:F.msg('Not possible. Use visual command (\\v) instead. ', 1)
     endif
 
     nunmap <buffer> S
