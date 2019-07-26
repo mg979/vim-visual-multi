@@ -9,9 +9,9 @@ endfun
 " Lambdas
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:X         = { -> g:Vm.extend_mode }
-let s:R         = { -> s:V.Regions      }
-let s:B         = { -> s:v.block_mode && g:Vm.extend_mode }
+let s:X = { -> g:Vm.extend_mode }
+let s:R = { -> s:V.Regions }
+let s:B = { -> s:v.block_mode && g:Vm.extend_mode }
 
 
 

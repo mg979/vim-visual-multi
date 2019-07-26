@@ -93,7 +93,7 @@ fun! vm#maps#all#buffer() abort
   call extend(maps, {
         \"Switch Mode":             ['<Tab>',       'n'],
         \"Toggle Block":            [leader.'<BS>', 'n'],
-        \"Toggle Only This Region": [leader.'<CR>', 'n'],
+        \"Toggle Single Region":    [leader.'<CR>', 'n'],
         \})
 
   "select

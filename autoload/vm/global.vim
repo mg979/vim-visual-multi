@@ -22,7 +22,6 @@ let s:X         = { -> g:Vm.extend_mode }
 let s:R         = { -> s:V.Regions      }
 let s:B         = { -> s:v.block_mode && g:Vm.extend_mode }
 let s:Group     = { -> s:V.Groups[s:v.active_group] }
-let s:only_this = { -> s:v.only_this || s:v.only_this_always }
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -62,9 +61,9 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.regions(...) abort
+fun! s:Global.active_regions(...) abort
     """Return current working set of regions.
-    if s:only_this()        | return [s:V.Regions[s:v.index]]
+    if s:v.single_region    | return [s:V.Regions[s:v.index]]
     elseif s:v.active_group | return s:Group()
     else                    | return s:V.Regions
     endif
@@ -429,7 +428,7 @@ endfun
 
 fun! s:Global.remove_empty_lines() abort
     """Remove regions that consist of the endline marker only.
-    for r in self.regions()
+    for r in self.active_regions()
         if r.a == 1 && r.A == r.B && col([r.l, '$']) == 1
             call r.clear()
         endif
@@ -441,13 +440,13 @@ endfun
 fun! s:Global.reset_byte_map(update) abort
     """Reset byte map for region, group, or all regions.
 
-    if s:only_this()        | call s:R()[s:v.index].remove_from_byte_map(0)
+    if s:v.single_region    | call s:R()[s:v.index].remove_from_byte_map(0)
     elseif s:v.active_group | for r in s:Group() | call r.remove_from_byte_map(0) | endfor
     else                    | let s:V.Bytes = {}
     endif
 
     if a:update
-        for r in self.regions() | call r.update_bytes_map() | endfor
+        for r in self.active_regions() | call r.update_bytes_map() | endfor
     endif
 endfun
 
@@ -519,7 +518,7 @@ endfun
 fun! s:Global.regions_text() abort
     """Return a list with all regions' contents.
     let t = []
-    for r in self.regions() | call add(t, r.txt) | endfor
+    for r in self.active_regions() | call add(t, r.txt) | endfor
     return t
 endfun
 
@@ -605,7 +604,7 @@ fun! s:Global.split_lines() abort
     let prev = s:v.index
 
     "make a list of regions to split
-    let lts = filter(copy(self.regions()), 'v:val.h')
+    let lts = filter(copy(self.active_regions()), 'v:val.h')
 
     for r in lts
         let R = s:R()[r.index].remove()

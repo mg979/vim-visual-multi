@@ -86,8 +86,7 @@ fun! vm#variables#init() abort
   let v.auto             = 0
   let v.silence          = 0
   let v.eco              = 0
-  let v.only_this        = 0
-  let v.only_this_always = 0
+  let v.single_region    = 0
   let v.using_regex      = 0
   let v.multiline        = 0
   let v.block_mode       = 0

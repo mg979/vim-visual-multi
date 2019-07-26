@@ -164,7 +164,8 @@ fun! s:remove_group(subtract) abort
         endif
     endfor
 
-    let s:v.active_group = s:old_group | call remove(s:V.Groups, -1)
+    let s:v.active_group = s:old_group
+    call remove(s:V.Groups, -1)
     let s:v.silence = 0
 endfun
 

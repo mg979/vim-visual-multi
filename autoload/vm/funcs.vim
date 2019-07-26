@@ -338,7 +338,7 @@ fun! s:Funcs.count_msg(force, ...) abort
     let i1 = [' '  , hl] | let m1 = g:Vm.mappings_enabled? ["M\+", H1] : ["m\-", H2]
     let i2 = [' / ', hl] | let m2 = s:v.multiline?         ["V\+", H1] : ["v\-", H2]
     let i3 = [' / ', hl] | let m3 = s:v.block_mode?        ["B\+", H1] : ["b\-", H2]
-    let i4 = [' / ', hl] | let m4 = s:v.only_this_always?  ["O\+", H1] : ["o\-", H2]
+    let i4 = [' / ', hl] | let m4 = s:v.single_region?     ["O\+", H1] : ["o\-", H2]
 
     let s = len(s:R())>1 ? 's.' : '.'
     let t = g:Vm.extend_mode? ' region' : ' cursor'

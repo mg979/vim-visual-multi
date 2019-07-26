@@ -701,13 +701,16 @@ endfun
 
 fun! s:call_motion(this) abort
     if s:F.no_regions() | return | endif
-    let s:v.only_this = a:this
     call s:F.Scroll.get()
     let R = s:R()[ s:v.index ]
 
+    let regions = a:this            ? [s:V.Regions[s:v.index]]
+          \     : s:v.active_group  ? s:V.Groups[s:v.active_group]
+          \     : s:V.Regions
+
     call s:before_move()
 
-    for r in s:RS() | call r.move() | endfor
+    for r in regions | call r.move() | endfor
 
     "update variables, facing direction, highlighting
     call s:after_move(R)
@@ -731,7 +734,6 @@ endfun
 
 fun! s:after_move(R) abort
     let s:v.direction = a:R.dir
-    let s:v.only_this = 0
     let s:v.restore_scroll = !s:v.insert
 
     if s:always_from_back() | call vm#commands#invert_direction() | endif
@@ -934,9 +936,8 @@ let s:X                = { -> g:Vm.extend_mode }
 let s:R                = { -> s:V.Regions      }
 let s:B                = { -> s:v.block_mode && g:Vm.extend_mode }
 let s:Group            = { -> s:V.Groups[s:v.active_group] }
-let s:RS               = { -> s:G.regions() }  "current regions set
+let s:RS               = { -> s:G.active_regions() }  "current regions set
 let s:is_r             = { -> g:Vm.is_active && !empty(s:G.is_region_at_pos('.')) }
-let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
 let s:first_line       = { -> line('.') == 1 }
 let s:last_line        = { -> line('.') == line('$') }
 let s:can_from_back    = {   -> s:X() && s:v.motion == '$' && !s:v.direction          }

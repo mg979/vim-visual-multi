@@ -6,8 +6,8 @@ fun! vm#special#commands#init() abort
     let s:G = s:V.Global
 endfun
 
-let s:R    = { -> s:V.Regions }
-let s:X    = { -> g:Vm.extend_mode }
+let s:R = { -> s:V.Regions }
+let s:X = { -> g:Vm.extend_mode }
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

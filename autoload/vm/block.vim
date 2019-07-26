@@ -9,9 +9,9 @@ endfun
 " Lambdas
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:X         = { -> g:Vm.extend_mode }
-let s:R         = { -> s:V.Regions      }
-let s:B         = { -> s:v.block_mode && g:Vm.extend_mode }
+let s:X = { -> g:Vm.extend_mode }
+let s:R = { -> s:V.Regions      }
+let s:B = { -> s:v.block_mode && g:Vm.extend_mode }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -110,7 +110,7 @@ fun! s:Block.start() abort
     call s:G.extend_mode()
 
     let s:v.block_mode = 1
-    if s:v.only_this_always | call s:V.Funcs.toggle_option('only_this_always') | endif
+    if s:v.single_region | call s:V.Funcs.toggle_option('single_region') | endif
     if s:v.index != -1
         let r = s:G.is_region_at_pos('.')
         if empty(r) | let r = s:R()[-1] | endif
