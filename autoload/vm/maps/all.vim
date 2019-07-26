@@ -230,6 +230,7 @@ fun! vm#maps#all#buffer() abort
         \"X":                       ['X',           'n'],
         \"J":                       ['J',           'n'],
         \"~":                       ['~',           'n'],
+        \"&":                       ['&',           'n'],
         \"Del":                     ['<del>',       'n'],
         \"Dot":                     ['.',           'n'],
         \"Increase":                ['<C-a>',       'n'],

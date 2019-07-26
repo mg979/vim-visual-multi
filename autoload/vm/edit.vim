@@ -59,11 +59,13 @@ fun! s:Edit.run_normal(cmd, ...) abort
     "-----------------------------------------------------------------------
 
     " defaults: commands are recursive, count 1, disable buffer mappings
-    let args = { 'recursive': 1, 'count': 1, 'vimreg': 0, 'disable_maps': 1 }
+    let args = { 'recursive': 1, 'count': 1, 'silent': 0,
+                \'vimreg': 0, 'disable_maps': 1 }
     if a:0 | call extend(args, a:1) | endif
 
     let n = args.count > 1 ? args.count : ''
     let c = args.recursive ? ("normal ".n.cmd) : ("normal! ".n.cmd)
+    let c = args.silent    ? ("silent! ".c) : c
 
     call s:G.cursor_mode()
     call self.before_commands(args.disable_maps)

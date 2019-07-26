@@ -75,6 +75,7 @@ be followed by the text object you want to change. Supported commands:
     |       set column for all cursors (to current column or [count])
     r       replace single character
     ~       change case of single character
+    &       repeat last substitution
     w/b/%   and all other basic motions
     <C-A>   increase number
     <C-X>   decrease number
