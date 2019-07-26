@@ -234,6 +234,8 @@ fun! vm#maps#all#buffer() abort
         \"Dot":                     ['.',           'n'],
         \"Increase":                ['<C-a>',       'n'],
         \"Decrease":                ['<C-x>',       'n'],
+        \"Alpha Increase":          [leader.'<C-a>','n'],
+        \"Alpha Decrease":          [leader.'<C-x>','n'],
         \"a":                       ['a',           'n'],
         \"A":                       ['A',           'n'],
         \"i":                       ['i',           'n'],

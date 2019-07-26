@@ -98,6 +98,8 @@ Special commands: ~
 
 Increase              <C-A>       increase numbers
 Decrease              <C-X>       decrease numbers
+Alpha-Increase        \\<C-A>     same but +alpha (see |'nrformats'|)
+Alpha-Decrease        \\<C-X>     ,,
 
 Commands:~
 
