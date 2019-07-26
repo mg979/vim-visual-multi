@@ -3,14 +3,12 @@
 
 fun! vm#visual#add(mode) abort
 
-    let w = s:create_group()
-    let h = 0
+    call s:create_group()
+    let [ w, h ] = [ 0, 0 ]
 
     if a:mode ==# 'v'     | call s:vchar()
     elseif a:mode ==# 'V' | call s:vline()
-    else
-        let w = s:vblock()
-        if w | exe "normal ".w."l" | endif
+    else                  | let w = s:vblock(1)
     endif
 
     call s:remove_group(0)
@@ -38,9 +36,7 @@ fun! vm#visual#subtract(mode) abort
 
     if a:mode ==# 'v'     | call s:vchar()
     elseif a:mode ==# 'V' | call s:vline()
-    else
-        let w = s:vblock()
-        if w | exe "normal ".w."l" | endif
+    else                  | call s:vblock(1)
     endif
 
     call s:remove_group(1)
@@ -59,7 +55,7 @@ fun! vm#visual#cursors(mode) abort
     if a:mode ==# 'v' | exe "normal! \<C-v>" | endif
 
     if a:mode ==# 'V' | call s:vline()
-    else              | call s:vblock()
+    else              | call s:vblock(0)
     endif
 
     call s:remove_group(0)
@@ -130,7 +126,7 @@ fun! s:vline() abort
     call s:G.new_region()
 endfun
 
-fun! s:vblock() abort
+fun! s:vblock(extend) abort
     "blockwise
     let start = getpos("'<")[1:2]
     let end = getpos("'>")[1:2]
@@ -143,6 +139,9 @@ fun! s:vblock() abort
         call vm#commands#add_cursor_down(0, 1)
     endwhile
 
+    if a:extend
+        call vm#commands#motion('l', w, 1, 0)
+    endif
     return w
 endfun
 
