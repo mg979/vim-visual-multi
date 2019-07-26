@@ -13,11 +13,8 @@ fun! vm#funcs#init() abort
     return s:Funcs
 endfun
 
-if v:version >= 800
-    let s:R = { -> s:V.Regions }
-else
-    let s:R = function('vm#v74#regions')
-endif
+let s:R = { -> s:V.Regions }
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Backup/restore buffer state on buffer change

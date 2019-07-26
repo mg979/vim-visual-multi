@@ -10,11 +10,8 @@ fun! vm#search#init() abort
     return s:Search
 endfun
 
-if v:version >= 800
-    let s:R = { -> s:V.Regions }
-else
-    let s:R = function('vm#v74#regions')
-endif
+let s:R = { -> s:V.Regions }
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Search

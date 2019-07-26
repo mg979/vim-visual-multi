@@ -18,19 +18,12 @@ endfun
 " Lambdas
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-if v:version >= 800
-    let s:X         = { -> g:Vm.extend_mode }
-    let s:R         = { -> s:V.Regions      }
-    let s:B         = { -> s:v.block_mode && g:Vm.extend_mode }
-    let s:Group     = { -> s:V.Groups[s:v.active_group] }
-    let s:only_this = { -> s:v.only_this || s:v.only_this_always }
-else
-    let s:R         = function('vm#v74#regions')
-    let s:X         = function('vm#v74#extend_mode')
-    let s:B         = function('vm#v74#block_mode')
-    let s:Group     = function('vm#v74#group')
-    let s:only_this = function('vm#v74#only_this')
-endif
+let s:X         = { -> g:Vm.extend_mode }
+let s:R         = { -> s:V.Regions      }
+let s:B         = { -> s:v.block_mode && g:Vm.extend_mode }
+let s:Group     = { -> s:V.Groups[s:v.active_group] }
+let s:only_this = { -> s:v.only_this || s:v.only_this_always }
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

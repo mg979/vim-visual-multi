@@ -37,6 +37,7 @@ fun! s:set_extend_mode(X) abort
     endif
 endfun
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Add cursor
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -186,6 +187,7 @@ fun! vm#commands#expand_line(down) abort
     call s:F.count_msg(1)
 endfun
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find by regex
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -247,6 +249,7 @@ fun! vm#commands#find_by_regex(mode) abort
     cnoremap <silent> <buffer> <cr>  <cr>:call vm#commands#regex_done()<cr>
 endfun
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find under commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -305,6 +308,7 @@ fun! vm#commands#find_under(visual, whole, inclusive, ...) abort
     return (a:0 && a:visual)? vm#commands#find_next(0, 0) : s:G.merge_overlapping(R)
 endfun
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find all
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -333,6 +337,7 @@ fun! vm#commands#find_all(visual, whole, inclusive) abort
     let s:v.restore_scroll = 1
     call s:G.update_map_and_select_region(pos)
 endfun
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find next/previous
@@ -567,6 +572,7 @@ fun! vm#commands#mouse_column() abort
     call s:F.count_msg(0)
 endfun
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Motion commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -688,6 +694,7 @@ fun! vm#commands#shrink_or_enlarge(shrink, this) abort
     if s:v.direction != dir | call vm#commands#invert_direction(1) | endif
 endfun
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Motion event
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -740,6 +747,7 @@ fun! s:after_move(R) abort
     endif
 endfun
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Cycle regions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -785,6 +793,7 @@ fun! vm#commands#seek_up() abort
     endfor
     return s:G.select_region(0)
 endfun
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Align
@@ -899,7 +908,10 @@ fun! vm#commands#redo() abort
     endtry
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Increase/decrease
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#increase_or_decrease(increase, all_types, count)
     let oldnr = &nrformats
@@ -913,43 +925,25 @@ fun! vm#commands#increase_or_decrease(increase, all_types, count)
     endif
 endfun
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Lambdas
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-if v:version >= 800
-    let s:X                = { -> g:Vm.extend_mode }
-    let s:R                = { -> s:V.Regions      }
-    let s:B                = { -> s:v.block_mode && g:Vm.extend_mode }
-    let s:Group            = { -> s:V.Groups[s:v.active_group] }
-    let s:RS               = { -> s:G.regions() }  "current regions set
-    let s:is_r             = { -> g:Vm.is_active && !empty(s:G.is_region_at_pos('.')) }
-    let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
-    let s:first_line       = { -> line('.') == 1 }
-    let s:last_line        = { -> line('.') == line('$') }
-    let s:can_from_back    = {   -> s:X() && s:v.motion == '$' && !s:v.direction          }
-    let s:always_from_back = {   -> s:X() && index(['^', '0', 'F', 'T'], s:v.motion) >= 0 }
-    let s:symbol           = {   -> index(['^', '0', '%', '$'],          s:v.motion) >= 0 }
-    let s:horizontal       = {   -> index(['h', 'l'],                    s:v.motion) >= 0 }
-    let s:vertical         = {   -> index(['j', 'k'],                    s:v.motion) >= 0 }
-    let s:simple           = { m -> index(split('hlwebWEB', '\zs'),      m)        >= 0   }
-else
-    let s:R                = function('vm#v74#regions')
-    let s:X                = function('vm#v74#extend_mode')
-    let s:B                = function('vm#v74#block_mode')
-    let s:Group            = function('vm#v74#group')
-    let s:only_this        = function('vm#v74#only_this')
-    let s:RS               = function('vm#v74#RS')
-    let s:is_r             = function('vm#v74#is_r')
-    let s:only_this        = function('vm#v74#only_this')
-    let s:first_line       = function('vm#v74#first_line')
-    let s:last_line        = function('vm#v74#last_line')
-    let s:can_from_back    = function('vm#v74#can_from_back')
-    let s:always_from_back = function('vm#v74#always_from_back')
-    let s:symbol           = function('vm#v74#symbol')
-    let s:horizontal       = function('vm#v74#horizontal')
-    let s:vertical         = function('vm#v74#vertical')
-    let s:simple           = function('vm#v74#simple')
-endif
+let s:X                = { -> g:Vm.extend_mode }
+let s:R                = { -> s:V.Regions      }
+let s:B                = { -> s:v.block_mode && g:Vm.extend_mode }
+let s:Group            = { -> s:V.Groups[s:v.active_group] }
+let s:RS               = { -> s:G.regions() }  "current regions set
+let s:is_r             = { -> g:Vm.is_active && !empty(s:G.is_region_at_pos('.')) }
+let s:only_this        = { -> s:v.only_this || s:v.only_this_always }
+let s:first_line       = { -> line('.') == 1 }
+let s:last_line        = { -> line('.') == line('$') }
+let s:can_from_back    = {   -> s:X() && s:v.motion == '$' && !s:v.direction          }
+let s:always_from_back = {   -> s:X() && index(['^', '0', 'F', 'T'], s:v.motion) >= 0 }
+let s:symbol           = {   -> index(['^', '0', '%', '$'],          s:v.motion) >= 0 }
+let s:horizontal       = {   -> index(['h', 'l'],                    s:v.motion) >= 0 }
+let s:vertical         = {   -> index(['j', 'k'],                    s:v.motion) >= 0 }
+let s:simple           = { m -> index(split('hlwebWEB', '\zs'),      m)        >= 0   }
 
 " vim: et ts=4 sw=4 sts=4 :

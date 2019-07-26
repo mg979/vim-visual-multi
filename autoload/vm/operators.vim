@@ -19,15 +19,10 @@ endfun
 " Lambdas
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-if v:version >= 800
-    let s:R      = { -> s:V.Regions }
-    let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
-    let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
-else
-    let s:R      = function('vm#v74#regions')
-    let s:single = function('vm#v74#single')
-    let s:double = function('vm#v74#double')
-endif
+let s:R      = { -> s:V.Regions }
+let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
+let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
+
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

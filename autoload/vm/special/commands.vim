@@ -6,13 +6,9 @@ fun! vm#special#commands#init() abort
     let s:G = s:V.Global
 endfun
 
-if v:version >= 800
-    let s:R    = { -> s:V.Regions }
-    let s:X    = { -> g:Vm.extend_mode }
-else
-    let s:R    = function('vm#v74#regions')
-    let s:X    = function('vm#v74#extend_mode')
-endif
+let s:R    = { -> s:V.Regions }
+let s:X    = { -> g:Vm.extend_mode }
+
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

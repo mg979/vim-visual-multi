@@ -176,10 +176,7 @@ fun! s:init() abort
     let s:F = s:V.Funcs
 endfun
 
-if v:version >= 800
-    let s:R = { -> s:V.Regions }
-else
-    let s:R = function('vm#v74#regions')
-endif
+let s:R = { -> s:V.Regions }
+
 
 " vim: et ts=4 sw=4 sts=4 :

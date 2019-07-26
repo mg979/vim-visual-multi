@@ -221,7 +221,6 @@ fun! s:init() abort
   let s:G         = s:V.Global
   let s:F         = s:V.Funcs
   let s:Search    = s:V.Search
-  let s:R         = function('vm#v74#regions')
   let s:init_done = 1
   call s:G.cursor_mode()
 endfun
@@ -235,17 +234,10 @@ endfun
 " Lambdas
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-if v:version >= 800
-  let s:R      = { -> s:V.Regions      }
-  let s:forw   = { c -> index(split('weWE%', '\zs'), c) >= 0                }
-  let s:ia     = { c -> index(['i', 'a'], c) >= 0                           }
-  let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
-  let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
-else
-  let s:R                = function('vm#v74#regions')
-  let s:forw   = function('vm#v74#forw')
-  let s:ia     = function('vm#v74#ia')
-  let s:single = function('vm#v74#single')
-  let s:double = function('vm#v74#double')
-endif
+let s:R      = { -> s:V.Regions      }
+let s:forw   = { c -> index(split('weWE%', '\zs'), c) >= 0                }
+let s:ia     = { c -> index(['i', 'a'], c) >= 0                           }
+let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
+let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
+
 " vim: et ts=2 sw=2 sts=2 :
