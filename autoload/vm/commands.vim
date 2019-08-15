@@ -804,9 +804,9 @@ endfun
 fun! vm#commands#align() abort
     if s:F.no_regions() | return | endif
     let s:v.restore_index = s:v.index
-    let winline = winline()
+    call s:F.Scroll.get(1)
     call s:V.Edit.align()
-    call s:F.Scroll.force(winline)
+    call s:F.Scroll.restore()
 endfun
 
 fun! vm#commands#align_char(count) abort
@@ -814,7 +814,7 @@ fun! vm#commands#align_char(count) abort
     call s:G.cursor_mode()
 
     let s:v.restore_index = s:v.index
-    let winline      = winline()
+    call s:F.Scroll.get(1)
     let n = a:count | let s = n>1? 's' : ''
     echohl Label    | echo 'Align with '.n.' char'.s.' > '   | echohl None
 
@@ -844,7 +844,7 @@ fun! vm#commands#align_char(count) abort
         let s = 'zp'    "change search method: don't accept at cursor position
     endwhile
     let s:v.silence = 0
-    call s:F.Scroll.force(winline)
+    call s:F.Scroll.restore()
     call s:F.count_msg(0)
     return
 endfun
@@ -855,7 +855,7 @@ fun! vm#commands#align_regex() abort
     if s:F.no_regions() | return | endif
     call s:G.cursor_mode()
     let s:v.restore_index = s:v.index
-    let winline      = winline()
+    call s:F.Scroll.get(1)
 
     echohl Label | let rx = input('Align with regex > ')   | echohl None
     if empty(rx) | echohl WarningMsg | echon ' ...Aborted' | return  | endif
@@ -867,7 +867,7 @@ fun! vm#commands#align_regex() abort
         call r.update_cursor([r.l, getpos('.')[2]])
     endfor
     call s:V.Edit.align()
-    call s:F.Scroll.force(winline)
+    call s:F.Scroll.restore()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

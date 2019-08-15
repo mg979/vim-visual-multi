@@ -302,7 +302,7 @@ endfun
 
 fun! s:Mode() abort
   let mode = g:Vm.extend_mode? ' (extend mode)' : ' (cursor mode)'
-  call b:VM_Selection.Funcs.msg([["Enter regex".mode.":", 'WarningMsg'], ["\n/", 'None']], 1)
+  call b:VM_Selection.Funcs.msg([["[visual-multi]", 'WarningMsg'], [" /", 'None']], 1)
 endfun
 
 fun! s:Visual(cmd) abort
