@@ -6,6 +6,10 @@ function! VimrunnerPyEvaluateCommandOutput(command)
   return output
 endfunction
 
-set runtimepath^=..
+let rp = split(&runtimepath, ',')
+let home = shellescape(fnamemodify($HOME, ':p'))
+let &runtimepath = join(filter(rp, 'v:val !~ '.home), ',')
 set packpath=
 set nocompatible
+set runtimepath^=..
+source ../plugin/visual-multi.vim
