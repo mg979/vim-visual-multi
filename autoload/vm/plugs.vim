@@ -13,6 +13,7 @@ fun! vm#plugs#permanent() abort
   nnoremap <silent>       <Plug>(VM-Select-Cursor-Down)      :<C-u>call vm#commands#add_cursor_down(1, v:count1)<cr>
   nnoremap <silent>       <Plug>(VM-Select-Cursor-Up)        :<C-u>call vm#commands#add_cursor_up(1, v:count1)<cr>
 
+  nnoremap <silent>       <Plug>(VM-Reselect-Last)           :call vm#commands#reselect_last()<cr>
   nnoremap <silent>       <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
   xnoremap <silent><expr> <Plug>(VM-Visual-All)              <sid>Visual('all')
   xnoremap <silent>       <Plug>(VM-Visual-Cursors)          :<c-u>call vm#commands#from_visual('cursors')<cr>

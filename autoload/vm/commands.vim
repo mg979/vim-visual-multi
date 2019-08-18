@@ -871,6 +871,29 @@ fun! vm#commands#align_regex() abort
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Reselect last regions, undo, redo
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#commands#reselect_last()
+    call s:init(0, 1, 0)
+    if empty(get(b:, 'VM_LastBackup', {})) || empty(get(b:VM_LastBackup, 'regions', []))
+        return s:F.exit('No regions to restore')
+    endif
+
+    try
+        for r in b:VM_LastBackup.regions
+            call vm#region#new(1, r.A, r.B)
+        endfor
+        let g:Vm.extend_mode = b:VM_LastBackup.extend
+    catch
+        return s:F.exit('Error while restoring regions.')
+    endtry
+
+    call s:G.update_and_select_region()
+endfun
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#undo() abort
     let first = b:VM_Backup.first

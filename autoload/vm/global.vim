@@ -349,6 +349,14 @@ fun! s:Global.backup_regions() abort
     let backup.last = tick
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.backup_last_regions() abort
+    """Create a backup of last set of regions.
+    let regions = map(deepcopy(s:R()), "{'A': v:val.A, 'B': v:val.B}")
+    let b:VM_LastBackup = {'extend': g:Vm.extend_mode, 'regions': regions}
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.collapse_regions() abort

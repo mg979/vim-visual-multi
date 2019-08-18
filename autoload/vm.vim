@@ -144,6 +144,7 @@ fun! vm#reset(...)
 
     let s:v.clear_vm_matches = 1
     call s:V.Global.remove_highlight()
+    call s:V.Global.backup_last_regions()
 
     call s:V.Funcs.save_vm_regs()
     call s:V.Funcs.restore_regs()

@@ -215,6 +215,7 @@ Select Right/Left            <S-Right>, <S-Left>          |vm-shift-select|
 Select All Words             \\A                          |vm-select-all|
 Find with Regex              \\/                          |vm-regex-search|
 Get Operator                 \\gs                         |vm-get-operator|
+Reselect Last                \\gS                         |vm-reselect-last|
 Select Operator              s                            |vm-select-operator|
 Find Operator                m                            |vm-find-operator|
 Show Infoline                \\l                          |vm-infoline|
@@ -607,6 +608,14 @@ To enable it (see |g:VM_maps|):
     let g:VM_maps["Undo"] = 'u'
     let g:VM_maps["Redo"] = '<C-r>'
 <
+
+Reselect last set of regions ~
+                                                             *vm-reselect-last*
+  Default mapping: \\gS
+
+This command works similarly as |gv|, in that it tries to reselect the regions
+as they were before exiting VM last time. Note that it works by byte offset, so
+if you did any change after exiting VM, the reselected regions will be wrong.
 
 
 

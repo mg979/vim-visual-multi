@@ -56,11 +56,12 @@ Select All              \\A       select all occurrences of a word
 Visual All              \\A       select all occurrences of visual selection
 Start Regex Search      \\/       create a selection with regex search
 Visual Regex            \\/       find a pattern in visual selection
-Get Operator            \\gs      see |vm-get-operator|
 Add Cursor At Pos       \\\       add a single cursor at current position
 Visual Find             \\f       find all patterns ( or @/ ) from visual mode
 Visual Cursors          \\c       create a column of cursors from visual mode
 Visual Add              \\a       create a selection from visual mode
+Get Operator            \\gs      see |vm-get-operator|
+Reselect Last           \\gS      reselect set of regions of last VM session
 
 Mouse Cursor    <C-LeftMouse>     create a cursor where clicked
 Mouse Word      <C-RightMouse>    select a word where clicked
