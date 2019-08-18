@@ -350,6 +350,11 @@ fun! s:Funcs.count_msg(force, ...) abort
     call self.msg(msg, a:force)
 endfun
 
+fun! s:Funcs.exit(msg) abort
+    call self.msg(a:msg, 1)
+    call vm#reset(1)
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Toggle options
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

@@ -222,9 +222,8 @@ fun! vm#operators#find(start, visual, ...) abort
     let s:v.clear_vm_matches = 1
 
     if !len(s:R())
-        call s:F.msg('No matches found. Exiting VM.', 0)
         call cursor(startline, startcol)
-        call vm#reset(1)
+        call s:F.exit('No matches found. Exiting VM.', 0)
     else
         call s:G.update_map_and_select_region()
     endif
