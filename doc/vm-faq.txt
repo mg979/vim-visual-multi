@@ -10,6 +10,10 @@ You can create these functions: >
   function! VM_Start()
   function! VM_Exit()
 <
+Or you can rely on a user autocommand:  >
+  autocmd User visual_multi_start   call MyVmStart()
+  autocmd User visual_multi_exit    call MyVmExit()
+<
 
                                                                  *vm-faq-remap*
 How can I remap x in VM? ~

@@ -99,6 +99,7 @@ endfun
 fun! vm#comp#exit() abort
     """Called last on VM exit."""
     if exists('*VM_Exit') | call VM_Exit() | endif
+    silent doautocmd <nomodeline> User visual_multi_exit
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
