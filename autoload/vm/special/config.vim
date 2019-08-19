@@ -12,7 +12,6 @@ fun! vm#special#config#start() abort
             \['Case setting',                   "VM_case_setting"],
             \['Disable syntax in insert-mode',  "VM_disable_syntax_in_imode"],
             \['Auto-exit with 1 cursor left',   "VM_exit_on_1_cursor_left"],
-            \['Manual infoline',                "VM_manual_infoline"],
             \]
 
   echohl Special    | echo "\nvim-visual-multi configuration. Select an option you want to change, or '?' for help.\n\n"
@@ -61,7 +60,6 @@ fun! vm#special#config#generate() abort
         \'let g:VM_case_setting               = "'.g:VM_case_setting.'"',
         \'let g:VM_disable_syntax_in_imode    = '.g:VM_disable_syntax_in_imode,
         \'let g:VM_exit_on_1_cursor_left      = '.g:VM_exit_on_1_cursor_left,
-        \'let g:VM_manual_infoline            = '.g:VM_manual_infoline,
         \'',
         \'"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""',
         \'',
@@ -103,7 +101,6 @@ fun! vm#special#config#help() abort
   echohl WarningMsg | echo _ | echohl None
 
   echohl Special | echo "g:VM_exit_on_1_cursor_left" | echohl None | echon "\t\tautomatically exit when there is one cursor left"
-  echohl Special | echo "g:VM_manual_infoline"       | echohl None | echon "\t\t\tshow the infoline only manually (default \\\\l)"
 
   echohl Special
   echohl None

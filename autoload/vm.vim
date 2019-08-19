@@ -12,7 +12,6 @@ let g:VM_case_setting                     = get(g:, 'VM_case_setting', 'smart')
 let g:VM_use_first_cursor_in_line         = get(g:, 'VM_use_first_cursor_in_line', 0)
 let g:VM_disable_syntax_in_imode          = get(g:, 'VM_disable_syntax_in_imode', 0)
 let g:VM_exit_on_1_cursor_left            = get(g:, 'VM_exit_on_1_cursor_left', 0)
-let g:VM_manual_infoline                  = get(g:, 'VM_manual_infoline', 1)
 let g:VM_overwrite_vim_registers          = get(g:, 'VM_overwrite_vim_registers', 0)
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -105,10 +104,6 @@ fun! vm#init_buffer(empty, ...) abort
             call feedkeys("\<Plug>(VM-Toggle-Hls)")
         else
             let s:v.oldhls = 0
-        endif
-
-        if empty(b:VM_Debug.lines) && !g:VM_manual_infoline
-            call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.")
         endif
 
         " backup sync settings for the buffer

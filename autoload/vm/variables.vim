@@ -35,8 +35,8 @@ fun! vm#variables#set() abort
   set ww=h,l,<,>
   set lz
 
-  if !g:VM_manual_infoline
-    let &ch = get(g:, 'VM_cmdheight', 2)
+  if get(g:, 'VM_cmdheight', 1) > 1
+    let &ch = g:VM_cmdheight
   endif
 endfun
 

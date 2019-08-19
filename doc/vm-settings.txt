@@ -32,11 +32,6 @@ Hopefully you won't need to alter any of these.
   When adding cursors up/down, skip empty lines.
 
 
-*g:VM_manual_infoline*                             Default: 1
-
-  Keeps the infoline visible, if set to 0.
-
-
 *g:VM_live_editing*                                Default: 1
 
   Controls how often text is updated in insert mode.
