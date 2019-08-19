@@ -95,8 +95,6 @@ fun! s:select(cmd) abort
     endfor
 
     call s:V.Maps.enable()
-    let s:v.silence    = 0
-
     call s:G.check_mutliline(1)
 
     nmap <silent><nowait><buffer> y <Plug>(VM-Yank)
@@ -183,7 +181,7 @@ fun! vm#operators#find(start, visual, ...) abort
     let [startline, startcol] = getpos('.')[1:2]
 
     if !search(join(s:v.search, '\|'), 'znp', endline)
-        call s:F.msg('No matches found.', 0)
+        call s:F.msg('No matches found.')
         let s:v.clear_vm_matches = 1
         if !len(s:R())
             call vm#reset(1)

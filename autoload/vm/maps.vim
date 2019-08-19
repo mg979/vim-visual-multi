@@ -60,7 +60,6 @@ fun! s:Maps.mappings_toggle() abort
     else
         call self.enable()
     endif
-    call s:V.Funcs.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -261,7 +260,7 @@ fun! s:check_warnings() abort
     """Notify once per buffer if errors have happened.
     if !empty(b:VM_Debug.lines) && !has_key(b:VM_Debug, 'maps_warning')
         let b:VM_Debug.maps_warning = 1
-        call s:V.Funcs.msg('VM has started with warnings. :VM_Debug for more info', 1)
+        call s:V.Funcs.msg('VM has started with warnings. :VM_Debug for more info')
     endif
 endfun
 

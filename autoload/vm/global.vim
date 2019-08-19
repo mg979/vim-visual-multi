@@ -122,8 +122,6 @@ fun! s:Global.change_mode(...) abort
     if a:0  "called manually
         let s:v.restore_scroll = 1
         call s:F.Scroll.restore()
-        let x = s:X()? 'Extend' : 'Cursor'
-        call s:F.count_msg(0, ['Switched to '.x.' Mode. ', 'WarningMsg'])
     endif
 endfun
 
@@ -268,7 +266,7 @@ fun! s:Global.update_and_select_region(...) abort
             else
                 return s:F.msg('[visual-multi] '.
                             \  'update_and_select_region() '.
-                            \  'called with wrong arguments', 1)
+                            \  'called with wrong arguments')
             endif
         else
             let R = self.select_region_at_pos('.')
@@ -280,7 +278,6 @@ fun! s:Global.update_and_select_region(...) abort
     if g:VM_exit_on_1_cursor_left && nR == 1
         call vm#reset()
     else
-        call s:F.count_msg(0)
         return R
     endif
 endfun
@@ -304,7 +301,6 @@ fun! s:Global.update_map_and_select_region(...) abort
     if g:VM_exit_on_1_cursor_left && len(s:R()) == 1
         call vm#reset()
     else
-        call s:F.count_msg(0)
         return R
     endif
 endfun
@@ -486,7 +482,6 @@ fun! s:Global.remove_last_region(...) abort
         let i = a:0? (r.index > 0? r.index-1 : 0) : s:v.index
         call self.select_region(i)
     endif
-    call s:F.count_msg(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -677,8 +672,6 @@ fun! s:Global.merge_cursors() abort
     endfor
 
     call self.remove_regions_by_id(ids_to_remove)
-
-    let s:v.silence = 0
     return self.update_and_select_region(pos)
 endfun
 

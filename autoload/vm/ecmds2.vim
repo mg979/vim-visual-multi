@@ -78,7 +78,7 @@ fun! s:Edit.surround() abort
 
     "not possible
     if c == '<' || c == '>'
-        return s:F.msg('Not possible. Use visual command (\\v) instead. ', 1)
+        return s:F.msg('Not possible. Use visual command (\\v) instead. ')
     endif
 
     nunmap <buffer> S
@@ -148,12 +148,11 @@ endfun
 
 fun! s:Edit.align() abort
     if s:v.multiline
-        return s:F.msg('Not possible, multiline is enabled.', 1)
+        return s:F.msg('Not possible, multiline is enabled.')
     endif
     call s:G.cursor_mode()
 
     call self.run_normal('D', {'store': '§'})
-    let s:v.silence = 1
     let max = max(map(copy(s:R()), 'virtcol([v:val.l, v:val.a])'))
     let reg = g:Vm.registers['§']
     for r in s:R()
@@ -224,11 +223,11 @@ fun! s:Edit.numbers(start, app) abort
     " fill the command line with [count]/default_step
     let x = input('Expression > ', a:start . '/1/')
 
-    if empty(x) | return s:F.msg('Canceled', 1) | endif
+    if empty(x) | return s:F.msg('Canceled') | endif
 
     "first char must be a digit or a negative sign
     if match(x, '^\d') < 0 && match(x, '^\-') < 0
-        return s:F.msg('Invalid expression', 1)
+        return s:F.msg('Invalid expression')
     endif
 
     "evaluate terms of the expression

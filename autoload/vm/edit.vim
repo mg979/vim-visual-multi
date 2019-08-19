@@ -40,13 +40,13 @@ fun! s:Edit.run_normal(cmd, ...) abort
 
     if a:cmd == -1
         let cmd = input('Normal command? ')
-        if empty(cmd) | return s:F.msg('Command aborted.', 1) | endif
+        if empty(cmd) | return s:F.msg('Command aborted.') | endif
 
     elseif a:cmd == '~' && s:X()
-        call self.run_visual('~', 0)        | return
+        return self.run_visual('~', 0)
 
     elseif empty(a:cmd)
-        call s:F.msg('No last command.', 1) | return
+        return s:F.msg('No last command.')
 
     else
         let cmd = a:cmd
@@ -79,7 +79,7 @@ fun! s:Edit.run_normal(cmd, ...) abort
     call self.after_commands(0)
 
     if !empty(errors)
-        call s:F.msg('[visual-multi] errors while executing '.c, 1)
+        call s:F.msg('[visual-multi] errors while executing '.c)
     endif
 endfun
 
@@ -91,10 +91,10 @@ fun! s:Edit.run_visual(cmd, recursive, ...) abort
 
     if !a:0 && a:cmd == -1
         let cmd = input('Visual command? ')
-        if empty(cmd) | call s:F.msg('Command aborted.', 1) | return | endif
+        if empty(cmd) | return s:F.msg('Command aborted.') | endif
 
     elseif empty(a:cmd)
-        call s:F.msg('Command not found.', 1) | return
+        return s:F.msg('Command not found.')
 
     elseif !a:0
         let cmd = a:cmd
@@ -116,7 +116,7 @@ fun! s:Edit.run_visual(cmd, recursive, ...) abort
     if !s:visual_reselect(cmd) | call s:G.change_mode() | endif
 
     if !empty(errors)
-        call s:F.msg('[visual-multi] errors while executing '.cmd, 1)
+        call s:F.msg('[visual-multi] errors while executing '.cmd)
     endif
 endfun
 
@@ -128,12 +128,12 @@ fun! s:Edit.run_ex(...) abort
 
     if !a:0
         let cmd = input('Ex command? ', '', 'command')
-        if empty(cmd) | call s:F.msg('Command aborted.', 1) | return | endif
+        if empty(cmd) | return s:F.msg('Command aborted.') | endif
 
     elseif !empty(a:1)
         let cmd = a:1
     else
-        call s:F.msg('Command not found.', 1) | return
+        return s:F.msg('Command not found.')
     endif
 
     "-----------------------------------------------------------------------
@@ -157,7 +157,7 @@ fun! s:Edit.run_ex(...) abort
     call self.after_commands(0)
 
     if !empty(errors)
-        call s:F.msg('[visual-multi] errors while executing '.cmd, 1)
+        call s:F.msg('[visual-multi] errors while executing '.cmd)
     endif
 endfun
 
@@ -168,10 +168,10 @@ endfun
 fun! s:Edit.run_macro(replace) abort
     if s:count(v:count) | return | endif
 
-    call s:F.msg('Macro register? ', 1)
+    call s:F.msg('Macro register? ')
     let reg = nr2char(getchar())
     if reg == "\<esc>"
-        return s:F.msg('Macro aborted.', 0)
+        return s:F.msg('Macro aborted.')
     endif
 
     call self.before_commands(1)
@@ -344,7 +344,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.before_commands(disable_maps) abort
-    let s:v.silence = 1 | let s:v.auto = 1 | let s:v.eco = 1
+    let s:v.auto = 1 | let s:v.eco = 1
 
     let s:old_multiline = s:v.multiline
     let s:v.multiline = s:can_multiline
@@ -394,7 +394,7 @@ fun! s:count(c) abort
     "forbid count
     if a:c > 1
         if !g:Vm.is_active | return 1 | endif
-        call s:F.msg('Count not allowed.', 0)
+        call s:F.msg('Count not allowed.')
         call vm#reset()
         return 1
     endif

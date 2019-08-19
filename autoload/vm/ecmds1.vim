@@ -30,7 +30,7 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) abort
                 \  a:def_reg?                         s:v.def_reg : v:register
 
     if !s:X()    | return vm#cursors#operation('y', v:count, register) | endif
-    if !s:min(1) | return s:F.msg('No regions selected.', 0)           | endif
+    if !s:min(1) | return s:F.msg('No regions selected.')              | endif
 
     "write custom and possibly vim registers.
     let [text, type] = self.fill_register(register, s:G.regions_text(), a:hard)
@@ -47,7 +47,7 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) abort
     endif
 
     if !a:silent
-        call s:F.msg('Yanked the content of '.len(s:R()).' regions.', 1)
+        call s:F.msg('Yanked the content of '.len(s:R()).' regions.')
     endif
     if a:0 | call s:G.change_mode() | endif
 endfun
@@ -190,11 +190,10 @@ fun! s:Edit.replace() abort
         call self.block_paste(1)
         call self.post_process(1, 0)
     else
-        call s:F.msg('Replace char... ', 1)
+        call s:F.msg('Replace char... ')
         let char = nr2char(getchar())
-        if char ==? "\<esc>" | call s:F.msg('Canceled.', 1) | return | endif
+        if char ==? "\<esc>" | return s:F.msg('Canceled.') | endif
         call self.run_normal('r'.char, {'recursive': 0, 'stay_put': 1})
-        call s:F.count_msg(1)
     endif
 endfun
 
@@ -203,19 +202,25 @@ endfun
 fun! s:Edit.replace_pattern() abort
     """Replace a pattern in all regions as with :s command."""
     if !s:X() | return | endif
+    let ix = s:v.index
+    call s:F.Scroll.get()
 
-    let ix = s:v.index | call s:F.Scroll.get()
     echohl Type
     let pat = input('Pattern to replace > ')
-    if empty(pat)  | call s:F.msg('Command aborted.', 1) | return | endif
+    if empty(pat)
+        return s:F.msg('Command aborted.')
+    endif
     let repl = input('Replacement > ')
     if empty(repl)
-        call s:F.msg('Hit Enter for an empty replacement... ', 1)
-        let confirm = nr2char(getchar())
-        if confirm != "\<cr>" | call s:F.msg('Command aborted.', 1) | return | endif
+        call s:F.msg('Hit Enter for an empty replacement... ')
+        if getchar() != 13
+            return s:F.msg('Command aborted.')
+        endif
     endif
     echohl None
-    let text = s:G.regions_text() | let T = []
+
+    let text = s:G.regions_text()
+    let T = []
     for t in text
         call add(T, substitute(t, pat, repl, 'g'))
     endfor
@@ -234,7 +239,7 @@ fun! s:Edit.replace_expression() abort
     let ix = s:v.index | call s:F.Scroll.get()
 
     echohl Type    | let expr = input('Expression > ', '', 'expression') | echohl None
-    if empty(expr) | call s:F.msg('Command aborted.', 1) | return | endif
+    if empty(expr) | return s:F.msg('Command aborted.') | endif
 
     let T = [] | let expr = s:F.get_expr(expr)
     for r in s:R()

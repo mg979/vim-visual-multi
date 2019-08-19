@@ -53,7 +53,6 @@ fun! vm#commands#add_cursor_at_word(yank, search) abort
 
     let R = s:G.new_cursor() | let R.pat = s:v.search[0]
     call s:F.restore_reg()
-    call s:F.count_msg(1)
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -106,7 +105,6 @@ fun! vm#commands#add_cursor_at_pos(extend) abort
     call s:set_extend_mode(a:extend)
     call s:Block.stop()
     call s:G.new_cursor(1)
-    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -126,7 +124,6 @@ fun! vm#commands#add_cursor_down(extend, count) abort
     endwhile
 
     call s:went_too_far()
-    call s:F.count_msg(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -146,7 +143,6 @@ fun! vm#commands#add_cursor_up(extend, count) abort
     endwhile
 
     call s:went_too_far()
-    call s:F.count_msg(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -158,7 +154,6 @@ fun! vm#commands#erase_regions(...) abort
 
     call s:G.erase_regions()
     call s:V.Block.stop()
-    if a:0 | call s:F.count_msg(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -184,7 +179,6 @@ fun! vm#commands#expand_line(down) abort
     endif
     call s:G.select_region_at_pos('.')
     call s:G.update_highlight()
-    call s:F.count_msg(1)
 endfun
 
 
@@ -202,8 +196,9 @@ endfun
 
 fun! vm#commands#regex_abort() abort
     let @/ = s:regex_reg
-    call s:F.msg('Regex search aborted. ', 0) | call s:F.count_msg(0)
-    call setpos('.', s:regex_pos)             | call vm#commands#regex_reset()
+    call s:F.msg('Regex search aborted. ')
+    call setpos('.', s:regex_pos)
+    call vm#commands#regex_reset()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -226,7 +221,6 @@ fun! vm#commands#regex_done() abort
 
     if s:X()
         call s:G.new_region()
-        call s:F.count_msg(0)
     else
         call vm#commands#add_cursor_at_word(0, 0)
     endif
@@ -253,10 +247,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find under commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" NOTE: don't call s:F.count_msg() after merging regions, or it will be
-" called twice.
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:yank(inclusive) abort
     if a:inclusive | silent keepjumps normal! yiW`]
@@ -275,15 +265,12 @@ fun! vm#commands#ctrln(count) abort
         call vm#operators#select(1, "iw")
         call s:G.update_and_select_region(pos)
     else
-        let s:v.silence = 1
         for i in range(a:count)
             call vm#commands#find_under(0, 1, 0, 1, 1)
             if no_reselect && s:v.was_region_at_pos
                 break
             endif
         endfor
-        let s:v.silence = 0
-        call s:F.count_msg(0)
     endif
 endfun
 
@@ -304,7 +291,6 @@ fun! vm#commands#find_under(visual, whole, inclusive, ...) abort
     call s:Search.add()
     let R = s:G.new_region()
     call s:G.check_mutliline(0, R)
-    call s:F.count_msg(0)
     return (a:0 && a:visual)? vm#commands#find_next(0, 0) : s:G.merge_overlapping(R)
 endfun
 
@@ -354,10 +340,10 @@ fun! s:get_region(next) abort
     if s:v.was_region_at_pos
         if g:VM_notify_previously_selected == 2
             normal! ``
-            call s:F.msg('Already selected', 1)
+            call s:F.msg('Already selected')
             return s:G.is_region_at_pos('.')
         endif
-        call s:F.msg('Already selected', 1)
+        call s:F.msg('Already selected')
     endif
     return R
 endfun
@@ -366,7 +352,6 @@ fun! s:get_next() abort
     if s:X()
         keepjumps normal! ngny`]
         let R = s:G.new_region()
-        call s:F.count_msg(0)
     else
         keepjumps normal! ngny`[
         let R = vm#commands#add_cursor_at_word(0, 0)
@@ -379,7 +364,6 @@ fun! s:get_prev() abort
     if s:X()
         keepjumps normal! NgNy`]
         let R = s:G.new_region()
-        call s:F.count_msg(1)
     else
         keepjumps normal! NgNy`[
         let R = vm#commands#add_cursor_at_word(0, 0)
@@ -390,13 +374,11 @@ endfun
 
 fun! s:navigate(force, dir) abort
     if a:force && s:v.nav_direction != a:dir
-        call s:F.count_msg(0, ['Reversed direction. ', 'WarningMsg'])
         let s:v.nav_direction = a:dir
         return s:keep_block()
     elseif a:force || @/==''
         let i = a:dir? s:v.index+1 : s:v.index-1
         call s:G.select_region(i)
-        call s:F.count_msg(1)
         return s:keep_block()
     endif
 endfun
@@ -519,7 +501,6 @@ endfun
 fun! vm#commands#from_visual(t) abort
     let mode = visualmode()
     call s:set_extend_mode(1)
-    let s:v.silence = 1
 
     if a:t ==# 'subtract' | call vm#visual#subtract(mode)
     elseif a:t ==# 'add'  | call vm#visual#add(mode)
@@ -550,7 +531,6 @@ fun! vm#commands#mouse_column() abort
     exe "normal! \<LeftMouse>"
     let end = getpos('.')[1:2]
 
-    let s:v.silence = 1
     if start[0] < end[0]
         call cursor(start[0], start[1])
         while getpos('.')[1] < end[0]
@@ -568,8 +548,6 @@ fun! vm#commands#mouse_column() abort
             call vm#commands#skip(1)
         endif
     endif
-    let s:v.silence = 0
-    call s:F.count_msg(0)
 endfun
 
 
@@ -649,7 +627,7 @@ fun! vm#commands#regex_motion(regex, count, remove, this) abort
                 \ g:VM_case_setting == 'ignore' ? '\c' : '\C'
 
     if empty(regex)
-      return s:F.msg('Cancel', 1)
+      return s:F.msg('Cancel')
     endif
 
     call s:F.Scroll.get()
@@ -826,7 +804,6 @@ fun! vm#commands#align_char(count) abort
         endif
     endwhile
 
-    let s:v.silence = 1
     let s = 'czp'    "search method: accept at cursor position
 
     while !empty(C)
@@ -843,10 +820,7 @@ fun! vm#commands#align_char(count) abort
         call s:V.Edit.align()
         let s = 'zp'    "change search method: don't accept at cursor position
     endwhile
-    let s:v.silence = 0
     call s:F.Scroll.restore()
-    call s:F.count_msg(0)
-    return
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -912,7 +886,7 @@ fun! vm#commands#undo() abort
             let b:VM_Backup.last = ticks[index - 1]
         endif
     catch
-        call s:V.Funcs.msg('[visual-multi] errors during undo operation.', 1)
+        call s:V.Funcs.msg('[visual-multi] errors during undo operation.')
     endtry
 endfun
 
@@ -929,7 +903,7 @@ fun! vm#commands#redo() abort
             let b:VM_Backup.last = ticks[index + 1]
         endif
     catch
-        call s:V.Funcs.msg('[visual-multi] errors during redo operation.', 1)
+        call s:V.Funcs.msg('[visual-multi] errors during redo operation.')
     endtry
 endfun
 

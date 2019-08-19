@@ -25,7 +25,7 @@ fun! vm#visual#add(mode) abort
 
     if h | let s:v.multiline = 1 | endif
     call s:G.update_and_select_region({'id': s:v.IDs_list[-1]})
-    if w | call s:F.toggle_option('block_mode', 0) | endif
+    if w | call s:F.toggle_option('block_mode') | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -82,16 +82,15 @@ fun! vm#visual#split() abort
     if !len(s:R()) | return | endif
 
     echohl Type   | let pat = input('Pattern to remove > ') | echohl None
-    if empty(pat) | call s:F.msg('Command aborted.', 1)     | return | endif
+    if empty(pat) | return s:F.msg('Command aborted.')     | endif
 
     let start = s:R()[0]                "first region
     let stop = s:R()[-1]                "last region
 
     call s:F.Cursor(start.A)            "check for a match first
     if !search(pat, 'nczW', stop.L)     "search method: accept at cursor position
-        call s:F.msg("\t\tPattern not found", 1)
-        call s:G.select_region(s:v.index)
-        return
+        call s:F.msg("\t\tPattern not found")
+        return s:G.select_region(s:v.index)
     endif
 
     let oldmap = copy(s:V.Bytes)
@@ -165,7 +164,6 @@ fun! s:remove_group(subtract) abort
 
     let s:v.active_group = s:old_group
     call remove(s:V.Groups, -1)
-    let s:v.silence = 0
 endfun
 
 fun! s:init() abort

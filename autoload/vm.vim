@@ -108,7 +108,7 @@ fun! vm#init_buffer(empty, ...) abort
         endif
 
         if empty(b:VM_Debug.lines) && !g:VM_manual_infoline
-            call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.", 0)
+            call s:V.Funcs.msg("Visual-Multi started. Press <esc> to exit.")
         endif
 
         " backup sync settings for the buffer
@@ -168,7 +168,7 @@ fun! vm#reset(...)
 
     "exiting manually
     if !get(g:, 'VM_silent_exit', 0) && !a:0
-        call s:V.Funcs.msg('Exited Visual-Multi.', 1)
+        call s:V.Funcs.msg('Exited Visual-Multi.')
     endif
 
     if !empty(g:VM_highlight_matches)
@@ -230,7 +230,6 @@ fun! s:cursor_moved() abort
     if s:v.block_mode
         if !s:v.block[3]
             call s:V.Block.stop()
-            call s:V.Funcs.count_msg(1)
         else
             let s:v.block[3] = 0
         endif

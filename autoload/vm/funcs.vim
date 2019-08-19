@@ -80,7 +80,7 @@ endfun
 fun! s:Funcs.no_regions() abort
     if !len(s:R())
         let s:v.index = -1
-        call self.msg('No regions.', 0)
+        call self.msg('No regions.')
         return 1
     endif
 endfun
@@ -302,10 +302,8 @@ endfun
 " Messages
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.msg(text, force) abort
-    if s:v.eco                     | return
-    elseif s:v.silence && !a:force | return
-    endif
+fun! s:Funcs.msg(text) abort
+    if s:v.eco | return | endif
 
     echo '\r'
     redraw
@@ -322,11 +320,9 @@ fun! s:Funcs.msg(text, force) abort
     endfor
 endfun
 
-fun! s:Funcs.count_msg(force, ...) abort
-    if s:v.eco || s:v.insert            | return
-    elseif s:v.silence && !a:force      | return
-    elseif s:v.no_msg  && a:force < 2   | return
-    elseif s:v.index < 0                | return self.msg("No selected regions.", 1)
+fun! s:Funcs.infoline() abort
+    if s:v.index < 0
+        return self.msg("No regions.")
     endif
     let r = s:R()[s:v.index]
 
@@ -346,12 +342,11 @@ fun! s:Funcs.count_msg(force, ...) abort
     let s1 = ['   Current patterns: ', hl]
     let s2 = [self.pad(string(s:v.search), &columns - 1), H1]
     let msg = [i1, m1, i2, m2, i3, m3, i4, m4, ix, R, s1, s2]
-    if a:0 | call insert(msg, a:1, 9) | endif
-    call self.msg(msg, a:force)
+    call self.msg(msg)
 endfun
 
 fun! s:Funcs.exit(msg) abort
-    call self.msg(a:msg, 1)
+    call self.msg(a:msg)
     call vm#reset(1)
 endfun
 
@@ -359,7 +354,7 @@ endfun
 " Toggle options
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.toggle_option(option, ...) abort
+fun! s:Funcs.toggle_option(option) abort
     if s:v.eco | return | endif
 
     let s = "s:v.".a:option
@@ -384,7 +379,7 @@ fun! s:Funcs.toggle_option(option, ...) abort
         endif
 
     elseif a:option == 'whole_word'
-        if empty(s:v.search) | call self.msg('No search patterns.', 1) | return | endif
+        if empty(s:v.search) | return self.msg('No search patterns.') | endif
         let s = s:v.search[0]
         let wm = 'WarningMsg' | let L = 'Label'
 
@@ -393,19 +388,17 @@ fun! s:Funcs.toggle_option(option, ...) abort
             let pats = self.pad(string(s:v.search), &columns - 1)
             call self.msg([
                         \['Search ->'               , wm], ['    whole word  ', L],
-                        \['  ->  Current patterns: ', wm], [pats              , L]], 1)
+                        \['  ->  Current patterns: ', wm], [pats              , L]])
         else
             if s[:1] == '\<' | let s:v.search[0] = s[2:-3] | endif
             let pats = self.pad(string(s:v.search), &columns - 1)
             call self.msg([
                         \['Search ->'              , wm], ['  not whole word ', L],
-                        \[' ->  Current patterns: ', wm], [pats               , L]], 1)
+                        \[' ->  Current patterns: ', wm], [pats               , L]])
         endif
         call s:V.Search.apply()
         return
     endif
-
-    if a:0 | redraw! | call self.count_msg(1) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

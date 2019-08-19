@@ -93,7 +93,7 @@ endfun
 fun! s:save_lines(buf) abort
     setlocal nomodified
     if len(b:VM_lines) != line("$")
-        return s:F.msg("Number of lines doesn't match, aborting", 1)
+        return s:F.msg("Number of lines doesn't match, aborting")
     endif
     let lnums = copy(b:VM_lines)
     let lines = map(range(line("$")), 'getline(v:key + 1)')
@@ -138,7 +138,7 @@ endfun
 fun! s:save_regions(buf) abort
     setlocal nomodified
     if len(b:VM_regions) != line("$")
-        return s:F.msg("Number of lines doesn't match number of regions", 1)
+        return s:F.msg("Number of lines doesn't match number of regions")
     endif
     let R = copy(b:VM_regions)
     let lines = map(range(line("$")), 'getline(v:key + 1)')
@@ -171,7 +171,7 @@ fun! vm#special#commands#filter_regions(type, fill, ...) abort
         let exp = a:1
     endif
     if empty(exp)
-        call s:F.msg('Canceled.', 1)
+        call s:F.msg('Canceled.')
     else
         call s:G.filter_by_expression(exp, type)
         call s:G.update_and_select_region()

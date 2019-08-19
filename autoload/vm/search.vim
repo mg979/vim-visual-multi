@@ -114,16 +114,16 @@ fun! s:Search.remove(also_regions) abort
     if !empty(pats)
         let s1 = ['Which index? ', 'WarningMsg']
         let s2 = [string(s:v.search), 'Type']
-        call s:F.msg([s1,s2], 0)
+        call s:F.msg([s1,s2])
         let i = nr2char(getchar())
-        if ( i == "\<esc>" ) | call s:F.msg("\tCanceled.\n", 0)             | call s:F.count_msg(1) | return | endif
-        if ( i < 0 || i >= len(pats) ) | call s:F.msg("\tWrong index\n", 0) | call s:F.count_msg(1) | return | endif
-        call s:F.msg("\n", 0)
+        if ( i == "\<esc>" ) | return s:F.msg("\tCanceled.\n")             | endif
+        if ( i < 0 || i >= len(pats) ) | return s:F.msg("\tWrong index\n") | endif
+        call s:F.msg("\n")
         let pat = pats[i]
         call remove(pats, i)
         call self.update_current()
     else
-        call s:F.msg('No search patters yet.', 0) | return
+        return s:F.msg('No search patters yet.')
     endif
 
     if a:also_regions
@@ -137,9 +137,6 @@ fun! s:Search.remove(also_regions) abort
         endwhile
 
         if removed | call s:G.update_and_select_region() | endif
-
-    elseif !empty(pats)
-        call s:F.count_msg(1)
     endif
 endfun
 
@@ -199,16 +196,16 @@ fun! s:Search.case() abort
     if &smartcase              "smartcase        ->  case sensitive
         set nosmartcase
         set noignorecase
-        call s:F.msg([['Search -> ', 'WarningMsg'], ['  case sensitive', 'Label']], 1)
+        call s:F.msg([['Search -> ', 'WarningMsg'], ['  case sensitive', 'Label']])
 
     elseif !&ignorecase        "case sensitive   ->  ignorecase
         set ignorecase
-        call s:F.msg([['Search -> ', 'WarningMsg'], ['  ignore case', 'Label']], 1)
+        call s:F.msg([['Search -> ', 'WarningMsg'], ['  ignore case', 'Label']])
 
     else                       "ignore case      ->  smartcase
         set smartcase
         set ignorecase
-        call s:F.msg([['Search -> ', 'WarningMsg'], ['  smartcase', 'Label']], 1)
+        call s:F.msg([['Search -> ', 'WarningMsg'], ['  smartcase', 'Label']])
     endif
 endfun
 
@@ -232,7 +229,7 @@ fun! s:pattern_found(t, i) abort
         let wm = 'WarningMsg'           | let L = 'Label'
         call s:F.msg([['Pattern updated:   [', wm ], [old, L],
                     \     [']  ->  [', wm],          [a:t, L],
-                    \     ["]\n", wm]], 1)
+                    \     ["]\n", wm]])
         return 1
     endif
 endfun
@@ -251,7 +248,6 @@ fun! s:Search.rewrite(last) abort
             if s:pattern_found(t, i) | break | endif
         endfor
     endif
-    call s:F.count_msg(1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

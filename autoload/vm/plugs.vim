@@ -67,10 +67,10 @@ fun! vm#plugs#buffer() abort
   xnoremap <silent><expr> <Plug>(VM-Visual-Hash)             <sid>Visual('hash')
 
   nnoremap <silent>       <Plug>(VM-Toggle-Mappings)         :call b:VM_Selection.Maps.mappings_toggle()<cr>
-  nnoremap <silent>       <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline', 1)<cr>
-  nnoremap <silent>       <Plug>(VM-Toggle-Block)            :call b:VM_Selection.Funcs.toggle_option('block_mode', 1)<cr>
-  nnoremap <silent>       <Plug>(VM-Toggle-Whole-Word)       :call b:VM_Selection.Funcs.toggle_option('whole_word', 1)<cr>
-  nnoremap <silent>       <Plug>(VM-Toggle-Single-Region)    :call b:VM_Selection.Funcs.toggle_option('single_region', 1)<cr>
+  nnoremap <silent>       <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline')<cr>
+  nnoremap <silent>       <Plug>(VM-Toggle-Block)            :call b:VM_Selection.Funcs.toggle_option('block_mode')<cr>
+  nnoremap <silent>       <Plug>(VM-Toggle-Whole-Word)       :call b:VM_Selection.Funcs.toggle_option('whole_word')<cr>
+  nnoremap <silent>       <Plug>(VM-Toggle-Single-Region)    :call b:VM_Selection.Funcs.toggle_option('single_region')<cr>
   nnoremap <silent>       <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
   nnoremap <silent>       <Plug>(VM-Rewrite-Last-Search)     :call b:VM_Selection.Search.rewrite(1)<cr>
   nnoremap <silent>       <Plug>(VM-Rewrite-All-Search)      :call b:VM_Selection.Search.rewrite(0)<cr>
@@ -109,7 +109,7 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Remove-Region)           :call vm#commands#skip(1)<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Last-Region)      :call b:VM_Selection.Global.remove_last_region()<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Every-n-Regions)  :<c-u>call vm#commands#remove_every_n_regions(v:count)<cr>
-  nnoremap <silent>       <Plug>(VM-Show-Infoline)           :call b:VM_Selection.Funcs.count_msg(2)<cr>
+  nnoremap <silent>       <Plug>(VM-Show-Infoline)           :call b:VM_Selection.Funcs.infoline()<cr>
 
   nnoremap <silent>       <Plug>(VM-Toggle-Hls)              :if v:hlsearch<bar>nohlsearch<bar>else<bar>set hls<bar>endif<cr>
 
@@ -303,7 +303,7 @@ endfun
 
 fun! s:Mode() abort
   let mode = g:Vm.extend_mode? ' (extend mode)' : ' (cursor mode)'
-  call b:VM_Selection.Funcs.msg([["[visual-multi]", 'WarningMsg'], [" /", 'None']], 1)
+  call b:VM_Selection.Funcs.msg([["[visual-multi]", 'WarningMsg'], [" /", 'None']])
 endfun
 
 fun! s:Visual(cmd) abort
