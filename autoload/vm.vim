@@ -99,7 +99,7 @@ fun! vm#init_buffer(empty, ...) abort
             exe g:Vm.Search
         endif
 
-        if !v:hlsearch && !a:empty
+        if &hlsearch && !v:hlsearch && !a:empty
             let s:v.oldhls = 1
             call feedkeys("\<Plug>(VM-Toggle-Hls)")
         else

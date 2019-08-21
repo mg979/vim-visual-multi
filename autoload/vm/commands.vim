@@ -834,7 +834,6 @@ fun! vm#commands#align_regex() abort
     echohl Label | let rx = input('Align with regex > ')   | echohl None
     if empty(rx) | echohl WarningMsg | echon ' ...Aborted' | return  | endif
 
-    set nohlsearch
     for r in s:RS()
         call cursor(r.l, r.a)
         if !search(rx, 'czp', r.l) | call r.remove() | continue | endif

@@ -291,7 +291,6 @@ fun! s:Insert.stop(...) abort
     endif
     unlet s:v.winline_insert
     silent! unlet s:v.smart_case_change
-    set hlsearch
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -421,7 +420,6 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.auto_start() abort
-    set nohlsearch
     augroup VM_insert
         au!
         au TextChangedI * call b:VM_Selection.Insert.insert()

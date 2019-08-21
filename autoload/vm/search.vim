@@ -46,7 +46,6 @@ fun! s:update_search(p) abort
     if s:v.eco | let @/ = s:v.search[0]
     else       | let @/ = join(s:v.search, '\|')
     endif
-    set hlsearch
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -225,8 +224,8 @@ fun! s:pattern_found(t, i) abort
         let old = s:v.search[a:i]
         let s:v.search[a:i] = a:t
         call s:G.update_region_patterns(a:t)
-        let @/ = join(s:v.search, '\|') | set hlsearch
-        let wm = 'WarningMsg'           | let L = 'Label'
+        let @/ = join(s:v.search, '\|')
+        let [ wm, L ] = [ 'WarningMsg', 'Label' ]
         call s:F.msg([['Pattern updated:   [', wm ], [old, L],
                     \     [']  ->  [', wm],          [a:t, L],
                     \     ["]\n", wm]])
