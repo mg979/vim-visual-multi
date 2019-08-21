@@ -39,10 +39,10 @@ fun! vm#themes#init() abort
   endif
 
   if theme == 'default'
-    let g:Vm.hi.extend  = get(g:, 'VM_Selection_hl',     'DiffAdd')
-    let g:Vm.hi.mono    = get(g:, 'VM_Mono_Cursor_hl',   'DiffText')
-    let g:Vm.hi.insert  = get(g:, 'VM_Ins_Mode_hl',      'DiffChange')
-    let g:Vm.hi.cursor  = get(g:, 'VM_Normal_Cursor_hl', 'Visual')
+    let g:Vm.hi.mono    = get(g:, 'VM_Mono_hl',   'DiffText')
+    let g:Vm.hi.cursor  = get(g:, 'VM_Cursor_hl', 'Visual')
+    let g:Vm.hi.extend  = get(g:, 'VM_Extend_hl', 'DiffAdd')
+    let g:Vm.hi.insert  = get(g:, 'VM_Insert_hl', 'DiffChange')
     exe "highlight! link VM_Mono     ".g:Vm.hi.mono
     exe "highlight! link VM_Cursor   ".g:Vm.hi.cursor
     exe "highlight! link VM_Extend   ".g:Vm.hi.extend

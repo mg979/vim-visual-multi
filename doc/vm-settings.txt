@@ -1,5 +1,10 @@
 *vm-settings.txt*    Version 0.3.0    Last change: June 13 2019
 
+Settings                                       |visual-multi-settings|
+Highlight                                      |visual-multi-highlight|
+
+
+
 SETTINGS                                                *visual-multi-settings*
 ===============================================================================
 
@@ -81,5 +86,31 @@ Hopefully you won't need to alter any of these.
 
 
 
+HIGHLIGHT                                              *visual-multi-highlight*
+===============================================================================
+
+
+VM default theme is based on your color scheme, if you don't like it you can:
+
+* select a theme
+* relink highlight groups
+                                                                   *g:VM_theme*
+You can load a theme by default by defining:  >
+    let g:VM_theme = 'your_chosen_theme'
+<                                                                    *:VMTheme*
+If you want to change theme, run: >
+    :VMTheme
+<
+To relink VM highlight groups: >
+
+  let g:VM_Mono_hl   = 'DiffText'
+  let g:VM_Extend_hl = 'DiffAdd'
+  let g:VM_Cursor_hl = 'Visual'
+  let g:VM_Insert_hl = 'DiffChange'
+<
+*g:VM_Mono_hl*    is the highlight in cursor mode
+*g:VM_Extend_hl*  ,, in extend mode (the selections)
+*g:VM_Cursor_hl*  ,, in extend mode (the cursors)
+*g:VM_Insert_hl*  ,, in insert mode (the virtual cursors)
 
  vim: ft=help et sw=2 ts=2 sts=2 tw=79
