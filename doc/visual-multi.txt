@@ -27,7 +27,8 @@ REQUIREMENTS                                        *visual-multi-requirements*
 
 Vim 8/Neovim is required.
 
-
+It's very recommended that you put in your vimrc: >
+  set hlsearch
 
 
 
@@ -65,8 +66,8 @@ They roughly correspond to |normal-mode| and |visual-mode|.
 
 At any time you can switch between them with the <Tab> key.
 
--------------------------------------------------------------------------------
-                                                               *vm-cursor-mode*
+
+-------------------------------------------------------------  *vm-cursor-mode*
 
 In |cursor-mode| commands expect a motion, so if you type `c`, it will have to
 be followed by the text object you want to change. Supported commands:
@@ -85,9 +86,9 @@ There is built-in support for:
     |vim-surround|      example: `ysiw(` to enclose in parentheses
     |vim-abolish|       example: `cr_` to change current word to snake case
 
--------------------------------------------------------------------------------
-                                                               *vm-extend-mode*
 
+-------------------------------------------------------------  *vm-extend-mode*
+                                                             
 In |extend-mode|, it's like having multiple visual selections: motions will
 extend them, and change/yank/delete commands won't wait for a motion, just like
 in visual mode. Even the key |o| works as in visual mode, inverting the anchor
@@ -103,12 +104,12 @@ And more, commands will be covered further on.
 
 Another feature of |extend-mode| is |smart-case-change|, started with `gc`.
 
--------------------------------------------------------------------------------
-                                                            *vm-multiline-mode*
 
-One thing that always bothered me in other editors with multiple cursors, is
-how hard it is to actually control them. What are they good for, if one wrong
-move can scramble them irreparably?
+----------------------------------------------------------  *vm-multiline-mode*
+                                                          
+Maybe you noticed, in other editors with multiple cursors, how hard it is to
+actually control them. What are they good for, if one wrong move can scramble
+them irreparably?
 
 In VM, not only you have much finer control through motions, but, in both
 modes, cursors and selections are 'kept in line', that is, cursors cannot end
@@ -117,9 +118,9 @@ up in a different line, and selections similarly.
 You may still want to do so, at times. You'll have to enable |multiline-mode|,
 for which the default mapping is `\\M`.
 
--------------------------------------------------------------------------------
-                                                               *vm-insert-mode*
 
+-------------------------------------------------------------  *vm-insert-mode*
+                                                             
 You'll probably want to enter insert mode in VM. There are several things you
 should be aware of:
 
@@ -194,8 +195,9 @@ that, it warns you that a mapping could not be applied. This isn't true for
 insert mode mappings, that will overwrite existant buffer mappings. You'll
 still be warned if this happens.
 
--------------------------------------------------------------------------------
-                                                                  *g:VM_Leader*
+
+----------------------------------------------------------------  *g:VM_Leader*
+                                                                
 
 Since there are a lot of new mappings, the chance for conflicts would be high,
 if you use plugins. VM uses its own leader to reduce this chance.
@@ -206,7 +208,10 @@ Default is `\\` (two backslashes). If you want to change it, set (for example):
 When you see mappings with 2 backslashes, that's the VM leader, so the mappings
 will be different if you change it.
 
+
+----------------------------------------------------------------  *vm-quickref*
 Quick reference ~
+                                                                
 
 Find Word                    <C-n>                        |vm-find-word|
 Add Cursors Down/Up          <C-Down> / <C-Up>            |vm-add-cursors|
@@ -218,11 +223,18 @@ Get Operator                 \\gs                         |vm-get-operator|
 Reselect Last                \\gS                         |vm-reselect-last|
 Select Operator              s                            |vm-select-operator|
 Find Operator                m                            |vm-find-operator|
+Alignment                    \\a                          |vm-align|
+Transposition                \\t                          |vm-transpose|
 Show Infoline                \\l                          |vm-infoline|
 
--------------------------------------------------------------------------------
+NOTE: you don't need to learn all, or even most commands. If you think you'll
+use the plugin for quick refactorings, and you want to keep things simple, you
+can stop reading here, and just use some of the commands listed in this table.
+
+
+---------------------------------------------------------------  *vm-find-word*
 Find Word ~
-                                                                 *vm-find-word*
+                                                               
   Default mapping: <C-n>
 
   Selects the word under cursor. Can be run from normal mode (with word
@@ -255,31 +267,30 @@ Find Word ~
 >
     let g:VM_custom_remaps = {'<c-p>': '[', '<c-s>': 'q'}
 
--------------------------------------------------------------------------------
+
+-------------------------------------------------------------  *vm-add-cursors*
 Add Cursors Down/Up ~
-                                                               *vm-add-cursors*
+                                                             
   Default mapping: <C-Down> / <C-Up>
 
   Used to create vertical columns of cursors. A cursor is only added if not
   present in that position. Pressing the keys once will create two cursors, one
   at the current position, one in the line above/below.
-  [count] increases this number.
-                                                      *g:VM_skip_shorter_lines*
-  By default shorter lines are skipped when adding cursors. To change:
->
-    let g:VM_skip_shorter_lines = 0
-<
--------------------------------------------------------------------------------
+  [count] increases this number. See also |g:VM_skip_shorter_lines|.
+ 
+
+--------------------------------------------------------------  *vm-add-cursor*
 Add Cursor at Position ~
-                                                                *vm-add-cursor*
+                                                              
   Default mapping: \\\
 
   Creates a single cursor at the current position. If there is a cursor
   already, the cursor is removed.
 
--------------------------------------------------------------------------------
+
+------------------------------------------------------------  *vm-shift-select*
 Select Right/Left ~
-                                                              *vm-shift-select*
+                                                            
   Default mapping: <S-Right>, <S-Left>
 
   If VM didn't start yet, it will start selecting left or right, otherwise it
@@ -293,17 +304,19 @@ Select Right/Left ~
   for example, you start selecting a part of a word with <Shift> + arrows, then
   press `find next` (<C-n> or ]): a pattern will be automatically added.
 
--------------------------------------------------------------------------------
+
+--------------------------------------------------------------  *vm-select-all*
 Select All Words ~
 
-  Default mapping: \\A                                          *vm-select-all*
+  Default mapping: \\A                                        
 
   Selects all occurrences of a word. Works in both normal and visual mode.
   Rules are the same as for <C-n>.
 
--------------------------------------------------------------------------------
+
+------------------------------------------------------------  *vm-regex-search*
 Find with Regex ~
-                                                              *vm-regex-search*
+                                                            
   Default mapping: \\/
 
   Enter a regex pattern as by / command. A selection will be created with that
@@ -313,51 +326,57 @@ Find with Regex ~
   If started from visual mode, it will select all occurrences of that pattern
   in the visual selection.
 
--------------------------------------------------------------------------------
+
+------------------------------------------------------------  *vm-get-operator*
 Get Operator ~
 
-  Default mapping: \\gs                                       *vm-get-operator*
+  Default mapping: \\gs                                     
 
   Creates a new selection from a text object. It can also create a pattern, but
   only if there are no patterns yet.
 
--------------------------------------------------------------------------------
+
+---------------------------------------------------------  *vm-select-operator*
 Select Operator ~
-                                                           *vm-select-operator*
+                                                         
   Default mapping: s
 
   Only after VM has started. It acts on all regions, reshaping the selections
   on the given text object. Example: `si[` would select inside brackets.
 
--------------------------------------------------------------------------------
+
+-----------------------------------------------------------  *vm-find-operator*
 Find Operator ~
 
-  Default mapping: m                                         *vm-find-operator*
+  Default mapping: m                                       
 
   Only after VM has started. 'm' as 'matches in text object': it finds the
   current patterns in the given text object, creating selections.
   Example: `mip` would find all patterns in the current paragraph.
 
--------------------------------------------------------------------------------
+
+-------------------------------------------------------------  *vm-single-mode*
 Single Region Mode ~
-                                                               *vm-single-mode*
+                                                             
   Default mapping: \\<CR>
 
   In this mode, motions will affect a single region, rather than all at once.
   Commands still affect all regions, though.
 
--------------------------------------------------------------------------------
+
+--------------------------------------------------------------  *vm-block-mode*
 Block Mode ~
 
-  Default mapping: \\<BS>                                       *vm-block-mode*
+  Default mapping: \\<BS>                                     
 
   The |block-mode| is a minor mode that works inside the |extend-mode|. It can
   help keeping the same width when adding new regions vertically with <C-Down>
   or <C-Up>, but there isn't much else about it right now.
 
--------------------------------------------------------------------------------
+
+----------------------------------------------------------------  *vm-infoline*
 Show Infoline ~
-                                                                  *vm-infoline*
+                                                                
   Default mapping: \\l
 
   The 'infoline' show informations about current regions and patterns, and the
@@ -411,7 +430,7 @@ COMMANDS                                                *visual-multi-commands*
 
 The commands that follow are placed somewhat in order of complexity (and
 arguably usefulness), so if you think as you go on reading, that something is
-'just too much', you can skim over the rest.
+'just too much', you can skip the rest.
 
 Quick reference ~
 
@@ -429,9 +448,10 @@ Filter regions                \\f                        |vm-filter|
 Transform with expression     \\e                        |vm-transform|
 
 
--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------  *vm-align*
 Alignment ~
-                                                                      *vm-align*
+                                                                    
   Default mappings: \\a, \\<, \\>
 
   Alings all regions, by setting their minimum column to the highest of all.
@@ -444,9 +464,10 @@ Alignment ~
   \\<   aligns by character, or [count] characters
   \\>   aligns by regex pattern
 
--------------------------------------------------------------------------------
+
+---------------------------------------------------------  *vm-replace-pattern*
 Replace pattern in regions ~
-                                                           *vm-replace-pattern*
+                                                         
   Default mapping: R
 
   You'll be asked for a pattern to replace, then for its replacement, and the
@@ -455,17 +476,19 @@ Replace pattern in regions ~
 
   Only working in |extend-mode|.
 
--------------------------------------------------------------------------------
+
+--------------------------------------------------------  *vm-subtract-pattern*
 Subtract pattern from regions ~
-                                                          *vm-subtract-pattern*
+                                                        
   Default mapping: \\s
 
   The entered pattern will be subtracted from regions, splitting them.
   Only working in |extend-mode|.
 
--------------------------------------------------------------------------------
+
+---------------------------------------------------------------  *vm-transpose*
 Transposition ~
-                                                                 *vm-transpose*
+                                                               
   Default mapping: \\t
 
   Swaps the contents of selections, cycling them if there are more than two.
@@ -474,24 +497,27 @@ Transposition ~
 
   Only working in |extend-mode|.
 
--------------------------------------------------------------------------------
+
+---------------------------------------------------------------  *vm-duplicate*
 Duplication ~
-                                                                 *vm-duplicate*
+                                                               
   Default mapping: \\d
 
   Duplicates in place the contents of the selections, reselecting the original
   ones. Only working in |extend-mode|.
 
--------------------------------------------------------------------------------
+
+----------------------------------------------------------------  *vm-shifting*
 Shift Selections ~
-                                                                  *vm-shifting*
+                                                                
   Default mapping: <M-S-Right>, <M-S-Left>
 
   Move the selections right or left, preserving the surroundings.
 
--------------------------------------------------------------------------------
+
+---------------------------------------------------------  *vm-case-conversion*
 Case conversion ~
-                                                           *vm-case-conversion*
+                                                         
   Default mapping: \\C
 
   Menu for case conversion. If called when in cursor mode, it will be run on
@@ -499,17 +525,19 @@ Case conversion ~
 
   It reuses functions extracted from |vim-abolish|.
 
--------------------------------------------------------------------------------
+
+----------------------------------------------------------  *vm-remove-every-n*
 Remove every n regions ~
-                                                            *vm-remove-every-n*
+                                                          
   Default mapping: \\R
 
   Removes every `n` regions. Without [count] it will remove every other region,
   with [count] 3 it will remove every third region, etc.
 
--------------------------------------------------------------------------------
+
+--------------------------------------------------------------  *vm-goto-regex*
 Go-to-regex motion ~
-                                                                *vm-goto-regex*
+                                                              
   Default mappings: \\g, \\G
 
   It is similar to a |f| motion (find character), but it accepts a regex
@@ -522,9 +550,10 @@ Go-to-regex motion ~
     \\G   ->  \d    ->  will also remove cursors where a digit was not found
     2\\g  ->  \d\d  ->  will search for 2 consecutive digits
 
--------------------------------------------------------------------------------
+
+---------------------------------------------------------------  *vm-numbering*
 Numbering ~
-                                                                 *vm-numbering*
+                                                               
   Default mapping: \\n, \\N
 
   Prepends or appends numbers with an expression. Accepts [count].
@@ -541,9 +570,10 @@ Numbering ~
     text, 4
     ...
 <
--------------------------------------------------------------------------------
+
+------------------------------------------------------------------  *vm-filter*
 Filter regions ~
-                                                                    *vm-filter*
+                                                                  
   Default mapping: \\f
 
   Filter (out) regions based on pattern or expression. After running this
@@ -555,9 +585,10 @@ Filter regions ~
   !pattern:   remove regions that match the pattern
   expression: remove regions that don't match the expression (same as below)
 
--------------------------------------------------------------------------------
+
+---------------------------------------------------------------  *vm-transform*
 Transform regions with expression ~
-                                                                 *vm-transform*
+                                                               
   Default mapping: \\e
 
   You can enter a vim expression, that will be run on each region.
