@@ -22,6 +22,11 @@ Hopefully you won't need to alter any of these.
   `b:VM_keep_buffer_hl` will override this setting, if defined.
 
 
+*g:VM_set_statusline*                              Default: 1
+
+  Enable statusline when VM is active.
+
+
 *g:VM_skip_shorter_lines*                          Default: 1
 
   When adding cursors up/down, skip shorter lines.

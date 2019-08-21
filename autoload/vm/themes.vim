@@ -39,18 +39,22 @@ fun! vm#themes#init() abort
   endif
 
   if theme == 'default'
-    let g:Vm.hi.extend  = get(g:, 'VM_Selection_hl',     'Visual')
-    let g:Vm.hi.mono    = get(g:, 'VM_Mono_Cursor_hl',   'DiffChange')
-    let g:Vm.hi.insert  = get(g:, 'VM_Ins_Mode_hl',      'Pmenu')
-    let g:Vm.hi.cursor  = get(g:, 'VM_Normal_Cursor_hl', 'ToolbarLine')
-    exe "highlight link MultiCursor ".g:Vm.hi.cursor
+    let g:Vm.hi.extend  = get(g:, 'VM_Selection_hl',     'DiffAdd')
+    let g:Vm.hi.mono    = get(g:, 'VM_Mono_Cursor_hl',   'DiffText')
+    let g:Vm.hi.insert  = get(g:, 'VM_Ins_Mode_hl',      'DiffChange')
+    let g:Vm.hi.cursor  = get(g:, 'VM_Normal_Cursor_hl', 'Visual')
+    exe "highlight! link VM_Mono     ".g:Vm.hi.mono
+    exe "highlight! link VM_Cursor   ".g:Vm.hi.cursor
+    exe "highlight! link VM_Extend   ".g:Vm.hi.extend
+    exe "highlight! link VM_Insert   ".g:Vm.hi.insert
+    exe "highlight! link MultiCursor ".g:Vm.hi.cursor
     return
   endif
 
-  exe "highlight VM_Extend" s:Themes[theme].extend
-  exe "highlight VM_Mono"   s:Themes[theme].mono
-  exe "highlight VM_Insert" s:Themes[theme].insert
-  exe "highlight VM_Cursor" s:Themes[theme].cursor
+  exe "highlight! VM_Extend" s:Themes[theme].extend
+  exe "highlight! VM_Mono"   s:Themes[theme].mono
+  exe "highlight! VM_Insert" s:Themes[theme].insert
+  exe "highlight! VM_Cursor" s:Themes[theme].cursor
   let g:Vm.hi.extend  = 'VM_Extend'
   let g:Vm.hi.mono    = 'VM_Mono'
   let g:Vm.hi.insert  = 'VM_Insert'
@@ -92,6 +96,15 @@ fun! vm#themes#complete(A, L, P) abort
     endif
   endfor
   return sort(valid)
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#themes#statusline() abort
+  let vm = VMInfos()
+  return printf("%s V-M %s %s %s %s %%=%s %s",
+        \ '%#VM_Extend#', '%#VM_Insert#', vm.ratio, '%#LineNr#', vm.patterns,
+        \ '%#VM_Extend#', vm.status)
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

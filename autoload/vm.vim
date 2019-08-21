@@ -106,6 +106,10 @@ fun! vm#init_buffer(empty, ...) abort
             let s:v.oldhls = 0
         endif
 
+        if get(g:, 'VM_set_statusline', 1)
+            setlocal statusline=%!vm#themes#statusline()
+        endif
+
         " backup sync settings for the buffer
         if !exists('b:VM_sync_minlines')
             let b:VM_sync_minlines = s:V.Funcs.sync_minlines()
