@@ -103,7 +103,7 @@ endfun
 fun! vm#themes#statusline() abort
   let vm = VMInfos()
   return printf("%s V-M %s %s %s %s %%=%s %s",
-        \ '%#VM_Extend#', '%#VM_Insert#', vm.ratio, '%#LineNr#', vm.patterns,
+        \ '%#VM_Extend#', '%#VM_Insert#', vm.ratio, '%#TabLine#', vm.patterns,
         \ '%#VM_Extend#', vm.status)
 endfun
 

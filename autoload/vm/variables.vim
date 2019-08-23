@@ -122,11 +122,13 @@ fun! vm#variables#reset()
   let &cinkeys     = v.cinkeys
   let &synmaxcol   = v.synmaxcol
   let &textwidth   = v.textwidth
-  let &statusline  = v.statusline
   let &softtabstop  = v.softtabstop
-
   let &conceallevel = v.conceallevel
   let &concealcursor = v.concealcursor
+
+  if get(g:, 'VM_set_statusline', 1)
+    let &statusline  = v.statusline
+  endif
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
