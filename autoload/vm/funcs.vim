@@ -220,6 +220,15 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Funcs.set_statusline(auto) abort
+    let setting = get(g:, 'VM_set_statusline', 2)
+    if ( setting - a:auto ) >= 1
+        silent! noautocmd setlocal statusline=%!vm#themes#statusline()
+    endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:add_char(c)
   let s:chars .= nr2char(a:c)
   echon nr2char(a:c)

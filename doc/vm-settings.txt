@@ -27,9 +27,12 @@ Hopefully you won't need to alter any of these.
   `b:VM_keep_buffer_hl` will override this setting, if defined.
 
 
-*g:VM_set_statusline*                              Default: 1
+*g:VM_set_statusline*                              Default: 2
 
   Enable statusline when VM is active.
+  With a value of 1, the statusline will be set once, on VM start.
+  With a value of 2, the statusline will be refreshed on |CursorHold| event.
+  With a value of 3, also on |CursorMoved| event.
 
 
 *g:VM_skip_shorter_lines*                          Default: 1

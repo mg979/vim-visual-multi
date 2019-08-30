@@ -106,9 +106,7 @@ fun! vm#init_buffer(empty, ...) abort
             let s:v.oldhls = 0
         endif
 
-        if get(g:, 'VM_set_statusline', 1)
-            setlocal statusline=%!vm#themes#statusline()
-        endif
+        call s:V.Funcs.set_statusline(0)
 
         " backup sync settings for the buffer
         if !exists('b:VM_sync_minlines')
@@ -221,7 +219,9 @@ fun! vm#au_cursor(end) abort
 
     augroup VM_cursormoved
         au!
-        au CursorMoved * call s:cursor_moved()
+        au CursorMoved  * call s:cursor_moved()
+        au CursorMoved  * call s:V.Funcs.set_statusline(2)
+        au CursorHold   * call s:V.Funcs.set_statusline(1)
     augroup END
 endfun
 
