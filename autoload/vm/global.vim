@@ -21,7 +21,6 @@ endfun
 let s:X         = { -> g:Vm.extend_mode }
 let s:R         = { -> s:V.Regions      }
 let s:B         = { -> s:v.block_mode && g:Vm.extend_mode }
-let s:Group     = { -> s:V.Groups[s:v.active_group] }
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -64,7 +63,6 @@ endfun
 fun! s:Global.active_regions(...) abort
     """Return current working set of regions.
     if s:v.single_region    | return [s:V.Regions[s:v.index]]
-    elseif s:v.active_group | return s:Group()
     else                    | return s:V.Regions
     endif
 endfun
@@ -312,7 +310,6 @@ fun! s:Global.erase_regions() abort
     call self.remove_highlight()
     let s:V.Regions = []
     let s:V.Bytes = {}
-    let s:V.Groups = {}
     let s:v.index = -1
 endfun
 
@@ -402,7 +399,7 @@ fun! s:Global.region_at_pos(...) abort
     let pos = s:F.pos2byte(a:0 ? a:1 : '.')
     if s:X() && !has_key(s:V.Bytes, pos) | return {} | endif
 
-    for r in (s:v.active_group? s:Group() : s:R())
+    for r in s:R()
         if pos >= r.A && pos <= r.B
             return r
         endif
@@ -444,9 +441,8 @@ endfun
 fun! s:Global.reset_byte_map(update) abort
     """Reset byte map for region, group, or all regions.
 
-    if s:v.single_region    | call s:R()[s:v.index].remove_from_byte_map(0)
-    elseif s:v.active_group | for r in s:Group() | call r.remove_from_byte_map(0) | endfor
-    else                    | let s:V.Bytes = {}
+    if s:v.single_region | call s:R()[s:v.index].remove_from_byte_map(0)
+    else                 | let s:V.Bytes = {}
     endif
 
     if a:update
@@ -686,6 +682,26 @@ fun! s:Global.merge_regions(...) abort
     let pos = getpos('.')[1:2]
     call self.rebuild_from_map()
     return self.update_map_and_select_region(pos)
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.merge_maps(map) abort
+    """Merge temporary and primary regions maps.
+    for b in keys(a:map)
+        let s:V.Bytes[b] = get(s:V.Bytes, b, 0) + a:map[b]
+    endfor
+    return self.merge_regions()
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.subtract_maps(map) abort
+    """Subtract temporary map from primary region map.
+    for b in keys(a:map)
+        silent! unlet s:V.Bytes[b]
+    endfor
+    return self.merge_regions()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

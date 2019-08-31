@@ -74,11 +74,7 @@ fun! vm#region#new(cursor, ...) abort
         call s:G.update_indices(i)
     endif
 
-    if s:v.active_group
-        call add(s:V.Groups[s:v.active_group], R)
-    endif
     call s:G.update_cursor_highlight()
-
     return R
 endfun
 
@@ -106,7 +102,6 @@ fun! s:Region.new(cursor, ...) abort
     let R.index   = len(s:R())
     let R.dir     = s:v.direction
     let R.id      = s:v.ID + 1
-    let R.group   = s:v.active_group
 
     let R.matches = {'region': [], 'cursor': 0}
 

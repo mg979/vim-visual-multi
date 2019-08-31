@@ -80,7 +80,6 @@ fun! vm#variables#init() abort
   let v.search           = []
   let v.IDs_list         = []
   let v.ID               = 0
-  let v.active_group     = 0
   let v.index            = -1
   let v.direction        = 1
   let v.nav_direction    = 1

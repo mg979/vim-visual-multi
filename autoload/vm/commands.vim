@@ -683,7 +683,6 @@ fun! s:call_motion(this) abort
     let R = s:R()[ s:v.index ]
 
     let regions = a:this            ? [s:V.Regions[s:v.index]]
-          \     : s:v.active_group  ? s:V.Groups[s:v.active_group]
           \     : s:V.Regions
 
     call s:before_move()
@@ -931,7 +930,6 @@ endfun
 let s:X                = { -> g:Vm.extend_mode }
 let s:R                = { -> s:V.Regions      }
 let s:B                = { -> s:v.block_mode && g:Vm.extend_mode }
-let s:Group            = { -> s:V.Groups[s:v.active_group] }
 let s:RS               = { -> s:G.active_regions() }  "current regions set
 let s:is_r             = { -> g:Vm.is_active && !empty(s:G.region_at_pos()) }
 let s:first_line       = { -> line('.') == 1 }
