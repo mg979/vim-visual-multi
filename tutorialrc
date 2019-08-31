@@ -4,7 +4,6 @@ set runtimepath^=.
 silent! set packpath=
 
 syntax enable
-set noswapfile
 
 if $COLORTERM == ( 'truecolor' || 'gnome-terminal' || 'rxvt-xpm' )
   set t_Co=256
@@ -26,7 +25,9 @@ if has('patch-8.0.0616') || has('nvim')
 endif
 set ttimeout timeoutlen=3000 ttimeoutlen=10
 silent e ./doc/vm-tutorial
-setf help
+setfiletype help
+setlocal bt=nofile bh=wipe noswf nobl
+nnoremap <buffer> ZZ :<c-u>quit!<cr>
 set mouse=a
 set t_ut=
 set expandtab
