@@ -291,7 +291,7 @@ fun! vm#commands#find_under(visual, whole, inclusive, ...) abort
     call s:Search.add()
     let R = s:G.new_region()
     call s:G.check_mutliline(0, R)
-    return (a:0 && a:visual)? vm#commands#find_next(0, 0) : s:G.merge_overlapping(R)
+    return (a:0 && a:visual)? s:G.region_at_pos() : s:G.merge_overlapping(R)
 endfun
 
 
