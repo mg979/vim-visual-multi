@@ -151,13 +151,13 @@ endfun
 fun! vm#operators#find(start, visual, ...) abort
     if a:start
         if !g:Vm.is_active
-            call s:init()
+            call s:backup_map_find()
             if a:visual
                 "use search register if just starting from visual mode
                 call s:V.Search.get_slash_reg(s:v.oldsearch[0])
             endif
         else
-            call s:init()
+            call s:backup_map_find()
         endif
 
         "ensure there is an active search
@@ -218,13 +218,7 @@ fun! vm#operators#find(start, visual, ...) abort
     endwhile
     let &wrapscan = ows
     let s:v.clear_vm_matches = 1
-
-    if !len(s:R())
-        call cursor(startline, startcol)
-        call s:F.exit('No matches found. Exiting VM.', 0)
-    else
-        call s:G.update_map_and_select_region()
-    endif
+    call s:merge_find()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -244,4 +238,23 @@ fun! s:old_updatetime() abort
         let &updatetime = g:Vm.oldupdate
     endif
 endfun
+
+fun! s:backup_map_find() abort
+    "use temporary regions, they will be merged later
+    call s:init()
+    let s:Bytes = copy(s:V.Bytes)
+    let s:V.Regions = []
+    let s:V.Bytes = {}
+    let s:v.index = -1
+    let s:v.no_search = 1
+    let s:v.eco = 1
+endfun
+
+fun! s:merge_find() abort
+    let new_map = copy(s:V.Bytes)
+    let s:V.Bytes = s:Bytes
+    call s:G.merge_maps(new_map)
+    unlet new_map
+endfun
+
 " vim: et ts=4 sw=4 sts=4 :
