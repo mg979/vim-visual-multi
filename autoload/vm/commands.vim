@@ -94,7 +94,7 @@ endfun
 
 fun! s:went_too_far() abort
     " if gone too far (because it skipped all lines), reselect region
-    if empty(s:G.is_region_at_pos('.'))
+    if empty(s:G.region_at_pos())
         call s:G.select_region(s:v.index)
     endif
 endfun
@@ -162,7 +162,7 @@ fun! vm#commands#expand_line(down) abort
     call s:set_extend_mode(1)
     if !s:v.multiline | call s:F.toggle_option('multiline') | endif
 
-    let R = s:G.is_region_at_pos('.')
+    let R = s:G.region_at_pos()
     if empty(R)
         let eol = col('$') | let ln = line('.')
         let l = eol>1? ln : a:down? ln   : ln-1
@@ -286,7 +286,7 @@ fun! vm#commands#find_under(visual, whole, inclusive, ...) abort
     if !a:visual | call s:yank(a:inclusive)                 | endif
 
     "replace region if calling the command on an existing region
-    if s:is_r()  | call s:G.is_region_at_pos('.').remove()  | endif
+    if s:is_r()  | call s:G.region_at_pos().remove()        | endif
 
     call s:Search.add()
     let R = s:G.new_region()
@@ -306,7 +306,7 @@ fun! vm#commands#find_all(visual, whole, inclusive) abort
     let s:v.eco = 1
 
     if !a:visual
-        let R = s:G.is_region_at_pos('.')
+        let R = s:G.region_at_pos()
         if empty(R)
             let R = vm#commands#find_under(0, a:whole, a:inclusive)
         endif
@@ -341,7 +341,7 @@ fun! s:get_region(next) abort
         if g:VM_notify_previously_selected == 2
             normal! ``
             call s:F.msg('Already selected')
-            return s:G.is_region_at_pos('.')
+            return s:G.region_at_pos()
         endif
         call s:F.msg('Already selected')
     endif
@@ -384,7 +384,7 @@ fun! s:navigate(force, dir) abort
 endfun
 
 fun! s:skip() abort
-    let r = s:G.is_region_at_pos('.')
+    let r = s:G.region_at_pos()
     if empty(r) | call s:navigate(1, s:v.nav_direction)
     else        | call r.clear()
     endif
@@ -424,7 +424,7 @@ fun! vm#commands#find_prev(skip, nav) abort
 
     call s:Search.validate()
 
-    let r = s:G.is_region_at_pos('.')
+    let r = s:G.region_at_pos()
     if empty(r)  | let r = s:G.select_region(s:v.index) | endif
     if !empty(r) | let pos = [r.l, r.a]
     else         | let pos = getpos('.')[1:2]
@@ -445,7 +445,7 @@ fun! vm#commands#skip(just_remove) abort
     if s:F.no_regions() | return | endif
 
     if a:just_remove
-        let r = s:G.is_region_at_pos('.')
+        let r = s:G.region_at_pos()
         if !empty(r)
             call s:G.remove_last_region(r.id)
             call s:keep_block()
@@ -738,7 +738,7 @@ fun! vm#commands#seek_down() abort
 
     " don't jump down if nothing else to seek
     if !s:F.Scroll.can_see_eof()
-        let r = s:G.is_region_at_pos('.')
+        let r = s:G.region_at_pos()
         if !empty(r) && r.index != nR - 1
             exe "keepjumps normal! \<C-f>"
         endif
@@ -758,7 +758,7 @@ fun! vm#commands#seek_up() abort
 
     " don't jump up if nothing else to seek
     if !s:F.Scroll.can_see_bof()
-        let r = s:G.is_region_at_pos('.')
+        let r = s:G.region_at_pos()
         if !empty(r) && r.index != 0
             exe "keepjumps normal! \<C-b>"
         endif
@@ -933,7 +933,7 @@ let s:R                = { -> s:V.Regions      }
 let s:B                = { -> s:v.block_mode && g:Vm.extend_mode }
 let s:Group            = { -> s:V.Groups[s:v.active_group] }
 let s:RS               = { -> s:G.active_regions() }  "current regions set
-let s:is_r             = { -> g:Vm.is_active && !empty(s:G.is_region_at_pos('.')) }
+let s:is_r             = { -> g:Vm.is_active && !empty(s:G.region_at_pos()) }
 let s:first_line       = { -> line('.') == 1 }
 let s:last_line        = { -> line('.') == line('$') }
 let s:can_from_back    = {   -> s:X() && s:v.motion == '$' && !s:v.direction          }

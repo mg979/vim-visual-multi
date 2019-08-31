@@ -69,7 +69,7 @@ endfun
 
 fun! s:Search.get() abort
     """Get a new search pattern from the selected region, with a fallback."
-    let r = s:G.is_region_at_pos('.')
+    let r = s:G.region_at_pos()
     if !empty(r)
         let pat = self.escape_pattern(r.txt)
         call s:update_search(pat) | return
@@ -234,7 +234,7 @@ fun! s:pattern_found(t, i) abort
 endfun
 
 fun! s:Search.rewrite(last) abort
-    let r = s:G.is_region_at_pos('.') | if empty(r) | return | endif
+    let r = s:G.region_at_pos() | if empty(r) | return | endif
 
     let t = self.escape_pattern(r.txt)
 

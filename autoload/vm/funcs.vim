@@ -34,7 +34,7 @@ fun! s:Funcs.pos2byte(...) abort
     if type(a:1) == 0                   "an offset
         return a:1
 
-    elseif type(a:1) == type("")        "a string (like '.')
+    elseif type(a:1) == v:t_string      "a string (like '.')
         let pos = getpos(a:1)[1:2]
         return (line2byte(pos[0]) + pos[1] - 1)
 

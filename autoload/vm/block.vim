@@ -53,7 +53,7 @@ fun! s:Block.horizontal(before) abort
 
     if a:before
         let s:v.block[3] = 1
-        let is_region = !empty(s:G.is_region_at_pos('.'))
+        let is_region = !empty(s:G.region_at_pos())
 
         if !is_region         | call self.stop()
         elseif !s:v.block[0]  | let s:v.block[0] = vcol
@@ -112,7 +112,7 @@ fun! s:Block.start() abort
     let s:v.block_mode = 1
     if s:v.single_region | call s:V.Funcs.toggle_option('single_region') | endif
     if s:v.index != -1
-        let r = s:G.is_region_at_pos('.')
+        let r = s:G.region_at_pos()
         if empty(r) | let r = s:R()[-1] | endif
         let s:v.block[0] = r.a
         let s:v.block[1] = r.b

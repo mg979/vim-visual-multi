@@ -292,7 +292,7 @@ fun! s:Insert(key) abort
 endfun
 
 fun! s:Yank(hard) abort
-  if empty(b:VM_Selection.Global.is_region_at_pos('.'))
+  if empty(b:VM_Selection.Global.region_at_pos())
     let b:VM_Selection.Vars.yanked = 1 | return 'y'
   endif
   let hard = a:hard && !g:VM_overwrite_vim_registers ||

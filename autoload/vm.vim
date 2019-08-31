@@ -236,7 +236,7 @@ fun! s:cursor_moved() abort
     elseif !s:v.eco
         " if currently on a region, set the index to this region
         " so that it's possible to select next/previous from it
-        let r = s:V.Global.is_region_at_pos('.')
+        let r = s:V.Global.region_at_pos()
         if !empty(r) | let s:v.index = r.index | endif
     endif
 endfun

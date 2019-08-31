@@ -130,7 +130,7 @@ endfun
 
 fun! s:get_region(add_pattern) abort
     """Create region with select operator.
-    let R = s:G.is_region_at_pos('.')
+    let R = s:G.region_at_pos()
     if !empty(R) | return R | endif
 
     let R = vm#region#new(0)

@@ -29,7 +29,7 @@ let s:Group     = { -> s:V.Groups[s:v.active_group] }
 fun! s:Global.new_region() abort
     """Get the region under cursor, or create a new one if there is none.
 
-    let R = self.is_region_at_pos('.')
+    let R = self.region_at_pos()
     if empty(R)
         let R = vm#region#new(0)
         let s:v.was_region_at_pos = 0
@@ -49,7 +49,7 @@ endfun
 
 fun! s:Global.new_cursor(...) abort
     """Create a new cursor if there isn't already a region.
-    let R = self.is_region_at_pos('.')
+    let R = self.region_at_pos()
 
     if empty(R)
         return vm#region#new(1)
@@ -386,7 +386,7 @@ endfun
 fun! s:Global.select_region_at_pos(pos) abort
     """Try to select a region at the given position.
 
-    let r = self.is_region_at_pos(a:pos)
+    let r = self.region_at_pos(a:pos)
     if !empty(r)
         return self.select_region(r.index)
     else
@@ -396,10 +396,10 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.is_region_at_pos(pos) abort
-    """Return the region under the cursor, or an empty dict if not found.
+fun! s:Global.region_at_pos(...) abort
+    """Return the region at position, or an empty dict if not found.
 
-    let pos = s:F.pos2byte(a:pos)
+    let pos = s:F.pos2byte(a:0 ? a:1 : '.')
     if s:X() && !has_key(s:V.Bytes, pos) | return {} | endif
 
     for r in (s:v.active_group? s:Group() : s:R())
