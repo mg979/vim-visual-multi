@@ -175,6 +175,8 @@ fun! vm#operators#find(start, visual, ...) abort
         return 'y'
     endif
 
+    let s:v.clear_vm_matches = 1
+
     "set the cursor to the start of the yanked region, then find occurrences until end mark is met
     let [endline, endcol] = getpos("']")[1:2]
     keepjumps normal! `[
@@ -182,7 +184,6 @@ fun! vm#operators#find(start, visual, ...) abort
 
     if !search(join(s:v.search, '\|'), 'znp', endline)
         call s:F.msg('No matches found.')
-        let s:v.clear_vm_matches = 1
         if !len(s:R())
             call vm#reset(1)
         else
@@ -217,7 +218,6 @@ fun! vm#operators#find(start, visual, ...) abort
         call s:G.new_region()
     endwhile
     let &wrapscan = ows
-    let s:v.clear_vm_matches = 1
     call s:merge_find()
 endfun
 

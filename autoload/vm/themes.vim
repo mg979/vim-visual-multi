@@ -38,16 +38,17 @@ fun! vm#themes#init() abort
     call vm#themes#hi()
   endif
 
+  let g:Vm.hi.mono    = 'VM_Mono'
+  let g:Vm.hi.cursor  = 'VM_Cursor'
+  let g:Vm.hi.extend  = 'VM_Extend'
+  let g:Vm.hi.insert  = 'VM_Insert'
+
   if theme == 'default'
-    let g:Vm.hi.mono    = get(g:, 'VM_Mono_hl',   'DiffText')
-    let g:Vm.hi.cursor  = get(g:, 'VM_Cursor_hl', 'Visual')
-    let g:Vm.hi.extend  = get(g:, 'VM_Extend_hl', 'DiffAdd')
-    let g:Vm.hi.insert  = get(g:, 'VM_Insert_hl', 'DiffChange')
-    exe "highlight! link VM_Mono     ".g:Vm.hi.mono
-    exe "highlight! link VM_Cursor   ".g:Vm.hi.cursor
-    exe "highlight! link VM_Extend   ".g:Vm.hi.extend
-    exe "highlight! link VM_Insert   ".g:Vm.hi.insert
-    exe "highlight! link MultiCursor ".g:Vm.hi.cursor
+    exe "highlight! link VM_Mono     ".get(g:, 'VM_Mono_hl',   'DiffText')
+    exe "highlight! link VM_Cursor   ".get(g:, 'VM_Cursor_hl', 'Visual')
+    exe "highlight! link VM_Extend   ".get(g:, 'VM_Extend_hl', 'DiffAdd')
+    exe "highlight! link VM_Insert   ".get(g:, 'VM_Insert_hl', 'DiffChange')
+    exe "highlight! link MultiCursor ".get(g:, 'VM_Cursor_hl', 'Visual')
     return
   endif
 
@@ -59,7 +60,7 @@ fun! vm#themes#init() abort
   let g:Vm.hi.mono    = 'VM_Mono'
   let g:Vm.hi.insert  = 'VM_Insert'
   let g:Vm.hi.cursor  = 'VM_Cursor'
-  highlight link MultiCursor VM_Cursor
+  highlight! link MultiCursor VM_Cursor
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
