@@ -15,6 +15,17 @@ Or you can rely on a user autocommand:  >
   autocmd User visual_multi_exit    call MyVmExit()
 <
 
+
+                                                      *vm-faq-disable-mappings*
+How can I temporarily disable VM mappings? ~
+
+VM has a <Plug> for that. Normally it is bound to |VM_leader| + <Space>, but
+unless you use <Space> as |VM_leader|, you may prefer an easier mapping:
+>
+  let g:VM_maps["Toggle Mappings"] = '<Space>'
+<
+
+
                                                                  *vm-faq-remap*
 How can I remap x in VM? ~
 
