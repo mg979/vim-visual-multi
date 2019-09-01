@@ -7,7 +7,7 @@
 let s:Maps = {}
 
 let g:VM_custom_noremaps   = get(g:, 'VM_custom_noremaps', {})
-let g:VM_custom_remaps     = extend({'<c-p>': '[', '<c-s>': 'q'}, get(g:, 'VM_custom_remaps', {}))
+let g:VM_custom_remaps     = get(g:, 'VM_custom_remaps', {})
 let g:VM_check_mappings    = get(g:, 'VM_check_mappings', 1)
 let g:VM_default_mappings  = get(g:, 'VM_default_mappings', 1)
 let g:VM_mouse_mappings    = get(g:, 'VM_mouse_mappings', 0)

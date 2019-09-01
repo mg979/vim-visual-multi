@@ -72,13 +72,13 @@ Mouse Column    <M-C-RightMouse>  create a column, from current cursor to
   Name                Keys        Notes ~
 -------------------------------------------------------------------------------
                                                            *vm-buffer-mappings*
-Find Next               ]         find next occurrence
-Find Prev             [, <C-p>    find previous occurrence
+Find Next               n         find next occurrence
+Find Prev               N         find previous occurrence
 Goto Next               }         go to next selected region
 Goto Prev               {         go to previous selected region
 Seek Next             <C-f>       fast go to next (from next page)
 Seek Prev             <C-b>       fast go to previous (from previous page)
-Skip Region           q, <C-s>    skip and find to next
+Skip Region             q         skip and find to next
 Remove Region           Q         remove region under cursor
 
 The following are valid in extend-mode: ~

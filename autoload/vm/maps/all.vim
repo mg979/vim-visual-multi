@@ -100,10 +100,10 @@ fun! vm#maps#all#buffer() abort
 
   "select
   call extend(maps, {
-        \"Find Next":               [']',         'n'],
-        \"Find Prev":               ['[',         'n'],
-        \"Goto Next":               ['}',         'n'],
-        \"Goto Prev":               ['{',         'n'],
+        \"Find Next":               ['n',         'n'],
+        \"Find Prev":               ['N',         'n'],
+        \"Goto Next":               [']',         'n'],
+        \"Goto Prev":               ['[',         'n'],
         \"Seek Up":                 ['<C-b>',     'n'],
         \"Seek Down":               ['<C-f>',     'n'],
         \"Invert Direction":        ['o',         'n'],

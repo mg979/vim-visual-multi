@@ -213,8 +213,8 @@ will be different if you change it.
 Quick reference ~
 
 
-Find Word                    <C-n> / <C-p>                |vm-find-word|
-Skip Word                    q / <C-s>                    |vm-skip-word|
+Find Word                    <C-n>                        |vm-find-word|
+Next/Previous/Skip           n / N / q                    |vm-find-next|
 Add Cursors Down/Up          <C-Down> / <C-Up>            |vm-add-cursors|
 Add Cursor at Position       \\\                          |vm-add-cursor|
 Select Right/Left            <S-Right>, <S-Left>          |vm-shift-select|
@@ -246,20 +246,20 @@ Find Word ~
   the first 3 occurrences of the word under cursor.
 
   After VM has started, you can also use the following mappings:
-                                                                 *vm-skip-word*
-    ]            find next
-    [ `or` <C-p>   find previous
-    }            go to next
-    {            go to previous
+                                                                 *vm-find-next*
+    n            find next
+    N            find previous
+    q            skip and find next (or previous if searching backwards)
+    ]            go to next
+    [            go to previous
     <C-f>        go to next (by page)
     <C-b>        go to previous (by page)
-    q `or` <C-s>   skip and find next (or previous if searching backwards)
 
   NOTE: <C-n> behaves both as `find next` if pressed on an existing region, or
   `find word` otherwise, adding a new pattern.
 
-  NOTE: when you change direction of search with [, skipping a region will
-  keep searching backwards.
+  NOTE: when you change direction of search, skipping a region will respect the
+  new direction.
 
   NOTE: you can press <C-n> also in cursor mode: all words under cursors will
   be selected, but in this case no patterns will be added. A new pattern is
@@ -648,6 +648,9 @@ This command works similarly as |gv|, in that it tries to reselect the regions
 as they were before exiting VM last time. Note that it works by byte offset, so
 if you did any change after exiting VM, the reselected regions will be wrong.
 
+Note that inside a VM session, this command reselects the last set of regions
+in extend mode, i.e. before switching to cursor mode, and the default mapping
+is gS (without leader).
 
 
 
