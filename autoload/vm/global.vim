@@ -102,7 +102,7 @@ fun! s:Global.change_mode(...) abort
     " merge cursors if transitioning from cursor mode, but
     " reset direction transitioning from extend mode
     if !s:X() | call self.merge_cursors()
-    else      | let s:v.direction = 1
+    else      | call self.backup_last_regions()
     endif
 
     let g:Vm.extend_mode = !s:X()
@@ -348,6 +348,7 @@ fun! s:Global.backup_last_regions() abort
     """Create a backup of last set of regions.
     let regions = map(deepcopy(s:R()), "{'A': v:val.A, 'B': v:val.B}")
     let b:VM_LastBackup = {'extend': g:Vm.extend_mode, 'regions': regions}
+    let s:v.direction = 1
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

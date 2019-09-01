@@ -111,6 +111,7 @@ fun! vm#maps#all#buffer() abort
         \"Remove Region":           ['Q',         'n'],
         \"Remove Last Region":      [leader.'q',  'n'],
         \"Remove Every n Regions":  [leader.'R',  'n'],
+        \"Reselect Last":           ['gS',        'n'],
         \"Star":                    ['',          'n'],
         \"Hash":                    ['',          'n'],
         \"Visual Star":             ['',          'x'],

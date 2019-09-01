@@ -847,9 +847,15 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#reselect_last()
-    call s:init(0, 1, 0)
+    let was_active = s:init(0, 1, 0)
     if empty(get(b:, 'VM_LastBackup', {})) || empty(get(b:VM_LastBackup, 'regions', []))
         return s:F.exit('No regions to restore')
+    endif
+
+    if was_active && !s:X()
+        call s:G.erase_regions()
+    elseif was_active
+        return s:F.msg('Not in extend mode.')
     endif
 
     try
