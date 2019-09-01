@@ -103,7 +103,7 @@ Quit VM and move to the second line.
 Press <C-n>: if smartcase is active, only one other match will be underlined.
 Press `\\c`: this allows you to cycle the case setting of the current pattern. Press
 it until it becomes case insensitive.
-Press <C-s>: the current match will be skipped. Alternate <C-n> and <C-s>.
+Press `q`: the current match will be skipped. Alternate <C-n> and `q`.
 
 <C-n> selects words with word boundaries. What if you want to select a part of a
 word? You have three options. Go back with `m after every attempt:
@@ -118,12 +118,12 @@ Let's focus on the second option, since it's probably the easiest.  So you press
 occurrence? <C-n> is an obvious choice: it will create a pattern from those letters,
 and will select the next occurrence.
 
-But you can also use `]` and `[`: select again the first two letters with <S-Right>,
-then press `]]]`. You can also skip a pattern with `q`. Try it. Add a pattern with
-`]`, skip one with `q`, go back with `[`, skip again with `q`.
+But you can also use `n` and `N`: select again the first two letters with <S-Right>,
+then press `nnn`. Try it: add a pattern with `n`, skip one with `q`, go back with
+`N`, skip again with `q`.
 
-The keys `]` and `[` stand for `find next/previous`, they don't add new patterns,
-unless there is none set yet: since <S-Right> doesn't add a pattern, `]` and `[`
+The keys `n` and `N` stand for `find next/previous`, they don't add new patterns,
+unless there is none set yet: since <S-Right> doesn't add a pattern, `n` and `N`
 will do it.
 
 Now press `Q`: you didn't skip a selection moving to the next one: you removed it.
@@ -192,7 +192,7 @@ Just don't expect *everything* to be repeatable, though!
 
 Replace in regions, Select Operator ~
 
-Say you want to remove underscores from the quoted text below. 
+Say you want to remove underscores from the quoted text below.
 Move to the start of the block, then:
 
 1. Press `f"l` to go inside the quotes

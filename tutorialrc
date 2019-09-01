@@ -33,6 +33,7 @@ set mouse=a
 set t_ut=
 set expandtab
 set laststatus=2
+set hlsearch
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " vim-visual-multi configuration {{{1
