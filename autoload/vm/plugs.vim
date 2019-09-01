@@ -98,14 +98,11 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction(1)<cr>
   nnoremap <silent>       <Plug>(VM-Goto-Next)               :call vm#commands#find_next(0, 1)<cr>
   nnoremap <silent>       <Plug>(VM-Goto-Prev)               :call vm#commands#find_prev(0, 1)<cr>
-  nnoremap <silent>       <Plug>(VM-Alt-Next)                :call vm#commands#find_next(0, 1)<cr>
-  nnoremap <silent>       <Plug>(VM-Alt-Prev)                :call vm#commands#find_prev(0, 1)<cr>
   nnoremap <silent>       <Plug>(VM-Find-Next)               :call vm#commands#find_next(0, 0)<cr>
   nnoremap <silent>       <Plug>(VM-Find-Prev)               :call vm#commands#find_prev(0, 0)<cr>
   nnoremap <silent>       <Plug>(VM-Seek-Up)                 :call vm#commands#seek_up()<cr>
   nnoremap <silent>       <Plug>(VM-Seek-Down)               :call vm#commands#seek_down()<cr>
   nnoremap <silent>       <Plug>(VM-Skip-Region)             :call vm#commands#skip(0)<cr>
-  nnoremap <silent>       <Plug>(VM-Alt-Skip)                :call vm#commands#skip(0)<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Region)           :call vm#commands#skip(1)<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Last-Region)      :call b:VM_Selection.Global.remove_last_region()<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Every-n-Regions)  :<c-u>call vm#commands#remove_every_n_regions(v:count)<cr>

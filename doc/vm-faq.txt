@@ -30,7 +30,7 @@ There are two ways: either do a remap using the functions above, e.g.:  >
   endfunction
 <
 or use |g:VM_custom_remaps| (normal mode only), e.g.:  >
-  let g:VM_custom_remaps = {'<c-p>': '[', '<c-s>': 'q'}
+  let g:VM_custom_remaps = {'n': ']', 'N': '['}
 <
 This will preserve the function of the original mapping. If you want to replace
 it entirely, see |g:VM_maps|.

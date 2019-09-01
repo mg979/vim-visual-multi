@@ -314,7 +314,7 @@ endfun
 fun! s:Funcs.msg(text) abort
     if s:v.eco | return | endif
 
-    echo '\r'
+    echo "\r"
     redraw
     if type(a:text) == type("")
         exe "echohl" g:Vm.hi.message

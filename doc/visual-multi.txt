@@ -213,7 +213,8 @@ will be different if you change it.
 Quick reference ~
 
 
-Find Word                    <C-n>                        |vm-find-word|
+Find Word                    <C-n> / <C-p>                |vm-find-word|
+Skip Word                    q / <C-s>                    |vm-skip-word|
 Add Cursors Down/Up          <C-Down> / <C-Up>            |vm-add-cursors|
 Add Cursor at Position       \\\                          |vm-add-cursor|
 Select Right/Left            <S-Right>, <S-Left>          |vm-shift-select|
@@ -225,12 +226,13 @@ Select Operator              s                            |vm-select-operator|
 Find Operator                m                            |vm-find-operator|
 Alignment                    \\a                          |vm-align|
 Transposition                \\t                          |vm-transpose|
-Show Infoline                \\l                          |vm-infoline|
+
+NOTE: some mappings in this list are <buffer> mappings, that is, they are
+available only after VM has started.
 
 NOTE: you don't need to learn all, or even most commands. If you think you'll
 use the plugin for quick refactorings, and you want to keep things simple, you
 can stop reading here, and just use some of the commands listed in this table.
-
 
 ---------------------------------------------------------------  *vm-find-word*
 Find Word ~
@@ -244,14 +246,14 @@ Find Word ~
   the first 3 occurrences of the word under cursor.
 
   After VM has started, you can also use the following mappings:
-
-    ]        find next
-    [        find previous
-    }        go to next
-    {        go to previous
-    <C-f>    go to next (by page)
-    <C-b>    go to previous (by page)
-    q        skip and find next (or previous if searching backwards)
+                                                                 *vm-skip-word*
+    ]            find next
+    [ `or` <C-p>   find previous
+    }            go to next
+    {            go to previous
+    <C-f>        go to next (by page)
+    <C-b>        go to previous (by page)
+    q `or` <C-s>   skip and find next (or previous if searching backwards)
 
   NOTE: <C-n> behaves both as `find next` if pressed on an existing region, or
   `find word` otherwise, adding a new pattern.
@@ -263,9 +265,7 @@ Find Word ~
   be selected, but in this case no patterns will be added. A new pattern is
   only added when you press <C-n> on some text without any region.
 
-  NOTE: you can remap these keys, e.g.:
->
-    let g:VM_custom_remaps = {'<c-p>': '[', '<c-s>': 'q'}
+  NOTE: you can remap these keys. See also |vm-faq-remap|.
 
 
 -------------------------------------------------------------  *vm-add-cursors*

@@ -10,7 +10,8 @@ if $COLORTERM == ( 'truecolor' || 'gnome-terminal' || 'rxvt-xpm' )
 endif
 
 if has('gui_running')
-  colorscheme desert
+  colorscheme darkblue
+  hi! link Tabline StatusLine
 else
   colorscheme industry
   hi Search ctermbg=236 ctermfg=12
@@ -19,9 +20,9 @@ else
   hi ColorColumn ctermbg=236
   hi Tabline cterm=NONE
   hi! link StatusLine Tabline
-endif
-if has('patch-8.0.0616') || has('nvim')
-  hi Normal ctermbg=235
+  if has('patch-8.0.0616') || has('nvim')
+    hi Normal ctermbg=235
+  endif
 endif
 set ttimeout timeoutlen=3000 ttimeoutlen=10
 silent e ./doc/vm-tutorial
