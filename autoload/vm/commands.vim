@@ -464,15 +464,15 @@ fun! vm#commands#invert_direction(...) abort
     """Invert direction and reselect region."""
     if s:F.no_regions() || s:v.auto | return | endif
 
-    for r in s:RS() | let r.dir = !r.dir | endfor
+    for r in s:R() | let r.dir = !r.dir | endfor
 
     "invert anchor
     if s:v.direction
         let s:v.direction = 0
-        for r in s:RS() | let r.k = r.b | let r.K = r.B | endfor
+        for r in s:R() | let r.k = r.b | let r.K = r.B | endfor
     else
         let s:v.direction = 1
-        for r in s:RS() | let r.k = r.a | let r.K = r.A | endfor
+        for r in s:R() | let r.k = r.a | let r.K = r.A | endfor
     endif
 
     if !a:0 | return | endif
@@ -555,11 +555,15 @@ endfun
 " Motion commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#motion(motion, count, select, this) abort
+fun! vm#commands#motion(motion, count, select, single) abort
+    call s:init(0, 1, a:select)
 
-    "create cursor if needed
-    if !g:Vm.is_active      | call s:init(0, 1, 1)     | call s:G.new_cursor()
-    elseif s:F.no_regions() || ( a:this && !s:is_r() ) | call s:G.new_cursor()
+    "create cursor if needed:
+    " - VM hasn't started yet
+    " - there are no regions
+    " - called with (single_region) and cursor not on a region
+    if !g:Vm.is_active || s:F.no_regions() || ( a:single && !s:is_r() )
+        call s:G.new_cursor()
     endif
 
     "-----------------------------------------------------------------------
@@ -580,32 +584,24 @@ fun! vm#commands#motion(motion, count, select, this) abort
     endif
 
     call s:V.Block.horizontal(1)
-    call s:call_motion(a:this)
+    call s:call_motion(a:single)
     call s:V.Block.horizontal(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#remap_motion(motion) abort
-    if s:F.no_regions() | return | endif
-    let s:v.motion = a:motion
-    call s:call_motion(a:this)
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#commands#merge_to_beol(eol, this) abort
+fun! vm#commands#merge_to_beol(eol) abort
     if s:F.no_regions() | return | endif
     call s:G.cursor_mode()
 
     let s:v.motion = a:eol? "\<End>" : '^'
     let s:v.merge = 1
-    call s:call_motion(a:this)
+    call s:call_motion()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_motion(motion, char, this, ...) abort
+fun! vm#commands#find_motion(motion, char) abort
     if s:F.no_regions() | return | endif
 
     if a:char != ''
@@ -614,12 +610,12 @@ fun! vm#commands#find_motion(motion, char, this, ...) abort
         let s:v.motion = a:motion.nr2char(getchar())
     endif
 
-    call s:call_motion(a:this)
+    call s:call_motion()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#regex_motion(regex, count, remove, this) abort
+fun! vm#commands#regex_motion(regex, count, remove) abort
     if s:F.no_regions() | return | endif
 
     let regex = empty(a:regex) ? s:F.search_chars(a:count) : a:regex
@@ -634,7 +630,7 @@ fun! vm#commands#regex_motion(regex, count, remove, this) abort
     let [ R, X ] = [ s:R()[ s:v.index ], s:X() ]
     call s:before_move()
 
-    for r in ( a:this ? [R] : s:RS() )
+    for r in ( s:v.single_region ? [R] : s:R() )
         call cursor(r.l, r.a)
         if !search(regex.case, 'zp', r.l)
             if a:remove | call r.remove() | endif
@@ -654,7 +650,7 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#shrink_or_enlarge(shrink, this) abort
+fun! vm#commands#shrink_or_enlarge(shrink) abort
     """Reduce/enlarge selection size by 1."""
     if s:F.no_regions() | return | endif
     call s:G.extend_mode()
@@ -662,12 +658,12 @@ fun! vm#commands#shrink_or_enlarge(shrink, this) abort
     let dir = s:v.direction
 
     let s:v.motion = a:shrink? (dir? 'h':'l') : (dir? 'l':'h')
-    call s:call_motion(a:this)
+    call s:call_motion()
 
     call vm#commands#invert_direction()
 
     let s:v.motion = a:shrink? (dir? 'l':'h') : (dir? 'h':'l')
-    call s:call_motion(a:this)
+    call s:call_motion()
 
     if s:v.direction != dir | call vm#commands#invert_direction(1) | endif
 endfun
@@ -677,13 +673,12 @@ endfun
 " Motion event
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:call_motion(this) abort
+fun! s:call_motion(...) abort
     if s:F.no_regions() | return | endif
     call s:F.Scroll.get()
     let R = s:R()[ s:v.index ]
 
-    let regions = a:this            ? [s:V.Regions[s:v.index]]
-          \     : s:V.Regions
+    let regions = (a:0 && a:1) || s:v.single_region ? [R] : s:R()
 
     call s:before_move()
 
@@ -809,7 +804,7 @@ fun! vm#commands#align_char(count) abort
         let c = remove(C, 0)
 
         "remove region if a match isn't found, otherwise it will be aligned
-        for r in s:RS()
+        for r in s:R()
             call cursor(r.l, r.a)
             if !search(c, s, r.l) | call r.remove() | continue | endif
             call r.update_cursor([r.l, getpos('.')[2]])
@@ -833,7 +828,7 @@ fun! vm#commands#align_regex() abort
     echohl Label | let rx = input('Align with regex > ')   | echohl None
     if empty(rx) | echohl WarningMsg | echon ' ...Aborted' | return  | endif
 
-    for r in s:RS()
+    for r in s:R()
         call cursor(r.l, r.a)
         if !search(rx, 'czp', r.l) | call r.remove() | continue | endif
         call r.update_cursor([r.l, getpos('.')[2]])
@@ -936,7 +931,6 @@ endfun
 let s:X                = { -> g:Vm.extend_mode }
 let s:R                = { -> s:V.Regions      }
 let s:B                = { -> s:v.block_mode && g:Vm.extend_mode }
-let s:RS               = { -> s:G.active_regions() }  "current regions set
 let s:is_r             = { -> g:Vm.is_active && !empty(s:G.region_at_pos()) }
 let s:first_line       = { -> line('.') == 1 }
 let s:last_line        = { -> line('.') == line('$') }

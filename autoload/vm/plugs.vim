@@ -51,8 +51,8 @@ fun! vm#plugs#buffer() abort
   xnoremap <silent>       <Plug>(VM-Visual-Subtract)         :<c-u>call vm#commands#from_visual('subtract')<cr>
   nnoremap                <Plug>(VM-Split-Regions)           :<c-u>call vm#visual#split()<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Empty-Lines)      :<c-u>call vm#commands#remove_empty_lines()<cr>
-  nnoremap <silent>       <Plug>(VM-Goto-Regex)              :<c-u>call vm#commands#regex_motion('', v:count1, 0, 0)<cr>
-  nnoremap <silent>       <Plug>(VM-Goto-Regex!)             :<c-u>call vm#commands#regex_motion('', v:count1, 1, 0)<cr>
+  nnoremap <silent>       <Plug>(VM-Goto-Regex)              :<c-u>call vm#commands#regex_motion('', v:count1, 0)<cr>
+  nnoremap <silent>       <Plug>(VM-Goto-Regex!)             :<c-u>call vm#commands#regex_motion('', v:count1, 1)<cr>
 
   nnoremap <silent>       <Plug>(VM-Find-I-Word)             :<c-u>call vm#commands#find_under(0, 0, 0)<cr>
   nnoremap <silent>       <Plug>(VM-Find-A-Word)             :<c-u>call vm#commands#find_under(0, 0, 1)<cr>
@@ -112,15 +112,15 @@ fun! vm#plugs#buffer() abort
 
   for m in g:Vm.motions
     exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 0, 0)\<cr>"
-    exe "nnoremap <silent> <Plug>(VM-This-Motion-".m.") :\<C-u>call vm#commands#motion('".m."',v:count1, 0, 1)\<cr>"
+    exe "nnoremap <silent> <Plug>(VM-Single-Motion-".m.") :\<C-u>call vm#commands#motion('".m."',v:count1, 0, 1)\<cr>"
   endfor
 
   for m in g:Vm.find_motions
-    exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :call vm#commands#find_motion('".m."', '', 0)\<cr>"
+    exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :call vm#commands#find_motion('".m."', '')\<cr>"
   endfor
 
   for m in g:Vm.select_motions
-    exe "nnoremap <silent> <Plug>(VM-This-Select-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 1, 1)\<cr>"
+    exe "nnoremap <silent> <Plug>(VM-Single-Select-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 1, 1)\<cr>"
   endfor
 
   let remaps = g:VM_custom_remaps
@@ -138,8 +138,8 @@ fun! vm#plugs#buffer() abort
     exe "nnoremap <silent> <Plug>(VM-".m.") ".cm[m]
   endfor
 
-  nnoremap <silent>        <Plug>(VM-Shrink)                  :call vm#commands#shrink_or_enlarge(1, 0)<cr>
-  nnoremap <silent>        <Plug>(VM-Enlarge)                 :call vm#commands#shrink_or_enlarge(0, 0)<cr>
+  nnoremap <silent>        <Plug>(VM-Shrink)                  :call vm#commands#shrink_or_enlarge(1)<cr>
+  nnoremap <silent>        <Plug>(VM-Enlarge)                 :call vm#commands#shrink_or_enlarge(0)<cr>
   nnoremap <silent>        <Plug>(VM-Merge-To-Eol)            :call vm#commands#merge_to_beol(1, 0)<cr>
   nnoremap <silent>        <Plug>(VM-Merge-To-Bol)            :call vm#commands#merge_to_beol(0, 0)<cr>
 

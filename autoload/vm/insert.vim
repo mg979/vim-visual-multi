@@ -32,20 +32,20 @@ fun! s:Insert.key(type) abort
     call vm#comp#icmds()  "compatibility tweaks
 
     if a:type ==# 'I'
-        call vm#commands#merge_to_beol(0, 0)
+        call vm#commands#merge_to_beol(0)
         call self.key('i')
 
     elseif a:type ==# 'A'
-        call vm#commands#merge_to_beol(1, 0)
+        call vm#commands#merge_to_beol(1)
         call self.key('a')
 
     elseif a:type ==# 'o'
-        call vm#commands#merge_to_beol(1, 0)
+        call vm#commands#merge_to_beol(1)
         call vm#icmds#insert_line(0)
         call self.start(1)
 
     elseif a:type ==# 'O'
-        call vm#commands#merge_to_beol(0, 0)
+        call vm#commands#merge_to_beol(0)
         call vm#icmds#insert_line(1)
         call self.start(1)
 

@@ -440,11 +440,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.reset_byte_map(update) abort
-    """Reset byte map for region, group, or all regions.
+    """Reset byte map for all regions.
 
-    if s:v.single_region | call s:R()[s:v.index].remove_from_byte_map(0)
-    else                 | let s:V.Bytes = {}
-    endif
+    let s:V.Bytes = {}
 
     if a:update
         for r in self.active_regions() | call r.update_bytes_map() | endfor
