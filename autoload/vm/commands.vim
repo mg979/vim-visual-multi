@@ -562,6 +562,7 @@ fun! vm#commands#motion(motion, count, select, single) abort
     " - VM hasn't started yet
     " - there are no regions
     " - called with (single_region) and cursor not on a region
+
     if !g:Vm.is_active || s:F.no_regions() || ( a:single && !s:is_r() )
         call s:G.new_cursor()
     endif
@@ -693,13 +694,6 @@ endfun
 fun! s:before_move() abort
     call s:G.reset_byte_map(0)
     if !s:X() | let s:v.merge = 1 | endif
-
-    if s:v.direction && s:always_from_back()
-        call vm#commands#invert_direction()
-
-    elseif s:can_from_back()
-        call vm#commands#invert_direction()
-    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -707,8 +701,6 @@ endfun
 fun! s:after_move(R) abort
     let s:v.direction = a:R.dir
     let s:v.restore_scroll = !s:v.insert
-
-    if s:always_from_back() | call vm#commands#invert_direction() | endif
 
     if s:v.merge
         call s:G.select_region(a:R.index)
@@ -934,8 +926,6 @@ let s:B                = { -> s:v.block_mode && g:Vm.extend_mode }
 let s:is_r             = { -> g:Vm.is_active && !empty(s:G.region_at_pos()) }
 let s:first_line       = { -> line('.') == 1 }
 let s:last_line        = { -> line('.') == line('$') }
-let s:can_from_back    = {   -> s:X() && s:v.motion == '$' && !s:v.direction          }
-let s:always_from_back = {   -> s:X() && index(['^', '0', 'F', 'T'], s:v.motion) >= 0 }
 let s:symbol           = {   -> index(['^', '0', '%', '$'],          s:v.motion) >= 0 }
 let s:horizontal       = {   -> index(['h', 'l'],                    s:v.motion) >= 0 }
 let s:vertical         = {   -> index(['j', 'k'],                    s:v.motion) >= 0 }
