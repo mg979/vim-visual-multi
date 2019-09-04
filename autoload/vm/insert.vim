@@ -142,7 +142,9 @@ fun! s:Insert.start(...) abort
             let I.lines[r.l] = s:Line.new(r.l, C)
             let nth = 0 | let C.nth = 0
         else
-            let nth += 1
+            if !s:v.single_region
+                let nth += 1
+            endif
             let C.nth = nth
             call add(I.lines[r.l].cursors, C)
         endif
@@ -178,8 +180,8 @@ fun! s:Insert.insert(...) abort
 
     call vm#comp#TextChangedI()  "compatibility tweaks
 
-    let I    = self
-    let L    = I.lines
+    let I = self
+    let L = I.lines
 
     " this is the current cursor position
     let ln   = line('.')
@@ -211,9 +213,11 @@ fun! s:Insert.insert(...) abort
     " inserted character is multibyte, we do so by checking last char of @.,
     " that has just been updated
 
-    " the extra coln adjustment will be strlen(lastchar), that is:
-    "   -  extra bytes of last entered character (strlen(lastchar) -1)
-    "   -  +1 because exiting insert mode
+    " no need to check extra bytes if not exiting insert mode, otherwise the
+    " extra coln adjustment will be:
+    "   strlen(lastchar) -1     ( extra bytes of last entered character )
+    "   +1                      ( because exiting insert mode )
+    " = strlen(lastchar)
 
     let lastchar = strcharpart(@., strchars(@.)-1)
     let extra = a:0 ? strlen(lastchar) : 0
@@ -222,7 +226,8 @@ fun! s:Insert.insert(...) abort
     " now update the current change: secondary cursors need this value updated
     let I.change = coln - pos + a:0
 
-    " update the lines (also the current line is updated with setline())
+    " update the lines (also the current line is updated with setline(), this
+    " should ensure that the same text is entered everywhere)
     for l in sort(keys(L))
         call L[l].update(I.change, text)
     endfor
@@ -247,12 +252,29 @@ fun! s:Insert.stop(...) abort
 
     call self.clear_hi() | call self.auto_end() | let i = 0
 
-    for r in s:R()
-        let c = self.cursors[i]
-        call r.update_cursor([c.l, c.a + self.change + self.change*c.nth])
-        if r.index == self.index | let s:v.storepos = [r.l, r.a] | endif
-        let i += 1
-    endfor
+    if s:v.single_region
+        let active_line = 0
+        let s:cursors_after = []
+        for r in s:R()
+            let c = self.cursors[i]
+            if c.active
+                let active_line = c.l
+                call r.update_cursor([c.l, c.a + self.change])
+                let s:v.storepos = [r.l, r.a]
+            elseif active_line == c.l
+                call r.update_cursor([c.l, c.a + self.change])
+                call add(s:cursors_after, c)
+            endif
+            let i += 1
+        endfor
+    else
+        for r in s:R()
+            let c = self.cursors[i]
+            call r.update_cursor([c.l, c.a + self.change + self.change*c.nth])
+            if r.index == self.index | let s:v.storepos = [r.l, r.a] | endif
+            let i += 1
+        endfor
+    endif
 
     "NOTE: restart_insert is set in plugs, to avoid postprocessing, but it will be reset on <esc>
     "check for s:v.insert instead, it will be true until insert session is really over
@@ -387,15 +409,21 @@ fun! s:Line.update(change, text) abort
     " to sum it up, if:
     "     t1 is the original line, before the insertion point
     "     t2 is the original line, after the insertion point
-    "     || is the insertion point (== c.a - 1 + change)
-    "     // is the end of the inserted text
+    "     // is the insertion point (== c.a - 1 + change)
+    "     \\ is the end of the inserted text
     " then:
-    "     line = t1 || inserted text // t2
+    "     line = t1 // inserted text \\ t2
 
 
     for c in self.cursors
         let inserted = exists('s:v.smart_case_change') ?
                     \ s:smart_case_change(c, a:text) : a:text
+
+        if s:v.single_region && !c.active
+            call c.update(self.l, c.a + change)
+            continue
+        endif
+
         if c.a > 1
             let insPoint = c.a + change - 1
             let t1 = text[ 0 : (insPoint - 1) ]
@@ -473,7 +501,7 @@ endfun
 
 fun! s:step_back() abort
     """Go back one char after exiting insert mode, as vim does.
-    for r in s:R()
+    for r in s:v.single_region ? [s:R()[s:Insert.index]] : s:R()
         if r.a != col([r.l, '$']) && r.a > 1
             call r.shift(-1,-1)
         endif
