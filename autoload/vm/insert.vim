@@ -82,6 +82,8 @@ fun! s:Insert.start(...) abort
     "used to track all changes from that point, to apply them on all cursors
 
     "--------------------------------------------------------------------------
+    call s:G.merge_cursors()
+
     let I = self
     let I._index = get(I, '_index', -1)
 

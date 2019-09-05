@@ -263,10 +263,10 @@ fun! s:Insert(key) abort
   endif
 
   if b:VM_Selection.Vars.single_region
-    if a:key == 'p'          " <C-v> pastes from regular vim register
+    if a:key == 'c-v'
       return "\<C-r>0"
-    elseif a:key == 'cr'     " <CR> is disabled
-      echo "[visual-multi] not possible in single region mode"
+    elseif a:key == 'cr' || a:key == 'c-w' || a:key == 'c-u'
+      call b:VM_Selection.Funcs.msg("[visual-multi] not possible in single region mode")
       let &ro = &ro          " brings the cursor back from commmand line
       return ""
     endif

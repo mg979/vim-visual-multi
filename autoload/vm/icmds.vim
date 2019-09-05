@@ -23,14 +23,17 @@ fun! vm#icmds#x(cmd) abort
     let size = s:F.size()
     let change = 0 | let s:v.eco = 1
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
+    let active = s:R()[s:V.Insert.index]
 
     for r in s:R()
-        call r.shift(change, change)
-
-        if s:v.single_region && r.index != s:V.Insert.index
+        if s:v.single_region && r isnot active
+            if r.l == active.l
+                call r.shift(change, change)
+            endif
             continue
         endif
 
+        call r.shift(change, change)
         call s:F.Cursor(r.A)
 
         " we want to emulate the behaviour that <del> and <bs> have in insert
@@ -66,10 +69,6 @@ fun! vm#icmds#cw(ctrlu) abort
     for r in s:R()
         call r.shift(change, change)
 
-        if s:v.single_region && r.index != s:V.Insert.index
-            continue
-        endif
-
         "TODO: deletion to line above can be bugged for now
         if keep_line && r.a == 1 | continue | endif
 
@@ -97,7 +96,6 @@ fun! vm#icmds#cw(ctrlu) abort
         "update changed size
         let change = s:F.size() - size
     endfor
-    call s:G.merge_cursors()
     call s:V.Insert.start(1)
 endfun
 
