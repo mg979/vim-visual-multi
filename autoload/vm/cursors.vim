@@ -174,8 +174,8 @@ fun! s:c_cursors(M, reg, n) abort
   let reg = a:reg != s:v.def_reg? a:reg : "_"
 
   if CC
-    call vm#operators#select(1, '$')
     call vm#commands#motion('^', 1, 0, 0)
+    call vm#operators#select(1, '$')
     call s:backup_changed_text()
     call s:V.Edit.delete(1, reg, 1, 0)
     call s:V.Insert.key('i')
