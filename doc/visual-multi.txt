@@ -11,6 +11,7 @@ Mappings                                       |visual-multi-mappings|
 Run ... at cursors                             |visual-multi-run-at-cursors|
 Commands                                       |visual-multi-commands|
 Other features                                 |visual-multi-other|
+Bugs                                           |visual-multi-bugs|
 Credits                                        |visual-multi-credits|
 License                                        |visual-multi-license|
 
@@ -365,7 +366,7 @@ Single Region Mode ~
 
   Moreover, when you enter insert mode you can use <Tab> and <S-Tab> to cycle
   cursors. See |vm-buffer-mappings| to change them, or |g:VM_single_mode_maps|
-  to disable these insert mode mappings.
+  to disable these insert mode mappings. See also |visual-multi-bugs|.
 
 
 --------------------------------------------------------------  *vm-block-mode*
@@ -655,6 +656,18 @@ if you did any change after exiting VM, the reselected regions will be wrong.
 Note that inside a VM session, this command reselects the last set of regions
 in extend mode, i.e. before switching to cursor mode, and the default mapping
 is gS (without leader).
+
+
+
+BUGS                                                        *visual-multi-bugs*
+===============================================================================
+
+In |vm-single-region| mode, some insert mode mappings (<C-w>, <C-u>, <CR>) are
+disabled because they don't behave well. <BS> and <Del> are not disabled, but
+they cause issues when deleting other cursors, so be careful. They are not
+disabled because it shouldn't happen in normal use cases for this feature, that
+should be used when you want to use cursors as 'fields' to edit sequentially.
+
 
 
 

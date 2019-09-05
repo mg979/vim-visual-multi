@@ -21,7 +21,7 @@ Also check the [latest changes](https://github.com/mg979/vim-visual-multi/wiki/L
 in the wiki to know about new features, when they're added.
 
 -------
-Some (very old) random pics:
+Some (sometimes very old) random pics:
 
 -------
 Insert mode with autocomplete, alignment (mappings in pic have changed, don't trust them)
@@ -47,6 +47,11 @@ Select inside/around brackets/quotes/etc:
 Select operator, here shown with 'wellle/targets.vim' plugin: sib, sia, saa + selection shift
 
 ![Imgur](https://i.imgur.com/yM3Fele.gif)
+
+-------
+Single region mode in insert mode, `Tab` moves to the next cursor
+
+![Imgur](https://i.imgur.com/s8ce3KK.gif)
 
 -------
 Synched column transposition

@@ -46,7 +46,7 @@ fun! s:Edit.change(X, count, reg, smart_case) abort
         let s:v.changed_text = map(copy(s:R()), 'v:val.txt')
         "delete existing region contents and leave the cursors
         call self.delete(1, a:reg != s:v.def_reg? a:reg : "_", 1, 0)
-        call s:V.Insert.start()
+        call s:V.Insert.key('i')
     else
         call vm#cursors#operation('c', a:count, a:reg)
     endif

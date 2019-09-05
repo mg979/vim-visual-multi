@@ -30,7 +30,7 @@ let s:X = { -> g:Vm.extend_mode }
 
 fun! s:Insert.key(type) abort
     call vm#comp#icmds()  "compatibility tweaks
-    if !exists('s:V.Insert.type')
+    if s:v.single_region && !exists('s:V.Insert.type')
         let s:V.Insert.type = a:type
     endif
     call s:map_single_mode(0)
