@@ -363,6 +363,10 @@ Single Region Mode ~
   In this mode, motions will affect a single region, rather than all at once.
   Commands still affect all regions, though.
 
+  Moreover, when you enter insert mode you can use <Tab> and <S-Tab> to cycle
+  cursors. See |vm-buffer-mappings| to change them, or |g:VM_single_mode_maps|
+  to disable these insert mode mappings.
+
 
 --------------------------------------------------------------  *vm-block-mode*
 Block Mode ~

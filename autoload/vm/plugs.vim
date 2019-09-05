@@ -226,6 +226,8 @@ fun! vm#plugs#buffer() abort
   inoremap <silent><expr> <Plug>(VM-I-CtrlE)            <sid>Insert('c-e')
   inoremap <silent><expr> <Plug>(VM-I-CtrlB)            <sid>Insert('h')
   inoremap <silent><expr> <Plug>(VM-I-CtrlF)            <sid>Insert('l')
+  inoremap <silent><expr> <Plug>(VM-I-Next)             vm#icmds#goto(1)
+  inoremap <silent><expr> <Plug>(VM-I-Prev)             vm#icmds#goto(0)
 
   "Cmdline
   nnoremap         <expr> <Plug>(VM-:)                  vm#commands#regex_reset(':')
@@ -256,6 +258,7 @@ fun! s:Insert(key) abort
   if pumvisible()
     if a:key == 'j'     | return "\<C-n>"
     elseif a:key == 'k' | return "\<C-p>"
+    elseif a:key == 'c-e' | return "\<C-g>\<C-g>"
     endif
   endif
 

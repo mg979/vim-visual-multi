@@ -185,6 +185,18 @@ fun! vm#icmds#insert_line(above) abort
     normal ^
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#icmds#goto(next) abort
+  """Used in single region mode.
+  let t = ":call b:VM_Selection.Insert.key('".s:V.Insert.type."')\<cr>"
+  if a:next
+      return "\<Esc>:call vm#commands#find_next(0,1)\<cr>".t
+  else
+      return "\<Esc>:call vm#commands#find_prev(0,1)\<cr>".t
+  endif
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:get_indent() abort

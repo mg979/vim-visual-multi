@@ -89,6 +89,11 @@ Surround                S         requires |vim-surround| plugin
 Move Right          <M-S-Right>   move all selections to the right
 Move Left           <M-S-Left>    ,,      ,,          to the left
 
+The following are valid in insert-mode and single-region-mode: ~
+
+I Next                <Tab>       move to next cursor
+I Prev               <S-Tab>      move to previous cursor
+
 Operators: ~
 
 Select Operator         s         see |vm-select-operator|

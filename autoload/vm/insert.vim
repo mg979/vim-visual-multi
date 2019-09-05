@@ -30,6 +30,10 @@ let s:X = { -> g:Vm.extend_mode }
 
 fun! s:Insert.key(type) abort
     call vm#comp#icmds()  "compatibility tweaks
+    if !exists('s:V.Insert.type')
+        let s:V.Insert.type = a:type
+    endif
+    call s:map_single_mode(0)
 
     if a:type ==# 'I'
         call vm#commands#merge_to_beol(0)
@@ -313,6 +317,9 @@ fun! s:Insert.stop(...) abort
     endif
     unlet s:v.winline_insert
     silent! unlet s:v.smart_case_change
+
+    " unmap single mode mappings, if they had been mapped
+    call s:map_single_mode(1)
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -507,4 +514,24 @@ fun! s:step_back() abort
         endif
     endfor
 endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:map_single_mode(stop) abort
+  """If single_region is active, map Tab to cycle regions.
+  if !s:v.single_region || !get(g:, 'VM_single_mode_maps', 1) | return | endif
+
+  let next = get(g:VM_maps, 'I Next', '<Tab>')
+  let prev = get(g:VM_maps, 'I Prev', '<S-Tab>')
+
+  if a:stop
+      exe 'iunmap <buffer>' next
+      exe 'iunmap <buffer>' prev
+      unlet s:V.Insert.type
+  else
+      exe 'imap <buffer>' next '<Plug>(VM-I-Next)'
+      exe 'imap <buffer>' prev '<Plug>(VM-I-Prev)'
+  endif
+endfun
+
 " vim: et ts=4 sw=4 sts=4 :
