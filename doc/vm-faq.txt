@@ -48,18 +48,6 @@ it entirely, see |g:VM_maps|.
 
 
 
-                                                             *vm-faq-find-char*
-How can I select a single character and search it? ~
-
-<C-n> generally can't do this because non-word characters are often included in
-some bigger pattern. You can add a mapping like this:
->
-  nmap gl <Plug>(VM-Add-Cursor-At-Pos)<Plug>(VM-Switch-Mode)<Plug>(VM-Add-Search)
-<
-That would be: add a cursor, switch mode and add a search pattern.
-
-
-
                                                      *vm-faq-creative-mappings*
 Can I have a mapping for...? ~
 
