@@ -212,18 +212,26 @@ fun! vm#maps#all#buffer() abort
         \"I Down Arrow":            ['<Down>',      'i'],
         \"I Return":                ['<CR>',        'i'],
         \"I BS":                    ['<BS>',        'i'],
-        \"I Paste":                 ['<C-v>',       'i'],
         \"I CtrlW":                 ['<C-w>',       'i'],
         \"I CtrlU":                 ['<C-u>',       'i'],
         \"I CtrlD":                 ['<C-d>',       'i'],
         \"I Del":                   ['<Del>',       'i'],
         \"I Home":                  ['<Home>',      'i'],
         \"I End":                   ['<End>',       'i'],
-        \"I CtrlA":                 ['<C-a>',       'i'],
-        \"I CtrlE":                 ['<C-e>',       'i'],
         \"I CtrlB":                 ['<C-b>',       'i'],
         \"I CtrlF":                 ['<C-f>',       'i'],
         \})
+
+  let insert_keys = get(g:, 'VM_insert_special_keys', ['c-a', 'c-e', 'c-v'])
+  if index(insert_keys, 'c-a') >= 0
+    let maps["I CtrlA"] = ['<C-a>', 'i']
+  endif
+  if index(insert_keys, 'c-e') >= 0
+    let maps["I CtrlE"] = ['<C-e>', 'i']
+  endif
+  if index(insert_keys, 'c-v') >= 0
+    let maps["I Paste"] = ['<C-v>', 'i']
+  endif
 
   "edit
   call extend(maps, {

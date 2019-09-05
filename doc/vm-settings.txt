@@ -81,6 +81,16 @@ Hopefully you won't need to alter any of these.
   To remap VM keys. See |vm-faq-remap|.
 
 
+*g:VM_insert_special_keys*                         Default: ['c-a', 'c-e', 'c-v']
+
+  Some keys in insert mode have a different behaviour, compared to vim
+  defaults. If you don't some or any them, remove them from the list.
+
+  <C-A> go to the beginning of the line, at indent level (same as <Esc>I)
+  <C-E> go to the end of the line (same as <Esc>A)
+  <C-V> paste from VM unnamed register
+
+
 *g:VM_silent_exit*                                 Default: 0
 
   Don't display a message when exiting VM. It can be useful if you already set

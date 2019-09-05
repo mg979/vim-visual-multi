@@ -215,15 +215,15 @@ fun! vm#plugs#buffer() abort
   inoremap <silent><expr> <Plug>(VM-I-Down-Arrow)       <sid>Insert('j')
   inoremap <silent><expr> <Plug>(VM-I-Return)           <sid>Insert('cr')
   inoremap <silent><expr> <Plug>(VM-I-BS)               <sid>Insert('X')
-  inoremap <silent><expr> <Plug>(VM-I-Paste)            <sid>Insert('p')
-  inoremap <silent><expr> <Plug>(VM-I-CtrlW)            <sid>Insert('cw')
-  inoremap <silent><expr> <Plug>(VM-I-CtrlU)            <sid>Insert('cu')
+  inoremap <silent><expr> <Plug>(VM-I-Paste)            <sid>Insert('c-v')
+  inoremap <silent><expr> <Plug>(VM-I-CtrlW)            <sid>Insert('c-w')
+  inoremap <silent><expr> <Plug>(VM-I-CtrlU)            <sid>Insert('c-u')
   inoremap <silent><expr> <Plug>(VM-I-CtrlD)            <sid>Insert('x')
   inoremap <silent><expr> <Plug>(VM-I-Del)              <sid>Insert('x')
   inoremap <silent><expr> <Plug>(VM-I-Home)             <sid>Insert('0')
-  inoremap <silent><expr> <Plug>(VM-I-End)              <sid>Insert('$')
-  inoremap <silent><expr> <Plug>(VM-I-CtrlA)            <sid>Insert('^')
-  inoremap <silent><expr> <Plug>(VM-I-CtrlE)            <sid>Insert('$')
+  inoremap <silent><expr> <Plug>(VM-I-End)              <sid>Insert('c-e')
+  inoremap <silent><expr> <Plug>(VM-I-CtrlA)            <sid>Insert('c-a')
+  inoremap <silent><expr> <Plug>(VM-I-CtrlE)            <sid>Insert('c-e')
   inoremap <silent><expr> <Plug>(VM-I-CtrlB)            <sid>Insert('h')
   inoremap <silent><expr> <Plug>(VM-I-CtrlF)            <sid>Insert('l')
 
@@ -273,28 +273,21 @@ fun! s:Insert(key) abort
   let i = ":call b:VM_Selection.Insert.key('i')\<cr>"
   let a = ":call b:VM_Selection.Insert.key('a')\<cr>"
 
-  if a:key == 'cr'            "CR
-    return "\<esc>:call vm#icmds#return()\<cr>".i
-  elseif a:key ==? 'x'        "x/X
-    return "\<esc>:call vm#icmds#x('".a:key."')\<cr>".i
-  elseif index(split('hjklwbWB0', '\zs'), a:key) >= 0
+  if index(split('hjklwbWB0', '\zs'), a:key) >= 0
     return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
-  elseif a:key =~? 'ge'
-    return "\<esc>:call vm#commands#motion('h".a:key."l', 1, 0, 0)\<cr>".i
-  elseif a:key =~? 'e'
-    return "\<esc>:call vm#commands#motion('".a:key."l', 1, 0, 0)\<cr>".i
-  elseif a:key ==? 'ge'
-    return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
-  elseif a:key == '$'
-    return "\<esc>:call b:VM_Selection.Insert.key('A')\<cr>"
-  elseif a:key == '^'
-    return "\<esc>:call b:VM_Selection.Insert.key('I')\<cr>"
-  elseif a:key == 'p'         "c-v
-    return "\<esc>:call vm#icmds#paste()\<cr>".a
-  elseif a:key == 'cw'        "c-w
-    return "\<esc>:call vm#icmds#cw(0)\<cr>"
-  elseif a:key == 'cu'        "c-u
-    return "\<esc>:call vm#icmds#cw(1)\<cr>"
+  endif
+
+  return {
+        \ 'cr': "\<esc>:call vm#icmds#return()\<cr>".i,
+        \ 'x': "\<esc>:call vm#icmds#x('".a:key."')\<cr>".i,
+        \ 'ge': "\<esc>:call vm#commands#motion('h".a:key."l', 1, 0, 0)\<cr>".i,
+        \ 'e': "\<esc>:call vm#commands#motion('".a:key."l', 1, 0, 0)\<cr>".i,
+        \ 'c-e': "\<esc>:call b:VM_Selection.Insert.key('A')\<cr>",
+        \ 'c-a': "\<esc>:call b:VM_Selection.Insert.key('I')\<cr>",
+        \ 'c-v': "\<esc>:call vm#icmds#paste()\<cr>".a,
+        \ 'c-w': "\<esc>:call vm#icmds#cw(0)\<cr>",
+        \ 'c-u': "\<esc>:call vm#icmds#cw(1)\<cr>",
+        \}[tolower(a:key)]
   endif
 endfun
 
