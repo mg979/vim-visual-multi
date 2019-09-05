@@ -125,7 +125,7 @@ fun! vm#variables#reset()
   let &conceallevel = v.conceallevel
   let &concealcursor = v.concealcursor
 
-  if get(g:, 'VM_set_statusline', 1)
+  if get(g:, 'VM_set_statusline', 2)
     let &statusline  = v.statusline
   endif
 endfun
@@ -141,4 +141,4 @@ fun! vm#variables#reset_globals()
   let g:Vm.selecting = 0
 endfun
 
-" vim: et ts=2 sw=2 sts=2 :
+" vim: et ts=2 sw=2 sts=2 tw=79 :

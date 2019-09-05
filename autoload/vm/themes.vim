@@ -103,9 +103,10 @@ endfun
 
 fun! vm#themes#statusline() abort
   let vm = VMInfos()
-  return printf("%s V-M %s %s %s %s %%=%s %s",
-        \ '%#VM_Extend#', '%#VM_Insert#', vm.ratio, '%#TabLine#', vm.patterns,
-        \ '%#VM_Extend#', vm.status)
+  let single = b:VM_Selection.Vars.single_region ? '%#VM_Mono# SINGLE ' : ''
+  return printf("%s V-M %s %s %s%s %s %%=%s %s",
+        \ '%#VM_Extend#', '%#VM_Insert#', vm.ratio, single, '%#TabLine#',
+        \ vm.patterns, '%#VM_Extend#', vm.status)
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -151,7 +152,7 @@ let s:Themes.lightblue2 = {
       \ 'mono':   "ctermbg=167 guibg=#df5f5f ctermfg=253 guifg=#dadada cterm=bold term=bold gui=bold",
       \}
 
-let s:Themes.pray = {
+let s:Themes.purplegray = {
       \ 'type':   "dark",
       \ 'extend': "ctermbg=60  guibg=#544a65",
       \ 'cursor': "ctermbg=103 guibg=#8787af ctermfg=54  guifg=#5f0087",

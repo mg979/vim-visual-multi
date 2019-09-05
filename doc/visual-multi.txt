@@ -9,6 +9,7 @@ Modes                                          |visual-multi-modes|
 Regions and patterns                           |visual-multi-regions|
 Mappings                                       |visual-multi-mappings|
 Run ... at cursors                             |visual-multi-run-at-cursors|
+Single region mode                             |visual-multi-single-mode|
 Commands                                       |visual-multi-commands|
 Other features                                 |visual-multi-other|
 Bugs                                           |visual-multi-bugs|
@@ -356,19 +357,6 @@ Find Operator ~
   Example: `mip` would find all patterns in the current paragraph.
 
 
--------------------------------------------------------------  *vm-single-mode*
-Single Region Mode ~
-
-  Default mapping: \\<CR>
-
-  In this mode, motions will affect a single region, rather than all at once.
-  Commands still affect all regions, though.
-
-  Moreover, when you enter insert mode you can use <Tab> and <S-Tab> to cycle
-  cursors. See |vm-buffer-mappings| to change them, or |g:VM_single_mode_maps|
-  to disable these insert mode mappings. See also |visual-multi-bugs|.
-
-
 --------------------------------------------------------------  *vm-block-mode*
 Block Mode ~
 
@@ -385,7 +373,10 @@ Show Infoline ~
   Default mapping: \\l
 
   The 'infoline' show informations about current regions and patterns, and the
-  modes you're in.  >
+  modes you're in. If the statusline works, this will redundant, but in case
+  it doesn't, it can be of help. The symbols used are the same, so this applies
+  to both.
+>
     M+ / m- : whether mappings are enabled or not
     V+ / v- : whether multiline is enabled or not
     B+ / b- : whether block mode is enabled or not
@@ -425,6 +416,33 @@ Visual     \\v     |extend-mode| only!                          *vm-run-visual*
 Ex         \\x     run any ex command at cursors              *vm-run-ex*
 Macro      \\@     run a macro at cursors                     *vm-run-macro*
 
+
+
+
+
+
+SINGLE REGION MODE                                   *visual-multi-single-mode*
+===============================================================================
+
+  Default mapping: \\<CR>
+
+It is a submode that allows motions to be performed on single regions, rather
+than all at once. Commands still affect all regions, though.
+
+                                   |vm-buffer-mappings| |g:VM_single_mode_maps|
+
+When you enter insert mode you can use <Tab> and <S-Tab> to cycle among
+cursors, to make changes sequentially at each of them. When you press <Tab>,
+you are brought to the next cursor, and the way (`i`, `a`, `I`, `A`) insert
+mode was started in still applies.
+                                                  |g:VM_single_mode_auto_reset|
+
+By default, this mode is deactivated by default when exiting insert mode, but
+only if <Tab> key has been used at least once, i.e, it won't happen if you move
+from region to region and perform individual changes, without cycling cursors
+from within insert mode.
+
+See also |visual-multi-bugs|.
 
 
 

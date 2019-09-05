@@ -378,10 +378,12 @@ fun! s:Funcs.toggle_option(option) abort
 
     elseif a:option == 'single_region'
         let a = ['Single region mode: ', 'None']
-        if s:v.single_region
-            call self.msg([a, ['activated', 'Label']])
-        else
-            call self.msg([a, ['deactivated', 'WarningMsg']])
+        if !get(g:, 'VM_set_statusline', 2)
+            if s:v.single_region
+                call self.msg([a, ['activated', 'Label']])
+            else
+                call self.msg([a, ['deactivated', 'WarningMsg']])
+            endif
         endif
 
     elseif a:option == 'block_mode'
@@ -514,4 +516,4 @@ fun! s:Funcs.not_VM() abort
     return !exists('b:VM_Selection') || empty(b:VM_Selection)
 endfun
 
-" vim: et ts=4 sw=4 sts=4 :
+" vim: et ts=4 sw=4 sts=4 tw=85 :
