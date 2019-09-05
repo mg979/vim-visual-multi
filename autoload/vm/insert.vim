@@ -530,6 +530,16 @@ fun! s:map_single_mode(stop) abort
       exe 'iunmap <buffer>' next
       exe 'iunmap <buffer>' prev
       unlet s:V.Insert.type
+      if exists('s:v.single_mode_running')
+          if s:v.single_mode_running
+              let s:v.single_mode_running = 0
+          else
+              if get(g:, 'VM_single_mode_auto_reset', 1)
+                  call s:F.toggle_option('single_region')
+              endif
+              unlet s:v.single_mode_running
+          endif
+      endif
   else
       exe 'imap <buffer>' next '<Plug>(VM-I-Next)'
       exe 'imap <buffer>' prev '<Plug>(VM-I-Prev)'

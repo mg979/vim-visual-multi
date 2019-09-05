@@ -187,6 +187,7 @@ endfun
 
 fun! vm#icmds#goto(next) abort
   """Used in single region mode.
+  let s:v.single_mode_running = 1
   let t = ":call b:VM_Selection.Insert.key('".s:V.Insert.type."')\<cr>"
   if a:next
       return "\<Esc>:call vm#commands#find_next(0,1)\<cr>".t

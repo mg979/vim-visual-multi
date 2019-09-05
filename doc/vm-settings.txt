@@ -88,6 +88,12 @@ Set to 0 to disable entirely insert mode mappings to cycle cursors in
 |vm-buffer-mappings|.
 
 
+*g:VM_single_mode_auto_reset*                      Default: 1
+
+If insert mode is entered while |vm-single-mode| is enabled, it will be reset
+automatically when exiting insert mode, unless this value is 0.
+
+
 *g:VM_insert_special_keys*                         Default: ['c-a', 'c-e', 'c-v']
 
   Some keys in insert mode have a different behaviour, compared to vim
