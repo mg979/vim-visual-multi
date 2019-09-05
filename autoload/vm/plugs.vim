@@ -259,6 +259,16 @@ fun! s:Insert(key) abort
     endif
   endif
 
+  if b:VM_Selection.Vars.single_region
+    if a:key == 'p'          " <C-v> pastes from regular vim register
+      return "\<C-r>0"
+    elseif a:key == 'cr'     " <CR> is disabled
+      echo "[visual-multi] not possible in single region mode"
+      let &ro = &ro          " brings the cursor back from commmand line
+      return ""
+    endif
+  endif
+
   let b:VM_Selection.Vars.restart_insert = 1
   let i = ":call b:VM_Selection.Insert.key('i')\<cr>"
   let a = ":call b:VM_Selection.Insert.key('a')\<cr>"
