@@ -376,6 +376,14 @@ fun! s:Funcs.toggle_option(option) abort
             call vm#commands#split_lines()
         endif
 
+    elseif a:option == 'single_region'
+        let a = ['Single region mode: ', 'None']
+        if s:v.single_region
+            call self.msg([a, ['activated', 'Label']])
+        else
+            call self.msg([a, ['deactivated', 'WarningMsg']])
+        endif
+
     elseif a:option == 'block_mode'
         if s:v.block_mode
             if s:v.multiline
