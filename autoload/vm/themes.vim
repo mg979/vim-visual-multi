@@ -103,10 +103,11 @@ endfun
 
 fun! vm#themes#statusline() abort
   let vm = VMInfos()
+  let left   = exists('g:loaded_airline') ? '%#airline_a_bold#' : '%#VM_Extend#'
   let single = b:VM_Selection.Vars.single_region ? '%#VM_Mono# SINGLE ' : ''
   return printf("%s V-M %s %s %s%s %s %%=%s %s",
-        \ '%#VM_Extend#', '%#VM_Insert#', vm.ratio, single, '%#TabLine#',
-        \ vm.patterns, '%#VM_Extend#', vm.status)
+        \ left, '%#VM_Insert#', vm.ratio, single, '%#TabLine#',
+        \ vm.patterns, left, vm.status . ' ')
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
