@@ -161,13 +161,6 @@ fun! vm#reset(...)
         call s:V.Funcs.Scroll.restore()
     endif
 
-    call vm#variables#reset_globals()
-
-    "exiting manually
-    if !get(g:, 'VM_silent_exit', 0) && !a:0
-        call s:V.Funcs.msg('Exited Visual-Multi.')
-    endif
-
     if !empty(g:VM_highlight_matches)
         hi clear Search
         exe g:Vm.search_hi
@@ -177,9 +170,16 @@ fun! vm#reset(...)
         let &updatetime = g:Vm.oldupdate
     endif
 
-    call garbagecollect()
     call vm#comp#exit()
+
+    "exiting manually
+    if !get(g:, 'VM_silent_exit', 0) && !a:0
+        call s:V.Funcs.msg('Exited Visual-Multi.')
+    endif
+
+    call vm#variables#reset_globals()
     delcommand VMSmartChange
+    call garbagecollect()
 endfun
 
 
