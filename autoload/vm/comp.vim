@@ -28,6 +28,10 @@ fun! vm#comp#init() abort
         let g:VM_use_first_cursor_in_line = 1
     endif
 
+    if exists('b:doge_interactive')
+        call doge#deactivate()
+    endif
+
     for plugin in keys(s:plugins)
         let p = s:plugins[plugin]
 
