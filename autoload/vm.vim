@@ -63,9 +63,8 @@ fun! vm#init_buffer(empty, ...) abort
         " init search register
         let @/ = a:empty ? '' : @/
 
-        " call hook before applying mappings
-        if exists('*VM_Start') | call VM_Start() | endif
-        silent doautocmd <nomodeline> User visual_multi_start
+        " hooks and compatibility tweaks before applying mappings
+        call vm#comp#init()
 
         " init classes
         let s:V.Maps       = vm#maps#init()
@@ -80,7 +79,6 @@ fun! vm#init_buffer(empty, ...) abort
         call vm#region#init()
         call vm#commands#init()
         call vm#operators#init()
-        call vm#comp#init()
         call vm#special#commands#init()
 
         call vm#augroup(0)

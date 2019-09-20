@@ -21,6 +21,9 @@ fun! vm#comp#init() abort
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
 
+    silent! call VM_Start()
+    silent doautocmd <nomodeline> User visual_multi_start
+
     if exists('g:loaded_youcompleteme')
         let g:VM_use_first_cursor_in_line = 1
     endif
@@ -98,7 +101,7 @@ endfun
 
 fun! vm#comp#exit() abort
     """Called last on VM exit."""
-    if exists('*VM_Exit') | call VM_Exit() | endif
+    silent! call VM_Exit()
     silent doautocmd <nomodeline> User visual_multi_exit
 endfun
 
