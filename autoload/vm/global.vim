@@ -408,6 +408,24 @@ fun! s:Global.region_at_pos(...) abort
     return {}
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Global.reset_index() abort
+  """Reset index to current region, 0, or max - 1.
+  if !len(s:R())
+      let s:v.index = -1
+      return
+  endif
+  let r = self.region_at_pos()
+  if !empty(r)
+      let s:v.index = r.index
+  elseif line('.') >= s:R()[-1].L
+      let s:v.index = len(s:R()) - 1
+  else
+      let s:v.index = 0
+  endif
+endfun
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.overlapping_regions(R) abort
@@ -592,6 +610,7 @@ fun! s:Global.reorder_regions() abort
     endwhile
     let s:V.Regions = Regions
     call s:Global.update_indices()
+    call self.reset_index()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
