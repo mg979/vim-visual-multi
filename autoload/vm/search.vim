@@ -76,10 +76,7 @@ fun! s:Search.get() abort
     endif
 
     "fallback to first region.txt or @/, if no active search
-    if !empty(s:v.search) | return
-    elseif len(s:R())     | call self.add(self.escape_pattern(s:R()[0].txt))
-    else                  | call self.get_slash_reg()
-    endif
+    if empty(s:v.search) | call self.ensure_is_set() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -89,6 +86,17 @@ fun! s:Search.get_slash_reg(...) abort
     if a:0 | let @/ = a:1 | endif
     call s:update_search(self.get_pattern('/', 1))
     if empty(s:v.search) | call s:update_search(s:v.oldreg[1]) | endif
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Search.ensure_is_set(...) abort
+    """Ensure there is an active search.
+    if empty(s:v.search)
+        if !len(s:R()) | call self.get_slash_reg()
+        else           | call self.add(self.escape_pattern(s:R()[0].txt))
+        endif
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

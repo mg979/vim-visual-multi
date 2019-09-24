@@ -157,15 +157,10 @@ fun! vm#operators#find(start, visual, ...) abort
                 call s:V.Search.get_slash_reg(s:v.oldsearch[0])
             endif
         else
+            call s:V.Search.ensure_is_set()
             call s:backup_map_find()
         endif
 
-        "ensure there is an active search
-        if empty(s:v.search)
-            if !len(s:R()) | call s:V.Search.get_slash_reg()
-            else           | call s:V.Search.get()
-            endif
-        endif
 
         call s:updatetime()
         let s:v.finding = 1

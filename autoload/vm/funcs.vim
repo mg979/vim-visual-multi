@@ -80,7 +80,6 @@ endfun
 fun! s:Funcs.no_regions() abort
     if !len(s:R())
         let s:v.index = -1
-        call self.msg('No regions.')
         return 1
     endif
 endfun
