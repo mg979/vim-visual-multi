@@ -28,13 +28,14 @@ let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
 
 fun! vm#operators#get(cnt) abort
     """Perform a yank, the autocmd will create the region.
-    call s:init()
     let g:Vm.selecting = 1
+    call s:init()
+    let hls = &hlsearch && !v:hlsearch ? "\<Plug>(VM-Toggle-Hls)" : ''
     call s:updatetime()
     silent! nunmap <buffer> y
 
     let n = a:cnt>1? a:cnt : ''
-    return n . 'y'
+    return hls . n . 'y'
 endfun
 
 fun! vm#operators#select(count, ...) abort
@@ -164,8 +165,8 @@ fun! vm#operators#find(start, visual, ...) abort
 
         call s:updatetime()
         let s:v.finding = 1
-        let s:vblock = a:visual && mode() == "\<C-v>"
         let g:Vm.selecting = 1
+        let s:vblock = a:visual && mode() == "\<C-v>"
         silent! nunmap <buffer> y
         return 'y'
     endif

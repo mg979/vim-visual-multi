@@ -99,7 +99,9 @@ fun! vm#init_buffer(empty, ...) abort
 
         if &hlsearch && !v:hlsearch && !a:empty
             let s:v.oldhls = 1
-            call feedkeys("\<Plug>(VM-Toggle-Hls)")
+            if !g:Vm.selecting
+                call feedkeys("\<Plug>(VM-Toggle-Hls)")
+            endif
         else
             let s:v.oldhls = 0
         endif
