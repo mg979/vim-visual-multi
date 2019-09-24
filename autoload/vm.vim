@@ -100,7 +100,7 @@ fun! vm#init_buffer(empty, ...) abort
         if &hlsearch && !v:hlsearch && !a:empty
             let s:v.oldhls = 1
             if !g:Vm.selecting
-                call feedkeys("\<Plug>(VM-Toggle-Hls)")
+                call vm#noh()
             endif
         else
             let s:v.oldhls = 0
@@ -135,7 +135,7 @@ fun! vm#reset(...)
     call vm#variables#reset()
 
     if s:v.oldhls
-        call feedkeys("\<Plug>(VM-Toggle-Hls)")
+        call feedkeys(vm#noh())
     endif
 
     call vm#commands#regex_reset()
@@ -180,6 +180,15 @@ fun! vm#reset(...)
     call vm#variables#reset_globals()
     delcommand VMSmartChange
     call garbagecollect()
+endfun
+
+"------------------------------------------------------------------------------
+
+fun! vm#noh() abort
+    """Turn off highlighting using lazyredraw.
+    if s:v.oldlz | return "\<Plug>(VM-Noh)"
+    else         | return "\<Plug>(VM-LazyNoh)"
+    endif
 endfun
 
 

@@ -30,7 +30,7 @@ fun! vm#operators#get(cnt) abort
     """Perform a yank, the autocmd will create the region.
     let g:Vm.selecting = 1
     call s:init()
-    let hls = &hlsearch && !v:hlsearch ? "\<Plug>(VM-Toggle-Hls)" : ''
+    let hls = &hlsearch && !v:hlsearch ? vm#noh() : ''
     call s:updatetime()
     silent! nunmap <buffer> y
 
