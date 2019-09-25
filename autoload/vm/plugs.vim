@@ -130,8 +130,8 @@ fun! vm#plugs#buffer() abort
   endfor
 
   let noremaps = g:VM_custom_noremaps
-  for m in keys(noremaps)
-    exe "nnoremap <silent> <Plug>(VM-Motion-".noremaps[m].") :\<C-u>call vm#commands#motion('".noremaps[m]."', 1, 0, 0)\<cr>"
+  for m in values(noremaps)
+    exe "nnoremap <silent> <Plug>(VM-Normal!-".m.") :\<C-u>call b:VM_Selection.Edit.run_normal('".m."', {'count': v:count1, 'recursive': 0})\<cr>"
   endfor
 
   let cm = g:VM_custom_commands

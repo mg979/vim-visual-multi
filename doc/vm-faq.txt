@@ -29,7 +29,9 @@ unless you use <Space> as |VM_leader|, you may prefer an easier mapping:
                                                                  *vm-faq-remap*
 How can I remap x in VM? ~
 
-There are two ways: either do a remap using the functions above, e.g.:  >
+There are several ways: either do a remap using the functions described above,
+e.g.:
+>
   function! VM_Start()
     nmap <buffer> <C-C> <Esc>
     imap <buffer> <C-C> <Esc>
@@ -40,12 +42,19 @@ There are two ways: either do a remap using the functions above, e.g.:  >
     iunmap <buffer> <C-C>
   endfunction
 <
-or use |g:VM_custom_remaps| (normal mode only), e.g.:  >
+or use |g:VM_custom_remaps| (normal mode only), e.g.:
+>
   let g:VM_custom_remaps = {'<c-p>': 'N', '<c-s>': 'q'}
 <
-This will preserve the function of the original mapping. If you want to replace
-it entirely, see |g:VM_maps|.
+This will preserve the function of the original mapping.
+If you want to replace it entirely, see |g:VM_maps|.
 
+There is also |g:VM_custom_noremaps|, with which you can remap any key to
+a normal! command. Example:
+>
+  let g:VM_custom_noremaps  = {'))': '])', ')}': ']}'}
+<
+would create mappings for each key-value pair.
 
 
                                                      *vm-faq-creative-mappings*

@@ -154,7 +154,7 @@ fun! s:build_buffer_maps() abort
 
     "integrate custom motions and commands
     for m in keys(g:VM_custom_noremaps)
-        let maps['Motion ' . m] = [g:VM_custom_noremaps[m], 'n']
+        let maps['Normal! ' . g:VM_custom_noremaps[m]] = [m, 'n']
     endfor
     for m in keys(g:VM_custom_remaps)
         let maps['Remap ' . g:VM_custom_remaps[m]] = [m, 'n']
