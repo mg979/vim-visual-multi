@@ -698,7 +698,7 @@ fun! s:Global.merge_regions(...) abort
 
     let s:v.eco = 1
     let pos = getpos('.')[1:2]
-    call self.rebuild_from_map()
+    call self.rebuild_from_map(s:V.Bytes)
     return self.update_map_and_select_region(pos)
 endfun
 
@@ -724,9 +724,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Global.rebuild_from_map(...) abort
+fun! s:Global.rebuild_from_map(map, ...) abort
     """Rebuild regions from bytes map.
-    let By = sort(map(keys(a:0? a:1 : s:V.Bytes), 'str2nr(v:val)'), 'n')
+    let By = sort(map(keys(a:map), 'str2nr(v:val)'), 'n')
+    if a:0
+        let [start, end] = a:1
+        call filter(By, 'v:val >= start && v:val <= end')
+    endif
     let A = By[0] | let B = By[0]
 
     call vm#commands#erase_regions()
@@ -747,8 +751,9 @@ endfun
 
 if !g:VM_use_python | finish | endif
 
-fun! s:Global.rebuild_from_map(...) abort
-    let l:dict = a:0 ? a:1 : s:V.Bytes
+fun! s:Global.rebuild_from_map(map, ...) abort
+    let l:dict = a:map
+    let l:range = a:0 ? a:1 : []
     python3 vm.py_rebuild_from_map()
 endfun
 
