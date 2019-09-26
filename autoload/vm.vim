@@ -33,8 +33,11 @@ call vm#plugs#buffer()
 " b:VM_Selection (= s:V) contains Regions, Vars (= s:v = plugin variables),
 " function classes (Global, Funcs, Edit, Search, Insert, etc)
 
+" Parameters:
+"   empty:  if > 0, the search register will be set to an empty string
+"           adding cursors uses 1, starting regex uses 2
 
-fun! vm#init_buffer(empty, ...) abort
+fun! vm#init_buffer(empty) abort
     """If already initialized, return current instance."""
     let v:errmsg = ""
     try
@@ -97,7 +100,7 @@ fun! vm#init_buffer(empty, ...) abort
             exe g:Vm.Search
         endif
 
-        if &hlsearch && !v:hlsearch && !a:empty
+        if &hlsearch && !v:hlsearch && a:empty != 2
             let s:v.oldhls = 1
             if !g:Vm.selecting
                 call feedkeys(vm#noh())

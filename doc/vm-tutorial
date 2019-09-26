@@ -46,8 +46,9 @@ I'll reuse the block above for the first test.
     let g:VM_maps["Undo"]      = 'u'
     let g:VM_maps["Redo"]      = '<C-r>'
 
-Move the cursor to the first 'let' word, on the first letter. Press `mm`, to set a
-mark, since you'll go back there more than once.
+Move the cursor to the first 'let' word, on the first letter.
+Press `mm`, to set a mark, since you'll go back there more than once.
+Then press |z<cr>| to scroll the window.
 
 Now press 5 times <C-Down>: you see that you've created cursors vertically, skipping
 the empty line. Press <Esc> to exit VM, then `m to go back to the mark.
@@ -84,7 +85,7 @@ are redirected to the black hole register (`_`), differently from vim.
 Select words ~
 ------------------------------------------------------------------------------------
 
-Quit VM, undo changes, move below and set a new mark in the same way.
+Quit VM, undo changes, move below and set a new mark, then |z<cr>|.
 
     let g:VM_moLET_mappings = 1
     Let g:VM_theme = 'iceblue'

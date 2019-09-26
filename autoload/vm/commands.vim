@@ -229,7 +229,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#commands#find_by_regex(mode) abort
-    if !g:Vm.is_active | call s:init(0, 1, 1) | endif
+    if !g:Vm.is_active | call s:init(0, 2, 1) | endif
     let s:v.using_regex = a:mode
 
     "if visual regex, reposition cursor to the beginning of the selection
