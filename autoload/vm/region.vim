@@ -325,7 +325,7 @@ fun! s:move_region(r) abort
         let went_back  =   newcol < r.k
         let went_forth =   newcol > r.k
     else
-        let New = s:F.pos2byte('.')
+        let New = s:F.curs2byte()
         let went_back  =   ( New <  r.K )  &&  ( New <  r.cur_Col() )
         let went_forth =   ( New >= r.K )  &&  ( New >= r.cur_Col() )
     endif

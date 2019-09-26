@@ -397,7 +397,7 @@ endfun
 fun! s:Global.region_at_pos(...) abort
     """Return the region at position, or an empty dict if not found.
 
-    let pos = s:F.pos2byte(a:0 ? a:1 : '.')
+    let pos = a:0 ? s:F.pos2byte(a:1) : s:F.curs2byte()
     if s:X() && !has_key(s:V.Bytes, pos) | return {} | endif
 
     for r in s:R()

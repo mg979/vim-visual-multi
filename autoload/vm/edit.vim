@@ -241,7 +241,7 @@ fun! s:Edit.process(cmd, ...) abort
         endif
 
         " update new cursor position after the command, unless specified
-        let diff = s:F.pos2byte('.') - r.A
+        let diff = s:F.curs2byte() - r.A
         if !stay_put
             call r.shift(diff, diff)
         endif

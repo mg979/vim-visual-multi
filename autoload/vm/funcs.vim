@@ -29,18 +29,26 @@ let s:Funcs = {}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.pos2byte(...) abort
-    "pos can be a string, a list [line, col], or the offset itself
+    "pos can be a mark, a list [line, col], or the offset itself
 
     if type(a:1) == 0                   "an offset
         return a:1
 
-    elseif type(a:1) == v:t_string      "a string (like '.')
-        let pos = getpos(a:1)[1:2]
-        return (line2byte(pos[0]) + pos[1] - 1)
-
-    else                                "a list [line, col]
+    elseif type(a:1) == v:t_list        "a list [line, col]
         return (line2byte(a:1[0]) + a:1[1] - 1)
+
+    else                                "a mark like '[
+        let pos = getpos(a:1)[1:2]
+        return (line2byte(pos[0]) + min([pos[1], col([pos[0], '$'])]) - 1)
     endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.curs2byte() abort
+    """Return the offset of the current cursor position.
+    let pos = getcurpos()[1:2]
+    return (line2byte(pos[0]) + pos[1] - 1)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
