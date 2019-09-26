@@ -42,6 +42,14 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! vm#visual#reduce() abort
+    let map = s:backup_map()
+    call s:G.rebuild_from_map(map, [s:F.pos2byte("'<"), s:F.pos2byte("'>")])
+    call s:G.update_and_select_region()
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#visual#cursors(mode) abort
     """Create cursors, one for each line of the visual selection."""
     call s:backup_map()

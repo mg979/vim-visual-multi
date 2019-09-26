@@ -152,6 +152,7 @@ fun! vm#maps#all#buffer() abort
         \"Align":                   [leader.'a',  'n'],
         \"Split Regions":           [leader.'s',  'n'],
         \"Visual Subtract":         [leader.'s',  'x'],
+        \"Visual Reduce":           [leader.'r',  'x'],
         \"Run Normal":              [leader.'z',  'n'],
         \"Run Last Normal":         [leader.'Z',  'n'],
         \"Run Visual":              [leader.'v',  'n'],

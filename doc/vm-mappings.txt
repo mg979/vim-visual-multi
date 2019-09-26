@@ -74,8 +74,7 @@ Mouse Column    <M-C-RightMouse>  create a column, from current cursor to
 -------------------------------------------------------------------------------
 VISUAL MODE MAPPINGS                                       *vm-visual-mappings*
 
-Of these, `Visual Subtract` is the only buffer mapping. The other ones belong
-to the default mappings (see above) and can be used at any time.
+Of these, `Visual Subtract` and `Visual Reduce` are buffer mappings.
 
 -------------------------------------------------------------------------------
   Name                Keys        Notes ~
@@ -87,6 +86,7 @@ Visual Find            \\f        find all patterns ( or @/ ) from visual mode
 Visual Cursors         \\c        create a column of cursors from visual mode
 Visual Add             \\a        create a region from visual mode
 Visual Subtract        \\s        remove regions in current visual selection
+Visual Reduce          \\r        remove regions outside of visual selection
 
 
 
