@@ -11,8 +11,10 @@ Then you can assign it to a new key:
 >
     let g:VM_maps["Get Operator"] = 'gs'
 <
-Mappings preceded by \\ are meant prefixed with |g:VM_leader|.
-
+To disable a specific mapping, set it to an empty string:
+>
+    let g:VM_maps["Get Operator"] = ''
+<
 To enable undo/redo (still experimental):
 >
     let g:VM_maps["Undo"] = 'u'
@@ -44,6 +46,11 @@ Mouse mappings can be enabled with:
 >
     let g:VM_mouse_mappings = 1
 <
+Default mappings are `permanent`, that is, always available, and applied when
+Vim starts. Buffer mappings instead are applied per-buffer, when VM is started.
+
+Mappings preceded by \\ are meant prefixed with |g:VM_leader|.
+
 -------------------------------------------------------------------------------
   Name                Keys        Notes ~
 -------------------------------------------------------------------------------
@@ -52,11 +59,11 @@ Find Under            <C-n>       select the word under cursor
 Find Subword Under    <C-n>       from visual mode, without word boundaries
 Add Cursor Down       <C-Down>    create cursors vertically
 Add Cursor Up         <C-Up>      ,,       ,,      ,,
-Select All              \\A       select all occurrences of a word
-Start Regex Search      \\/       create a selection with regex search
-Add Cursor At Pos       \\\       add a single cursor at current position
-Get Operator            \\gs      see |vm-get-operator|
-Reselect Last           \\gS      reselect set of regions of last VM session
+Select All            \\A         select all occurrences of a word
+Start Regex Search    \\/         create a selection with regex search
+Add Cursor At Pos     \\\         add a single cursor at current position
+Get Operator          \\gs        see |vm-get-operator|
+Reselect Last         \\gS        reselect set of regions of last VM session
 
 Mouse Cursor    <C-LeftMouse>     create a cursor where clicked
 Mouse Word      <C-RightMouse>    select a word where clicked
@@ -74,12 +81,12 @@ to the default mappings (see above) and can be used at any time.
   Name                Keys        Notes ~
 -------------------------------------------------------------------------------
 
-Visual All              \\A       select all occurrences of visual selection
-Visual Regex            \\/       find a pattern in visual selection
-Visual Find             \\f       find all patterns ( or @/ ) from visual mode
-Visual Cursors          \\c       create a column of cursors from visual mode
-Visual Add              \\a       create a region from visual mode
-Visual Subtract         \\s       remove regions in current visual selection
+Visual All             \\A        select all occurrences of visual selection
+Visual Regex           \\/        find a pattern in visual selection
+Visual Find            \\f        find all patterns ( or @/ ) from visual mode
+Visual Cursors         \\c        create a column of cursors from visual mode
+Visual Add             \\a        create a region from visual mode
+Visual Subtract        \\s        remove regions in current visual selection
 
 
 

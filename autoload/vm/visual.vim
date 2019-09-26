@@ -141,6 +141,7 @@ fun! s:backup_map() abort
     call vm#commands#erase_regions()
     let s:v.no_search = 1
     let s:v.eco = 1
+    return s:Bytes
 endfun
 
 fun! s:merge(subtract) abort

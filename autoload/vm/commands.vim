@@ -501,11 +501,7 @@ endfun
 fun! vm#commands#from_visual(t) abort
     let mode = visualmode()
     call s:set_extend_mode(1)
-
-    if a:t ==# 'subtract' | call vm#visual#subtract(mode)
-    elseif a:t ==# 'add'  | call vm#visual#add(mode)
-    else                  | call vm#visual#cursors(mode)
-    endif
+    exe 'call vm#visual#' . a:t . '(mode)' 
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
