@@ -6,9 +6,7 @@ function! VimrunnerPyEvaluateCommandOutput(command)
   return output
 endfunction
 
-let rp = split(&runtimepath, ',')
-let home = shellescape(fnamemodify($HOME, ':p'))
-let &runtimepath = join(filter(rp, 'v:val !~ '.home), ',')
+set runtimepath=$VIMRUNTIME
 set packpath=
 set nocompatible
 set runtimepath^=..
