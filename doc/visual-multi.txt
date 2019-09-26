@@ -198,14 +198,14 @@ insert mode mappings, that will overwrite existant buffer mappings. You'll
 still be warned if this happens.
 
 
-----------------------------------------------------------------  *g:VM_Leader*
+----------------------------------------------------------------  *g:VM_leader*
 
 
 Since there are a lot of new mappings, the chance for conflicts would be high,
 if you use plugins. VM uses its own leader to reduce this chance.
 Default is `\\` (two backslashes). If you want to change it, set (for example):
 >
-    let g:VM_Leader = '\'
+    let g:VM_leader = '\'
 <
 When you see mappings with 2 backslashes, that's the VM leader, so the mappings
 will be different if you change it.
