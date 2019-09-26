@@ -28,8 +28,10 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" FIXME: subtract still gives error if started from cursor mode
+
 fun! vm#visual#subtract(mode) abort
-    call s:backup_map()
+    let X = s:backup_map()
 
     if a:mode ==# 'v'     | call s:vchar()
     elseif a:mode ==# 'V' | call s:vline()
@@ -38,13 +40,15 @@ fun! vm#visual#subtract(mode) abort
 
     call s:merge(1)
     call s:G.update_and_select_region({'id': s:v.IDs_list[-1]})
+    if X | call s:G.cursor_mode() | endif
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#visual#reduce() abort
-    let map = s:backup_map()
-    call s:G.rebuild_from_map(map, [s:F.pos2byte("'<"), s:F.pos2byte("'>")])
+    let X = s:backup_map()
+    call s:G.rebuild_from_map(s:Bytes, [s:F.pos2byte("'<"), s:F.pos2byte("'>")])
+    if X | call s:G.cursor_mode() | endif
     call s:G.update_and_select_region()
 endfun
 
@@ -145,11 +149,12 @@ endfun
 fun! s:backup_map() abort
     "use temporary regions, they will be merged later
     call s:init()
+    let X = s:G.extend_mode()
     let s:Bytes = copy(s:V.Bytes)
     call vm#commands#erase_regions()
     let s:v.no_search = 1
     let s:v.eco = 1
-    return s:Bytes
+    return X
 endfun
 
 fun! s:merge(subtract) abort

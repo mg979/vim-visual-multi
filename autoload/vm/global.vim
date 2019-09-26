@@ -126,15 +126,15 @@ endfun
 "------------------------------------------------------------------------------
 
 fun! s:Global.cursor_mode() abort
-    """Change to cursor mode.
-    if s:X() | call self.change_mode() | endif
+    """Set cursor mode. Return 1 if mode had to be changed.
+    if s:X() | call self.change_mode() | return 1 | endif
 endfun
 
 "------------------------------------------------------------------------------
 
 fun! s:Global.extend_mode() abort
-    """Change to extend mode.
-    if !s:X() | call self.change_mode() | endif
+    """Set extend mode. Return 1 if mode had to be changed.
+    if !s:X() | call self.change_mode() | return 1 | endif
 endfun
 
 
