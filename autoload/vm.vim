@@ -100,7 +100,7 @@ fun! vm#init_buffer(empty, ...) abort
         if &hlsearch && !v:hlsearch && !a:empty
             let s:v.oldhls = 1
             if !g:Vm.selecting
-                call vm#noh()
+                call feedkeys(vm#noh())
             endif
         else
             let s:v.oldhls = 0
