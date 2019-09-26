@@ -28,8 +28,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-" FIXME: subtract still gives error if started from cursor mode
-
 fun! vm#visual#subtract(mode) abort
     let X = s:backup_map()
 
@@ -85,10 +83,11 @@ endfun
 fun! vm#visual#split() abort
     """Split regions with regex pattern."""
     call s:init()
-    if !len(s:R()) | return | endif
+    if !len(s:R()) | return
+    elseif !s:X()  | return s:F.msg('Not in cursor mode.')  | endif
 
     echohl Type   | let pat = input('Pattern to remove > ') | echohl None
-    if empty(pat) | return s:F.msg('Command aborted.')     | endif
+    if empty(pat) | return s:F.msg('Command aborted.')      | endif
 
     let start = s:R()[0]                "first region
     let stop = s:R()[-1]                "last region
@@ -176,6 +175,7 @@ fun! s:init() abort
 endfun
 
 let s:R = { -> s:V.Regions }
+let s:X = { -> g:Vm.extend_mode }
 
 
 " vim: et ts=4 sw=4 sts=4 :

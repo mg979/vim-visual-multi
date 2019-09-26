@@ -49,7 +49,7 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Select-Line-Down)        :call vm#commands#expand_line(1)<cr>
   nnoremap <silent>       <Plug>(VM-Select-Line-Up)          :call vm#commands#expand_line(0)<cr>
 
-  xnoremap <silent>       <Plug>(VM-Visual-Subtract)         :<c-u>call vm#commands#from_visual('subtract')<cr>
+  xnoremap <silent>       <Plug>(VM-Visual-Subtract)         :<c-u>call vm#visual#subtract(visualmode())<cr>
   nnoremap                <Plug>(VM-Split-Regions)           :<c-u>call vm#visual#split()<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Empty-Lines)      :<c-u>call vm#commands#remove_empty_lines()<cr>
   nnoremap <silent>       <Plug>(VM-Goto-Regex)              :<c-u>call vm#commands#regex_motion('', v:count1, 0)<cr>
