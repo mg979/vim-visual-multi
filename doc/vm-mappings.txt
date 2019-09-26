@@ -33,8 +33,8 @@ Example of |vim-multiple-cursors| -like mappings:
     let g:VM_maps['Increase']    = '+'
     let g:VM_maps['Decrease']    = '-'
 <
-
 -------------------------------------------------------------------------------
+DEFAULT MAPPINGS                                          *vm-default-mappings*
                                                         *g:VM_default_mappings*
 Non-buffer mappings, except <C-n>, can be disabled with:
 >
@@ -53,13 +53,8 @@ Find Subword Under    <C-n>       from visual mode, without word boundaries
 Add Cursor Down       <C-Down>    create cursors vertically
 Add Cursor Up         <C-Up>      ,,       ,,      ,,
 Select All              \\A       select all occurrences of a word
-Visual All              \\A       select all occurrences of visual selection
 Start Regex Search      \\/       create a selection with regex search
-Visual Regex            \\/       find a pattern in visual selection
 Add Cursor At Pos       \\\       add a single cursor at current position
-Visual Find             \\f       find all patterns ( or @/ ) from visual mode
-Visual Cursors          \\c       create a column of cursors from visual mode
-Visual Add              \\a       create a selection from visual mode
 Get Operator            \\gs      see |vm-get-operator|
 Reselect Last           \\gS      reselect set of regions of last VM session
 
@@ -68,10 +63,32 @@ Mouse Word      <C-RightMouse>    select a word where clicked
 Mouse Column    <M-C-RightMouse>  create a column, from current cursor to
                                   clicked position
 
+
+-------------------------------------------------------------------------------
+VISUAL MODE MAPPINGS                                       *vm-visual-mappings*
+
+Of these, `Visual Subtract` is the only buffer mapping. The other ones belong
+to the default mappings (see above) and can be used at any time.
+
 -------------------------------------------------------------------------------
   Name                Keys        Notes ~
 -------------------------------------------------------------------------------
-                                                           *vm-buffer-mappings*
+
+Visual All              \\A       select all occurrences of visual selection
+Visual Regex            \\/       find a pattern in visual selection
+Visual Find             \\f       find all patterns ( or @/ ) from visual mode
+Visual Cursors          \\c       create a column of cursors from visual mode
+Visual Add              \\a       create a region from visual mode
+Visual Subtract         \\s       remove regions in current visual selection
+
+
+
+-------------------------------------------------------------------------------
+BUFFER MAPPINGS                                            *vm-buffer-mappings*
+-------------------------------------------------------------------------------
+  Name                Keys        Notes ~
+-------------------------------------------------------------------------------
+
 Find Next               n         find next occurrence
 Find Prev               N         find previous occurrence
 Goto Next               }         go to next selected region

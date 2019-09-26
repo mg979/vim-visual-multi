@@ -638,6 +638,14 @@ Transform regions with expression ~
 OTHER FEATURES                                             *visual-multi-other*
 ===============================================================================
 
+Operations from visual mode~
+                                                               *vm-visual-mode*
+
+VM works entirely from normal/insert mode, so the name can be misleading. But
+this means that you can still use visual mode and VM has a set of mappings to
+work with it. See |vm-visual-mappings| for details.
+
+
 Smart case change~
                                                          *vm-smart-case-change*
 
