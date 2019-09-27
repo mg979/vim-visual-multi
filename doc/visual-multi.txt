@@ -21,6 +21,7 @@ Additional resources:
 Settings                                       |visual-multi-settings|
 Quick reference                                |visual-multi-qr|
 Frequently asked questions                     |visual-multi-faq|
+Additional Ex commands                         |visual-multi-ex-commands|
 
 
 
@@ -148,7 +149,7 @@ Some keys have a special behaviour:
 
 NOTE: Some mappings that you may have (<C-H> for <BS> etc.) will NOT work,
 and they will probably break your text. For some of them there may be
-solutions, for others not. See |visual-multi-customization|.
+solutions, for others not. See |vm-faq-remap|.
 
 NOTE: Since <C-V> is remapped, you should use <C-Q> to insert special
 characters.
@@ -202,7 +203,8 @@ still be warned if this happens.
 
 
 Since there are a lot of new mappings, the chance for conflicts would be high,
-if you use plugins. VM uses its own leader to reduce this chance.
+if you use plugins that use buffer mappings (common with |ftplugins|).
+VM uses its own leader to reduce this chance.
 Default is `\\` (two backslashes). If you want to change it, set (for example):
 >
     let g:VM_leader = '\'

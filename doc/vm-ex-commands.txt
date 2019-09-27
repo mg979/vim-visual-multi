@@ -1,0 +1,87 @@
+*vm-ex-commands.txt*    Version 0.5.0    Last change: September 27 2019
+
+EX COMMANDS                                         *visual-multi-ex-commands*
+==============================================================================
+
+The following Ex commands can be run at any time:
+
+  |:VMDebug|
+  |:VMClear|
+
+The following are only available inside a VM session:
+
+  |:VMQfix|
+  |:VMFilterRegions|
+  |:VMFilterLines|
+  |:VMRegionsToBuffer|
+  |:VMMassTranspose|
+
+Some of these commands are available in the `tools menu` (default mapping: `\\``).
+
+==============================================================================
+
+    VMDebug                                                         *:VMDebug*
+
+Print in the command line any error relative to the current buffer (if some
+mappings could not be applied).
+
+------------------------------------------------------------------------------
+
+    VMClear                                                         *:VMClear*
+
+Clear any remnant of VM-specific highlight matches in the current buffer. It
+can be necessary if VM exited with errors for some reason.
+
+------------------------------------------------------------------------------
+
+    VMQfix[!]                                                        *:VMQfix*
+
+Populate the |quickfix| window with the regions lines.
+If run with <bang>, use positions and contents instead. If run from cursor
+mode, the text will be empty, but the positions will be valid.
+
+------------------------------------------------------------------------------
+
+    VMFilterRegions[!] [pattern]                            *:VMFilterRegions*
+
+Filter regions so that you keep only the ones match [pattern].
+If a <bang> is used, keep the regions that don't match [pattern].
+If no [pattern] is given, prompt for a pattern.
+
+In prompt mode, `Ctrl-x` can change the filter type, cycling among:
+>
+  pattern:    keep regions that match pattern
+  !pattern:   keep regions that don't match pattern
+  expression: keep the regions that match the vim expression
+<
+------------------------------------------------------------------------------
+
+    VMFilterLines                                             *:VMFilterLines*
+
+Open a new buffer, filling it with all lines that contain at least a region.
+When saving (|:write| or |:update|) this temporary buffer, the lines in the
+original buffer are replaced with the corresponding lines in this buffer.
+If the number of lines doesn't match for some reason, the command fails.
+Use this feature only if you know what you're doing.
+
+------------------------------------------------------------------------------
+
+    VMRegionsToBuffer                                     *:VMRegionsToBuffer*
+
+Open a new buffer, filling it with the contents of each region, one per line.
+This works similarly to |:VMFilterLines|, in that it can update the original
+buffer on save. Use with caution.
+If the number of lines doesn't match the number of regions, the command fails.
+
+------------------------------------------------------------------------------
+
+    VMMassTranspose                                         *:VMMassTranspose*
+
+If you select two patterns, replace all occurrences of the first pattern with
+the second one, and viceversa.
+
+
+
+
+ vim: ft=help et sw=2 ts=2 sts=2 tw=78
+
