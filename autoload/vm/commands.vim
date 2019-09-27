@@ -118,7 +118,7 @@ fun! vm#commands#add_cursor_down(extend, count) abort
     let N = a:count
 
     while N
-        keepjumps normal! j
+        normal! j
         if !s:skip_shorter_lines() | let N -= 1 | endif
         if s:last_line()           | break      | endif
     endwhile
@@ -137,7 +137,7 @@ fun! vm#commands#add_cursor_up(extend, count) abort
     let N = a:count
 
     while N
-        keepjumps normal! k
+        normal! k
         if !s:skip_shorter_lines() | let N -= 1 | endif
         if s:first_line()          | break      | endif
     endwhile
@@ -350,10 +350,10 @@ endfun
 
 fun! s:get_next() abort
     if s:X()
-        keepjumps normal! ngny`]
+        silent keepjumps normal! ngny`]
         let R = s:G.new_region()
     else
-        keepjumps normal! ngny`[
+        silent keepjumps normal! ngny`[
         let R = vm#commands#add_cursor_at_word(0, 0)
     endif
     let s:v.nav_direction = 1
@@ -362,10 +362,10 @@ endfun
 
 fun! s:get_prev() abort
     if s:X()
-        keepjumps normal! NgNy`]
+        silent keepjumps normal! NgNy`]
         let R = s:G.new_region()
     else
-        keepjumps normal! NgNy`[
+        silent keepjumps normal! NgNy`[
         let R = vm#commands#add_cursor_at_word(0, 0)
     endif
     let s:v.nav_direction = 0
@@ -501,7 +501,7 @@ endfun
 fun! vm#commands#from_visual(t) abort
     let mode = visualmode()
     call s:set_extend_mode(1)
-    exe 'call vm#visual#' . a:t . '(mode)' 
+    exe 'call vm#visual#' . a:t . '(mode)'
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
