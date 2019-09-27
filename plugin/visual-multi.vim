@@ -27,6 +27,7 @@ com! -nargs=? -complete=customlist,vm#themes#complete
       \ VMTheme  call vm#themes#load(<q-args>)
 com!    VMConfig call vm#special#config#start()
 com!    VMDebug  call vm#special#commands#debug()
+com!    VMClear  call vm#clearmatches()
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

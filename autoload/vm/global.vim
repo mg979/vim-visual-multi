@@ -185,11 +185,7 @@ fun! s:Global.remove_highlight() abort
         endfor
         if exists('s:v.clear_vm_matches')
             unlet s:v.clear_vm_matches
-            for m in getmatches()
-                if m.group == 'VM_Extend' || m.group == 'MultiCursor'
-                    call matchdelete(m.id)
-                endif
-            endfor
+            call vm#clearmatches()
         endif
     endif
 endfun

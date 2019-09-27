@@ -194,6 +194,16 @@ fun! vm#noh() abort
     endif
 endfun
 
+"------------------------------------------------------------------------------
+
+fun! vm#clearmatches() abort
+    for m in getmatches()
+        if m.group == 'VM_Extend' || m.group == 'MultiCursor'
+            call matchdelete(m.id)
+        endif
+    endfor
+endfun
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Autocommands

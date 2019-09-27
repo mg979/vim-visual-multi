@@ -3,6 +3,12 @@
 FREQUENTLY ASKED QUESTIONS                                   *visual-multi-faq*
 ===============================================================================
 
+                                                                *vm-faq-errors*
+VM has quit with errors and I can't clear VM highlight matches.~
+
+Run |:VMClear|
+
+
                                                              *vm-faq-functions*
 How can I do something before VM starts, or after VM ends? ~
 
