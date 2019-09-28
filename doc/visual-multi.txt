@@ -9,9 +9,9 @@ Modes                                          |visual-multi-modes|
 Regions and patterns                           |visual-multi-regions|
 Mappings                                       |visual-multi-mappings|
 Run ... at cursors                             |visual-multi-run-at-cursors|
-Single region mode                             |visual-multi-single-mode|
 Commands                                       |visual-multi-commands|
 Other features                                 |visual-multi-other|
+Single region mode                             |visual-multi-single-mode|
 Bugs                                           |visual-multi-bugs|
 Credits                                        |visual-multi-credits|
 License                                        |visual-multi-license|
@@ -105,22 +105,6 @@ Some commands are specific to |extend-mode|, such as:
 
 And more, commands will be covered further on.
 
-Another feature of |extend-mode| is |smart-case-change|, started with `gc`.
-
-
-----------------------------------------------------------  *vm-multiline-mode*
-
-Maybe you noticed, in other editors with multiple cursors, how hard it is to
-actually control them. What are they good for, if one wrong move can scramble
-them irreparably?
-
-In VM, not only you have much finer control through motions, but, in both
-modes, cursors and selections are 'kept in line', that is, cursors cannot end
-up in a different line, and selections similarly.
-
-You may still want to do so, at times. You'll have to enable |multiline-mode|,
-for which the default mapping is `\\M`.
-
 
 -------------------------------------------------------------  *vm-insert-mode*
 
@@ -153,6 +137,34 @@ solutions, for others not. See |vm-faq-remap|.
 
 NOTE: Since <C-V> is remapped, you should use <C-Q> to insert special
 characters.
+
+-------------------------------------------------------------  *vm-visual-mode*
+
+VM works entirely from normal/insert mode, so the name can be misleading. But
+this means that you can still use visual mode and VM has a set of mappings to
+work with it. You can among other things:
+
+- add words and patterns, select all occurrences of visual selection
+- subtract visual selection from VM regions
+- conversely, remove all regions that are not in the visual selection
+- find regex pattern in visual selection, etc
+
+See |vm-visual-mappings| for details.
+
+
+----------------------------------------------------------  *vm-multiline-mode*
+
+Maybe you noticed, in other editors with multiple cursors, how hard it is to
+actually control them. What are they good for, if then you have so little
+control over them?
+
+In VM, not only you have much finer control through motions, but, in both
+modes, cursors and selections are 'kept in line', that is, cursors cannot end
+up in a different line, and selections similarly.
+
+You may still want to do so, at times. You'll have to enable |multiline-mode|,
+for which the default mapping is `\\M`.
+
 
 
 
@@ -315,7 +327,7 @@ Select All Words ~
   Default mapping: \\A
 
   Selects all occurrences of a word. Works in both normal and visual mode.
-  Rules are the same as for <C-n>.
+  Rules are the same as for <C-n>. Works from visual mode too.
 
 
 ------------------------------------------------------------  *vm-regex-search*
@@ -324,8 +336,8 @@ Find with Regex ~
   Default mapping: \\/
 
   Enter a regex pattern as by / command. A selection will be created with that
-  pattern. Pressing <C-n> (or ], etc) will then find the next occurrence of
-  that pattern, rather than the word under cursor.
+  pattern. Pressing `n/N` will then find the next occurrence of that pattern,
+  rather than the word under cursor.
 
   If started from visual mode, it will select all occurrences of that pattern
   in the visual selection.
@@ -336,7 +348,7 @@ Get Operator ~
 
   Default mapping: \\gs
 
-  Creates a new selection from a text object. It can also create a pattern, but
+  Creates a new selection from a text object. It will also add a pattern, but
   only if there are no patterns yet.
 
 
@@ -408,7 +420,7 @@ in insert mode).
 
 NOTE: the dot command can repeat the last edit done outside VM, but once you
 start editing things inside VM, don't expect the same! It can repeat deletions
-at cursors (`dw` kind of things) but not more.
+at cursors (`dw` kind of things) but not more (currently at least).
 
 Quick reference ~
 
@@ -418,33 +430,6 @@ Visual     \\v     |extend-mode| only!                          *vm-run-visual*
 Ex         \\x     run any ex command at cursors              *vm-run-ex*
 Macro      \\@     run a macro at cursors                     *vm-run-macro*
 
-
-
-
-
-
-SINGLE REGION MODE                                   *visual-multi-single-mode*
-===============================================================================
-
-  Default mapping: \\<CR>
-
-It is a submode that allows motions to be performed on single regions, rather
-than all at once. Commands still affect all regions, though.
-
-                                   |vm-buffer-mappings| |g:VM_single_mode_maps|
-
-When you enter insert mode you can use <Tab> and <S-Tab> to cycle among
-cursors, to make changes sequentially at each of them. When you press <Tab>,
-you are brought to the next cursor, and the way (`i`, `a`, `I`, `A`) insert
-mode was started in still applies.
-                                                  |g:VM_single_mode_auto_reset|
-
-By default, this mode is deactivated by default when exiting insert mode, but
-only if <Tab> key has been used at least once, i.e, it won't happen if you move
-from region to region and perform individual changes, without cycling cursors
-from within insert mode.
-
-See also |visual-multi-bugs|.
 
 
 
@@ -640,14 +625,6 @@ Transform regions with expression ~
 OTHER FEATURES                                             *visual-multi-other*
 ===============================================================================
 
-Operations from visual mode~
-                                                               *vm-visual-mode*
-
-VM works entirely from normal/insert mode, so the name can be misleading. But
-this means that you can still use visual mode and VM has a set of mappings to
-work with it. See |vm-visual-mappings| for details.
-
-
 Smart case change~
                                                          *vm-smart-case-change*
 
@@ -684,6 +661,34 @@ if you did any change after exiting VM, the reselected regions will be wrong.
 Note that inside a VM session, this command reselects the last set of regions
 in extend mode, i.e. before switching to cursor mode, and the default mapping
 is gS (without leader).
+
+
+
+
+SINGLE REGION MODE                                   *visual-multi-single-mode*
+===============================================================================
+
+  Default mapping: \\<CR>
+
+It is a submode that allows motions to be performed on single regions, rather
+than all at once. Commands still affect all regions, though.
+
+                                   |vm-buffer-mappings| |g:VM_single_mode_maps|
+
+When you enter insert mode you can use <Tab> and <S-Tab> to cycle among
+cursors, to make changes sequentially at each of them. When you press <Tab>,
+you are brought to the next cursor, and the way (`i`, `a`, `I`, `A`) insert
+mode was started in still applies.
+                                                  |g:VM_single_mode_auto_reset|
+
+By default, this mode is deactivated by default when exiting insert mode, but
+only if <Tab> key has been used at least once, i.e, it won't happen if you move
+from region to region and perform individual changes, without cycling cursors
+from within insert mode.
+
+See also |visual-multi-bugs|.
+
+
 
 
 
