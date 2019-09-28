@@ -105,13 +105,9 @@ fun! s:Region.new(cursor, ...) abort
 
     let R.matches = {'region': [], 'cursor': 0}
 
-    if !a:0 && a:cursor    "/////////// CURSOR ////////////
+    if !a:0                "/////// FROM MAPPINGS ///////
 
-        call s:region_vars(R, 1)
-
-    elseif !a:0            "/////////// REGION ////////////
-
-        call s:region_vars(R, 0)
+        call s:region_vars(R, a:cursor)
 
     else                   "///////// FROM ARGS ///////////
 
@@ -427,7 +423,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_vars() abort
-    """Update the rest of the region vars."""
+    """Update the rest of the region variables."""
 
     let r         = self
     let s:v.index = r.index
@@ -540,11 +536,11 @@ fun! s:pattern(r) abort
 
     "return current search pattern in regex mode
     if !has_key(a:r, 'pat')
-        if s:v.using_regex | return s:v.search[0] | else | return '' | endif
+        return s:v.using_regex ? s:v.search[0] : ''
     endif
 
     "return current pattern if one is present (in cursor mode text is empty)
-    return empty(a:r.pat)? '' : a:r.pat
+    return a:r.pat
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

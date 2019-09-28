@@ -46,7 +46,7 @@ fun! vm#commands#add_cursor_at_word(yank, search) abort
     call s:init(0, 1, 0)
 
     if a:yank
-        call s:yank(0)
+        call s:yank()
         keepjumps normal! `[
     endif
     if a:search | call s:Search.add() | endif
@@ -248,10 +248,8 @@ endfun
 " Find under commands
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:yank(inclusive) abort
-    if a:inclusive | silent keepjumps normal! yiW`]
-    else           | silent keepjumps normal! yiw`]
-    endif
+fun! s:yank() abort
+    silent keepjumps normal! viwy`]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -266,7 +264,7 @@ fun! vm#commands#ctrln(count) abort
         call s:G.update_and_select_region(pos)
     else
         for i in range(a:count)
-            call vm#commands#find_under(0, 1, 0, 1, 1)
+            call vm#commands#find_under(0, 1, 1)
             if no_reselect && s:v.was_region_at_pos
                 break
             endif
@@ -276,14 +274,14 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_under(visual, whole, inclusive, ...) abort
+fun! vm#commands#find_under(visual, whole, ...) abort
     call s:init(a:whole, 0, 1)
 
     "C-d command
     if a:0 && s:is_r() | return vm#commands#find_next(0, 0) | endif
 
     " yank and create region
-    if !a:visual | call s:yank(a:inclusive)                 | endif
+    if !a:visual | call s:yank() | endif
 
     "replace region if calling the command on an existing region
     if s:is_r()  | call s:G.region_at_pos().remove()        | endif
@@ -299,7 +297,7 @@ endfun
 " Find all
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_all(visual, whole, inclusive) abort
+fun! vm#commands#find_all(visual, whole) abort
     call s:init(a:whole, 0, 1)
 
     let pos = getpos('.')[1:2]
@@ -308,11 +306,11 @@ fun! vm#commands#find_all(visual, whole, inclusive) abort
     if !a:visual
         let R = s:G.region_at_pos()
         if empty(R)
-            let R = vm#commands#find_under(0, a:whole, a:inclusive)
+            let R = vm#commands#find_under(0, a:whole)
         endif
         call s:Search.check_pattern(R.pat)
     else
-        let R = vm#commands#find_under(1, a:whole, a:inclusive)
+        let R = vm#commands#find_under(1, a:whole)
     endif
 
     let @/ = join(s:v.search, '\|')

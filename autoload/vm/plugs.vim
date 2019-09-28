@@ -14,7 +14,7 @@ fun! vm#plugs#permanent() abort
   nnoremap <silent>       <Plug>(VM-Select-Cursor-Up)        :<C-u>call vm#commands#add_cursor_up(1, v:count1)<cr>
 
   nnoremap <silent>       <Plug>(VM-Reselect-Last)           :call vm#commands#reselect_last()<cr>
-  nnoremap <silent>       <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1, 0)<cr>
+  nnoremap <silent>       <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1)<cr>
   xnoremap <silent><expr> <Plug>(VM-Visual-All)              <sid>Visual('all')
   xnoremap <silent>       <Plug>(VM-Visual-Cursors)          :<c-u>call vm#commands#from_visual('cursors')<cr>
   xnoremap <silent>       <Plug>(VM-Visual-Add)              :<c-u>call vm#commands#from_visual('add')<cr>
@@ -54,18 +54,6 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Remove-Empty-Lines)      :<c-u>call vm#commands#remove_empty_lines()<cr>
   nnoremap <silent>       <Plug>(VM-Goto-Regex)              :<c-u>call vm#commands#regex_motion('', v:count1, 0)<cr>
   nnoremap <silent>       <Plug>(VM-Goto-Regex!)             :<c-u>call vm#commands#regex_motion('', v:count1, 1)<cr>
-
-  nnoremap <silent>       <Plug>(VM-Find-I-Word)             :<c-u>call vm#commands#find_under(0, 0, 0)<cr>
-  nnoremap <silent>       <Plug>(VM-Find-A-Word)             :<c-u>call vm#commands#find_under(0, 0, 1)<cr>
-  nnoremap <silent>       <Plug>(VM-Find-I-Whole-Word)       :<c-u>call vm#commands#find_under(0, 1, 0)<cr>
-  nnoremap <silent>       <Plug>(VM-Find-A-Whole-Word)       :<c-u>call vm#commands#find_under(0, 1, 1)<cr>
-  xnoremap <silent><expr> <Plug>(VM-Find-A-Subword)          <sid>Visual('subw')
-  xnoremap <silent><expr> <Plug>(VM-Find-A-Whole-Subword)    <sid>Visual('wsubw')
-
-  nnoremap <silent>       <Plug>(VM-Star)                    :<c-u>call <sid>Star(1)<cr>
-  nnoremap <silent>       <Plug>(VM-Hash)                    :<c-u>call <sid>Star(2)<cr>
-  xnoremap <silent><expr> <Plug>(VM-Visual-Star)             <sid>Visual('star')
-  xnoremap <silent><expr> <Plug>(VM-Visual-Hash)             <sid>Visual('hash')
 
   nnoremap <silent>       <Plug>(VM-Toggle-Mappings)         :call b:VM_Selection.Maps.mappings_toggle()<cr>
   nnoremap <silent>       <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline')<cr>
@@ -241,21 +229,6 @@ endfun
 " Helper functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Star(type) abort
-  set nosmartcase
-  set noignorecase
-
-  if a:type == 1
-    call vm#commands#find_under(0, 1, 0)
-  elseif a:type == 2
-    call vm#commands#find_under(0, 1, 1)
-  elseif a:type == 3
-    call vm#commands#find_under(1, 0, 0)
-  elseif a:type == 4
-    call vm#commands#find_under(1, 1, 0)
-  endif
-endfun
-
 fun! s:Insert(key) abort
   if pumvisible()
     if a:key == 'j'     | return "\<C-n>"
@@ -320,10 +293,8 @@ fun! s:Visual(cmd) abort
   else
     let r = ''
   endif
-  return a:cmd == 'all'  ? "y:call vm#commands#find_all(1, 0, 0)\<cr>".r."`]" :
-        \ a:cmd == 'under'? "y:call vm#commands#find_under(1, 0, 0, 1)\<cr>".r."`]" :
-        \ a:cmd == 'subw' ? "y:call vm#commands#find_under(1, 0, 0)\<cr>".r."`]" :
-        \ a:cmd == 'wsubw'? "y:call vm#commands#find_under(1, 1, 0)\<cr>".r."`]" :
-        \ a:cmd == 'star' ? "y:call <sid>Star(3)\<cr>".r."`]" : "y:call <sid>Star(4)\<cr>".r."`]"
+  return a:cmd == 'all'
+        \ ? "y:call vm#commands#find_all(1, 0)\<cr>".r."`]"
+        \ : "y:call vm#commands#find_under(1, 0)\<cr>".r."`]"
 endfun
 " vim: et ts=2 sw=2 sts=2 :
