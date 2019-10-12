@@ -47,7 +47,8 @@ let s:base = {
 fun! vm#maps#all#permanent() abort
   """Default permanent mappings dictionary."""
   let maps = s:base
-  let leader = g:Vm.leader
+  let leader = g:Vm.leader.default
+  let visual = g:Vm.leader.visual
 
   " map <c-n> in any case
   let maps["Find Under"][0]              = '<C-n>'
@@ -63,11 +64,11 @@ fun! vm#maps#all#permanent() abort
     let maps["Add Cursor Up"][0]         = '<C-Up>'
     let maps["Select l"][0]              = '<S-Right>'
     let maps["Select h"][0]              = '<S-Left>'
-    let maps["Visual Regex"][0]          = leader.'/'
-    let maps["Visual All"][0]            = leader.'A'
-    let maps["Visual Add"][0]            = leader.'a'
-    let maps["Visual Find"][0]           = leader.'f'
-    let maps["Visual Cursors"][0]        = leader.'c'
+    let maps["Visual Regex"][0]          = visual.'/'
+    let maps["Visual All"][0]            = visual.'A'
+    let maps["Visual Add"][0]            = visual.'a'
+    let maps["Visual Find"][0]           = visual.'f'
+    let maps["Visual Cursors"][0]        = visual.'c'
   endif
 
   if g:VM_mouse_mappings
@@ -85,7 +86,8 @@ fun! vm#maps#all#buffer() abort
   """Default buffer mappings dictionary."""
 
   let maps = {}
-  let leader = g:Vm.leader
+  let leader = g:Vm.leader.buffer
+  let visual = g:Vm.leader.visual
 
   "basic
   call extend(maps, {
@@ -107,11 +109,8 @@ fun! vm#maps#all#buffer() abort
         \"Remove Region":           ['Q',         'n'],
         \"Remove Last Region":      [leader.'q',  'n'],
         \"Remove Every n Regions":  [leader.'R',  'n'],
-        \"Reselect Last":           ['gS',        'n'],
         \"Select Operator":         ['s',         'n'],
         \"Find Operator":           ['m',         'n'],
-        \"Add Cursor Down":         ['<C-Down>',  'n'],
-        \"Add Cursor Up":           ['<C-Up>',    'n'],
         \})
 
   "utility
@@ -139,8 +138,8 @@ fun! vm#maps#all#buffer() abort
         \"Duplicate":               [leader.'d',  'n'],
         \"Align":                   [leader.'a',  'n'],
         \"Split Regions":           [leader.'s',  'n'],
-        \"Visual Subtract":         [leader.'s',  'x'],
-        \"Visual Reduce":           [leader.'r',  'x'],
+        \"Visual Subtract":         [visual.'s',  'x'],
+        \"Visual Reduce":           [visual.'r',  'x'],
         \"Run Normal":              [leader.'z',  'n'],
         \"Run Last Normal":         [leader.'Z',  'n'],
         \"Run Visual":              [leader.'v',  'n'],
@@ -167,12 +166,8 @@ fun! vm#maps#all#buffer() abort
         \"Select Cursor Up":        ['<M-C-Up>',    'n'],
         \"Select Line Down":        ['',            'n'],
         \"Select Line Up":          ['',            'n'],
-        \"Add Cursor Down":         ['',            'n'],
-        \"Add Cursor Up":           ['',            'n'],
         \"Select j":                ['<S-Down>',    'n'],
         \"Select k":                ['<S-Up>',      'n'],
-        \"Select l":                ['<S-Right>',   'n'],
-        \"Select h":                ['<S-Left>',    'n'],
         \"Single Select l":         ['<M-Right>',   'n'],
         \"Single Select h":         ['<M-Left>',    'n'],
         \"Select e":                ['',            'n'],

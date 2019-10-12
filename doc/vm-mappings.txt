@@ -49,7 +49,17 @@ Mouse mappings can be enabled with:
 Default mappings are `permanent`, that is, always available, and applied when
 Vim starts. Buffer mappings instead are applied per-buffer, when VM is started.
 
+                                                             *g:VM_leader-dict*
 Mappings preceded by \\ are meant prefixed with |g:VM_leader|.
+
+Some of the permanent/visual mappings use the |g:VM_leader| as well, and you
+could want to use a different one for them. In this case you can define the
+leader as a dictionary:
+>
+    let g:VM_leader = {'default': '\', 'visual': '\', 'buffer': 'z'}
+
+That is, the VM leader used for default (permanent) normal mode mappings,
+visual mappings, and buffer mappings.
 
 -------------------------------------------------------------------------------
   Name                Keys        Notes ~

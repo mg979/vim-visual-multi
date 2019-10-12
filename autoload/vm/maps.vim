@@ -109,7 +109,10 @@ fun! s:build_permanent_maps() abort
     """Run at vim start. Generate permanent mappings and integrate custom ones.
 
     "set default VM leader
-    let g:Vm.leader = get(g:, 'VM_leader', '\\')
+    let ldr = get(g:, 'VM_leader', '\\')
+    let g:Vm.leader = type(ldr) == v:t_string
+                \ ? {'default': ldr, 'visual': ldr, 'buffer': ldr}
+                \ : extend({'default':'\\', 'visual':'\\', 'buffer':'\\'}, ldr)
 
     "init vars and generate base permanent maps
     let g:VM_maps   = get(g:, 'VM_maps', {})
@@ -181,7 +184,7 @@ fun! s:build_buffer_maps() abort
 
     "store the key used to toggle mappings
     let g:Vm.maps.toggle = has_key(g:VM_maps, 'Toggle Mappings') ?
-                \ g:VM_maps['Toggle Mappings'] : g:Vm.leader.'<Space>'
+                \ g:VM_maps['Toggle Mappings'] : g:Vm.leader.buffer . '<Space>'
 
     "generate list of 'exe' commands for unmappings
     for key in keys(maps)
