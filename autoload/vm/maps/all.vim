@@ -13,7 +13,6 @@
 let s:base = {
       \"Get Operator":            ['', 'n'],
       \"Reselect Last":           ['', 'n'],
-      \"Erase Regions":           ['', 'n'],
       \"Add Cursor At Pos":       ['', 'n'],
       \"Add Cursor At Word":      ['', 'n'],
       \"Start Regex Search":      ['', 'n'],
@@ -109,6 +108,7 @@ fun! vm#maps#all#buffer() abort
         \"Remove Region":           ['Q',         'n'],
         \"Remove Last Region":      [leader.'q',  'n'],
         \"Remove Every n Regions":  [leader.'R',  'n'],
+        \"Erase Regions":           [leader.'Q',  'n'],
         \"Select Operator":         ['s',         'n'],
         \"Find Operator":           ['m',         'n'],
         \})
