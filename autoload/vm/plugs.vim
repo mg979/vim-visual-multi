@@ -98,7 +98,6 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Show-Infoline)           :call b:VM_Selection.Funcs.infoline()<cr>
 
   nnoremap <silent>       <Plug>(VM-Noh)                     :if v:hlsearch<bar>nohlsearch<bar>else<bar>set hls<bar>endif<cr>
-  nnoremap <silent>       <Plug>(VM-LazyNoh)                 :set lz<bar>if v:hlsearch<bar>nohlsearch<bar>else<bar>set hls<bar>endif<bar>set nolz<cr>
 
   for m in g:Vm.motions
     exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 0, 0)\<cr>"
