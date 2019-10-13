@@ -1,32 +1,30 @@
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Global class
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:Global = {}
 
 fun! vm#global#init() abort
+    " Store Global class in buffer VM dictionary.
+
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
     let s:F = s:V.Funcs
 
-    "make a bytes map of the file, where 0 is unselected, 1 is selected
-    call s:Global.reset_byte_map(0)
+    let s:X = { -> g:Vm.extend_mode }
+    let s:R = { -> s:V.Regions      }
+    let s:B = { -> s:v.block_mode && g:Vm.extend_mode }
+
     return s:Global
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Lambdas
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:X         = { -> g:Vm.extend_mode }
-let s:R         = { -> s:V.Regions      }
-let s:B         = { -> s:v.block_mode && g:Vm.extend_mode }
-
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Regions creation and access
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.new_region() abort
-    """Get the region under cursor, or create a new one if there is none.
+    " Get the region under cursor, or create a new one if there is none.
 
     let R = self.region_at_pos()
     if empty(R)
@@ -44,10 +42,10 @@ fun! s:Global.new_region() abort
     return R
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.new_cursor(...) abort
-    """Create a new cursor if there isn't already a region.
+    " Create a new cursor if there isn't already a region.
+
     let R = self.region_at_pos()
 
     if empty(R)
@@ -58,19 +56,19 @@ fun! s:Global.new_cursor(...) abort
     return R
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.active_regions(...) abort
-    """Return current working set of regions.
+    " Return current working set of regions.
+
     if s:v.single_region    | return [s:V.Regions[s:v.index]]
     else                    | return s:V.Regions
     endif
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.get_all_regions(...) abort
-    """Get all regions, optionally between two byte offsets.
+    " Get all regions, optionally between two byte offsets.
+
     let ows = &wrapscan
     set nowrapscan
     let [l:start, l:end] = a:0 ? [a:1, a:2] : [1, 0]
@@ -94,13 +92,17 @@ fun! s:Global.get_all_regions(...) abort
     let &wrapscan = ows
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Change mode
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 fun! s:Global.change_mode(...) abort
-    " merge cursors if transitioning from cursor mode, but
-    " reset direction transitioning from extend mode
+    " Change from extend to cursor mode and viceversa.
+    " Merge cursors if transitioning from cursor mode, but reset direction
+    " transitioning from extend mode.
+
     if !s:X() | call self.merge_cursors()
     else      | call self.backup_last_regions()
     endif
@@ -123,27 +125,29 @@ fun! s:Global.change_mode(...) abort
     endif
 endfun
 
-"------------------------------------------------------------------------------
 
 fun! s:Global.cursor_mode() abort
-    """Set cursor mode. Return 1 if mode had to be changed.
+    " Set cursor mode. Return 1 if mode had to be changed.
+
     if s:X() | call self.change_mode() | return 1 | endif
 endfun
 
-"------------------------------------------------------------------------------
 
 fun! s:Global.extend_mode() abort
-    """Set extend mode. Return 1 if mode had to be changed.
+    " Set extend mode. Return 1 if mode had to be changed.
+
     if !s:X() | call self.change_mode() | return 1 | endif
 endfun
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Highlight
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 fun! s:Global.update_highlight(...) abort
-    """Update highlight for all regions.
+    " Update highlight for all regions.
+
     if s:v.eco | return | endif
 
     call self.remove_highlight()
@@ -154,10 +158,10 @@ fun! s:Global.update_highlight(...) abort
     call self.update_cursor_highlight()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_cursor_highlight(...) abort
-    """Set cursor highlight, depending on extending mode.
+    " Set cursor highlight, depending on extending mode.
+
     if s:v.eco | return | endif
 
     highlight clear MultiCursor
@@ -173,10 +177,10 @@ fun! s:Global.update_cursor_highlight(...) abort
     endif
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.remove_highlight() abort
-    """Remove all regions' highlight.
+    " Remove all regions' highlight.
+
     if !s:v.keep_matches
         call clearmatches()
     else
@@ -190,12 +194,14 @@ fun! s:Global.remove_highlight() abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Regions functions
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 fun! s:Global.all_empty() abort
-    """If not all regions are empty, turn on extend mode, if not already active.
+    " If not all regions are empty, turn on extend mode.
 
     for r in s:R()
         if r.a != r.b
@@ -206,10 +212,10 @@ fun! s:Global.all_empty() abort
     return 1
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_regions() abort
-    """Force regions update.
+    " Force regions update.
+
     if s:v.eco | return | endif
 
     if s:X()
@@ -221,10 +227,10 @@ fun! s:Global.update_regions() abort
     call s:F.restore_reg()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_and_select_region(...) abort
-    """Update regions and select region at position, index or id.
+    " Update regions and select region at position, index or id.
+
     if s:v.merge
         let s:v.merge = 0 | return self.merge_regions()
     endif
@@ -276,11 +282,11 @@ fun! s:Global.update_and_select_region(...) abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_map_and_select_region(...) abort
-    "Don't reupdate regions, only the bytes map.
-    "Use when regions have been just created and there's no need to update them.
+    " Update only the bytes map, skipping region update.
+    " Regions have been just created and there's no need to update them.
+
     if s:v.find_all_overlap
         let s:v.find_all_overlap = 0
         return self.merge_regions()
@@ -299,20 +305,20 @@ fun! s:Global.update_map_and_select_region(...) abort
     endif
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.erase_regions() abort
-    """Erase all regions.
+    " Erase all regions.
+
     call self.remove_highlight()
     let s:V.Regions = []
     let s:V.Bytes = {}
     let s:v.index = -1
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.restore_regions(index) abort
-    """Restore previous regions from backup.
+    " Restore previous regions from backup.
+
     let backup = b:VM_Backup | call self.erase_regions()
 
     let tick = backup.ticks[a:index]
@@ -321,10 +327,10 @@ fun! s:Global.restore_regions(index) abort
     call self.update_and_select_region()
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.backup_regions() abort
-    """Store a copy of the current regions.
+    " Store a copy of the current regions.
+
     let tick   = undotree().seq_cur
     let backup = b:VM_Backup
     let index  = index(backup.ticks, backup.last)
@@ -338,19 +344,18 @@ fun! s:Global.backup_regions() abort
     let backup.last = tick
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.backup_last_regions() abort
-    """Create a backup of last set of regions.
+    " Create a backup of last set of regions.
+
     let regions = map(deepcopy(s:R()), "{'A': v:val.A, 'B': v:val.B}")
     let b:VM_LastBackup = {'extend': g:Vm.extend_mode, 'regions': regions}
     let s:v.direction = 1
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.collapse_regions() abort
-    """Collapse regions to cursors and turn off extend mode.
+    " Collapse regions to cursors and turn off extend mode.
 
     call self.reset_byte_map(0)
     call s:V.Block.stop()
@@ -360,10 +365,10 @@ fun! s:Global.collapse_regions() abort
     call self.update_highlight()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.select_region(i) abort
-    """Adjust cursor position of the region at index, then return the region.
+    " Adjust cursor position of the region at index, then return region.
+
     if !len(s:R()) | return | endif
 
     let i = a:i >= len(s:R())? 0 : a:i
@@ -375,10 +380,9 @@ fun! s:Global.select_region(i) abort
     return R
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.select_region_at_pos(pos) abort
-    """Try to select a region at the given position.
+    " Try to select a region at the given position.
 
     let r = self.region_at_pos(a:pos)
     if !empty(r)
@@ -388,10 +392,9 @@ fun! s:Global.select_region_at_pos(pos) abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.region_at_pos(...) abort
-    """Return the region at position, or an empty dict if not found.
+    " Return the region at position, or an empty dict if not found.
 
     let pos = a:0 ? s:F.pos2byte(a:1) : s:F.curs2byte()
     if s:X() && !has_key(s:V.Bytes, pos) | return {} | endif
@@ -404,46 +407,46 @@ fun! s:Global.region_at_pos(...) abort
     return {}
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.reset_index() abort
-  """Reset index to current region, 0, or max - 1.
-  if !len(s:R())
-      let s:v.index = -1
-      return
-  endif
-  let r = self.region_at_pos()
-  if !empty(r)
-      let s:v.index = r.index
-  elseif line('.') >= s:R()[-1].L
-      let s:v.index = len(s:R()) - 1
-  else
-      let s:v.index = 0
-  endif
+    " Reset index to current region, 0, or max - 1.
+
+    if !len(s:R())
+        let s:v.index = -1
+        return
+    endif
+    let r = self.region_at_pos()
+    if !empty(r)
+        let s:v.index = r.index
+    elseif line('.') >= s:R()[-1].L
+        let s:v.index = len(s:R()) - 1
+    else
+        let s:v.index = 0
+    endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.overlapping_regions(R) abort
-    """Check if two regions are overlapping.
+    " Check if two regions are overlapping.
+
     let B = range(a:R.A, a:R.B)
     for b in B
         if s:V.Bytes[b] > 1 | return 1 | endif
     endfor
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.merge_overlapping(R) abort
-    """Return merged regions if region had overlapping regions.
+    " Return merged regions if region had overlapping regions.
+
     let overlap = self.overlapping_regions(a:R)
     return overlap ? self.merge_regions() : a:R
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.remove_empty_lines() abort
-    """Remove regions that consist of the endline marker only.
+    " Remove regions that consist of the endline marker only.
+
     for r in self.active_regions()
         if r.a == 1 && r.A == r.B && col([r.l, '$']) == 1
             call r.clear()
@@ -451,10 +454,9 @@ fun! s:Global.remove_empty_lines() abort
     endfor
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.reset_byte_map(update) abort
-    """Reset byte map for all regions.
+    " Reset byte map for all regions.
 
     let s:V.Bytes = {}
 
@@ -463,11 +465,11 @@ fun! s:Global.reset_byte_map(update) abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.reset_vars() abort
-    """Reset variables during final regions update.
+    " Reset variables during final regions update.
     "Note: this eco/auto check is old and seems wrong. Keeping for now but it should go
+
     if !( s:v.eco || s:v.auto ) | return | endif
 
     let s:v.auto = 0    | let s:v.eco = 0
@@ -475,10 +477,9 @@ fun! s:Global.reset_vars() abort
     call s:F.restore_reg()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.remove_last_region(...) abort
-    """Remove last region and reselect the previous one.
+    " Remove last region and reselect the previous one.
 
     for r in s:R()
         if r.id == ( a:0? a:1 : s:v.IDs_list[-1] )
@@ -487,16 +488,17 @@ fun! s:Global.remove_last_region(...) abort
         endif
     endfor
 
-    if len(s:R())       "reselect previous region
+    if len(s:R()) "reselect previous region
+
         let i = a:0? (r.index > 0? r.index-1 : 0) : s:v.index
         call self.select_region(i)
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_indices(...) abort
-    """Adjust region indices.
+    " Adjust region indices.
+
     if a:0
         let i = a:1
         for r in s:R()[i:]
@@ -513,10 +515,9 @@ fun! s:Global.update_indices(...) abort
     endfor
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.update_region_patterns(pat) abort
-    """Update the patterns for the appropriate regions.
+    " Update the patterns for the appropriate regions.
 
     for r in s:R()
         if a:pat =~ r.pat || r.pat =~ a:pat
@@ -525,19 +526,18 @@ fun! s:Global.update_region_patterns(pat) abort
     endfor
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.regions_text() abort
-    """Return a list with all regions' contents.
+    " Return a list with all regions' contents.
+
     let t = []
     for r in self.active_regions() | call add(t, r.txt) | endfor
     return t
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.check_mutliline(all, ...) abort
-    """Check if multiline must be enabled.
+    " Check if multiline must be enabled.
 
     for r in a:0? [a:1] : s:R()
         if !s:v.multiline && r.h
@@ -546,10 +546,9 @@ fun! s:Global.check_mutliline(all, ...) abort
     endfor
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.lines_with_regions(reverse, ...) abort
-    """Find lines with regions.""
+    " Find lines with regions.""
 
     let lines = {}
     for r in s:R()
@@ -563,6 +562,7 @@ fun! s:Global.lines_with_regions(reverse, ...) abort
 
     for line in keys(lines)
         "sort list so that lower indices are put farther in the list
+
         if len(lines[line]) > 1
             if a:reverse | call reverse(sort(lines[line], 'n'))
             else         | call sort(lines[line], 'n')
@@ -572,10 +572,9 @@ fun! s:Global.lines_with_regions(reverse, ...) abort
     return lines
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.one_region_per_line() abort
-    """Remove all regions in each line, except the first one.
+    " Remove all regions in each line, except the first one.
 
     let L = self.lines_with_regions(0)
     let new_regions = []
@@ -587,10 +586,9 @@ fun! s:Global.one_region_per_line() abort
     call self.reorder_regions()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.reorder_regions() abort
-    """Reorder regions, so that their byte offsets are consecutive.
+    " Reorder regions, so that their byte offsets are consecutive.
 
     let As = sort(map(copy(s:R()), 'v:val.A'), 'n')
     let Regions = []
@@ -609,10 +607,9 @@ fun! s:Global.reorder_regions() abort
     call self.reset_index()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.split_lines() abort
-    """Split regions, so that each is contained in a single line.
+    " Split regions, so that each is contained in a single line.
 
     let prev = s:v.index
 
@@ -634,10 +631,10 @@ fun! s:Global.split_lines() abort
     endfor
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.filter_by_expression(exp, type) abort
-    """Filter out regions that don't match an expression or a pattern.
+    " Filter out regions that don't match an expression or a pattern.
+
     let ids_to_remove = []
     if a:type == 'pattern'
         let exp = "r.txt =~ '".a:exp."'"
@@ -658,21 +655,23 @@ fun! s:Global.filter_by_expression(exp, type) abort
     call self.remove_regions_by_id(ids_to_remove)
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.remove_regions_by_id(list) abort
-    """Remove a list of regions by id.
+    " Remove a list of regions by id.
+
     for id in a:list
         call s:F.region_with_id(id).remove()
     endfor
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Merging regions
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 fun! s:Global.merge_cursors() abort
-    """Merge overlapping cursors.
+    " Merge overlapping cursors.
 
     let ids_to_remove = [] | let last_A = 0 | let pos = getpos('.')[1:2]
 
@@ -685,10 +684,10 @@ fun! s:Global.merge_cursors() abort
     return self.update_and_select_region(pos)
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.merge_regions(...) abort
-    """Merge overlapping regions.
+    " Merge overlapping regions.
+
     if !len(s:R()) | return                      | endif
     if !s:X()      | return self.merge_cursors() | endif
 
@@ -698,30 +697,30 @@ fun! s:Global.merge_regions(...) abort
     return self.update_map_and_select_region(pos)
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.merge_maps(map) abort
-    """Merge temporary and primary regions maps.
+    " Merge temporary and primary regions maps.
+
     for b in keys(a:map)
         let s:V.Bytes[b] = get(s:V.Bytes, b, 0) + a:map[b]
     endfor
     return self.merge_regions()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.subtract_maps(map) abort
-    """Subtract temporary map from primary region map.
+    " Subtract temporary map from primary region map.
+
     for b in keys(a:map)
         silent! unlet s:V.Bytes[b]
     endfor
     return self.merge_regions()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Global.rebuild_from_map(map, ...) abort
-    """Rebuild regions from bytes map.
+    " Rebuild regions from bytes map.
+
     let By = sort(map(keys(a:map), 'str2nr(v:val)'), 'n')
     if a:0
         let [start, end] = a:1
@@ -742,8 +741,11 @@ fun! s:Global.rebuild_from_map(map, ...) abort
     call vm#region#new(0, A, B)
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " python section (functions here will overwrite previous ones)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 if !g:VM_use_python | finish | endif
 
@@ -758,4 +760,5 @@ fun! s:Global.lines_with_regions(reverse, ...) abort
     python3 vm.py_lines_with_regions()
     return lines
 endfun
-" vim: et ts=4 sw=4 sts=4 :
+
+" vim: et sw=4 ts=4 sts=4 fdm=indent fdn=1

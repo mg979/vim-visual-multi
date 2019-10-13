@@ -43,7 +43,7 @@ fun! vm#init_buffer(empty) abort
     try
         if exists('b:VM_Selection') && !empty(b:VM_Selection) | return s:V | endif
 
-        let b:VM_Selection = {'Vars': {}, 'Regions': []}
+        let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Bytes': {}}
 
         let b:VM_mappings_loaded = get(b:, 'VM_mappings_loaded', 0)
         let b:VM_Debug           = get(b:, 'VM_Debug', {'lines': []})

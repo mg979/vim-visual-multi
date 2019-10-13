@@ -13,7 +13,6 @@
 let s:base = {
       \"Get Operator":            ['', 'n'],
       \"Reselect Last":           ['', 'n'],
-      \"Erase Regions":           ['', 'n'],
       \"Add Cursor At Pos":       ['', 'n'],
       \"Add Cursor At Word":      ['', 'n'],
       \"Start Regex Search":      ['', 'n'],
