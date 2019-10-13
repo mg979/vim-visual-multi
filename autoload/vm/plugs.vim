@@ -16,8 +16,8 @@ fun! vm#plugs#permanent() abort
   nnoremap <silent>       <Plug>(VM-Reselect-Last)           :call vm#commands#reselect_last()<cr>
   nnoremap <silent>       <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1)<cr>
   xnoremap <silent><expr> <Plug>(VM-Visual-All)              <sid>Visual('all')
-  xnoremap <silent>       <Plug>(VM-Visual-Cursors)          :<c-u>call vm#commands#from_visual('cursors')<cr>
-  xnoremap <silent>       <Plug>(VM-Visual-Add)              :<c-u>call vm#commands#from_visual('add')<cr>
+  xnoremap <silent>       <Plug>(VM-Visual-Cursors)          :<c-u>call vm#commands#visual_cursors()<cr>
+  xnoremap <silent>       <Plug>(VM-Visual-Add)              :<c-u>call vm#commands#visual_add()<cr>
   xnoremap <silent>       <Plug>(VM-Visual-Reduce)           :<c-u>call vm#visual#reduce()<cr>
 
   nnoremap <silent>       <Plug>(VM-Find-Under)              :<c-u>call vm#commands#ctrln(v:count1)<cr>
