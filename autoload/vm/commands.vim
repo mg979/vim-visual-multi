@@ -146,32 +146,6 @@ fun! vm#commands#add_cursor_up(extend, count) abort
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#commands#expand_line(down) abort
-    call s:set_extend_mode(1)
-    if !s:v.multiline | call s:F.toggle_option('multiline') | endif
-
-    let R = s:G.region_at_pos()
-    if empty(R)
-        let eol = col('$') | let ln = line('.')
-        let l = eol>1? ln : a:down? ln   : ln-1
-        let L = eol>1? ln : a:down? ln+1 : ln
-        call vm#region#new(0, l, L, 1, col([L, '$']))
-        if !a:down | call vm#commands#invert_direction() | endif
-    elseif a:down
-        call vm#commands#motion('j', 1, 1, 1)
-        call R.update_region(R.l, R.L, 1, col([R.L, '$']))
-    elseif !a:down
-        call vm#commands#motion('k', 1, 1, 1)
-        let b = len(getline(R.L))
-        call R.update_region(R.l, R.L, 1, col([R.L, '$']))
-    endif
-    call s:G.select_region_at_pos('.')
-    call s:G.update_highlight()
-endfun
-
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Find by regex
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

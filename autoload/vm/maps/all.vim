@@ -34,8 +34,6 @@ let s:base = {
       \"Select h":                ['', 'n'],
       \"Select w":                ['', 'n'],
       \"Select b":                ['', 'n'],
-      \"Select Line Down":        ['', 'n'],
-      \"Select Line Up":          ['', 'n'],
       \"Select E":                ['', 'n'],
       \"Select BBW":              ['', 'n'],
       \"Mouse Cursor":            ['', 'n'],
@@ -163,8 +161,6 @@ fun! vm#maps#all#buffer() abort
   call extend(maps, {
         \"Select Cursor Down":      ['<M-C-Down>',  'n'],
         \"Select Cursor Up":        ['<M-C-Up>',    'n'],
-        \"Select Line Down":        ['',            'n'],
-        \"Select Line Up":          ['',            'n'],
         \"Select j":                ['<S-Down>',    'n'],
         \"Select k":                ['<S-Up>',      'n'],
         \"Single Select l":         ['<M-Right>',   'n'],

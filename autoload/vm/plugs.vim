@@ -46,9 +46,6 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Select-Operator)         :<c-u>call vm#operators#select(v:count)<cr>
   nmap <expr><silent>     <Plug>(VM-Find-Operator)           vm#operators#find(1, 0)
 
-  nnoremap <silent>       <Plug>(VM-Select-Line-Down)        :call vm#commands#expand_line(1)<cr>
-  nnoremap <silent>       <Plug>(VM-Select-Line-Up)          :call vm#commands#expand_line(0)<cr>
-
   xnoremap <silent>       <Plug>(VM-Visual-Subtract)         :<c-u>call vm#visual#subtract(visualmode())<cr>
   nnoremap                <Plug>(VM-Split-Regions)           :<c-u>call vm#visual#split()<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Empty-Lines)      :<c-u>call vm#commands#remove_empty_lines()<cr>
