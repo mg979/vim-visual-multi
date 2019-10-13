@@ -150,7 +150,7 @@ fun! s:backup_map() abort
     call s:init()
     let X = s:G.extend_mode()
     let s:Bytes = copy(s:V.Bytes)
-    call vm#commands#erase_regions()
+    call s:G.erase_regions()
     let s:v.no_search = 1
     let s:v.eco = 1
     return X

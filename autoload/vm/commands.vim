@@ -147,17 +147,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#erase_regions(...) abort
-    """Clear all regions, but stay in visual-multi mode.
-    "empty start
-    if !g:Vm.is_active | call s:init(0,1,0) | return | endif
-
-    call s:G.erase_regions()
-    call s:V.Block.stop()
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! vm#commands#expand_line(down) abort
     call s:set_extend_mode(1)
     if !s:v.multiline | call s:F.toggle_option('multiline') | endif
@@ -315,7 +304,7 @@ fun! vm#commands#find_all(visual, whole) abort
 
     let @/ = join(s:v.search, '\|')
     let s:v.nav_direction = 1
-    call vm#commands#erase_regions()
+    call s:G.erase_regions()
     call s:G.get_all_regions()
 
     let s:v.restore_scroll = 1

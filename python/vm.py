@@ -4,6 +4,7 @@ import vim
 
 def py_rebuild_from_map():
     """Rebuild regions from bytes map."""
+
     bmap = ev('l:dict')
     Range = ev('l:range')
     bys = sorted([int(b) for b in bmap.keys()])
@@ -12,7 +13,7 @@ def py_rebuild_from_map():
         bys = [b for b in bys if b >= A and b <= B]
 
     start, end = bys[0], bys[0]
-    vim.command('call vm#commands#erase_regions()')
+    vim.command('call b:VM_Selection.Global.erase_regions()')
 
     for i in bys[1:]:
         if i == end + 1:

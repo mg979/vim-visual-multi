@@ -87,7 +87,7 @@ fun! s:select(cmd) abort
     silent! nunmap <buffer> y
 
     let Rs = map(copy(s:R()), '[v:val.l, v:val.a]')
-    call vm#commands#erase_regions()
+    call s:G.erase_regions()
 
     for r in Rs
         call cursor(r[0], r[1])

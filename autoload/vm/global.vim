@@ -310,6 +310,7 @@ fun! s:Global.erase_regions() abort
     " Erase all regions.
 
     call self.remove_highlight()
+    call s:V.Block.stop()
     let s:V.Regions = []
     let s:V.Bytes = {}
     let s:v.index = -1
@@ -728,7 +729,7 @@ fun! s:Global.rebuild_from_map(map, ...) abort
     endif
     let A = By[0] | let B = By[0]
 
-    call vm#commands#erase_regions()
+    call self.erase_regions()
 
     for i in By[1:]
         if i == B+1
