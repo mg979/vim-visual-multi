@@ -1,25 +1,33 @@
 "script to handle compatibility issues with other plugins
 
 let s:plugins = extend({
-                \'ctrlsf':    {
-                                \'ft': ['ctrlsf'],
-                                \'maps': 'call ctrlsf#buf#ToggleMap(1)',
-                                \'var': 'g:ctrlsf_loaded'},
-                \'AutoPairs': {
-                                \'maps': 'call AutoPairsInit()',
-                                \'enable': 'let b:autopairs_enabled = 1',
-                                \'disable': 'let b:autopairs_enabled = 0',
-                                \'var': 'b:autopairs_enabled'}
-                \}, get(g:, 'VM_plugins_compatibilty', {}))
+            \'ctrlsf':    {
+            \   'test': { -> &ft == 'ctrlsf' },
+            \   'enable': 'call ctrlsf#buf#ToggleMap(1)',
+            \   'disable': 'call ctrlsf#buf#ToggleMap(0)',
+            \},
+            \'AutoPairs': {
+            \   'test': { -> exists('b:autopairs_enabled') && b:autopairs_enabled },
+            \   'enable': 'unlet b:autopairs_loaded | call AutoPairsTryInit() | let b:autopairs_enabled = 1',
+            \   'disable': 'let b:autopairs_enabled = 0',
+            \},
+            \'tagalong': {
+            \   'test': { -> exists('b:tagalong_initialized') },
+            \   'enable': 'TagalongInit',
+            \   'disable': 'TagalongDeinit'
+            \},
+            \}, get(g:, 'VM_plugins_compatibilty', {}))
 
 let s:disabled_deoplete = 0
+let s:disabled_ncm2     = 0
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#init() abort
-    """Set variables according to plugin needs."""
+    " Set variables according to plugin needs. "{{{1
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
+    let s:v.disabled_plugins = []
 
     silent! call VM_Start()
     silent doautocmd <nomodeline> User visual_multi_start
@@ -35,84 +43,72 @@ fun! vm#comp#init() abort
     for plugin in keys(s:plugins)
         let p = s:plugins[plugin]
 
-        if !exists(p.var)
-            continue
-
-        elseif has_key(p, 'disable')
-            if s:ftype(p)       | exe p.disable
-            elseif s:noftype(p) | exe p.disable
-            endif
+        if p.test()
+            exe p.disable
+            call add(s:v.disabled_plugins, plugin)
         endif
     endfor
-endfun
+endfun "}}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#comp#TextChangedI() abort
-    if exists('g:loaded_deoplete') && s:disabled_deoplete
-        call deoplete#enable()
-        let s:disabled_deoplete = 0
-    elseif exists('b:ncm2_enable')
-        let b:ncm2_enable = 1
-    endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#icmds() abort
+    " Insert mode starts: temporarily disable autocompletion engines. {{{1
     if exists('g:loaded_deoplete') && g:deoplete#is_enabled()
         call deoplete#disable()
         let s:disabled_deoplete = 1
-    elseif exists('b:ncm2_enable')
+    elseif exists('b:ncm2_enable') && b:ncm2_enable
         let b:ncm2_enable = 0
+        let s:disabled_ncm2 = 1
     endif
-endfun
+endfun "}}}
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#comp#conceallevel() abort
-    return exists('b:indentLine_ConcealOptionSet') && b:indentLine_ConcealOptionSet
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#comp#reset() abort
+fun! vm#comp#TextChangedI() abort
+    " Insert mode change: re-enable autocompletion engines. {{{1
     if exists('g:loaded_deoplete') && s:disabled_deoplete
         call deoplete#enable()
         let s:disabled_deoplete = 0
-    elseif exists('b:ncm2_enable')
+    elseif s:disabled_ncm2
         let b:ncm2_enable = 1
+        let s:disabled_ncm2 = 0
+    endif
+endfun "}}}
+
+
+fun! vm#comp#conceallevel() abort
+    " indentLine compatibility. {{{1
+    return exists('b:indentLine_ConcealOptionSet') && b:indentLine_ConcealOptionSet
+endfun "}}}
+
+
+fun! vm#comp#reset() abort
+    " Called during VM exit. "{{{1
+    if exists('g:loaded_deoplete') && s:disabled_deoplete
+        call deoplete#enable()
+        let s:disabled_deoplete = 0
+    elseif s:disabled_ncm2
+        let b:ncm2_enable = 1
+        let s:disabled_ncm2 = 0
     endif
 
     "restore plugins functionality if necessary
     for plugin in keys(s:plugins)
-        let p = s:plugins[plugin]
-
-        if !exists(p.var)
-            continue
-
-        elseif has_key(p, 'maps')
-            if s:ftype(p) || s:noftype(p) | exe p.maps | endif
-        endif
-
-        if has_key(p, 'enable')
-            if s:ftype(p) || s:noftype(p) | exe p.enable | endif
+        if index(s:v.disabled_plugins, plugin) >= 0
+            exe s:plugins[plugin].enable
         endif
     endfor
-endfun
+endfun "}}}
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#exit() abort
-    """Called last on VM exit."""
+    " Called last on VM exit. "{{{1
     silent! call VM_Exit()
     silent doautocmd <nomodeline> User visual_multi_exit
-endfun
+endfun "}}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#comp#add_line() abort
-    """Ensure a line is added with these text objects, while changing in cursor mode.
+    " Ensure a line is added with these text objects, while changing in cursor mode. "{{{1
 
     let l = []
     if exists('g:loaded_textobj_indent')
@@ -122,26 +118,12 @@ fun! vm#comp#add_line() abort
         let l += ['if', 'af', 'iF', 'aF']
     endif
     return l
-endfun
+endfun "}}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" don't reindent for filetypes
 
 fun! vm#comp#no_reindents() abort
+    " Don't reindent for filetypes. "{{{1
     return g:VM_no_reindent_filetype + ['ctrlsf']
-endfun
+endfun "}}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Helpers
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:ftype(p) abort
-    return has_key(a:p, 'ft') && index(a:p.ft, &ft) >= 0
-endfun
-
-fun! s:noftype(p) abort
-    return !has_key(a:p, 'ft') || empty(a:p.ft)
-endfun
-
-
-" vim: et ts=4 sw=4 sts=4 :
+" vim: et sw=4 ts=4 sts=4 fdm=marker
