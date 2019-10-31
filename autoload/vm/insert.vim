@@ -510,6 +510,9 @@ endfun
 
 fun! s:step_back() abort
     """Go back one char after exiting insert mode, as vim does.
+    if s:v.single_region && s:Insert.type ==? 'i'
+        return
+    endif
     for r in s:v.single_region ? [s:R()[s:Insert.index]] : s:R()
         if r.a != col([r.l, '$']) && r.a > 1
             call r.shift(-1,-1)
