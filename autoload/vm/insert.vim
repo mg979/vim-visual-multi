@@ -173,7 +173,7 @@ fun! s:Insert.start(...) abort
     endif
 
     "start insert mode
-    call feedkeys("i", 'n')
+    startinsert
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
