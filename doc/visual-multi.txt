@@ -30,7 +30,7 @@ REQUIREMENTS                                        *visual-multi-requirements*
 
 Vim 8/Neovim is required.
 
-It's very recommended that you put in your vimrc: >
+It's recommended that you put in your vimrc: >
   set hlsearch
 
 
@@ -223,8 +223,6 @@ Default is `\\` (two backslashes). If you want to change it, set (for example):
 <
 When you see mappings with 2 backslashes, that's the VM leader, so the mappings
 will be different if you change it.
-
-NOTE: you can define this leader also as a dictionary (see |g:VM_leader-dict|).
 
 
 ----------------------------------------------------------------  *vm-quickref*

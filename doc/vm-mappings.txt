@@ -108,8 +108,8 @@ BUFFER MAPPINGS                                            *vm-buffer-mappings*
 
 Find Next               n         find next occurrence
 Find Prev               N         find previous occurrence
-Goto Next               }         go to next selected region
-Goto Prev               {         go to previous selected region
+Goto Next               ]         go to next selected region
+Goto Prev               [         go to previous selected region
 Seek Next             <C-f>       fast go to next (from next page)
 Seek Prev             <C-b>       fast go to previous (from previous page)
 Skip Region             q         skip and find to next
