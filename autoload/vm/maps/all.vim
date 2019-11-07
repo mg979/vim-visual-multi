@@ -161,8 +161,12 @@ fun! vm#maps#all#buffer() abort
   call extend(maps, {
         \"Select Cursor Down":      ['<M-C-Down>',  'n'],
         \"Select Cursor Up":        ['<M-C-Up>',    'n'],
+        \"Add Cursor Down":         ['<C-Down>',    'n'],
+        \"Add Cursor Up":           ['<C-Up>',      'n'],
         \"Select j":                ['<S-Down>',    'n'],
         \"Select k":                ['<S-Up>',      'n'],
+        \"Select l":                ['<S-Right>',   'n'],
+        \"Select h":                ['<S-Left>',    'n'],
         \"Single Select l":         ['<M-Right>',   'n'],
         \"Single Select h":         ['<M-Left>',    'n'],
         \"Select e":                ['',            'n'],
