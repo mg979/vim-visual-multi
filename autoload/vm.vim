@@ -45,7 +45,6 @@ fun! vm#init_buffer(empty) abort
 
         let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Bytes': {}}
 
-        let b:VM_mappings_loaded = get(b:, 'VM_mappings_loaded', 0)
         let b:VM_Debug           = get(b:, 'VM_Debug', {'lines': []})
         let b:VM_Backup          = {'ticks': [], 'last': 0, 'first': undotree().seq_cur}
 

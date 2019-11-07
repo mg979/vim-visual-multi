@@ -21,7 +21,7 @@ endfun
 fun! vm#maps#init() abort
     " At VM start, buffer mappings are generated (once per buffer) and applied.
     let s:V = b:VM_Selection
-    if !b:VM_mappings_loaded | call s:build_buffer_maps() | endif
+    if !exists('b:VM_maps') | call s:build_buffer_maps() | endif
 
     call s:map_esc_and_toggle()
     call s:check_warnings()
@@ -79,7 +79,7 @@ endfun
 fun! s:Maps.start() abort
     " Apply mappings in current buffer.
     for m in g:Vm.maps.permanent | exe m | endfor
-    for m in g:Vm.maps.buffer    | exe m | endfor
+    for m in b:VM_maps           | exe m | endfor
 
     nmap              <nowait> <buffer> :          <Plug>(VM-:)
     nmap              <nowait> <buffer> /          <Plug>(VM-/)
@@ -96,6 +96,7 @@ endfun
 fun! s:Maps.end(keep_permanent) abort
     " Remove mappings in current buffer.
     for m in g:Vm.unmaps | exe m | endfor
+    for m in b:VM_unmaps | exe m | endfor
 
     nunmap <buffer> :
     nunmap <buffer> /
@@ -127,7 +128,7 @@ fun! s:build_permanent_maps() abort
 
     "init vars and generate base permanent maps
     let g:VM_maps   = get(g:, 'VM_maps', {})
-    let g:Vm.maps   = {'permanent': [], 'buffer': []}
+    let g:Vm.maps   = {'permanent': []}
     let g:Vm.unmaps = []
     let maps        = vm#maps#all#permanent()
 
@@ -153,9 +154,10 @@ endfun
 
 fun! s:build_buffer_maps() abort
     " Run once per buffer. Generate buffer mappings and integrate custom ones.
-    let b:VM_mappings_loaded = 1
-    let check_maps = get(b:, 'VM_check_mappings', g:VM_check_mappings)
-    let force_maps = get(b:, 'VM_force_maps', get(g:, 'VM_force_maps', []))
+    let b:VM_maps   = []
+    let b:VM_unmaps = []
+    let check_maps  = get(b:, 'VM_check_mappings', g:VM_check_mappings)
+    let force_maps  = get(b:, 'VM_force_maps', get(g:, 'VM_force_maps', []))
 
     "generate base buffer maps
     let maps = vm#maps#all#buffer()
@@ -185,7 +187,7 @@ fun! s:build_buffer_maps() abort
     for key in keys(maps)
         let mapping = s:assign(key, maps[key], 1, check_maps, force_maps)
         if !empty(mapping)
-            call add(g:Vm.maps.buffer, mapping)
+            call add(b:VM_maps, mapping)
         else
             " remove the mapping, so that it won't be unmapped either
             unlet maps[key]
@@ -198,7 +200,7 @@ fun! s:build_buffer_maps() abort
 
     "generate list of 'exe' commands for unmappings
     for key in keys(maps)
-        call add(g:Vm.unmaps, s:unmap(maps[key], 1))
+        call add(b:VM_unmaps, s:unmap(maps[key], 1))
     endfor
 endfun
 
