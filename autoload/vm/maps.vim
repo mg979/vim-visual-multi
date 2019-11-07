@@ -1,7 +1,5 @@
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Initialize
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:Maps = {}
@@ -12,14 +10,16 @@ let g:VM_check_mappings    = get(g:, 'VM_check_mappings', 1)
 let g:VM_default_mappings  = get(g:, 'VM_default_mappings', 1)
 let g:VM_mouse_mappings    = get(g:, 'VM_mouse_mappings', 0)
 
+
 fun! vm#maps#default() abort
-    """At vim start, permanent mappings are generated and applied.
+    " At vim start, permanent mappings are generated and applied.
     call s:build_permanent_maps()
     for m in g:Vm.maps.permanent | exe m | endfor
 endfun
 
+
 fun! vm#maps#init() abort
-    """At VM start, buffer mappings are generated (once per buffer) and applied.
+    " At VM start, buffer mappings are generated (once per buffer) and applied.
     let s:V = b:VM_Selection
     if !b:VM_mappings_loaded | call s:build_buffer_maps() | endif
 
@@ -28,33 +28,40 @@ fun! vm#maps#init() abort
     return s:Maps
 endfun
 
+
 fun! vm#maps#reset() abort
-    """At VM reset, last buffer mappings are reset, and permanent maps are restored.
+    " At VM reset, last buffer mappings are reset, and permanent maps are restored.
     call s:unmap_esc_and_toggle()
     for m in g:Vm.maps.permanent | exe m | endfor
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Mappings activation/deactivation
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Maps.enable() abort
+    " Enable mappings in current buffer.
     if !g:Vm.mappings_enabled
         let g:Vm.mappings_enabled = 1
         call self.start()
     endif
 endfun
 
+
 fun! s:Maps.disable(keep_permanent) abort
+    " Disable mappings in current buffer.
     if g:Vm.mappings_enabled
         let g:Vm.mappings_enabled = 0
         call self.end(a:keep_permanent)
     endif
 endfun
 
+
 fun! s:Maps.mappings_toggle() abort
+    " Toggle mappings in current buffer.
     if g:Vm.mappings_enabled
         call self.disable(1)
     else
@@ -62,14 +69,15 @@ fun! s:Maps.mappings_toggle() abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Apply mappings
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Maps.start() abort
-
+    " Apply mappings in current buffer.
     for m in g:Vm.maps.permanent | exe m | endfor
     for m in g:Vm.maps.buffer    | exe m | endfor
 
@@ -78,13 +86,15 @@ fun! s:Maps.start() abort
     nmap              <nowait> <buffer> ?          <Plug>(VM-?)
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Remove mappings
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Maps.end(keep_permanent) abort
+    " Remove mappings in current buffer.
     for m in g:Vm.unmaps | exe m | endfor
 
     nunmap <buffer> :
@@ -99,14 +109,15 @@ fun! s:Maps.end(keep_permanent) abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Map helper functions
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:build_permanent_maps() abort
-    """Run at vim start. Generate permanent mappings and integrate custom ones.
+    " Run at vim start. Generate permanent mappings and integrate custom ones.
 
     "set default VM leader
     let ldr = get(g:, 'VM_leader', '\\')
@@ -139,10 +150,9 @@ fun! s:build_permanent_maps() abort
     endfor
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:build_buffer_maps() abort
-    """Run once per buffer. Generate buffer mappings and integrate custom ones.
+    " Run once per buffer. Generate buffer mappings and integrate custom ones.
     let b:VM_mappings_loaded = 1
     let check_maps = get(b:, 'VM_check_mappings', g:VM_check_mappings)
     let force_maps = get(b:, 'VM_force_maps', get(g:, 'VM_force_maps', []))
@@ -192,10 +202,9 @@ fun! s:build_buffer_maps() abort
     endfor
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:assign(plug, key, buffer, ...) abort
-    """Create a map command that will be executed."""
+    " Create a map command that will be executed.
     let k = a:key[0] | if empty(k) | return '' | endif
     let m = a:key[1]
 
@@ -224,10 +233,9 @@ fun! s:assign(plug, key, buffer, ...) abort
     return m."map "._.k.' <Plug>(VM-'.p.")"
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:unmap(key, buffer) abort
-    """Create an unmap command that will be executed."""
+    " Create an unmap command that will be executed.
     let k = a:key[0]
     if empty(k) | return '' | endif
     let m = a:key[1]
@@ -235,9 +243,9 @@ fun! s:unmap(key, buffer) abort
     return "silent! ".m."unmap".b.k
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:map_esc_and_toggle() abort
+    " Esc and 'toggle' keys are handled separately.
     if !has('nvim') && !has('gui_running')
         nnoremap <nowait><buffer> <esc><esc> <esc><esc>
     endif
@@ -245,7 +253,9 @@ fun! s:map_esc_and_toggle() abort
     exe 'nmap <nowait><buffer>' g:Vm.maps.toggle '<Plug>(VM-Toggle-Mappings)'
 endfun
 
+
 fun! s:unmap_esc_and_toggle() abort
+    " Esc and 'toggle' keys are handled separately.
     silent! exe 'nunmap <buffer>' g:Vm.maps.toggle
     silent! nunmap <buffer> <esc>
     if !has('nvim') && !has('gui_running')
@@ -253,14 +263,13 @@ fun! s:unmap_esc_and_toggle() abort
     endif
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:check_warnings() abort
-    """Notify once per buffer if errors have happened.
+    " Notify once per buffer if errors have happened.
     if !empty(b:VM_Debug.lines) && !has_key(b:VM_Debug, 'maps_warning')
         let b:VM_Debug.maps_warning = 1
         call s:V.Funcs.msg('VM has started with warnings. :VMDebug for more info')
     endif
 endfun
 
-" vim: et ts=4 sw=4 sts=4 :
+" vim: et ts=4 sw=4 sts=4 fdm=indent fdn=1 :
