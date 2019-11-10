@@ -180,7 +180,7 @@ endfun
 " Insert mode update
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.insert(...) abort
+fun! s:Insert.update_text(...) abort
     """Update the text on TextChangedI event, and just after InsertLeave.
     if s:F.not_VM() || !g:VM_live_editing && !a:0 | return | endif
 
@@ -252,7 +252,7 @@ fun! s:Insert.stop(...) abort
 
     " text can be updated again after complete_done
     if &modified && ( s:v.complete_done || !g:VM_live_editing )
-        call self.insert(1)
+        call self.update_text(1)
     endif
     let s:v.complete_done = 0
 
@@ -459,7 +459,7 @@ endfun
 fun! s:Insert.auto_start() abort
     augroup VM_insert
         au!
-        au TextChangedI * call b:VM_Selection.Insert.insert()
+        au TextChangedI * call b:VM_Selection.Insert.update_text()
         au InsertLeave  * call b:VM_Selection.Insert.stop()
         au CompleteDone * let s:v.complete_done = 1
     augroup END
