@@ -129,6 +129,7 @@ fun! s:Insert.start(...) abort
     let I.cursors   = []
     let I.lines     = {}
     let I.change    = 0
+    let I.lastcol   = 0
     let I.col       = col('.')
 
     " remove current regions highlight
@@ -238,6 +239,9 @@ fun! s:Insert.update_text(...) abort
         call L[l].update(I.change, text)
     endfor
 
+    " store the last known column position, it will be checked on InsertLeave
+    let I.lastcol = coln
+
     " put the cursor where it should stay after the lines update
     " as said before, the actual cursor can be pushed by cursors behind it
     call cursor(ln, I.col)
@@ -250,9 +254,15 @@ endfun
 fun! s:Insert.stop(...) abort
     if s:F.not_VM() | return | endif
 
-    " text can be updated again after complete_done
-    if &modified && ( s:v.complete_done || !g:VM_live_editing )
-        call self.update_text(1)
+    " text will be updated again after CompleteDone, or abbreviation expansion
+    " because in these cases TextChangedI wasn't triggered
+    if &modified
+        " confront the last known edited column with the one at which insert
+        " mode was actually exited
+        let column_mismatch = self.lastcol && col("'^") != self.lastcol
+        if ( s:v.complete_done || column_mismatch || !g:VM_live_editing )
+            call self.update_text(1)
+        endif
     endif
     let s:v.complete_done = 0
 
