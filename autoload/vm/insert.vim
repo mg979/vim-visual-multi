@@ -128,7 +128,8 @@ fun! s:Insert.start(...) abort
     let I.size      = s:F.size()
     let I.cursors   = []
     let I.lines     = {}
-    let I.change    = 0
+    let I.change    = 0         " text change, only if g:VM_live_editing
+    let I.tchanged  = 0         " TextChangedI flag
     let I.lastcol   = 0
     let I.col       = col('.')
 
@@ -183,6 +184,10 @@ endfun
 
 fun! s:Insert.update_text(...) abort
     """Update the text on TextChangedI event, and just after InsertLeave.
+
+    " set the flag that TextChangedI has been triggered at least once
+    if !a:0 | let self.tchanged = 1 | endif
+
     if s:F.not_VM() || !g:VM_live_editing && !a:0 | return | endif
 
     call vm#comp#TextChangedI()  "compatibility tweaks
@@ -260,7 +265,8 @@ fun! s:Insert.stop(...) abort
         " confront the last known edited column with the one at which insert
         " mode was actually exited
         let column_mismatch = self.lastcol && col("'^") != self.lastcol
-        if ( s:v.complete_done || column_mismatch || !g:VM_live_editing )
+        if ( s:v.complete_done || column_mismatch ||
+                    \ !g:VM_live_editing && self.tchanged )
             call self.update_text(1)
         endif
     endif
