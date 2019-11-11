@@ -226,9 +226,9 @@ endfun
 
 fun! s:Insert(key) abort
   if pumvisible()
-    if a:key == 'j'     | return "\<C-n>"
-    elseif a:key == 'k' | return "\<C-p>"
-    elseif a:key == 'c-e' | return "\<C-g>\<C-g>"
+    if a:key == 'j'       | return "\<C-n>"
+    elseif a:key == 'k'   | return "\<C-p>"
+    elseif a:key == 'c-e' | return "\<C-e>"
     endif
   endif
 
