@@ -27,9 +27,9 @@ let s:X = { -> g:Vm.extend_mode }
 fun! s:Edit.duplicate() abort
     if !s:min(1) | return | endif
 
-    call self.yank('"', 1)
+    call self.yank('§', 1)
     call s:G.change_mode()
-    call self.paste(1, 0, 1, '"')
+    call self.paste(1, 0, 1, '§')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
