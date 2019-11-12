@@ -1,6 +1,6 @@
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Edit commands #1 (yank, delete, paste, replace)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:Edit = {}
 
@@ -13,21 +13,25 @@ fun! vm#ecmds1#init() abort
     return extend(s:Edit, vm#ecmds2#init())
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Lambdas
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-let s:R = { -> s:V.Regions }
-let s:X = { -> g:Vm.extend_mode }
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let s:R   = { -> s:V.Regions }
+let s:X   = { -> g:Vm.extend_mode }
+let s:min = { n -> s:X() && len(s:R()) >= n }
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Yank
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 fun! s:Edit.yank(hard, def_reg, silent, ...) abort
-    let register = (s:v.use_register != s:v.def_reg)? s:v.use_register :
-                \  a:def_reg?                         s:v.def_reg : v:register
+    " Yank the regions contents in a VM register. {{{1
+    let register = (s:v.use_register != s:v.def_reg) ? s:v.use_register
+                \ : a:def_reg ? s:v.def_reg : v:register
 
     if !s:X()    | return vm#cursors#operation('y', v:count, register) | endif
     if !s:min(1) | return s:F.msg('No regions selected.')              | endif
@@ -50,14 +54,17 @@ fun! s:Edit.yank(hard, def_reg, silent, ...) abort
         call s:F.msg('Yanked the content of '.len(s:R()).' regions.')
     endif
     if a:0 | call s:G.change_mode() | endif
-endfun
+endfun " }}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Delete
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 fun! s:Edit.delete(X, register, count, hard) abort
-    """Delete the selected text and change to cursor mode.
+    " Delete the selected text and change to cursor mode. {{{1
     if s:F.no_regions() | return | endif
     if !s:v.direction | call vm#commands#invert_direction() | endif
 
@@ -100,13 +107,17 @@ fun! s:Edit.delete(X, register, count, hard) abort
     if a:register == "_" | call s:F.restore_reg()          | endif
     let s:v.old_text = []
     call s:F.Scroll.force(winline)
-endfun
+endfun " }}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Paste
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 fun! s:Edit.paste(before, vim_reg, reselect, register, ...) abort
+    " Perform a paste, of the appropriate type. {{{1
     let X                = s:X()
     let s:v.use_register = a:register
     let vim_reg          = a:vim_reg || !has_key(g:Vm.registers, a:register) ||
@@ -133,11 +144,11 @@ fun! s:Edit.paste(before, vim_reg, reselect, register, ...) abort
     let s:v.W = self.store_widths(s:v.new_text)
     call self.post_process((X? 1 : a:reselect), !a:before)
     let s:v.old_text = []
-endfun
+endfun " }}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.block_paste(before) abort
+    " Paste the new text (list-type) at cursors. {{{1
     let size = s:F.size()
     let text = copy(s:v.new_text)
     let change = 0
@@ -161,13 +172,17 @@ fun! s:Edit.block_paste(before) abort
         endif
     endfor
     call s:F.restore_reg()
-endfun
+endfun " }}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Replace
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 fun! s:Edit.replace() abort
+    " Replace single characters or selections with character. {{{1
     if s:X()
         let char = nr2char(getchar())
         if char ==? "\<esc>" | return | endif
@@ -195,12 +210,11 @@ fun! s:Edit.replace() abort
         if char ==? "\<esc>" | return s:F.msg('Canceled.') | endif
         call self.run_normal('r'.char, {'recursive': 0, 'stay_put': 1})
     endif
-endfun
+endfun " }}}
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.replace_pattern() abort
-    """Replace a pattern in all regions as with :s command."""
+    " Replace a pattern in all regions as with :s command. {{{1
     if !s:X() | return | endif
     let ix = s:v.index
     call s:F.Scroll.get()
@@ -227,14 +241,11 @@ fun! s:Edit.replace_pattern() abort
     call self.fill_register('"', T, 0)
     normal p
     call s:G.select_region(ix)
-endfun
+endfun " }}}
 
-
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.replace_expression() abort
-    """Replace all regions with the result of an expression."""
+    " Replace all regions with the result of an expression. {{{1
     if !s:X() | return | endif
     let ix = s:v.index | call s:F.Scroll.get()
 
@@ -248,20 +259,17 @@ fun! s:Edit.replace_expression() abort
     call self.fill_register('"', T, 0)
     normal p
     call s:G.select_region(ix)
-endfun
+endfun " }}}
 
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Helper functions
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:min(n) abort
-    return s:X() && len(s:R()) >= a:n
-endfun
 
 fun! s:fix_regions_text(replacement) abort
-    """Ensure there are enough elements for all regions.
+    " Ensure there are enough elements for all regions. {{{1
     let L = a:replacement
     let i = len(s:R()) - len(L)
 
@@ -270,12 +278,11 @@ fun! s:fix_regions_text(replacement) abort
         let i -= 1
     endwhile
     return L
-endfun
+endfun " }}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.convert_vimreg(as_block) abort
-    """Fill the content to paste with the chosen vim register.
+    " Fill the content to paste with the chosen vim register. {{{1
     let text = []
     let block = char2nr(getregtype(s:v.use_register)[0]) == 22
 
@@ -300,12 +307,11 @@ fun! s:Edit.convert_vimreg(as_block) abort
         for n in range(len(s:R())) | call add(text, getreg(s:v.use_register)) | endfor
     endif
     return text
-endfun
+endfun " }}}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.store_widths(...) abort
-    "Build a list that holds the widths(integers) of each region
+    "Build a list that holds the widths(integers) of each region {{{1
     "It will be used for various purposes (reselection, paste as block...)
 
     let W = [] | let x = s:X()
@@ -327,12 +333,11 @@ fun! s:Edit.store_widths(...) abort
         call add( W, use_text? text : use_list? (w? w-1 : 0) : r.w )
     endfor
     return W
-endfun
+endfun " }}}
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.fill_register(reg, text, hard) abort
-    """Write custom and possibly vim registers.
+    " Write custom and possibly vim registers. {{{1
     if a:reg == "_"
         return
     else
@@ -359,15 +364,16 @@ fun! s:Edit.fill_register(reg, text, hard) abort
             let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type]
         endif
     endif
-    return [text, type]
-endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    return [text, type]
+endfun " }}}
+
 
 fun! s:Edit.replace_regions_with_text(text) abort
-    """Paste a custom list of strings into current regions.
+    " Paste a custom list of strings into current regions. {{{1
     call self.fill_register('"', a:text, 0)
     normal p
-endfun
+endfun " }}}
 
-" vim: et ts=4 sw=4 sts=4 :
+
+" vim: et sw=4 ts=4 sts=4 fdm=marker
