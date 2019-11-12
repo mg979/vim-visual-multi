@@ -27,7 +27,7 @@ let s:X = { -> g:Vm.extend_mode }
 fun! s:Edit.duplicate() abort
     if !s:min(1) | return | endif
 
-    call self.yank(0, 1, 1)
+    call self.yank('"', 1)
     call s:G.change_mode()
     call self.paste(1, 0, 1, '"')
 endfun
@@ -100,7 +100,7 @@ fun! s:Edit.rotate() abort
     """Non-inline transposition.
     if !s:min(2) | return | endif
 
-    call self.yank(0, 1, 1)
+    call self.yank('"', 1)
 
     let t = remove(g:Vm.registers[s:v.def_reg], 0)
     call add(g:Vm.registers[s:v.def_reg], t)
@@ -133,7 +133,7 @@ fun! s:Edit.transpose() abort
         return self.rotate()
     endif
 
-    call self.yank(0, 1, 1)
+    call self.yank('"', 1)
 
     "inline transpositions
     for l in klines
@@ -171,7 +171,7 @@ endfun
 fun! s:Edit.shift(dir) abort
     if !s:min(1) | return | endif
 
-    call self.yank(0, 1, 1)
+    call self.yank('"', 1)
     if a:dir
         call self.paste(0, 0, 1, '"')
     else
@@ -206,8 +206,10 @@ fun! s:Edit._numbers(start, step, separator, append) abort
     " paste string before/after the cursor/selection
 
     if s:X()
-        call self.fill_register('"', map(copy(s:R()), a:append ?
-              \ '(v:val.txt).text[v:key]' : 'text[v:key].(v:val.txt)'), 0)
+        let text = map(copy(s:R()), a:append
+                    \ ? '(v:val.txt).text[v:key]'
+                    \ : 'text[v:key].(v:val.txt)')
+        call self.fill_register('"', text, 0)
         normal p
     else
         call self.fill_register('"', text, 0)

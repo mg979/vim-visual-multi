@@ -249,7 +249,6 @@ fun! vm#maps#all#buffer() abort
         \"p Paste Vimreg":          [leader.'p',    'n'],
         \"P Paste Vimreg":          [leader.'P',    'n'],
         \"Yank":                    ['y',           'n'],
-        \"Yank Hard":               [leader.'y',    'n'],
         \})
 
   return maps

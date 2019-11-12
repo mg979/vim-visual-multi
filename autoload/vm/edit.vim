@@ -10,7 +10,6 @@ fun! vm#edit#init() abort
     let s:G = s:V.Global
     let s:F = s:V.Funcs
 
-    let s:v.use_register = s:v.def_reg
     let s:v.new_text     = []
     let s:v.old_text     = []
     let s:v.W            = []
@@ -257,9 +256,8 @@ fun! s:Edit.process(cmd, ...) abort
 
     " fill VM register after deletions/changes at cursors
     if store
-        let hard = g:VM_overwrite_vim_registers
-                    \ || ( a:1.store == s:v.def_reg ) || a:1.vimreg
-        call self.fill_register(a:1.store, txt, hard)
+        " overwrite vim register if requested
+        call self.fill_register(a:1.store, txt, a:1.vimreg)
     endif
     " backup original regions text since it could used
     if backup_txt

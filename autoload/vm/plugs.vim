@@ -160,8 +160,7 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>        <Plug>(VM-P-Paste-Regions)         :call b:VM_Selection.Edit.paste((g:Vm.extend_mode? 1 : 1), 0, g:Vm.extend_mode, v:register)<cr>
   nnoremap <silent>        <Plug>(VM-p-Paste-Vimreg)          :call b:VM_Selection.Edit.paste((g:Vm.extend_mode? 1 : 0), 1, g:Vm.extend_mode, v:register)<cr>
   nnoremap <silent>        <Plug>(VM-P-Paste-Vimreg)          :call b:VM_Selection.Edit.paste((g:Vm.extend_mode? 1 : 1), 1, g:Vm.extend_mode, v:register)<cr>
-  nnoremap <silent> <expr> <Plug>(VM-Yank)                    <SID>Yank(0)
-  nnoremap <silent> <expr> <Plug>(VM-Yank-Hard)               <SID>Yank(1)
+  nnoremap <silent> <expr> <Plug>(VM-Yank)                    <SID>Yank()
 
   nnoremap <silent>        <Plug>(VM-Move-Right)              :call b:VM_Selection.Edit.shift(1)<cr>
   nnoremap <silent>        <Plug>(VM-Move-Left)               :call b:VM_Selection.Edit.shift(0)<cr>
@@ -264,14 +263,11 @@ fun! s:Insert(key) abort
   endif
 endfun
 
-fun! s:Yank(hard) abort
+fun! s:Yank() abort
   if empty(b:VM_Selection.Global.region_at_pos())
     let b:VM_Selection.Vars.yanked = 1 | return 'y'
   endif
-  let hard = a:hard && !g:VM_overwrite_vim_registers ||
-        \ !a:hard && g:VM_overwrite_vim_registers
-
-  return ":\<C-u>call b:VM_Selection.Edit.yank(".hard.", 0, 0, 1)\<cr>"
+  return ":\<C-u>call b:VM_Selection.Edit.yank(v:register, 1)\<cr>"
 endfun
 
 fun! s:Mode() abort
@@ -280,7 +276,7 @@ fun! s:Mode() abort
 endfun
 
 fun! s:Visual(cmd) abort
-  """Restore register after a visual yank."""
+  " Restore register after a visual yank.
   if !g:Vm.is_active
     let g:Vm.visual_reg = ['"', getreg('"'), getregtype('"')]
     let r = "g:Vm.visual_reg[0], g:Vm.visual_reg[1], g:Vm.visual_reg[2]"

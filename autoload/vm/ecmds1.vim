@@ -28,27 +28,21 @@ let s:min = { n -> s:X() && len(s:R()) >= n }
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
-fun! s:Edit.yank(hard, def_reg, silent, ...) abort
+fun! s:Edit.yank(reg, silent, ...) abort
     " Yank the regions contents in a VM register. {{{1
-    let register = (s:v.use_register != s:v.def_reg) ? s:v.use_register
-                \ : a:def_reg ? s:v.def_reg : v:register
+    let register = (s:v.use_register != s:v.def_reg) ? s:v.use_register : a:reg
 
     if !s:X()    | return vm#cursors#operation('y', v:count, register) | endif
     if !s:min(1) | return s:F.msg('No regions selected.')              | endif
 
     "write custom and possibly vim registers.
-    let [text, type] = self.fill_register(register, s:G.regions_text(), a:hard)
+    let [text, type] = self.fill_register(register, s:G.regions_text(), 0)
 
     "restore default register if a different register was provided
     if register !=# s:v.def_reg | call s:F.restore_reg() | endif
 
     "reset temp register
     let s:v.use_register = s:v.def_reg
-
-    "overwrite the old saved register if yanked using default register
-    if register ==# s:v.def_reg
-        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type]
-    endif
 
     if !a:silent
         call s:F.msg('Yanked the content of '.len(s:R()).' regions.')
@@ -63,7 +57,7 @@ endfun " }}}
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
-fun! s:Edit.delete(X, register, count, hard) abort
+fun! s:Edit.delete(X, register, count, manual) abort
     " Delete the selected text and change to cursor mode. {{{1
     if s:F.no_regions() | return | endif
     if !s:v.direction | call vm#commands#invert_direction() | endif
@@ -79,7 +73,7 @@ fun! s:Edit.delete(X, register, count, hard) abort
     let s:v.old_text = s:G.regions_text()
 
     " manual deletion: backup current regions
-    if a:hard | call s:G.backup_regions() | endif
+    if a:manual | call s:G.backup_regions() | endif
 
     for r in s:R()
         call r.shift(change, change)
@@ -98,12 +92,12 @@ fun! s:Edit.delete(X, register, count, hard) abort
     endfor
 
     "write custom and possibly vim registers.
-    call self.fill_register(a:register, s:v.old_text, a:hard)
+    call self.fill_register(a:register, s:v.old_text, a:manual)
 
     call s:G.change_mode()
     call s:G.select_region(ix)
 
-    if a:hard            | call self.extra_spaces.remove() | endif
+    if a:manual          | call self.extra_spaces.remove() | endif
     if a:register == "_" | call s:F.restore_reg()          | endif
     let s:v.old_text = []
     call s:F.Scroll.force(winline)
@@ -311,8 +305,8 @@ endfun " }}}
 
 
 fun! s:Edit.store_widths(...) abort
-    "Build a list that holds the widths(integers) of each region {{{1
-    "It will be used for various purposes (reselection, paste as block...)
+    " Build a list that holds the widths(integers) of each region {{{1
+    " It will be used for various purposes (reselection, paste as block...)
 
     let W = [] | let x = s:X()
     let use_text = 0
@@ -336,33 +330,29 @@ fun! s:Edit.store_widths(...) abort
 endfun " }}}
 
 
-fun! s:Edit.fill_register(reg, text, hard) abort
+fun! s:Edit.fill_register(reg, text, force_ow) abort
     " Write custom and possibly vim registers. {{{1
     if a:reg == "_"
         return
-    else
-        let reg       = empty(a:reg) ? '"' : a:reg
-        let temp_reg  = reg == '§'
-        let overwrite = reg ==# s:v.def_reg || ( a:hard && !temp_reg )
     endif
 
-    let text = a:text
-    let maxw = max(map(copy(text), 'len(v:val)'))
+    let text      = a:text
+    let reg       = empty(a:reg) ? '"' : a:reg
+    let temp_reg  = reg == '§'
+    let overwrite = reg ==# s:v.def_reg || ( a:force_ow && !temp_reg )
+    let maxw      = max(map(copy(text), 'len(v:val)'))
+    let type      = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
 
-    " set VM register, overwrite unnamed unless temporary VM register
+    " set VM register, overwrite backup register unless temporary
     if !temp_reg
         let g:Vm.registers[s:v.def_reg] = text
+        let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type]
     endif
     let g:Vm.registers[reg] = text
 
-    let type = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
-
-    "vim register is overwritten if unnamed, or if hard yank
+    "vim register is overwritten if unnamed, or if forced
     if overwrite
         call setreg(reg, join(text, "\n"), type)
-        if a:hard   "also overwrite the old saved register
-            let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type]
-        endif
     endif
 
     return [text, type]
