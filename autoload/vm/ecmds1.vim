@@ -71,6 +71,7 @@ fun! s:Edit.delete(X, register, count, manual) abort
     let change       = 0
     let ix           = s:G.select_region_at_pos('.').index
     let s:v.old_text = s:G.regions_text()
+    let s:v.deleting = 1
 
     " manual deletion: backup current regions
     if a:manual | call s:G.backup_regions() | endif
@@ -332,9 +333,14 @@ endfun " }}}
 
 fun! s:Edit.fill_register(reg, text, force_ow) abort
     " Write custom and possibly vim registers. {{{1
-    if a:reg == "_"
-        return
+
+    "if doing a change/deletion, write the VM - register
+    if s:v.deleting
+        let g:Vm.registers['-'] = a:text
+        let s:v.deleting = 0
     endif
+
+    if a:reg == "_" | return | endif
 
     let text      = a:text
     let reg       = empty(a:reg) ? '"' : a:reg

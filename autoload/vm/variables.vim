@@ -101,6 +101,7 @@ fun! vm#variables#init() abort
   let v.no_search        = 0
   let v.visual_regex     = 0
   let v.use_register     = v.def_reg
+  let v.deleting         = 0
 
   let v.keep_matches     = get(g:, 'VM_keep_buffer_hl', 1) ||
         \                  get(b:, 'VM_keep_buffer_hl', 0)

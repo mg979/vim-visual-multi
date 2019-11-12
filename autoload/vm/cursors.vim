@@ -62,8 +62,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#cursors#process(op, M, reg, n) abort
-  call s:init() | let s:init_done = 0
+  let s:init_done = s:init()
   let s:v.dot = a:M
+  let s:v.deleting = a:op == 'd' || a:op == 'c'
 
   if a:op ==# 'd'     | call s:d_cursors(a:M, a:reg, a:n)
   elseif a:op ==# 'c' | call s:c_cursors(a:M, a:reg, a:n)
@@ -212,10 +213,8 @@ endfun
 " Helpers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:init_done = 0
-
 fun! s:init() abort
-  if s:init_done | return | endif
+  if get(s:, 'init_done', 0) | return 1 | endif
   let s:V         = b:VM_Selection
   let s:v         = s:V.Vars
   let s:G         = s:V.Global

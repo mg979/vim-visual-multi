@@ -176,6 +176,7 @@ fun! s:Funcs.restore_regs() abort
     let s = s:v.oldsearch
     call setreg("/", s[0], s[1])
     let g:Vm.registers['"'] = []
+    let g:Vm.registers['-'] = []
     silent! unlet g:Vm.registers['§']
 endfun
 
