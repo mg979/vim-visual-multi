@@ -68,7 +68,7 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Case-Conversion-Menu)    :call b:VM_Selection.Case.menu()<cr>
 
   nnoremap <silent>       <Plug>(VM-Show-Regions-Info)       :call b:VM_Selection.Funcs.regions_contents()<cr>
-  nnoremap <silent>       <Plug>(VM-Show-Registers)          :call b:VM_Selection.Funcs.show_registers()<cr>
+  nnoremap <silent>       <Plug>(VM-Show-Registers)          :VMRegisters<cr>
   nnoremap <silent>       <Plug>(VM-Tools-Menu)              :call vm#special#commands#menu()<cr>
   nnoremap <silent>       <Plug>(VM-Filter-Regions)          :call vm#special#commands#filter_regions(0, '', 1)<cr>
   nnoremap <silent>       <Plug>(VM-Regions-To-Buffer)       :call vm#special#commands#regions_to_buffer()<cr>

@@ -127,28 +127,6 @@ fun! s:Funcs.get_regs_1_9() abort
     return regs
 endfun
 
-fun! s:Funcs.vm_regs_to_json() abort
-    if !filereadable(g:Vm.regs_file) | return | endif
-    let regs = copy(g:Vm.registers)
-    unlet regs['"']
-    return json_encode(regs)
-endfun
-
-fun! s:Funcs.vm_regs_from_json() abort
-    if !get(g:, 'VM_persistent_registers', 0) || !filereadable(g:Vm.regs_file)
-        return {'"': []}
-    endif
-    let regs = json_decode(readfile(g:Vm.regs_file)[0])
-    let regs['"'] = []
-    return regs
-endfun
-
-fun! s:Funcs.save_vm_regs() abort
-    if get(g:, 'VM_persistent_registers', 0) && filereadable(g:Vm.regs_file)
-        call writefile([self.vm_regs_to_json()], g:Vm.regs_file)
-    endif
-endfun
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.set_reg(text) abort
@@ -431,22 +409,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Utility functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Funcs.show_registers() abort
-    echohl Label | echo " Register\tLine\t--- Register contents ---" | echohl None
-    for r in keys(g:Vm.registers)
-        "skip temporary register
-        if r == '§' | continue | endif
-
-        echohl Directory  | echo "\n    ".r
-        let l = 1
-        for s in g:Vm.registers[r]
-            echohl WarningMsg | echo "\t\t".l."\t"
-            echohl None  | echon s
-            let l += 1
-        endfor
-    endfor
-endfun
 
 function! s:Funcs.pad(t, n, ...)
     if len(a:t) > a:n

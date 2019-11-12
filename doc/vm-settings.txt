@@ -115,6 +115,11 @@ automatically when exiting insert mode, unless this value is 0.
   up statusline integration.
 
 
+*g:VM_persistent_registers*                        Default: 0
+
+  If true VM registers will be stored in the |viminfo|. The 'viminfo' option
+  must include !, for this to work. Also see |:VMRegisters|.
+
 
 
 HIGHLIGHT                                              *visual-multi-highlight*

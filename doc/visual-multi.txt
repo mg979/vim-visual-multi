@@ -10,6 +10,7 @@ Regions and patterns                           |visual-multi-regions|
 Mappings                                       |visual-multi-mappings|
 Run ... at cursors                             |visual-multi-run-at-cursors|
 Commands                                       |visual-multi-commands|
+Registers                                      |visual-multi-registers|
 Other features                                 |visual-multi-other|
 Single region mode                             |visual-multi-single-mode|
 Bugs                                           |visual-multi-bugs|
@@ -166,6 +167,11 @@ You may still want to do so, at times. You'll have to enable |multiline-mode|,
 for which the default mapping is `\\M`.
 
 
+---------------------------------------------------------------  *vm-registers*
+
+VM uses its own registers, that are lists of strings, one element for each
+region that is yanked/deleted. You can read more about them in the
+|visual-multi-registers| section, since this is an accessory topic.
 
 
 
@@ -618,6 +624,61 @@ Transform regions with expression ~
 <
   Only working in |extend-mode|.
 
+
+
+
+
+NOTES ABOUT REGISTERS                                  *visual-multi-registers*
+===============================================================================
+
+VM uses its own registers: they don't have a 'type' as vim registers, because
+they are lists of strings (the regions contents). Still, some conversion
+between vim and VM (and viceversa) takes place.
+
+When yanking regions:~
+
+  A copy of the regions contents are saved in a VM register. If no register is
+  specified, only the unnamed register is written. The unnamed `vim` register
+  is also overwritten, and it will be of type |blockwise-register|. This means
+  that after you exit VM, you'll find any yanked text in the unnamed register.
+
+When deleting regions:~
+
+  As above, but the text is also copied in the VM '-' register (in analogy with
+  vim's small delete register |quote-|).
+
+When changing regions:~
+
+  The text is stored in the VM '-' register, but the unnamed register is not
+  overwritten, unless a register is specified. Likewise, `vim` unnamed register
+  is not overwritten.
+
+------------------------------------------------------------------------------
+
+What happens when you paste some text in VM depends on whether a VM register
+(from a previous operation in VM) is available or not.
+
+When pasting from VM registers:~
+
+  Regions are pasted as they were yanked/deleted, for example if you type `dw`,
+  then move with `w` and paste with `p`, the regions that you deleted will be
+  pasted back. If the number of regions is different, VM will paste as many as
+  it can.
+
+When pasting from vim registers:~
+
+  |characterwise-register|  the same content is pasted in all regions
+
+  |linewise-register|       similarly, but a linewise paste is performed
+                          (the only case this can happen in VM!)
+
+  |blockwise-register|      it is treated as if it were a VM register
+                          (each line of the block goes into one region)
+
+
+Note: when exiting VM, its registers are not deleted. Only the unnamed and '-'
+registers are always cleared. To show VM registers, type |:VMRegisters|.
+You can also enable persistance (see |g:VM_persistent_registers|).
 
 
 

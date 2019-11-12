@@ -7,6 +7,7 @@ The following Ex commands can be run at any time:
 
   |:VMDebug|
   |:VMClear|
+  |:VMRegisters|
 
 The following are only available inside a VM session:
 
@@ -31,6 +32,13 @@ mappings could not be applied).
 
 Clear any remnant of VM-specific highlight matches in the current buffer. It
 can be necessary if VM exited with errors for some reason.
+
+------------------------------------------------------------------------------
+
+    VMRegisters[!] [register]                                   *:VMRegisters*
+
+Show VM registers, or single [register]. With <bang>, delete a [register], or
+all of them if no register is specified.
 
 ------------------------------------------------------------------------------
 

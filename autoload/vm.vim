@@ -141,7 +141,6 @@ fun! vm#reset(...)
     call s:V.Global.remove_highlight()
     call s:V.Global.backup_last_regions()
 
-    call s:V.Funcs.save_vm_regs()
     call s:V.Funcs.restore_regs()
     call s:V.Maps.disable(1)
     silent! call s:V.Insert.auto_end()
@@ -268,41 +267,6 @@ fun! s:set_reg() abort
         let s:v.oldreg = s:V.Funcs.get_reg(v:register)
     endif
 endfun
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"VM registers
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-let g:VM_persistent_registers = get(g:, 'VM_persistent_registers', 0)
-
-fun! s:vm_regs() abort
-    if !g:VM_persistent_registers | return | endif
-
-    let is_win = has('win32') || has('win64') || has('win16')
-    let sep    = is_win ? '\' : '/'
-    let vmfile = is_win ? '_VM_registers' : '.VM_registers'
-    let home   = !empty(get(g:, 'VM_vimhome', '')) ? g:VM_vimhome :
-                \ exists('$VIMHOME')               ? $VIMHOME :
-                \ is_win                           ? '~/vimfiles' : "~/.vim"
-
-    let g:Vm.regs_file = home.sep.vmfile
-    if isdirectory(home) && !filereadable(g:Vm.regs_file)
-        call writefile(['{}'], g:Vm.regs_file)
-    endif
-endfun
-
-fun! s:vm_regs_from_json() abort
-    if !g:VM_persistent_registers || !filereadable(g:Vm.regs_file)
-        return {'"': []}
-    endif
-    let regs = json_decode(readfile(g:Vm.regs_file)[0])
-    let regs['"'] = []
-    return regs
-endfun
-
-call s:vm_regs()
-let g:Vm.registers = s:vm_regs_from_json()
-
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "python section

@@ -25,6 +25,9 @@ set cpo&vim
 
 com! -nargs=? -complete=customlist,vm#themes#complete
       \ VMTheme  call vm#themes#load(<q-args>)
+com! -nargs=? -bang
+      \ VMRegisters  call vm#special#commands#show_registers(<bang>0, <q-args>)
+
 com!    VMConfig call vm#special#config#start()
 com!    VMDebug  call vm#special#commands#debug()
 com!    VMClear  call vm#clearmatches()
@@ -39,10 +42,12 @@ let g:Vm = { 'hi'          : {},
       \ 'last_ex'          : '',
       \ 'last_normal'      : '',
       \ 'last_visual'      : '',
+      \ 'registers'        : {'"': [], '-': []},
       \ 'oldupdate'        : exists("##TextYankPost") ? 0 : &updatetime,
       \}
 
 let g:VM_highlight_matches = get(g:, 'VM_highlight_matches', 'underline')
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Global mappings
@@ -50,13 +55,39 @@ let g:VM_highlight_matches = get(g:, 'VM_highlight_matches', 'underline')
 call vm#plugs#permanent()
 call vm#maps#default()
 
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Registers
+
+let g:VM_persistent_registers = get(g:, 'VM_persistent_registers', 0)
+
+fun! s:vm_registers()
+  if exists('g:VM_PERSIST') && !g:VM_persistent_registers
+    unlet g:VM_PERSIST
+  elseif exists('g:VM_PERSIST')
+    let g:Vm.registers = deepcopy(g:VM_PERSIST)
+  endif
+endfun
+
+fun! s:vm_persist()
+  if exists('g:VM_PERSIST') && !g:VM_persistent_registers
+    unlet g:VM_PERSIST
+  elseif g:VM_persistent_registers
+    let g:VM_PERSIST = deepcopy(g:Vm.registers)
+  endif
+endfun
+
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Autocommands
 
 augroup VM_start
   au!
   au ColorScheme  * call vm#themes#init()
+  au VimEnter     * call s:vm_registers()
+  au VimLeavePre  * call s:vm_persist()
 augroup END
+
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

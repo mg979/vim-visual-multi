@@ -271,6 +271,50 @@ endfun
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Show registers                                                           {{{1
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#special#commands#show_registers(delete, args) abort
+  if a:delete
+    if a:args != ''
+      " don't delete " or - registers, they are reset anyway at VM restart
+      if a:args != '"' && a:args != '-'
+        silent! unlet g:Vm.registers[a:args]
+      endif
+    else
+      let g:Vm.registers = {'"': [], '-': []}
+    endif
+    return
+  elseif a:args != ''
+    if !has_key(g:Vm.registers, a:args)
+      echo '[visual-multi] invalid register'
+      return
+    else
+      let registers = [a:args]
+    endif
+  else
+    let registers = keys(g:Vm.registers)
+  endif
+
+  echohl Label | echo " Register\tLine\t--- Register contents ---" | echohl None
+
+  for r in registers
+    "skip temporary register
+    if r == '§' | continue | endif
+
+    echohl Directory  | echo "\n    ".r
+    let l = 1
+    for s in g:Vm.registers[r]
+      echohl WarningMsg | echo "\t\t".l."\t"
+      echohl None  | echon s
+      let l += 1
+    endfor
+  endfor
+  echohl None
+endfun
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Ex Commands and helpers                                                  {{{1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
