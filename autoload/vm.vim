@@ -40,9 +40,10 @@ fun! vm#init_buffer(empty) abort
     """If already initialized, return current instance."""
     let v:errmsg = ""
     try
-        if exists('b:VM_Selection') && !empty(b:VM_Selection) | return s:V | endif
+        if exists('b:visual_multi') | return s:V | endif
 
         let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Bytes': {}}
+        let b:visual_multi = 1
 
         let b:VM_Debug           = get(b:, 'VM_Debug', {'lines': []})
         let b:VM_Backup          = {'ticks': [], 'last': 0, 'first': undotree().seq_cur}
@@ -175,6 +176,7 @@ fun! vm#reset(...)
 
     call vm#variables#reset_globals()
     call vm#special#commands#unset()
+    unlet b:visual_multi
     call garbagecollect()
 endfun
 
