@@ -1,0 +1,91 @@
+*vm-troubleshooting.txt*    Version 0.3.0    Last change: June 13 2019
+
+Known issues                                   |visual-multi-bugs|
+Plugins compatibility                          |visual-multi-compatibility|
+
+
+
+KNOWN ISSUES                                               *visual-multi-bugs*
+==============================================================================
+
+VM relies mostly on autocommands, especially in insert mode. Plugins and
+autocommands defined by the user could cause issues, if they do something
+intrusive while VM is updating text. Snippets plugins won't work for this
+reason, but |abbreviations| work. For example this won't work either:
+>
+  au InsertLeave * silent! update
+<                                                             *b:visual_multi*
+In this case you may want to check that VM is not active, before performing an
+action, you could write it as:
+>
+  au InsertLeave * if !exists('b:visual_multi') | silent! update | endif
+<
+                         {https://github.com/mg979/vim-visual-multi/issues/91}
+
+------------------------------------------------------------------------------
+
+To start insert mode, VM currently uses feedkeys(), this can cause issues if
+you include a VM command that starts insert mode in some of your mappings, or
+if you use recursive mappings inside VM that also start insert mode.
+
+In case vim becomes non-responsive because of this, press |CTRL-C| (you didn't
+remap it, right?).
+
+                         {https://github.com/mg979/vim-visual-multi/issues/89}
+
+------------------------------------------------------------------------------
+
+In |vm-single-region| mode, some insert mode mappings (<C-w>, <C-u>, <CR>) are
+disabled because they don't behave well. <BS> and <Del> are not disabled, but
+they cause issues when deleting other cursors, so be careful. They are not
+disabled because it shouldn't happen in normal use cases for this feature, that
+should be used when you want to use cursors as 'fields' to edit sequentially.
+
+
+
+
+
+PLUGINS COMPATIBILITY                             *visual-multi-compatibility*
+==============================================================================
+
+As mentioned above, snippets plugins cannot work with VM. Other plugins can
+have incompatibilities, especially if they apply buffer mappings. In this
+case, VM will not replace the conflicting keys, but whis can result in missing
+VM functionalities or even render VM unusable. If you notice some mappings
+don't work in VM, run |:VMDebug| to see if a plugin is the cause.
+
+However, VM will always overwrite insert mode mappings. If this happens, you
+can also read it in the |:VMDebug| output. In this case, it's not VM that
+breaks, it's the conflicting plugin.
+
+Some plugins have built-in compatibility:
+
+  - jiangmiao/auto-pairs
+  - AndrewRadev/tagalong.vim
+  - dyng/ctrlsf.vim
+  - Shougo/deoplete.nvim
+  - ncmw/ncm2
+
+If you want to run some code before/after VM starts/exits, see
+|vm-faq-functions|.
+
+If you make a plugin and want to test if VM is active, perform a check on the
+|b:visual_multi| variable.
+
+If a plugin needs to be deactivated inside VM, you could also use the
+|g:VM_plugins_compatibilty| dictionary, with this structure:
+>
+  let g:VM_plugins_compatibilty = {
+            \'plugin_name': {
+            \   'test': { -> exists('plugin_is_enabled') },
+            \   'enable': ':PluginEnableCommand',
+            \   'disable': ':PluginDisableCommand'},
+            \}
+<
+If you would like a plugin to have built-in compatibility, open an issue about
+it on the VM GitHub repo and/or make a pull request.
+
+
+
+
+ vim: ft=help et sw=2 ts=2 sts=2 tw=78

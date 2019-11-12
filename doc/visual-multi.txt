@@ -13,7 +13,6 @@ Commands                                       |visual-multi-commands|
 Registers                                      |visual-multi-registers|
 Other features                                 |visual-multi-other|
 Single region mode                             |visual-multi-single-mode|
-Bugs                                           |visual-multi-bugs|
 Credits                                        |visual-multi-credits|
 License                                        |visual-multi-license|
 
@@ -22,6 +21,7 @@ Additional resources:
 Settings                                       |visual-multi-settings|
 Quick reference                                |visual-multi-qr|
 Frequently asked questions                     |visual-multi-faq|
+Troubleshooting                                |visual-multi-troubleshooting|
 Additional Ex commands                         |visual-multi-ex-commands|
 
 
@@ -749,18 +749,6 @@ from within insert mode.
 
 See also |visual-multi-bugs|.
 
-
-
-
-
-BUGS                                                        *visual-multi-bugs*
-===============================================================================
-
-In |vm-single-region| mode, some insert mode mappings (<C-w>, <C-u>, <CR>) are
-disabled because they don't behave well. <BS> and <Del> are not disabled, but
-they cause issues when deleting other cursors, so be careful. They are not
-disabled because it shouldn't happen in normal use cases for this feature, that
-should be used when you want to use cursors as 'fields' to edit sequentially.
 
 
 

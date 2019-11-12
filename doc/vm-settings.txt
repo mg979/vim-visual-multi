@@ -20,19 +20,18 @@ Hopefully you won't need to alter any of these.
     let g:VM_highlight_matches = 'hi Search ctermfg=228 cterm=underline'
     let g:VM_highlight_matches = 'hi! link Search PmenuSel'
 <
-*g:VM_keep_buffer_hl*                              Default: 1
-
-  If 0, VM will use clearmatches() to clear VM highlight. It's faster but it is
-  not compatible with plugins that apply special highlights.
-  `b:VM_keep_buffer_hl` will override this setting, if defined.
-
-
 *g:VM_set_statusline*                              Default: 2
 
   Enable statusline when VM is active.
   With a value of 1, the statusline will be set once, on VM start.
   With a value of 2, the statusline will be refreshed on |CursorHold| event.
   With a value of 3, also on |CursorMoved| event.
+
+
+*g:VM_silent_exit*                                 Default: 0
+
+  Don't display a message when exiting VM. You may prefer it if you already set
+  up statusline integration.
 
 
 *g:VM_skip_shorter_lines*                          Default: 1
@@ -48,11 +47,6 @@ Hopefully you won't need to alter any of these.
 *g:VM_live_editing*                                Default: 1
 
   Controls how often text is updated in insert mode.
-
-
-*g:VM_filesize_limit*                              Default: 0 (disabled)
-
-  VM won't start if buffer size is greater.
 
 
 *g:VM_reselect_first*                              Default: 0
@@ -86,6 +80,16 @@ Hopefully you won't need to alter any of these.
   To remap any key to normal! commands. See |vm-faq-remap|.
 
 
+*g:VM_insert_special_keys*                         Default: ['c-a', 'c-e', 'c-v']
+
+  Some keys in insert mode have a different behaviour, compared to vim
+  defaults. If you don't want some or any them, remove them from the list.
+
+  <C-A> go to the beginning of the line, at indent level (same as <Esc>I)
+  <C-E> go to the end of the line (same as <Esc>A)
+  <C-V> paste from VM unnamed register
+
+
 *g:VM_single_mode_maps*                            Default: 1
 
 Set to 0 to disable entirely insert mode mappings to cycle cursors in
@@ -99,20 +103,9 @@ If insert mode is entered while |vm-single-mode| is enabled, it will be reset
 automatically when exiting insert mode, unless this value is 0.
 
 
-*g:VM_insert_special_keys*                         Default: ['c-a', 'c-e', 'c-v']
+*g:VM_filesize_limit*                              Default: 0 (disabled)
 
-  Some keys in insert mode have a different behaviour, compared to vim
-  defaults. If you don't some or any them, remove them from the list.
-
-  <C-A> go to the beginning of the line, at indent level (same as <Esc>I)
-  <C-E> go to the end of the line (same as <Esc>A)
-  <C-V> paste from VM unnamed register
-
-
-*g:VM_silent_exit*                                 Default: 0
-
-  Don't display a message when exiting VM. It can be useful if you already set
-  up statusline integration.
+  VM won't start if buffer size is greater than this.
 
 
 *g:VM_persistent_registers*                        Default: 0
@@ -120,6 +113,17 @@ automatically when exiting insert mode, unless this value is 0.
   If true VM registers will be stored in the |viminfo|. The 'viminfo' option
   must include !, for this to work. Also see |:VMRegisters|.
 
+
+*g:VM_keep_buffer_hl*                              Default: 1
+
+  If 0, VM will use clearmatches() to clear VM highlight. It's faster but it is
+  not compatible with plugins that apply special highlights.
+  `b:VM_keep_buffer_hl` will override this setting, if defined.
+
+
+*g:VM_plugins_compatibilty*                        Default: {}
+
+Used for plugins compatibility, see |visual-multi-compatibility|.
 
 
 HIGHLIGHT                                              *visual-multi-highlight*

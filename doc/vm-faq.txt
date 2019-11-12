@@ -2,13 +2,12 @@
 
 FREQUENTLY ASKED QUESTIONS                                   *visual-multi-faq*
 ===============================================================================
-
                                                                 *vm-faq-errors*
 VM has quit with errors and I can't clear VM highlight matches.~
 
 Run |:VMClear|
 
-
+-------------------------------------------------------------------------------
                                                              *vm-faq-functions*
 How can I do something before VM starts, or after VM ends? ~
 
@@ -21,7 +20,7 @@ Or you can rely on a user autocommand:  >
   autocmd User visual_multi_exit    call MyVmExit()
 <
 
-
+-------------------------------------------------------------------------------
                                                       *vm-faq-disable-mappings*
 How can I temporarily disable VM mappings? ~
 
@@ -31,7 +30,7 @@ unless you use <Space> as |VM_leader|, you may prefer an easier mapping:
   let g:VM_maps["Toggle Mappings"] = '<Space>'
 <
 
-
+-------------------------------------------------------------------------------
                                                                  *vm-faq-remap*
 How can I remap x in VM? ~
 
@@ -63,6 +62,7 @@ a normal! command. Example:
 would create mappings for each key-value pair.
 
 
+-------------------------------------------------------------------------------
                                                      *vm-faq-creative-mappings*
 Can I have a mapping for...? ~
 
@@ -79,6 +79,7 @@ The first mapping would start VM by selecting the first occurrence of the
 current search register (|@/|, the one you get with |star|).
 The second mapping would select all matches.
 
+It is recommended that you don't start insert mode in VM recursive mappings.
 
 
 
