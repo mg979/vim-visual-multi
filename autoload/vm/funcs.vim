@@ -458,30 +458,6 @@ fun! s:Funcs.region_txt(r) abort
     echohl None
 endfun
 
-fun! s:Funcs.external_before_macro() abort
-    if exists('*VM_before_macro')
-        call VM_before_macro()
-    endif
-endfun
-
-fun! s:Funcs.external_after_macro() abort
-    if exists('*VM_after_macro')
-        call VM_after_macro()
-    endif
-endfun
-
-fun! s:Funcs.external_before_auto() abort
-    if exists('*VM_before_auto')
-        call VM_before_auto()
-    endif
-endfun
-
-fun! s:Funcs.external_after_auto() abort
-    if exists('*VM_after_auto')
-        call VM_after_auto()
-    endif
-endfun
-
 fun! s:Funcs.not_VM() abort
     return !exists('b:VM_Selection') || empty(b:VM_Selection)
 endfun

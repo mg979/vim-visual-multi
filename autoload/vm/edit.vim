@@ -54,7 +54,7 @@ fun! s:Edit.run_normal(cmd, ...) abort
     "-----------------------------------------------------------------------
 
     " defaults: commands are recursive, count 1, disable buffer mappings
-    let args = { 'recursive': 1, 'count': 1, 'vimreg': 0, 'disable_maps': 1,
+    let args = { 'recursive': 1, 'count': 1, 'vimreg': 0,
                 \'silent': get(g:, 'VM_silent_ex_commands', 0) }
     if a:0 | call extend(args, a:1) | endif
 
@@ -63,7 +63,7 @@ fun! s:Edit.run_normal(cmd, ...) abort
     let c = args.silent    ? ("silent! ".c) : c
 
     call s:G.cursor_mode()
-    call self.before_commands(args.disable_maps)
+    call self.before_commands()
     let errors = ''
 
     try
@@ -101,7 +101,7 @@ fun! s:Edit.run_visual(cmd, recursive, ...) abort
 
     "-----------------------------------------------------------------------
 
-    call self.before_commands(!a:recursive)
+    call self.before_commands()
     let errors = ''
 
     try
@@ -145,7 +145,7 @@ fun! s:Edit.run_ex(...) abort
     call s:G.cursor_mode()
     let errors = ''
 
-    call self.before_commands(1)
+    call self.before_commands()
 
     try
         call self.process(cmd)
@@ -173,7 +173,7 @@ fun! s:Edit.run_macro(replace) abort
         return s:F.msg('Macro aborted.')
     endif
 
-    call self.before_commands(1)
+    call self.before_commands()
     call s:G.cursor_mode()
 
     call self.process('normal! @'.reg)
@@ -192,10 +192,6 @@ fun! s:Edit.dot() abort
             call vm#operators#select(1, dot[1:])
             normal ".p
             call s:G.cursor_mode()
-
-        elseif dot[1] ==? 's'                   "surround (ys, ds, cs)
-            call self.run_normal(dot, {'disable_maps': 0})
-
         else
             call self.run_normal(dot)
         endif
@@ -341,7 +337,7 @@ endfun
 " Before/after processing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.before_commands(disable_maps) abort
+fun! s:Edit.before_commands() abort
     let s:v.auto = 1 | let s:v.eco = 1
 
     let s:old_multiline = s:v.multiline
@@ -351,14 +347,8 @@ fun! s:Edit.before_commands(disable_maps) abort
     exe 'nunmap <buffer>' g:Vm.maps.toggle
     nunmap <buffer> <esc>
 
-    let s:maps_disabled = 0
-    call s:F.external_before_auto()
-
-    if a:disable_maps
-        let s:maps_disabled = 1
-        call s:V.Maps.disable(0)
-        call s:F.external_before_macro()
-    endif
+    silent doautocmd <nomodeline> User visual_multi_before_cmd
+    call s:V.Maps.disable(0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -371,16 +361,11 @@ fun! s:Edit.after_commands(reselect, ...) abort
         call s:V.Edit.post_process(0)
     endif
 
-    call s:F.external_after_auto()
-
     nmap <nowait><buffer>       <esc>             <Plug>(VM-Reset)
     exe 'nmap <nowait><buffer>' g:Vm.maps.toggle '<Plug>(VM-Toggle-Mappings)'
 
-    if s:maps_disabled
-        let s:maps_disabled = 0
-        call s:V.Maps.enable()
-        call s:F.external_after_macro()
-    endif
+    call s:V.Maps.enable()
+    silent doautocmd <nomodeline> User visual_multi_after_cmd
 endfun
 
 
