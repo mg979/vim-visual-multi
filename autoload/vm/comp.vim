@@ -123,7 +123,7 @@ endfun "}}}
 
 fun! vm#comp#no_reindents() abort
     " Don't reindent for filetypes. "{{{1
-    return g:VM_no_reindent_filetype + ['ctrlsf']
+    return ['ctrlsf']
 endfun "}}}
 
 " vim: et sw=4 ts=4 sts=4 fdm=marker

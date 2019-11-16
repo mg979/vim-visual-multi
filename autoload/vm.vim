@@ -16,9 +16,7 @@ let g:VM_exit_on_1_cursor_left            = get(g:, 'VM_exit_on_1_cursor_left', 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Reindentation after insert mode
 
-let g:VM_reindent_all_filetypes           = get(g:, 'VM_reindent_all_filetypes', 0)
-let g:VM_reindent_filetype                = get(g:, 'VM_reindent_filetype', [])
-let g:VM_no_reindent_filetype             = get(g:, 'VM_no_reindent_filetype', ['text', 'markdown'])
+let g:VM_reindent_filetypes               = get(g:, 'VM_reindent_filetypes', [])
 
 call vm#themes#init()
 call vm#plugs#buffer()

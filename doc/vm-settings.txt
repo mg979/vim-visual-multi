@@ -64,6 +64,11 @@ Hopefully you won't need to alter any of these.
 
   You could want to do it for performance reasons.
 
+*g:VM_reindent_filetypes*                          Default: []
+
+Autoindentation (via |indentkeys|) is temporarily disabled in insert mode, and
+you have to reindent edited lines yoursef. For filetypes included in this list,
+edited lines are automatically reindented when exiting insert mode in VM.
 
 *g:VM_exit_on_1_cursor_left*                       Default: 0
 

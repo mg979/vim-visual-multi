@@ -518,8 +518,7 @@ fun! s:do_reindent() abort
     if empty(&ft) | return | endif
 
     return index(vm#comp#no_reindents(), &ft) < 0 &&
-                \ index(g:VM_reindent_filetype, &ft) >= 0 ||
-                \ g:VM_reindent_all_filetypes
+                \ index(g:VM_reindent_filetypes, &ft) >= 0
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
