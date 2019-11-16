@@ -267,7 +267,7 @@ fun! s:Yank() abort
   if empty(b:VM_Selection.Global.region_at_pos())
     let b:VM_Selection.Vars.yanked = 1 | return 'y'
   endif
-  return ":\<C-u>call b:VM_Selection.Edit.yank(v:register, 1)\<cr>"
+  return ":\<C-u>call b:VM_Selection.Edit.yank(v:register, 1, 1)\<cr>"
 endfun
 
 fun! s:Mode() abort
