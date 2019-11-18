@@ -38,8 +38,10 @@ fun! s:Edit.run_normal(cmd, ...) abort
     "-----------------------------------------------------------------------
 
     if a:cmd == -1
-        let cmd = input('Normal command? ')
-        if empty(cmd) | return s:F.msg('Command aborted.') | endif
+        call s:F.special_statusline('NORMAL')
+        let bang = a:0 && !get(a:1, 'recursive', 1) ? '!' : ''
+        let cmd = input(':normal'.bang.' ')
+        if empty(cmd) | return s:F.msg('Normal command aborted.') | endif
 
     elseif a:cmd == '~' && s:X()
         return self.run_visual('~', 0)
@@ -89,8 +91,10 @@ fun! s:Edit.run_visual(cmd, recursive, ...) abort
     "-----------------------------------------------------------------------
 
     if !a:0 && a:cmd == -1
-        let cmd = input('Visual command? ')
-        if empty(cmd) | return s:F.msg('Command aborted.') | endif
+        call s:F.special_statusline('VISUAL')
+        let bang = !a:recursive ? '!' : ''
+        let cmd = input(':visual'.bang.' ')
+        if empty(cmd) | return s:F.msg('Visual command aborted.') | endif
 
     elseif empty(a:cmd)
         return s:F.msg('Command not found.')
@@ -105,7 +109,7 @@ fun! s:Edit.run_visual(cmd, recursive, ...) abort
     let errors = ''
 
     try
-        call self.process_visual(cmd)
+        call self.process_visual(cmd, a:recursive)
     catch
         let errors = v:errmsg
     endtry
@@ -125,14 +129,10 @@ fun! s:Edit.run_ex(...) abort
 
     "-----------------------------------------------------------------------
 
-    if !a:0
-        let cmd = input('Ex command? ', '', 'command')
-        if empty(cmd) | return s:F.msg('Command aborted.') | endif
-
-    elseif !empty(a:1)
+    if !empty(a:1)
         let cmd = a:1
     else
-        return s:F.msg('Command not found.')
+        return s:F.msg('Invalid command')
     endif
 
     "-----------------------------------------------------------------------
@@ -159,6 +159,33 @@ fun! s:Edit.run_ex(...) abort
         call s:F.msg('[visual-multi] errors while executing '.cmd)
     endif
 endfun
+
+"------------------------------------------------------------------------------
+
+fun! s:Edit.ex_done() abort
+    silent! cunmap <buffer> <cr>
+    silent! cunmap <buffer> <esc><esc>
+    silent! cunmap <buffer> <esc>
+    call histdel(':', -1)
+    if empty(@") | return s:F.msg('Ex command aborted.') | endif
+    call s:V.Edit.run_ex(@")
+endfun
+
+fun! s:Edit.ex_get() abort
+    let @" = getcmdline()
+    if !empty(@") | call histadd(':', @") | endif
+    return ''
+endfun
+
+fun! s:Edit.ex() abort
+    cnoremap <silent><nowait><buffer> <cr>  <c-r>=b:VM_Selection.Edit.ex_get()<cr><c-u>call b:VM_Selection.Edit.ex_done()<cr>
+    cnoremap <silent><nowait><buffer> <esc><esc> <c-u>let @" = ''<cr>:call b:VM_Selection.Edit.ex_done()<cr>
+    cnoremap <silent><nowait><buffer> <esc> <c-u>let @" = ''<cr>:call b:VM_Selection.Edit.ex_done()<cr>
+    call s:F.special_statusline('EX')
+    call feedkeys("\<C-L>", 'n')
+    return ''
+endfun
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Macros
@@ -263,11 +290,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.process_visual(cmd) abort
+fun! s:Edit.process_visual(cmd, recursive) abort
     let s:v.eco = 1             " turn on eco mode
     let change  = 0             " each cursor will update this value
     let size    = s:F.size()    " initial buffer size
     let s:v.storepos = getpos('.')[1:2]
+
+    let cmd = a:recursive ? 'normal '.a:cmd : 'normal! '.a:cmd
 
     call s:G.backup_regions()
 
@@ -275,7 +304,7 @@ fun! s:Edit.process_visual(cmd) abort
         call r.shift(change, change)
         call cursor(r.L, r.b) | normal! m`
         call cursor(r.l, r.a) | normal! v``
-        exe "normal ".a:cmd
+        exe cmd
 
         "update changed size
         let change = s:F.size() - size

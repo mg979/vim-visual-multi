@@ -178,11 +178,11 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>        <Plug>(VM-Run-Dot)                 :<C-u>call b:VM_Selection.Edit.run_normal('.', {'count': v:count1, 'recursive': 0})<cr>
   nnoremap <silent>        <Plug>(VM-Surround)                :call b:VM_Selection.Edit.surround()<cr>
   nnoremap <silent>        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
-  nnoremap <silent>        <Plug>(VM-Run-Ex)                  :<C-u>call b:VM_Selection.Edit.run_ex()<cr>
+  nnoremap <silent>        <Plug>(VM-Run-Ex)                  :<C-r>=b:VM_Selection.Edit.ex()<CR>
   nnoremap <silent>        <Plug>(VM-Run-Last-Ex)             :<C-u>call b:VM_Selection.Edit.run_ex(g:Vm.last_ex)<cr>
   nnoremap <silent>        <Plug>(VM-Run-Normal)              :<C-u>call b:VM_Selection.Edit.run_normal(-1, {'count': v:count1})<cr>
   nnoremap <silent>        <Plug>(VM-Run-Last-Normal)         :<C-u>call b:VM_Selection.Edit.run_normal(g:Vm.last_normal[0], {'count': v:count1, 'recursive': g:Vm.last_normal[1]})<cr>
-  nnoremap <silent>        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1, 0)<cr>
+  nnoremap <silent>        <Plug>(VM-Run-Visual)              :call b:VM_Selection.Edit.run_visual(-1, 1)<cr>
   nnoremap <silent>        <Plug>(VM-Run-Last-Visual)         :call b:VM_Selection.Edit.run_visual(g:Vm.last_visual[0], g:Vm.last_visual[1])<cr>
 
   inoremap <silent><expr> <Plug>(VM-I-Arrow-w)          <sid>Insert('w')
