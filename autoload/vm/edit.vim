@@ -5,6 +5,7 @@
 let s:Edit = {'skip_index': -1}
 
 fun! vm#edit#init() abort
+    " Initialize script variables
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
     let s:G = s:V.Global
@@ -30,10 +31,11 @@ let s:X = { -> g:Vm.extend_mode }
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Ex commands
+" Commands at cursors
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.run_normal(cmd, ...) abort
+    " Run normal command over regions.
     " optional arg is a dictionary with options
     "-----------------------------------------------------------------------
 
@@ -55,7 +57,7 @@ fun! s:Edit.run_normal(cmd, ...) abort
 
     "-----------------------------------------------------------------------
 
-    " defaults: commands are recursive, count 1, disable buffer mappings
+    " defaults: commands are recursive, count 1
     let args = { 'recursive': 1, 'count': 1, 'vimreg': 0,
                 \'silent': get(g:, 'VM_silent_ex_commands', 0) }
     if a:0 | call extend(args, a:1) | endif
@@ -87,10 +89,13 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.run_visual(cmd, recursive, ...) abort
-
+    " Run visual command over selections.
     "-----------------------------------------------------------------------
 
-    if !a:0 && a:cmd == -1
+    if !s:X()
+        return s:F.msg('Not possible in cursor mode.')
+
+    elseif !a:0 && a:cmd == -1
         call s:F.special_statusline('VISUAL')
         let bang = !a:recursive ? '!' : ''
         let cmd = input(':visual'.bang.' ')
@@ -126,7 +131,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.run_ex(...) abort
-
+    " Run Ex command over regions.
     "-----------------------------------------------------------------------
 
     if !empty(a:1)
@@ -160,9 +165,9 @@ fun! s:Edit.run_ex(...) abort
     endif
 endfun
 
-"------------------------------------------------------------------------------
 
 fun! s:Edit.ex_done() abort
+    " Remove command mode mappings.
     silent! cunmap <buffer> <cr>
     silent! cunmap <buffer> <esc><esc>
     silent! cunmap <buffer> <esc>
@@ -171,13 +176,17 @@ fun! s:Edit.ex_done() abort
     call s:V.Edit.run_ex(@")
 endfun
 
+
 fun! s:Edit.ex_get() abort
+    " Get command line as entered by user.
     let @" = getcmdline()
     if !empty(@") | call histadd(':', @") | endif
     return ''
 endfun
 
+
 fun! s:Edit.ex() abort
+    " Set command mode mappings.
     cnoremap <silent><nowait><buffer> <cr>  <c-r>=b:VM_Selection.Edit.ex_get()<cr><c-u>call b:VM_Selection.Edit.ex_done()<cr>
     cnoremap <silent><nowait><buffer> <esc><esc> <c-u>let @" = ''<cr>:call b:VM_Selection.Edit.ex_done()<cr>
     cnoremap <silent><nowait><buffer> <esc> <c-u>let @" = ''<cr>:call b:VM_Selection.Edit.ex_done()<cr>
@@ -191,10 +200,9 @@ endfun
 " Macros
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Edit.run_macro(replace) abort
-    if s:count(v:count) | return | endif
-
-    call s:F.msg('Macro register? ')
+fun! s:Edit.run_macro() abort
+    " Run macro over regions. Change to cursor mode if necessary.
+    call s:F.msg('Register? ')
     let reg = nr2char(getchar())
     if reg == "\<esc>"
         return s:F.msg('Macro aborted.')
@@ -207,11 +215,13 @@ fun! s:Edit.run_macro(replace) abort
     call self.after_commands(0)
 endfun
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Dot
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.dot() abort
+    " Run dot command over regions.
     let dot = s:v.dot
     if !s:X() && !empty(dot)
 
@@ -227,11 +237,13 @@ fun! s:Edit.dot() abort
     endif
 endfun
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Region processing
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.process(cmd, ...) abort
+    " Execute command at cursors.
     let s:v.eco = 1             " turn on eco mode
     let change  = 0             " each cursor will update this value
     let txt     = []            " if text is deleted, it will be stored here
@@ -288,9 +300,9 @@ fun! s:Edit.process(cmd, ...) abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.process_visual(cmd, recursive) abort
+    " Process a 'visual' command over selections.
     let s:v.eco = 1             " turn on eco mode
     let change  = 0             " each cursor will update this value
     let size    = s:F.size()    " initial buffer size
@@ -311,10 +323,9 @@ fun! s:Edit.process_visual(cmd, recursive) abort
     endfor
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.post_process(reselect, ...) abort
-
+    " Operations to be performed after the command has been executed.
     if a:reselect
         call s:G.extend_mode()
         for r in s:R()
@@ -338,7 +349,8 @@ endfun
 let s:Edit.extra_spaces = {}
 
 fun! s:Edit.extra_spaces.remove(...) abort
-    "remove the extra space only if it comes after r.b, and it's just before \n
+    " Extra spaces at EOL may have been added and must be removed.
+    " remove the extra space only if it comes after r.b, and it's just before \n
     for i in s:v.extra_spaces
         "some region has been removed for some reason(merge, ...)
         if i >= len(s:R()) | break | endif
@@ -352,7 +364,9 @@ fun! s:Edit.extra_spaces.remove(...) abort
     let s:v.extra_spaces = []
 endfun
 
+
 fun! s:Edit.extra_spaces.add(r) abort
+    " It may be necessary to add spaces over empty lines, or if at EOL.
     "add space if empty line(>) or eol(=)
     let L = getline(a:r.L)
     if a:r.b >= strwidth(L)
@@ -367,6 +381,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.before_commands() abort
+    " Disable mappings and run user autocommand before running commands.
     let s:v.auto = 1 | let s:v.eco = 1
 
     let s:old_multiline = s:v.multiline
@@ -380,9 +395,9 @@ fun! s:Edit.before_commands() abort
     call s:V.Maps.disable(0)
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Edit.after_commands(reselect, ...) abort
+    " Trigger post processing and reenable mappings.
     let s:v.multiline = s:old_multiline
     if a:reselect
         call s:V.Edit.post_process(1, a:1)
@@ -402,19 +417,8 @@ endfun
 " Helpers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:count(c) abort
-    "forbid count
-    if a:c > 1
-        if !g:Vm.is_active | return 1 | endif
-        call s:F.msg('Count not allowed.')
-        call vm#reset()
-        return 1
-    endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:bs_del(cmd) abort
+    " Special handler for x/X normal commands, and <BS>/<Del> insert commands.
     if s:v.insert
         return vm#icmds#x(a:cmd)
     else
@@ -432,12 +436,11 @@ fun! s:bs_del(cmd) abort
     call s:G.merge_regions()
 endfun
 
-"------------------------------------------------------------------------------
 
 fun! s:visual_reselect(cmd) abort
-    """Ensure selections are reselected after some commands.
+    " Ensure selections are reselected after some commands.
     let reselect = a:cmd == '~' || a:cmd =~? 'gu'
     return s:X() && reselect
 endfun
 
-" vim: et ts=4 sw=4 sts=4 :
+" vim: et sw=4 ts=4 sts=4 fdm=indent fdn=1
