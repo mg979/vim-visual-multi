@@ -5,16 +5,11 @@
 fun! vm#cursors#operation(op, n, register, ...) abort
   call s:init()
   let reg = a:register   | let r = "\"".reg
-  let hl1 = 'WarningMsg' | let hl2 = 'Label'
 
   "shortcut for command in a:1
   if a:0 | call vm#cursors#process(a:op, a:1, reg, 0) | return | endif
 
-  let s = a:op==#'d'? [['Delete ', hl1], ['([n] d/w/e/b/$...) ?  ',   hl2]] :
-        \ a:op==#'c'? [['Change ', hl1], ['([n] c/w/e/b/$...) ?  ',   hl2]] :
-        \ a:op==#'y'? [['Yank   ', hl1], ['([n] y/w/e/b/$...) ?  ',   hl2]] : 'Aborted.'
-
-  call s:F.msg(s)
+  call s:F.msg('[VM] ')
 
   "starting string
   let M = (a:n>1? a:n : '').( reg == s:v.def_reg? '' : '"'.reg ).a:op
