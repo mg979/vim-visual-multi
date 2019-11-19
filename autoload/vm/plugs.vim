@@ -176,8 +176,8 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>        <Plug>(VM-Zero-Numbers)            :<C-u>call b:VM_Selection.Edit.numbers(v:count, 0)<cr>
   nnoremap <silent>        <Plug>(VM-Zero-Numbers-Append)     :<C-u>call b:VM_Selection.Edit.numbers(v:count, 1)<cr>
   nnoremap <silent>        <Plug>(VM-Run-Dot)                 :<C-u>call b:VM_Selection.Edit.run_normal('.', {'count': v:count1, 'recursive': 0})<cr>
-  nnoremap <silent>        <Plug>(VM-Surround)                :call b:VM_Selection.Edit.surround()<cr>
-  nnoremap <silent>        <Plug>(VM-Run-Macro)               :call b:VM_Selection.Edit.run_macro(0)<cr>
+  nnoremap <silent>        <Plug>(VM-Surround)                :<c-u>call b:VM_Selection.Edit.surround()<cr>
+  nnoremap <silent>        <Plug>(VM-Run-Macro)               :<c-u>call b:VM_Selection.Edit.run_macro()<cr>
   nnoremap <silent>        <Plug>(VM-Run-Ex)                  :<C-r>=b:VM_Selection.Edit.ex()<CR>
   nnoremap <silent>        <Plug>(VM-Run-Last-Ex)             :<C-u>call b:VM_Selection.Edit.run_ex(g:Vm.last_ex)<cr>
   nnoremap <silent>        <Plug>(VM-Run-Normal)              :<C-u>call b:VM_Selection.Edit.run_normal(-1, {'count': v:count1})<cr>

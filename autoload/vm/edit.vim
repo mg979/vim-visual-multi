@@ -388,11 +388,9 @@ fun! s:Edit.before_commands() abort
     let s:v.multiline = s:can_multiline
     let s:can_multiline = 0
 
-    exe 'nunmap <buffer>' g:Vm.maps.toggle
-    nunmap <buffer> <esc>
-
     silent doautocmd <nomodeline> User visual_multi_before_cmd
     call s:V.Maps.disable(0)
+    call s:V.Maps.unmap_esc_and_toggle()
 endfun
 
 
@@ -405,10 +403,8 @@ fun! s:Edit.after_commands(reselect, ...) abort
         call s:V.Edit.post_process(0)
     endif
 
-    nmap <nowait><buffer>       <esc>             <Plug>(VM-Reset)
-    exe 'nmap <nowait><buffer>' g:Vm.maps.toggle '<Plug>(VM-Toggle-Mappings)'
-
     call s:V.Maps.enable()
+    call s:V.Maps.map_esc_and_toggle()
     silent doautocmd <nomodeline> User visual_multi_after_cmd
 endfun
 

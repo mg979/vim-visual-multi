@@ -23,7 +23,7 @@ fun! vm#maps#init() abort
     let s:V = b:VM_Selection
     if !exists('b:VM_maps') | call s:build_buffer_maps() | endif
 
-    call s:map_esc_and_toggle()
+    call s:Maps.map_esc_and_toggle()
     call s:check_warnings()
     return s:Maps
 endfun
@@ -31,7 +31,7 @@ endfun
 
 fun! vm#maps#reset() abort
     " At VM reset, last buffer mappings are reset, and permanent maps are restored.
-    call s:unmap_esc_and_toggle()
+    call s:Maps.unmap_esc_and_toggle()
     for m in g:Vm.maps.permanent | exe m | endfor
 endfun
 
@@ -87,6 +87,16 @@ fun! s:Maps.start() abort
 endfun
 
 
+fun! s:Maps.map_esc_and_toggle() abort
+    " Esc and 'toggle' keys are handled separately.
+    if !has('nvim') && !has('gui_running')
+        nnoremap <nowait><buffer> <esc><esc> <esc><esc>
+    endif
+    nmap <nowait><buffer> <esc> <Plug>(VM-Reset)
+    exe 'nmap <nowait><buffer>' g:Vm.maps.toggle '<Plug>(VM-Toggle-Mappings)'
+endfun
+
+
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -107,6 +117,16 @@ fun! s:Maps.end(keep_permanent) abort
     " restore permanent mappings
     if a:keep_permanent
         for m in g:Vm.maps.permanent | exe m | endfor
+    endif
+endfun
+
+
+fun! s:Maps.unmap_esc_and_toggle() abort
+    " Esc and 'toggle' keys are handled separately.
+    silent! exe 'nunmap <buffer>' g:Vm.maps.toggle
+    silent! nunmap <buffer> <esc>
+    if !has('nvim') && !has('gui_running')
+        silent! nunmap <buffer> <esc><esc>
     endif
 endfun
 
@@ -243,26 +263,6 @@ fun! s:unmap(key, buffer) abort
     let m = a:key[1]
     let b = a:buffer? ' <buffer> ' : ' '
     return "silent! ".m."unmap".b.k
-endfun
-
-
-fun! s:map_esc_and_toggle() abort
-    " Esc and 'toggle' keys are handled separately.
-    if !has('nvim') && !has('gui_running')
-        nnoremap <nowait><buffer> <esc><esc> <esc><esc>
-    endif
-    nmap <nowait><buffer> <esc> <Plug>(VM-Reset)
-    exe 'nmap <nowait><buffer>' g:Vm.maps.toggle '<Plug>(VM-Toggle-Mappings)'
-endfun
-
-
-fun! s:unmap_esc_and_toggle() abort
-    " Esc and 'toggle' keys are handled separately.
-    silent! exe 'nunmap <buffer>' g:Vm.maps.toggle
-    silent! nunmap <buffer> <esc>
-    if !has('nvim') && !has('gui_running')
-        silent! nunmap <buffer> <esc><esc>
-    endif
 endfun
 
 
