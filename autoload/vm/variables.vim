@@ -102,6 +102,7 @@ fun! vm#variables#init() abort
   let v.visual_regex     = 0
   let v.use_register     = v.def_reg
   let v.deleting         = 0
+  let v.vmarks           = [getpos("'<"), getpos("'>")]
 
   let v.keep_matches     = get(g:, 'VM_keep_buffer_hl', 1) ||
         \                  get(b:, 'VM_keep_buffer_hl', 0)
