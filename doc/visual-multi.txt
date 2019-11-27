@@ -418,15 +418,18 @@ This kind of commands is certainly alien to any other multiple cursor system,
 but they can be very powerful.
 
 For example, to swap lines with regions with the lines below them: >
-  \\z   Normal command?   ddp
+  \\z   normal ddp
 
 The |dot| is also good because it can repeat edits done in Vim |replace-mode|,
 a thing that is impossible otherwise (VM doesn't currently support replace mode
 in insert mode).
 
-NOTE: the dot command can repeat the last edit done outside VM, but once you
-start editing things inside VM, don't expect the same! It can repeat deletions
-at cursors (`dw` kind of things) but not more (currently at least).
+With the dot command you can repeat:
+
+- in VM the last edit done outside of VM
+- operations at cursors (`daw`, `ciw`, etc)
+- the last VM normal command (`x`, `X`, `~`, etc)
+- the last VM normal command as entered with \\z
 
 Quick reference ~
 
