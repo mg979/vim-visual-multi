@@ -79,6 +79,7 @@ fun! s:Edit.run_normal(cmd, ...) abort
     endtry
 
     let g:Vm.last_normal = [cmd, args.recursive]
+    let s:v.dot = [cmd, args.recursive]
     call self.after_commands(0)
 
     if !empty(errors)
@@ -224,7 +225,9 @@ fun! s:Edit.dot() abort
     " Run dot command over regions.
     let dot = s:v.dot
     if !s:X() && !empty(dot)
-        if dot[0] ==? 'c' && dot[1] !=? 's'     "repeat last change operator
+        if type(dot) == v:t_list                    " a VM normal command
+            call self.run_normal(dot[0], {'recursive': dot[1]})
+        elseif dot[0] ==? 'c' && dot[1] !=? 's'     "repeat last change operator
             call vm#operators#select(1, dot[1:])
             normal ".p
             call s:G.cursor_mode()
