@@ -224,7 +224,6 @@ fun! s:Edit.dot() abort
     " Run dot command over regions.
     let dot = s:v.dot
     if !s:X() && !empty(dot)
-
         if dot[0] ==? 'c' && dot[1] !=? 's'     "repeat last change operator
             call vm#operators#select(1, dot[1:])
             normal ".p

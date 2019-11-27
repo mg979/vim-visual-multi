@@ -7,7 +7,7 @@ fun! vm#cursors#operation(op, n, register, ...) abort
   let reg = a:register   | let r = "\"".reg
 
   "shortcut for command in a:1
-  if a:0 | call vm#cursors#process(a:op, a:1, reg, 0) | return | endif
+  if a:0 | call s:process(a:op, a:1, reg, 0) | return | endif
 
   call s:F.msg('[VM] ')
 
@@ -51,13 +51,12 @@ fun! vm#cursors#operation(op, n, register, ...) abort
     endif
   endwhile
 
-  call vm#cursors#process(a:op, M, reg, n)
+  call s:process(a:op, M, reg, n)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#cursors#process(op, M, reg, n) abort
-  let s:init_done = s:init()
+fun! s:process(op, M, reg, n) abort
   let s:v.dot = a:M
   let s:v.deleting = a:op == 'd' || a:op == 'c'
 
@@ -209,13 +208,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:init() abort
-  if get(s:, 'init_done', 0) | return 1 | endif
   let s:V         = b:VM_Selection
   let s:v         = s:V.Vars
   let s:G         = s:V.Global
   let s:F         = s:V.Funcs
   let s:Search    = s:V.Search
-  let s:init_done = 1
   call s:G.cursor_mode()
 endfun
 
