@@ -9,6 +9,7 @@ keys('text')
 keys('\<Esc>')
 keys('0j\<C-Down>\<C-Down>')
 keys('.')
+keys('0dw.~...')
 keys('\<Esc>')
 
 keys("6Gf'l")
