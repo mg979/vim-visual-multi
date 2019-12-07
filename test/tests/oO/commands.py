@@ -2,7 +2,8 @@
 L = '\\\\\\\\'
 
 keys(':setf vim\<CR>jw')
-keys('4\<C-Down>Ea')
+keys('4\<C-Down>')
+keys('Ea')
 keys('\<CR>')
 keys('CARRYING OVER ')
 keys('\<Esc>A')

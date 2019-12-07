@@ -97,13 +97,8 @@ fun! vm#init_buffer(empty) abort
             exe g:Vm.Search
         endif
 
-        if &hlsearch && !v:hlsearch && a:empty != 2
-            let s:v.oldhls = 1
-            if !g:Vm.selecting
-                call feedkeys("\<Plug>(VM-Noh)")
-            endif
-        else
-            let s:v.oldhls = 0
+        if !v:hlsearch && a:empty != 2 && !g:Vm.selecting
+            call feedkeys("\<Plug>(VM-Hls)")
         endif
 
         call s:V.Funcs.set_statusline(0)
@@ -129,11 +124,6 @@ endfun
 
 fun! vm#reset(...)
     call vm#variables#reset()
-
-    if s:v.oldhls
-        call feedkeys("\<Plug>(VM-Noh)")
-    endif
-
     call vm#commands#regex_reset()
 
     let s:v.clear_vm_matches = 1

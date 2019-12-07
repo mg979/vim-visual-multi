@@ -76,7 +76,7 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Filter-Lines-Strip)      :call vm#special#commands#filter_lines(1)<cr>
   nnoremap <silent>       <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
   nnoremap <silent>       <Plug>(VM-Switch-Mode)             :call b:VM_Selection.Global.change_mode(1)<cr>
-  nnoremap <silent>       <Plug>(VM-Reset)                   :<c-u>call vm#reset()<cr><esc>
+  nnoremap <silent>       <Plug>(VM-Reset)                   :<c-u><C-r>=b:VM_Selection.Vars.noh<CR>call vm#reset()<cr>
   nnoremap <silent>       <Plug>(VM-Undo)                    :call vm#commands#undo()<cr>
   nnoremap <silent>       <Plug>(VM-Redo)                    :call vm#commands#redo()<cr>
 
@@ -93,7 +93,7 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Remove-Every-n-Regions)  :<c-u>call vm#commands#remove_every_n_regions(v:count)<cr>
   nnoremap <silent>       <Plug>(VM-Show-Infoline)           :call b:VM_Selection.Funcs.infoline()<cr>
 
-  nnoremap <silent>       <Plug>(VM-Noh)                     :if v:hlsearch<bar>nohlsearch<bar>else<bar>set hls<bar>endif<cr>
+  nnoremap <silent>       <Plug>(VM-Hls)                     :set hls<cr>
 
   for m in g:Vm.motions
     exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 0, 0)\<cr>"

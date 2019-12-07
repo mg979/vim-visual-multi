@@ -52,8 +52,10 @@ fun! vm#variables#init() abort
   let v.oldreg           = F.get_reg()
   let v.oldregs_1_9      = F.get_regs_1_9()
   let v.oldsearch        = [getreg("/"), getregtype("/")]
+  let v.noh              = !v:hlsearch ? 'noh|' : ''
 
   "store old vars
+  let v.oldhls           = &hlsearch
   let v.oldvirtual       = &virtualedit
   let v.oldwhichwrap     = &whichwrap
   let v.oldlz            = &lz
@@ -113,6 +115,10 @@ endfun
 
 fun! vm#variables#reset()
   let v = b:VM_Selection.Vars
+
+  if !v.oldhls
+    set nohlsearch
+  endif
 
   let &virtualedit = v.oldvirtual
   let &whichwrap   = v.oldwhichwrap
