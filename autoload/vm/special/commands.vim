@@ -33,7 +33,7 @@ fun! vm#special#commands#menu() abort
   let c = nr2char(getchar())
   if c ==# '"'
     redraw!
-    call s:F.show_registers()
+    call vm#special#commands#show_registers(0, '')
   elseif c ==# 'i'
     redraw!
     call s:F.regions_contents()
