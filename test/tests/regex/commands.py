@@ -40,7 +40,7 @@ keys('\<Esc>')
 keys('\<Esc>')
 
 keys('0f_l')
-keys('\\\\\\\\gse')
+keys('ve')
 keys('\\\\\\\\A')
 keys('c')
 keys('this')

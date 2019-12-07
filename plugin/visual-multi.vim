@@ -37,7 +37,7 @@ com!    VMClear  call vm#clearmatches()
 let g:Vm = { 'hi'          : {},
       \ 'is_active'        : 0,
       \ 'extend_mode'      : 0,
-      \ 'selecting'        : 0,
+      \ 'finding'          : 0,
       \ 'mappings_enabled' : 0,
       \ 'last_ex'          : '',
       \ 'last_normal'      : '',

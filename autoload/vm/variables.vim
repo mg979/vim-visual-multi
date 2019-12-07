@@ -148,7 +148,7 @@ fun! vm#variables#reset_globals()
   let b:VM_Selection = {}
   let g:Vm.is_active = 0
   let g:Vm.extend_mode = 0
-  let g:Vm.selecting = 0
+  let g:Vm.finding = 0
 endfun
 
 " vim: et ts=2 sw=2 sts=2 tw=79 :

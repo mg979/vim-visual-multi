@@ -242,7 +242,6 @@ Add Cursor at Position       \\\                          |vm-add-cursor|
 Select Right/Left            <S-Right>, <S-Left>          |vm-shift-select|
 Select All Words             \\A                          |vm-select-all|
 Find with Regex              \\/                          |vm-regex-search|
-Get Operator                 \\gs                         |vm-get-operator|
 Reselect Last                \\gS                         |vm-reselect-last|
 Select Operator              s                            |vm-select-operator|
 Find Operator                m                            |vm-find-operator|
@@ -347,15 +346,6 @@ Find with Regex ~
 
   If started from visual mode, it will select all occurrences of that pattern
   in the visual selection.
-
-
-------------------------------------------------------------  *vm-get-operator*
-Get Operator ~
-
-  Default mapping: \\gs
-
-  Creates a new selection from a text object. It will also add a pattern, but
-  only if there are no patterns yet.
 
 
 ---------------------------------------------------------  *vm-select-operator*

@@ -11,7 +11,6 @@
 "       2. add the reformatted plug name in this file (permanent or buffer section)
 
 let s:base = {
-      \"Get Operator":            ['', 'n'],
       \"Reselect Last":           ['', 'n'],
       \"Add Cursor At Pos":       ['', 'n'],
       \"Add Cursor At Word":      ['', 'n'],
@@ -52,7 +51,6 @@ fun! vm#maps#all#permanent() abort
   let maps["Find Subword Under"][0]      = '<C-n>'
 
   if g:VM_default_mappings
-    let maps["Get Operator"][0]          = leader.'gs'
     let maps["Reselect Last"][0]         = leader.'gS'
     let maps["Add Cursor At Pos"][0]     = leader.'\'
     let maps["Start Regex Search"][0]    = leader.'/'

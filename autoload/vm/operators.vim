@@ -7,7 +7,6 @@ fun! vm#operators#init() abort
     let s:v = s:V.Vars
     let s:G = s:V.Global
     let s:F = s:V.Funcs
-    let s:v.finding = 0
 endfun
 
 fun! s:init() abort
@@ -25,18 +24,6 @@ let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! vm#operators#get(cnt) abort
-    """Perform a yank, the autocmd will create the region.
-    let g:Vm.selecting = 1
-    call s:init()
-    let hls = &hlsearch && !v:hlsearch ? "\<Plug>(VM-Hls)" : ''
-    call s:updatetime()
-    silent! nunmap <buffer> y
-
-    let n = a:cnt>1? a:cnt : ''
-    return hls . n . 'y'
-endfun
 
 fun! vm#operators#select(count, ...) abort
     call s:init()
@@ -107,21 +94,11 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#operators#after_yank() abort
-    if g:Vm.selecting
-        let g:Vm.selecting = 0
-
-        "find operator
-        if s:v.finding
-            let s:v.finding = 0
-            call vm#operators#find(0, s:v.visual_regex)
-            let s:v.visual_regex = 0
-        else
-            "get operator
-            let R = s:get_region(1)
-            call s:G.check_mutliline(0, R)
-            call s:G.update_and_select_region()
-        endif
-
+    "find operator
+    if g:Vm.finding
+        let g:Vm.finding = 0
+        call vm#operators#find(0, s:v.visual_regex)
+        let s:v.visual_regex = 0
         call s:old_updatetime()
         nmap <silent> <nowait> <buffer> y <Plug>(VM-Yank)
     endif
@@ -164,8 +141,7 @@ fun! vm#operators#find(start, visual, ...) abort
 
 
         call s:updatetime()
-        let s:v.finding = 1
-        let g:Vm.selecting = 1
+        let g:Vm.finding = 1
         let s:vblock = a:visual && mode() == "\<C-v>"
         silent! nunmap <buffer> y
         return 'y'

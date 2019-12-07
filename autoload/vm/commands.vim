@@ -182,7 +182,7 @@ fun! vm#commands#regex_done() abort
 
     if s:v.visual_regex
         call s:Search.get_slash_reg()
-        let g:Vm.selecting = 1 | let s:v.finding = 1
+        let g:Vm.finding = 1
         silent keepjumps normal! gv
         exe "silent normal \<Plug>(VM-Visual-Find)"
         return

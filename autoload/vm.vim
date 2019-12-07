@@ -97,7 +97,7 @@ fun! vm#init_buffer(empty) abort
             exe g:Vm.Search
         endif
 
-        if !v:hlsearch && a:empty != 2 && !g:Vm.selecting
+        if !v:hlsearch && a:empty != 2
             call feedkeys("\<Plug>(VM-Hls)")
         endif
 

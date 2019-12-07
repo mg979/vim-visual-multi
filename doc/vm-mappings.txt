@@ -9,11 +9,11 @@ To change any mapping you must first initialize the variable:
 <
 Then you can assign it to a new key:
 >
-    let g:VM_maps["Get Operator"] = 'gs'
+    let g:VM_maps["Select Operator"] = 'gs'
 <
 To disable a specific mapping, set it to an empty string:
 >
-    let g:VM_maps["Get Operator"] = ''
+    let g:VM_maps["Select Operator"] = ''
 <
 To enable undo/redo (still experimental):
 >
@@ -72,7 +72,6 @@ Add Cursor Up         <C-Up>      ,,       ,,      ,,
 Select All            \\A         select all occurrences of a word
 Start Regex Search    \\/         create a selection with regex search
 Add Cursor At Pos     \\\         add a single cursor at current position
-Get Operator          \\gs        see |vm-get-operator|
 Reselect Last         \\gS        reselect set of regions of last VM session
 
 Mouse Cursor    <C-LeftMouse>     create a cursor where clicked

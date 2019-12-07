@@ -1,6 +1,6 @@
-# get operator, cc
+# visual select, cc
 L = '\\\\\\\\'
-keys(L + 'gse')
+keys('ve')
 keys(L + 'A')
 keys('\<Tab>')
 keys('cc')
