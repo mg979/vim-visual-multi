@@ -217,7 +217,6 @@ fun! s:Funcs.special_statusline(msg) abort
     let s:v.statusline_mode = a:msg
     call self.set_statusline(1)
     redraw
-    unlet s:v.statusline_mode
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

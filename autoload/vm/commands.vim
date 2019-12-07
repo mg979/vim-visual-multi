@@ -157,16 +157,21 @@ fun! vm#commands#find_by_regex(mode) abort
     " Entry point for VM regex search.
     if !g:Vm.is_active | call s:init(0, 2, 1) | endif
     let s:v.using_regex = a:mode
+    let s:v.regex_backup = empty(@/) ? '\%^' : @/
 
     "if visual regex, reposition cursor to the beginning of the selection
     if a:mode == 2
         keepjumps normal! `<
     endif
 
-    "store reg and position, to check if the search will be aborted
-    let s:regex_pos = getpos('.') | let s:regex_reg = @/
+    "store position, restored if the search will be aborted
+    let s:regex_pos = winsaveview()
 
     cnoremap <silent> <buffer> <cr>  <cr>:call vm#commands#regex_done()<cr>
+    cnoremap <silent><nowait><buffer> <esc><esc> <C-r>=b:VM_Selection.Vars.regex_backup<cr><esc>:call vm#commands#regex_abort()<cr>
+    cnoremap <silent><nowait><buffer> <esc>      <C-r>=b:VM_Selection.Vars.regex_backup<cr><esc>:call vm#commands#regex_abort()<cr>
+    call s:F.special_statusline('VM-REGEX')
+    return '/'
 endfun
 
 
@@ -195,19 +200,25 @@ fun! vm#commands#regex_done() abort
 endfun
 
 
-fun! vm#commands#regex_abort() abort
+fun! vm#commands#regex_abort()
     " Abort the VM regex mode.
-    let @/ = s:regex_reg
-    call s:F.msg('Regex search aborted. ')
-    call setpos('.', s:regex_pos)
+    call winrestview(s:regex_pos)
     call vm#commands#regex_reset()
+    if !len(s:R())
+        call feedkeys("\<esc>")
+    else
+        call s:F.msg('Regex search aborted. ')
+    endif
 endfun
 
 
 fun! vm#commands#regex_reset(...) abort
     " Reset the VM regex mode.
     silent! cunmap <buffer> <cr>
+    silent! cunmap <buffer> <esc>
+    silent! cunmap <buffer> <esc><esc>
     let s:v.using_regex = 0
+    silent! unlet s:v.statusline_mode
     if a:0 | return a:1 | endif
 endfun
 

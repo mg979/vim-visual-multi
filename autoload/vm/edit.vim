@@ -43,6 +43,7 @@ fun! s:Edit.run_normal(cmd, ...) abort
         call s:F.special_statusline('NORMAL')
         let bang = a:0 && !get(a:1, 'recursive', 1) ? '!' : ''
         let cmd = input(':normal'.bang.' ')
+        unlet s:v.statusline_mode
         if empty(cmd) | return s:F.msg('Normal command aborted.') | endif
 
     elseif a:cmd == '~' && s:X()
@@ -100,6 +101,7 @@ fun! s:Edit.run_visual(cmd, recursive, ...) abort
         call s:F.special_statusline('VISUAL')
         let bang = !a:recursive ? '!' : ''
         let cmd = input(':visual'.bang.' ')
+        unlet s:v.statusline_mode
         if empty(cmd) | return s:F.msg('Visual command aborted.') | endif
 
     elseif empty(a:cmd)
@@ -173,6 +175,7 @@ fun! s:Edit.ex_done() abort
     silent! cunmap <buffer> <esc><esc>
     silent! cunmap <buffer> <esc>
     call histdel(':', -1)
+    unlet s:v.statusline_mode
     if empty(@") | return s:F.msg('Ex command aborted.') | endif
     call s:V.Edit.run_ex(@")
 endfun
@@ -192,8 +195,7 @@ fun! s:Edit.ex() abort
     cnoremap <silent><nowait><buffer> <esc><esc> <c-u>let @" = ''<cr>:call b:VM_Selection.Edit.ex_done()<cr>
     cnoremap <silent><nowait><buffer> <esc> <c-u>let @" = ''<cr>:call b:VM_Selection.Edit.ex_done()<cr>
     call s:F.special_statusline('EX')
-    call feedkeys("\<C-L>", 'n')
-    return ''
+    return ':'
 endfun
 
 

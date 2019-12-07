@@ -23,8 +23,8 @@ fun! vm#plugs#permanent() abort
   nnoremap <silent>       <Plug>(VM-Find-Under)              :<c-u>call vm#commands#ctrln(v:count1)<cr>
   xnoremap <silent><expr> <Plug>(VM-Find-Subword-Under)      <sid>Visual('under')
 
-  nnoremap <silent>       <Plug>(VM-Start-Regex-Search)      :call vm#commands#find_by_regex(1)<cr>:call <SID>Mode()<cr>/
-  xnoremap <silent>       <Plug>(VM-Visual-Regex)            :call vm#commands#find_by_regex(2)<cr>:call <SID>Mode()<cr>/
+  nnoremap <silent>       <Plug>(VM-Start-Regex-Search)      @=vm#commands#find_by_regex(1)<cr>
+  xnoremap <silent>       <Plug>(VM-Visual-Regex)            :call vm#commands#find_by_regex(2)<cr>:call feedkeys('/', 'n')<cr>
 
   nnoremap <silent>       <Plug>(VM-Left-Mouse)              <LeftMouse>
   nmap     <silent>       <Plug>(VM-Mouse-Cursor)            <Plug>(VM-Left-Mouse)<Plug>(VM-Add-Cursor-At-Pos)
@@ -178,7 +178,7 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>        <Plug>(VM-Run-Dot)                 :<C-u>call b:VM_Selection.Edit.run_normal('.', {'count': v:count1, 'recursive': 0})<cr>
   nnoremap <silent>        <Plug>(VM-Surround)                :<c-u>call b:VM_Selection.Edit.surround()<cr>
   nnoremap <silent>        <Plug>(VM-Run-Macro)               :<c-u>call b:VM_Selection.Edit.run_macro()<cr>
-  nnoremap <silent>        <Plug>(VM-Run-Ex)                  :<C-r>=b:VM_Selection.Edit.ex()<CR>
+  nnoremap <silent>        <Plug>(VM-Run-Ex)                  @=b:VM_Selection.Edit.ex()<CR>
   nnoremap <silent>        <Plug>(VM-Run-Last-Ex)             :<C-u>call b:VM_Selection.Edit.run_ex(g:Vm.last_ex)<cr>
   nnoremap <silent>        <Plug>(VM-Run-Normal)              :<C-u>call b:VM_Selection.Edit.run_normal(-1, {'count': v:count1})<cr>
   nnoremap <silent>        <Plug>(VM-Run-Last-Normal)         :<C-u>call b:VM_Selection.Edit.run_normal(g:Vm.last_normal[0], {'count': v:count1, 'recursive': g:Vm.last_normal[1]})<cr>
@@ -268,11 +268,6 @@ fun! s:Yank() abort
     let b:VM_Selection.Vars.yanked = 1 | return 'y'
   endif
   return ":\<C-u>call b:VM_Selection.Edit.yank(v:register, 1, 1)\<cr>"
-endfun
-
-fun! s:Mode() abort
-  let mode = g:Vm.extend_mode? ' (extend mode)' : ' (cursor mode)'
-  call b:VM_Selection.Funcs.msg([["[visual-multi]", 'WarningMsg'], [" /", 'None']])
 endfun
 
 fun! s:Visual(cmd) abort
