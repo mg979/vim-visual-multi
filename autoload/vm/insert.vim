@@ -2,7 +2,7 @@
 " Insert class
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:Insert = {'index': -1, 'cursors': []}
+let s:Insert = {'index': -1, 'cursors': [], 'type': ''}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -29,10 +29,9 @@ let s:X = { -> g:Vm.extend_mode }
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.key(type) abort
-    call vm#comp#icmds()  "compatibility tweaks
-    if s:v.single_region && !exists('s:V.Insert.type')
-        let s:V.Insert.type = a:type
-    endif
+    let s:V.Insert.type = a:type
+
+    call vm#comp#icmds()        "compatibility tweaks
     call s:map_single_mode(0)
 
     if a:type ==# 'I'
@@ -92,8 +91,6 @@ fun! s:Insert.start(...) abort
         let s:v.winline_insert = winline()
         call s:G.backup_regions()
     endif
-
-    " s:v.insert is true if re-entering insert mode after BS/CR/arrows etc.
 
     " syn minlines/synmaxcol settings
     if !s:v.insert
@@ -281,10 +278,10 @@ fun! s:Insert.stop(...) abort
             let c = self.cursors[i]
             if c.active
                 let active_line = c.l
-                call r.update_cursor([c.l, c.a + self.change])
+                call r.update_cursor([c.l, c._a])
                 let s:v.storepos = [r.l, r.a]
             elseif active_line == c.l
-                call r.update_cursor([c.l, c.a + self.change])
+                call r.update_cursor([c.l, c._a])
                 call add(s:cursors_after, c)
             endif
             let i += 1
@@ -292,17 +289,26 @@ fun! s:Insert.stop(...) abort
     else
         for r in s:R()
             let c = self.cursors[i]
-            call r.update_cursor([c.l, c.a + self.change + self.change*c.nth])
+            call r.update_cursor([c.l, c._a])
             if r.index == self.index | let s:v.storepos = [r.l, r.a] | endif
             let i += 1
         endfor
     endif
 
-    "NOTE: restart_insert is set in plugs, to avoid postprocessing, but it will be reset on <esc>
-    "check for s:v.insert instead, it will be true until insert session is really over
+    " NOTE:
+    " - s:v.insert is true if re-entering insert mode after BS/CR/arrows etc;
+    "   it is true until an insert session is really over.
+    "
+    " - s:v.restart_insert is only temporarily true when commands need to exit
+    "   insert mode to update cursors, and enter it again; it is set in plugs,
+    "   to avoid postprocessing.
+
     if s:v.restart_insert | let s:v.restart_insert = 0 | return | endif
 
-    let s:v.eco = 1 | let s:v.insert = 0
+    " reset insert mode variables
+    let s:v.eco    = 1
+    let s:v.insert = 0
+    let self.type  = ''
 
     call s:step_back()
     call s:V.Edit.post_process(0,0)
@@ -363,7 +369,7 @@ let s:Cursor = {}
 "--------------------------------------------------------------------------
 
 "in Insert Mode we will forget about the regions, and work with cursors at
-"positions; from the final position, we'll update the real regions later
+"positions; from the final positions, we'll update the real regions later
 
 "--------------------------------------------------------------------------
 
@@ -385,13 +391,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Cursor.update(l, c) abort
-    "Update cursors positions and highlight.
+fun! s:Cursor.update(ln, change) abort
+    "Update cursor position and highlight.
     let C = self
-    let C._a = a:c
+    let C._a = C.a + a:change
 
     call matchdelete(C.hl)
-    let C.hl  = matchaddpos('MultiCursor', [[C.l, a:c]], 40)
+    let C.hl  = matchaddpos('MultiCursor', [[C.l, C._a]], 40)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -413,9 +419,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Line.update(change, text) abort
-    let change   = 0
     let text     = self.txt
     let I        = s:V.Insert
+    let extraChg = 0  " cumulative change for additional cursors in same line
 
     " self.txt is the initial text of the line, when insert mode starts
     " it is not updated: the new text will be inserted inside of it
@@ -427,30 +433,27 @@ fun! s:Line.update(change, text) abort
     " 1 must be subtracted from their column (c.a)
 
     " a:change is the length of the text inserted by the main cursor
-    " 'change' is the cumulative length inside the for loop
-    " it is zero if there is only one cursor in the line
-    " but if there are more cursors, changes add up
+    " if there are more cursors in the same line, changes add up (== extraChg)
 
     " to sum it up, if:
     "     t1 is the original line, before the insertion point
     "     t2 is the original line, after the insertion point
-    "     // is the insertion point (== c.a - 1 + change)
+    "     // is the insertion point (== c.a - 1 + nth*a:change)
     "     \\ is the end of the inserted text
     " then:
     "     line = t1 // inserted text \\ t2
 
-
     for c in self.cursors
-        let inserted = exists('s:v.smart_case_change') ?
-                    \ s:smart_case_change(c, a:text) : a:text
-
         if s:v.single_region && !c.active
-            call c.update(self.l, c.a + change)
+            call c.update(self.l, extraChg)
             continue
         endif
 
+        let inserted = exists('s:v.smart_case_change') ?
+                    \ s:smart_case_change(c, a:text) : a:text
+
         if c.a > 1
-            let insPoint = c.a + change - 1
+            let insPoint = c.a + extraChg - 1
             let t1 = text[ 0 : (insPoint - 1) ]
             let t2 = text[ insPoint : ]
             let text = t1 . inserted . t2
@@ -459,8 +462,11 @@ fun! s:Line.update(change, text) abort
             " echo "█" . strtrans(inserted) . "█" . strtrans(text)
             let text = inserted . text
         endif
-        let change += a:change
-        call c.update(self.l, c.a + change)
+
+        " increase the cumulative extra change
+        let extraChg += a:change
+        call c.update(self.l, extraChg)
+
         " c._a is the updated cursor position, c.a stays the same
         if c.active | let I.col = c._a | endif
     endfor
@@ -547,7 +553,6 @@ fun! s:map_single_mode(stop) abort
   if a:stop
       exe 'iunmap <buffer>' next
       exe 'iunmap <buffer>' prev
-      unlet s:V.Insert.type
       if exists('s:v.single_mode_running')
           if s:v.single_mode_running
               let s:v.single_mode_running = 0
