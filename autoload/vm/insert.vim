@@ -2,7 +2,7 @@
 " Insert class
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:Insert = {'index': -1, 'cursors': [], 'type': ''}
+let s:Insert = {'index': -1, 'cursors': [], 'replace': 0, 'type': ''}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -30,6 +30,10 @@ let s:X = { -> g:Vm.extend_mode }
 
 fun! s:Insert.key(type) abort
     let s:V.Insert.type = a:type
+
+    if self.replace
+        call s:G.one_region_per_line()
+    endif
 
     call vm#comp#icmds()        "compatibility tweaks
     call s:map_single_mode(0)
@@ -105,13 +109,13 @@ fun! s:Insert.start(...) abort
         endif
     endif
 
-    if s:v.insert
-        let i = I.index >= len(s:R())? len(s:R())-1 : I.index
-        let R = s:G.select_region(i)
-    elseif g:VM_use_first_cursor_in_line
+    if g:VM_use_first_cursor_in_line || I.replace
         let R = s:G.select_region_at_pos('.')
         let ix = s:G.lines_with_regions(0, R.l)[R.l][0]
         let R = s:G.select_region(ix)
+    elseif s:v.insert
+        let i = I.index >= len(s:R())? len(s:R())-1 : I.index
+        let R = s:G.select_region(i)
     else
         let R = s:G.select_region_at_pos('.')
     endif
@@ -172,7 +176,11 @@ fun! s:Insert.start(...) abort
     endif
 
     "start insert mode
-    startinsert
+    if self.replace
+        startreplace
+    else
+        startinsert
+    endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -238,7 +246,11 @@ fun! s:Insert.update_text(...) abort
     " update the lines (also the current line is updated with setline(), this
     " should ensure that the same text is entered everywhere)
     for l in sort(keys(L))
-        call L[l].update(I.change, text)
+        if I.replace
+            call L[l].replace(I.change, text)
+        else
+            call L[l].update(I.change, text)
+        endif
     endfor
 
     " store the last known column position, it will be checked on InsertLeave
@@ -309,6 +321,11 @@ fun! s:Insert.stop(...) abort
     let s:v.eco    = 1
     let s:v.insert = 0
     let self.type  = ''
+
+    " don't reset replace mode if in single mode
+    if !exists('s:v.single_mode_running') || !s:v.single_mode_running
+        let self.replace = 0
+    endif
 
     call s:step_back()
     call s:V.Edit.post_process(0,0)
@@ -466,6 +483,36 @@ fun! s:Line.update(change, text) abort
         " increase the cumulative extra change
         let extraChg += a:change
         call c.update(self.l, extraChg)
+
+        " c._a is the updated cursor position, c.a stays the same
+        if c.active | let I.col = c._a | endif
+    endfor
+    call setline(self.l, text)
+endfun
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Line.replace(change, text) abort
+    let text     = self.txt
+    let I        = s:V.Insert
+    let inserted = a:text
+
+    for c in self.cursors
+        if s:v.single_region && !c.active
+            continue
+        endif
+
+        if c.a > 1
+            let insPoint = c.a - 1
+            let t1 = text[ 0 : (insPoint - 1) ]
+            let t2 = text[ insPoint + strwidth(inserted) : ]
+            let text = t1 . inserted . t2
+        else
+            let text = inserted . text[ len(inserted) : ]
+        endif
+
+        call c.update(self.l, a:change)
 
         " c._a is the updated cursor position, c.a stays the same
         if c.active | let I.col = c._a | endif

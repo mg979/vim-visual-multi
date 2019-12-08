@@ -210,7 +210,11 @@ endfun " }}}
 
 fun! s:Edit.replace_pattern() abort
     " Replace a pattern in all regions as with :s command. {{{1
-    if !s:X() | return | endif
+    if !s:X()
+        let s:V.Insert.replace = 1
+        return s:V.Insert.key('i')
+    endif
+
     let ix = s:v.index
     call s:F.Scroll.get()
 

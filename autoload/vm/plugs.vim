@@ -211,6 +211,7 @@ fun! vm#plugs#buffer() abort
   inoremap <silent><expr> <Plug>(VM-I-CtrlF)            <sid>Insert('l')
   inoremap <silent><expr> <Plug>(VM-I-Next)             vm#icmds#goto(1)
   inoremap <silent><expr> <Plug>(VM-I-Prev)             vm#icmds#goto(0)
+  inoremap <silent><expr> <Plug>(VM-I-Replace)          <sid>Insert('ins')
 
   "Cmdline
   nnoremap         <expr> <Plug>(VM-:)                  vm#commands#regex_reset(':')
@@ -223,6 +224,8 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert(key) abort
+  let VM = b:VM_Selection
+
   if pumvisible()
     if a:key == 'j'       | return "\<C-n>"
     elseif a:key == 'k'   | return "\<C-p>"
@@ -230,19 +233,24 @@ fun! s:Insert(key) abort
     endif
   endif
 
-  if b:VM_Selection.Vars.single_region
+  if VM.Vars.single_region
     if a:key == 'c-v'
       return "\<C-r>0"
     elseif a:key == 'cr' || a:key == 'c-w' || a:key == 'c-u'
-      call b:VM_Selection.Funcs.msg("[visual-multi] not possible in single region mode")
+      call VM.Funcs.msg("[visual-multi] not possible in single region mode")
       let &ro = &ro          " brings the cursor back from commmand line
       return ""
     endif
   endif
 
-  let b:VM_Selection.Vars.restart_insert = 1
+  let VM.Vars.restart_insert = 1
   let i = ":call b:VM_Selection.Insert.key('i')\<cr>"
   let a = ":call b:VM_Selection.Insert.key('a')\<cr>"
+
+  if a:key == 'ins'
+    let VM.Insert.replace = !VM.Insert.replace
+    return "\<esc>".i
+  endif
 
   if index(split('hjklwbWB0', '\zs'), a:key) >= 0
     return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i

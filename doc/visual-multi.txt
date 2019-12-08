@@ -79,6 +79,7 @@ be followed by the text object you want to change. Supported commands:
     c/y/d   change/yank/delete (+ text object)
     |       set column for all cursors (to current column or [count])
     r       replace single character
+    R       enter |vm-replace-mode|
     ~       change case of single character
     &       repeat last substitution
     w/b/%   and all other basic motions
@@ -138,6 +139,19 @@ solutions, for others not. See |vm-faq-remap|.
 
 NOTE: Since <C-V> is remapped, you should use <C-Q> to insert special
 characters.
+
+------------------------------------------------------------  *vm-replace-mode*
+
+|Replace-mode| is partially implemented in VM. It can be started in two ways:
+
+- from cursor mode, by pressing |R|.
+- from insert mode, by pressing <Insert> (toggle).
+
+The main limitation is that only one region per line is allowed, so if you have
+more regions in the same line, they will be collapsed first.
+
+Another limitation concerns special keys like <BS>, that work like in insert
+mode. Only typed characters will replace underlying text.
 
 -------------------------------------------------------------  *vm-visual-mode*
 
@@ -410,13 +424,9 @@ but they can be very powerful.
 For example, to swap lines with regions with the lines below them: >
   \\z   normal ddp
 
-The |dot| is also good because it can repeat edits done in Vim |replace-mode|,
-a thing that is impossible otherwise (VM doesn't currently support replace mode
-in insert mode).
-
 With the dot command you can repeat:
 
-- in VM the last edit done outside of VM
+- in VM the last edit done outside of VM (also edits done in |replace-mode|)
 - operations at cursors (`daw`, `ciw`, etc)
 - the last VM normal command (`x`, `X`, `~`, etc)
 - the last VM normal command as entered with \\z
@@ -483,7 +493,8 @@ Replace pattern in regions ~
   substitution will take place in all selected regions, leaving unselected text
   untouched.
 
-  Only working in |extend-mode|.
+  Only working in |extend-mode|. When |R| is pressed in |cursor-mode|, it will
+  start |vm-replace-mode| instead.
 
 
 --------------------------------------------------------  *vm-subtract-pattern*

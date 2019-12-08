@@ -201,6 +201,7 @@ fun! vm#maps#all#buffer() abort
         \"I End":                   ['<End>',       'i'],
         \"I CtrlB":                 ['<C-b>',       'i'],
         \"I CtrlF":                 ['<C-f>',       'i'],
+        \"I Replace":               ['<Insert>',    'i'],
         \})
 
   let insert_keys = get(g:, 'VM_insert_special_keys', ['c-a', 'c-e', 'c-v'])

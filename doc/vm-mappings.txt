@@ -117,7 +117,7 @@ Remove Region           Q         remove region under cursor
 The following are valid in extend-mode: ~
 
 Invert Direction        o         as |o| in visual mode
-Replace Pattern         R         replace pattern in regions
+Replace Pattern         R         replace pattern in regions, or replace mode
 Surround                S         requires |vim-surround| plugin
 Move Right          <M-S-Right>   move all selections to the right
 Move Left           <M-S-Left>    ,,      ,,          to the left
