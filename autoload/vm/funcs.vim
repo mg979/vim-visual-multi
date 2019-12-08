@@ -271,7 +271,7 @@ endfun
 
 fun! s:Funcs.Scroll.get(...) abort
     """Store winline().
-    let s:v.restore_scroll = a:0
+    if a:0 | let s:v.restore_scroll = 1 | endif
     let s:v.winline = winline()
 endfun
 

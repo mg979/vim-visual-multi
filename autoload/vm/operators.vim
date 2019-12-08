@@ -27,8 +27,8 @@ let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
 
 fun! vm#operators#select(count, ...) abort
     call s:init()
-    let s:v.storepos = getpos('.')[1:2]
-    call s:F.Scroll.get()
+    let pos = getpos('.')[1:2]
+    call s:F.Scroll.get(1)
 
     if a:0 | return s:select('y'.a:1) | endif
 
@@ -62,7 +62,8 @@ fun! vm#operators#select(count, ...) abort
     let n = n<1? 1 : n
     let n = n*x>1? n*x : ''
     call s:select('v'.n.s.'y')
-    call s:G.update_and_select_region()
+    call s:G.update_and_select_region(pos)
+    call s:F.Scroll.restore()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
