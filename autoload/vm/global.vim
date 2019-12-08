@@ -389,7 +389,7 @@ fun! s:Global.select_region_at_pos(pos) abort
     if !empty(r)
         return self.select_region(r.index)
     else
-        return self.select_region(s:v.index)
+        return self.select_region(self.nearest_region().index)
     endif
 endfun
 
@@ -406,6 +406,24 @@ fun! s:Global.region_at_pos(...) abort
         endif
     endfor
     return {}
+endfun
+
+
+fun! s:Global.nearest_region(...) abort
+    " Return the nearest region at position.
+
+    let Rs = s:R() | if !len(Rs) | return {} | endif
+
+    let pos = a:0 ? s:F.pos2byte(a:1) : s:F.curs2byte()
+
+    if pos <= Rs[0].A  | return Rs[0]  | endif
+    if pos >= Rs[-1].B | return Rs[-1] | endif
+
+    for r in Rs
+        if pos <= r.B
+            return r
+        endif
+    endfor
 endfun
 
 

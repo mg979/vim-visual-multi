@@ -347,7 +347,12 @@ fun! s:navigate(force, dir) abort
         let s:v.nav_direction = a:dir
         return s:keep_block()
     elseif a:force || @/==''
-        let i = a:dir? s:v.index+1 : s:v.index-1
+        let r = s:G.region_at_pos()
+        if empty(r)
+            let i = s:G.nearest_region().index
+        else
+            let i = a:dir? r.index+1 : r.index-1
+        endif
         call s:G.select_region(i)
         return s:keep_block()
     endif
