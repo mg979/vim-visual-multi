@@ -595,14 +595,17 @@ endfun
 fun! s:Global.one_region_per_line() abort
     " Remove all regions in each line, except the first one.
 
-    let L = self.lines_with_regions(0)
     let new_regions = []
-    for l in keys(L)
-        let first_in_line = copy(s:R()[L[l][0]])
-        call add(new_regions, first_in_line)
+    let lines = []
+    for r in s:R()
+        if index(lines, r.l) < 0
+            call add(new_regions, r)
+            call add(lines, r.l)
+        endif
     endfor
+    call self.erase_regions()
     let s:V.Regions = new_regions
-    call self.reorder_regions()
+    call self.update_indices()
 endfun
 
 
@@ -622,7 +625,7 @@ fun! s:Global.reorder_regions() abort
         if !len(As) | break | endif
     endwhile
     let s:V.Regions = Regions
-    call s:Global.update_indices()
+    call self.update_indices()
     call self.reset_index()
 endfun
 
