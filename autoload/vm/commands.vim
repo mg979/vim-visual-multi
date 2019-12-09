@@ -343,10 +343,8 @@ fun! s:get_prev() abort
 endfun
 
 fun! s:navigate(force, dir) abort
-    if a:force && s:v.nav_direction != a:dir
+    if a:force || @/==''
         let s:v.nav_direction = a:dir
-        return s:keep_block()
-    elseif a:force || @/==''
         let r = s:G.region_at_pos()
         if empty(r)
             let i = s:G.nearest_region().index
