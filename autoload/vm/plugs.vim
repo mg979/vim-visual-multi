@@ -225,6 +225,8 @@ endfun
 
 fun! s:Insert(key) abort
   let VM = b:VM_Selection
+  let i  = ":call b:VM_Selection.Insert.key('i')\<cr>"
+  let a  = ":call b:VM_Selection.Insert.key('a')\<cr>"
 
   if pumvisible()
     if a:key == 'j'       | return "\<C-n>"
@@ -233,23 +235,22 @@ fun! s:Insert(key) abort
     endif
   endif
 
+  " in single region mode, some keys must be handled differently, or the
+  " function must return prematurely
   if VM.Vars.single_region
     if a:key == 'c-v'
       return "\<C-r>0"
-    elseif a:key == 'cr' || a:key == 'c-w' || a:key == 'c-u'
+    elseif index(['cr', 'c-w', 'c-u', 'ins'], a:key) >= 0
       call VM.Funcs.msg("[visual-multi] not possible in single region mode")
       let &ro = &ro          " brings the cursor back from commmand line
       return ""
     endif
+  else
+    let VM.Vars.restart_insert = 1
   endif
-
-  let VM.Vars.restart_insert = 1
-  let i = ":call b:VM_Selection.Insert.key('i')\<cr>"
-  let a = ":call b:VM_Selection.Insert.key('a')\<cr>"
 
   if a:key == 'ins'
     let VM.Insert.replace = !VM.Insert.replace
-    return "\<esc>".i
   endif
 
   if index(split('hjklwbWB0', '\zs'), a:key) >= 0
@@ -266,6 +267,7 @@ fun! s:Insert(key) abort
         \ 'c-v': "\<esc>:call vm#icmds#paste()\<cr>".a,
         \ 'c-w': "\<esc>:call vm#icmds#cw(0)\<cr>",
         \ 'c-u': "\<esc>:call vm#icmds#cw(1)\<cr>",
+        \ 'ins': "\<esc>".i,
         \}[tolower(a:key)]
   endif
 endfun

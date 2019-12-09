@@ -29,7 +29,9 @@ let s:X = { -> g:Vm.extend_mode }
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.key(type) abort
-    let s:V.Insert.type = a:type
+    if empty(self.type)
+        let self.type = a:type
+    endif
 
     if self.replace
         call s:G.one_region_per_line()
@@ -320,12 +322,6 @@ fun! s:Insert.stop(...) abort
     " reset insert mode variables
     let s:v.eco    = 1
     let s:v.insert = 0
-    let self.type  = ''
-
-    " don't reset replace mode if in single mode
-    if !exists('s:v.single_mode_running') || !s:v.single_mode_running
-        let self.replace = 0
-    endif
 
     call s:step_back()
     call s:V.Edit.post_process(0,0)
@@ -361,6 +357,12 @@ fun! s:Insert.stop(...) abort
 
     " unmap single mode mappings, if they had been mapped
     call s:map_single_mode(1)
+
+    " reset type and replace mode last, but not in single region mode
+    if !s:v.single_region
+        let self.replace = 0
+        let self.type = ''
+    endif
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
