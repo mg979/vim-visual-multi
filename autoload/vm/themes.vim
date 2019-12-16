@@ -120,9 +120,10 @@ fun! vm#themes#statusline() abort
     let mode = 'V-M'
   endtry
   let mode = exists('v.statusline_mode') ? v.statusline_mode : mode
-  return printf("%s %s %s %s %s%s %s %%=%s %s",
+  let patterns = string(vm.patterns)[:(winwidth(0)-30)]
+  return printf("%s %s %s %s %s%s %s %%=%%l:%%c %s %s",
         \ color, mode, '%#VM_Insert#', vm.ratio, single, '%#TabLine#',
-        \ vm.patterns, color, vm.status . ' ')
+        \ patterns, color, vm.status . ' ')
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
