@@ -176,7 +176,7 @@ endfun " }}}
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
-fun! s:Edit.replace() abort
+fun! s:Edit.replace_chars() abort
     " Replace single characters or selections with character. {{{1
     if s:X()
         let char = nr2char(getchar())
@@ -208,8 +208,8 @@ fun! s:Edit.replace() abort
 endfun " }}}
 
 
-fun! s:Edit.replace_pattern() abort
-    " Replace a pattern in all regions as with :s command. {{{1
+fun! s:Edit.replace() abort
+    " Replace a pattern in all regions, or start replace mode. {{{1
     if !s:X()
         let s:V.Insert.replace = 1
         return s:V.Insert.key('i')

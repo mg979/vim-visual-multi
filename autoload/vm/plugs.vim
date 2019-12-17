@@ -152,8 +152,8 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>        <Plug>(VM-C)                       :<C-u>call vm#cursors#operation('c', 0, v:register, 'c$')<cr>
   nnoremap <silent>        <Plug>(VM-Delete)                  :<C-u>call b:VM_Selection.Edit.delete(g:Vm.extend_mode, v:register, v:count1, 1)<cr>
   nnoremap <silent>        <Plug>(VM-Delete-Exit)             :<C-u>call b:VM_Selection.Edit.delete(g:Vm.extend_mode, v:register, v:count1, 1)<cr>:call vm#reset()<cr>
+  nnoremap <silent>        <Plug>(VM-Replace-Characters)      :<C-u>call b:VM_Selection.Edit.replace_chars()<cr>
   nnoremap <silent>        <Plug>(VM-Replace)                 :<C-u>call b:VM_Selection.Edit.replace()<cr>
-  nnoremap <silent>        <Plug>(VM-Replace-Pattern)         :<C-u>call b:VM_Selection.Edit.replace_pattern()<cr>
   nnoremap <silent>        <Plug>(VM-Transform-Regions)       :<C-u>call b:VM_Selection.Edit.replace_expression()<cr>
   nnoremap <silent>        <Plug>(VM-p-Paste-Regions)         :call b:VM_Selection.Edit.paste((g:Vm.extend_mode? 1 : 0), 0, g:Vm.extend_mode, v:register)<cr>
   nnoremap <silent>        <Plug>(VM-P-Paste-Regions)         :call b:VM_Selection.Edit.paste((g:Vm.extend_mode? 1 : 1), 0, g:Vm.extend_mode, v:register)<cr>
