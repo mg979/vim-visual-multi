@@ -8,6 +8,21 @@ VM has quit with errors and I can't clear VM highlight matches.~
 Run |:VMClear|
 
 -------------------------------------------------------------------------------
+                                                              *vm-faq-mappings*
+I want to remap the main VM mappings.~
+
+You have to initialize the mappings dictionary and replace individual mappings
+with your own. Below there are some examples.
+
+For a full list of mappings and other informations, see |vm-mappings.txt|.
+>
+  let g:VM_maps = {}
+  let g:VM_maps['Find Under']         = '<C-d>'   " replace C-n
+  let g:VM_maps['Find Subword Under'] = '<C-d>'   " replace visual C-n
+  let g:VM_maps["Add Cursor Down"]    = '<M-j>'   " new cursor down
+  let g:VM_maps["Add Cursor Up"]      = '<M-k>'   " new cursor up
+
+-------------------------------------------------------------------------------
                                                              *vm-faq-functions*
 How can I do something before VM starts, or after VM ends? ~
 
@@ -79,8 +94,9 @@ The first mapping would start VM by selecting the first occurrence of the
 current search register (|@/|, the one you get with |star|).
 The second mapping would select all matches.
 
-It is recommended that you don't start insert mode in VM recursive mappings.
-
-
+Obviously you can just use keys rather than plugs:
+>
+  nmap  \*    \\/<Up><CR>\\A
+<
 
  vim: ft=help et sw=2 ts=2 sts=2 tw=79

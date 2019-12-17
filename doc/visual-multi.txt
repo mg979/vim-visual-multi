@@ -31,8 +31,8 @@ REQUIREMENTS                                        *visual-multi-requirements*
 
 Vim 8/Neovim is required.
 
-It's recommended that you put in your vimrc: >
-  set hlsearch
+Here for troubles? Go to |visual-multi-faq| or |visual-multi-troubleshooting|.
+
 
 
 
@@ -51,8 +51,8 @@ features that can make up for it, namely: powerful macros, visual block, |gn|
 text object, |:global| command and more.
 
 Still I think that multiple selections cover a middle ground for which macros
-are a bit cumbersome, visual block is unsufficient, |gn| is limited in what it
-can do, and you don't always want to make a global change on the whole file.
+and other methods are a bit cumbersome, or you just want somw visual feedback
+on what you're doing.
 
 I think of them as an evolution of visual block, so if you think visual block
 has its usefulness and its place in Vim, why should it be different for
