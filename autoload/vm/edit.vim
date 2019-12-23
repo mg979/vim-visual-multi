@@ -289,7 +289,7 @@ fun! s:Edit.process(cmd, ...) abort
 
         " let's force CursorMoved in case some yank command needs it
         if !diff && do_cursor_moved
-            doautocmd CursorMoved
+            silent! doautocmd <nomodeline> CursorMoved
         endif
     endfor
 
