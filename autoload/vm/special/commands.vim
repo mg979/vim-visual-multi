@@ -224,7 +224,7 @@ fun! vm#special#commands#mass_transpose()
 
   " fill register and paste new text
   call VM.Edit.fill_register('"', new_text, 0)
-  normal p
+  call VM.Edit.paste(1, 0, 1, '"')
 endfun
 
 

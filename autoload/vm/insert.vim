@@ -65,7 +65,7 @@ fun! s:Insert.key(type) abort
             let s:v.direction = 1
         endif
         for r in s:R() | call s:V.Edit.extra_spaces.add(r) | endfor
-        normal l
+        call vm#commands#motion('l', 1, 0, 0)
         call self.start(1)
 
     else

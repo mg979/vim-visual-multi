@@ -134,6 +134,6 @@ fun! s:Case.convert(type) abort
   for r in s:R()
     call add(text, eval("self.".a:type."(r.txt)"))
   endfor
-  normal p
+  call b:VM_Selection.Edit.paste(1, 0, 1, '"')
 endfun
 " vim: et ts=2 sw=2 sts=2 :

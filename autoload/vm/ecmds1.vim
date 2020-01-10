@@ -237,8 +237,7 @@ fun! s:Edit.replace() abort
     for t in text
         call add(T, substitute(t, pat, repl, 'g'))
     endfor
-    call self.fill_register('"', T, 0)
-    normal p
+    call self.replace_regions_with_text(T)
     call s:G.select_region(ix)
 endfun " }}}
 
@@ -255,8 +254,7 @@ fun! s:Edit.replace_expression() abort
     for r in s:R()
         call add(T, eval(expr))
     endfor
-    call self.fill_register('"', T, 0)
-    normal p
+    call self.replace_regions_with_text(T)
     call s:G.select_region(ix)
 endfun " }}}
 
@@ -369,10 +367,11 @@ fun! s:Edit.fill_register(reg, text, force_ow) abort
 endfun " }}}
 
 
-fun! s:Edit.replace_regions_with_text(text) abort
+fun! s:Edit.replace_regions_with_text(text, ...) abort
     " Paste a custom list of strings into current regions. {{{1
     call self.fill_register('"', a:text, 0)
-    normal p
+    let before = !a:0 || !a:1
+    call self.paste(before, 0, 1, '"')
 endfun " }}}
 
 

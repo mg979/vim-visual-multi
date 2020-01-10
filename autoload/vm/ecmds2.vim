@@ -209,13 +209,9 @@ fun! s:Edit._numbers(start, step, separator, append) abort
         let text = map(copy(s:R()), a:append
                     \ ? '(v:val.txt).text[v:key]'
                     \ : 'text[v:key].(v:val.txt)')
-        call self.fill_register('"', text, 0)
-        normal p
+        call self.replace_regions_with_text(text)
     else
-        call self.fill_register('"', text, 0)
-        if a:append | normal p
-        else        | normal P
-        endif
+        call self.replace_regions_with_text(text, a:append)
     endif
 endfun
 
