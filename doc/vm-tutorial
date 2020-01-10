@@ -135,7 +135,7 @@ Note that you can also remove cursors with `Q`, not only selections.
 Some commands ~
 ------------------------------------------------------------------------------------
 
-Set a new mark here below and let's learn some more useful commands.
+Set a new mark here below and let's try some other commands.
 
     let g:VM_mouse_mappings = 1               " some text
     let g:VM_theme = 'iceblue'                " some text
@@ -239,7 +239,7 @@ column of cursors with 5<C-Down>. Do the following in a single VM session:
 1. `~` (toggle case for character under cursors)
 2. `r`<char> (replace character under cursors)
 3. <C-n> to select words under current cursors, then repeat `~` and `r`<char>
-4. press `\\n`, then enter `,`<Space><CR> in the prompt (numbering with separator)
+4. press `\\N`, then enter `,`<Space><CR> in the prompt (numbering with separator)
 5. now press <Tab>`dWWP`, then `A`<Space><C-v>
 6. exit insert mode, then press `0`, then <C-a>, then <C-x>
 7. still in VM, press `u` until you can, do the same with <C-r>, then again `u`

@@ -574,18 +574,19 @@ Go-to-regex motion ~
 ---------------------------------------------------------------  *vm-numbering*
 Numbering ~
 
-  Default mapping: \\n, \\N
+  Default mapping: `\\n`, `\\N`
 
-  Prepends or appends numbers with an expression. Accepts [count].
+  Appends or prepends numbers with an expression. Accepts [count].
   Expression syntax is: >
     start=[count]/step/separator
-<  For example: >
+
+<  For example, started with `\\N`: >
     2/2/,<space>
 <  will generate:  >
     2, text
     4, text
     ...
-<  If started with \\N, the result will be instead: >
+<  If started with `\\n`, the result will be instead: >
     text, 2
     text, 4
     ...
