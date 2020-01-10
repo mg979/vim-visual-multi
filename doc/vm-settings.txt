@@ -85,6 +85,11 @@ edited lines are automatically reindented when exiting insert mode in VM.
   To remap any key to normal! commands. See |vm-faq-remap|.
 
 
+*g:VM_custom_motions*                              Default: {}
+
+  To remap any standard motion (h,j,k,l,f...) commands. See |vm-faq-remap|.
+
+
 *g:VM_insert_special_keys*                         Default: ['c-a', 'c-e', 'c-v']
 
   Some keys in insert mode have a different behaviour, compared to vim

@@ -6,6 +6,7 @@ let s:Maps = {}
 
 let g:VM_custom_noremaps   = get(g:, 'VM_custom_noremaps', {})
 let g:VM_custom_remaps     = get(g:, 'VM_custom_remaps', {})
+let g:VM_custom_motions    = get(g:, 'VM_custom_motions', {})
 let g:VM_check_mappings    = get(g:, 'VM_check_mappings', 1)
 let g:VM_default_mappings  = get(g:, 'VM_default_mappings', 1)
 let g:VM_mouse_mappings    = get(g:, 'VM_mouse_mappings', 0)
@@ -188,6 +189,9 @@ fun! s:build_buffer_maps() abort
     endfor
 
     "integrate custom motions and commands
+    for m in keys(g:VM_custom_motions)
+        let maps['Motion ' . g:VM_custom_motions[m]] = [m, 'n']
+    endfor
     for m in keys(g:VM_custom_noremaps)
         let maps['Normal! ' . g:VM_custom_noremaps[m]] = [m, 'n']
     endfor
