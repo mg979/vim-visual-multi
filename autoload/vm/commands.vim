@@ -372,7 +372,6 @@ endfun
 fun! vm#commands#find_next(skip, nav) abort
     " Find next region, always downwards.
     if ( a:nav || a:skip ) && s:F.no_regions()                 | return | endif
-    if !s:X() && a:skip && s:is_r() | call vm#commands#skip(1) | return | endif
 
     "write search pattern if not navigating and no search set
     if s:X() && !a:nav | call s:Search.add_if_empty() | endif
@@ -390,7 +389,6 @@ endfun
 fun! vm#commands#find_prev(skip, nav) abort
     " Find previous region, always upwards.
     if ( a:nav || a:skip ) && s:F.no_regions()                 | return | endif
-    if !s:X() && a:skip && s:is_r() | call vm#commands#skip(1) | return | endif
 
     "write search pattern if not navigating and no search set
     if s:X() && !a:nav | call s:Search.add_if_empty() | endif
