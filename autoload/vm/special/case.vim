@@ -19,7 +19,7 @@ let s:Case = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Case.mixed(word) abort
+fun! s:Case.pascal(word) abort
   return substitute(self.camel(a:word),'^.','\u&','')
 endfun
 
@@ -78,48 +78,39 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Case.menu() abort
-  echohl WarningMsg | echo "\tCase Conversion\n---------------------------------"
-  echohl WarningMsg | echo "l         " | echohl Type | echon "lowercase"       | echohl None
-  echohl WarningMsg | echo "u         " | echohl Type | echon "UPPERCASE"       | echohl None
-  echohl WarningMsg | echo "C         " | echohl Type | echon "Captialize"      | echohl None
-  echohl WarningMsg | echo "c         " | echohl Type | echon "camelCase"       | echohl None
-  echohl WarningMsg | echo "m         " | echohl Type | echon "MixedCase"       | echohl None
-  echohl WarningMsg | echo "s         " | echohl Type | echon "snake_case"      | echohl None
-  echohl WarningMsg | echo "S         " | echohl Type | echon "SNAKE_UPPERCASE" | echohl None
-  echohl WarningMsg | echo "-         " | echohl Type | echon "dash-case"       | echohl None
-  echohl WarningMsg | echo ".         " | echohl Type | echon "dot.case"        | echohl None
-  echohl WarningMsg | echo "<space>   " | echohl Type | echon "space case"      | echohl None
-  echohl WarningMsg | echo "t         " | echohl Type | echon "Title Case"      | echohl None
-  echohl WarningMsg | echo "---------------------------------"
-  echohl Directory | echo "Enter an option: " | echohl None
-  let c = nr2char(getchar())
-  echon c "\t"
-  if c ==# "c"
-    call self.convert('camel')
-  elseif c ==# "m"
-    call self.convert('mixed')
-  elseif c ==# "s"
-    call self.convert('snake')
-  elseif c ==# "S"
-    call self.convert('snake_upper')
-  elseif c ==# "-"
-    call self.convert('dash')
-  elseif c ==# "k"
-    call self.convert('remove')
-  elseif c ==# "."
-    call self.convert('dot')
-  elseif c ==# "\<space>"
-    call self.convert('space')
-  elseif c ==# "t"
-    call self.convert('title')
-  elseif c ==# "l"
-    call self.convert('lower')
-  elseif c ==# "u"
-    call self.convert('upper')
-  elseif c ==# "C"
-    call self.convert('capitalize')
+  if get(g:, 'VM_verbose_commands', 0)
+    echohl WarningMsg | echo "\tCase Conversion\n---------------------------------"
+    echohl WarningMsg | echo "u         " | echohl Type | echon "lowercase"       | echohl None
+    echohl WarningMsg | echo "U         " | echohl Type | echon "UPPERCASE"       | echohl None
+    echohl WarningMsg | echo "C         " | echohl Type | echon "Captialize"      | echohl None
+    echohl WarningMsg | echo "t         " | echohl Type | echon "Title Case"      | echohl None
+    echohl WarningMsg | echo "c         " | echohl Type | echon "camelCase"       | echohl None
+    echohl WarningMsg | echo "P         " | echohl Type | echon "PascalCase"      | echohl None
+    echohl WarningMsg | echo "s         " | echohl Type | echon "snake_case"      | echohl None
+    echohl WarningMsg | echo "S         " | echohl Type | echon "SNAKE_UPPERCASE" | echohl None
+    echohl WarningMsg | echo "-         " | echohl Type | echon "dash-case"       | echohl None
+    echohl WarningMsg | echo ".         " | echohl Type | echon "dot.case"        | echohl None
+    echohl WarningMsg | echo "<space>   " | echohl Type | echon "space case"      | echohl None
+    echohl WarningMsg | echo "---------------------------------"
+    echohl Directory  | echo "Enter an option: " | echohl None
+  else
+    echohl Constant   | echo "Case conversion: " | echohl None | echon '(u/U/C/t/c/P/s/S/-/./ )'
   endif
-  call feedkeys("\<cr>", 'n')
+  let c = nr2char(getchar())
+  let case = {
+        \ "u": 'lower',      "U": 'upper',
+        \ "C": 'capitalize', "t": 'title',
+        \ "c": 'camel',      "P": 'pascal',
+        \ "s": 'snake',      "S": 'snake_upper',
+        \ "-": 'dash',       "k": 'remove',
+        \ ".": 'dot',        " ": 'space',
+        \}
+  if has_key(case, c)
+    call self.convert(case[c])
+  endif
+  if get(g:, 'VM_verbose_commands', 0)
+    call feedkeys("\<cr>", 'n')
+  endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

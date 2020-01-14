@@ -543,6 +543,20 @@ Case conversion ~
   Menu for case conversion. If called when in cursor mode, it will be run on
   inner words, and some methods won't work (eg. space case -> snake case).
 
+  Letters in the prompt have the following meaning:
+
+    u          lowercase
+    U          UPPERCASE
+    C          Captialize
+    t          Title Case
+    c          camelCase
+    P          PascalCase
+    s          snake_case
+    S          SNAKE_UPPERCASE
+    -          dash-case
+    .          dot.case
+    <space>    space case
+
   It reuses functions extracted from |vim-abolish|.
 
 

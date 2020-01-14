@@ -20,6 +20,7 @@ Hopefully you won't need to alter any of these.
     let g:VM_highlight_matches = 'hi Search ctermfg=228 cterm=underline'
     let g:VM_highlight_matches = 'hi! link Search PmenuSel'
 <
+
 *g:VM_set_statusline*                              Default: 2
 
   Enable statusline when VM is active.
@@ -32,6 +33,12 @@ Hopefully you won't need to alter any of these.
 
   Don't display a message when exiting VM. You may prefer it if you already set
   up statusline integration.
+
+
+*g:VM_verbose_commands*                            Default: 0
+
+  Set to 1 if you want command prompts to be more informative, rather than as
+  minimal as possible.
 
 
 *g:VM_skip_shorter_lines*                          Default: 1
@@ -64,11 +71,13 @@ Hopefully you won't need to alter any of these.
 
   You could want to do it for performance reasons.
 
+
 *g:VM_reindent_filetypes*                          Default: []
 
 Autoindentation (via |indentkeys|) is temporarily disabled in insert mode, and
 you have to reindent edited lines yoursef. For filetypes included in this list,
 edited lines are automatically reindented when exiting insert mode in VM.
+
 
 *g:VM_exit_on_1_cursor_left*                       Default: 0
 
@@ -134,6 +143,8 @@ automatically when exiting insert mode, unless this value is 0.
 *g:VM_plugins_compatibilty*                        Default: {}
 
 Used for plugins compatibility, see |visual-multi-compatibility|.
+
+
 
 
 HIGHLIGHT                                              *visual-multi-highlight*
