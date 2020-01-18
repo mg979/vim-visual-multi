@@ -257,6 +257,7 @@ Select Right/Left            <S-Right>, <S-Left>          |vm-shift-select|
 Select All Words             \\A                          |vm-select-all|
 Find with Regex              \\/                          |vm-regex-search|
 Reselect Last                \\gS                         |vm-reselect-last|
+Toggle Mappings              \\<Space>                    |vm-toggle-mappings|
 Select Operator              s                            |vm-select-operator|
 Find Operator                m                            |vm-find-operator|
 Alignment                    \\a                          |vm-align|
@@ -360,6 +361,18 @@ Find with Regex ~
 
   If started from visual mode, it will select all occurrences of that pattern
   in the visual selection.
+
+
+---------------------------------------------------------  *vm-toggle-mappings*
+Toggle Mappings ~
+
+  Default mapping: \\<Space>
+
+Disable all <buffer> VM mappings, so that you can (for example) use regular
+motions to move somewhere else in the file, without affecting regions at all.
+
+<Esc> key is still mapped (to exit VM), as it is this function itself (to
+re-enable VM mappings).
 
 
 ---------------------------------------------------------  *vm-select-operator*
