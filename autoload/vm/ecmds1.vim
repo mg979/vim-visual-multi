@@ -98,8 +98,11 @@ fun! s:Edit.delete(X, register, count, manual) abort
     call s:G.change_mode()
     call s:G.select_region(ix)
 
-    if a:manual          | call self.extra_spaces.remove() | endif
-    if a:register == "_" | call s:F.restore_reg()          | endif
+    if a:manual
+        call self.extra_spaces.remove()
+        call s:G.update_and_select_region()
+    endif
+    if a:register == "_" | call s:F.restore_reg() | endif
     let s:v.old_text = []
     call s:F.Scroll.force(winline)
 endfun " }}}
