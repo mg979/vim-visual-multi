@@ -13,7 +13,6 @@ fun! vm#insert#init() abort
     let s:G    = s:V.Global
     let s:F    = s:V.Funcs
     let s:v.restart_insert = 0
-    let s:v.complete_done  = 0
     return s:Insert
 endfun
 
@@ -137,8 +136,7 @@ fun! s:Insert.start(...) abort
     let I.cursors   = []
     let I.lines     = {}
     let I.change    = 0         " text change, only if g:VM_live_editing
-    let I.tchanged  = 0         " TextChangedI flag
-    let I.lastcol   = 0
+    let I.xbytes    = 0         " to handle multibyte characters
     let I.col       = col('.')
 
     " remove current regions highlight
@@ -196,13 +194,10 @@ endfun
 " Insert mode update
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Insert.update_text(...) abort
+fun! s:Insert.update_text(insert_leave) abort
     " Update the text on TextChangedI event, and just after InsertLeave.
 
-    " set the flag that TextChangedI has been triggered at least once
-    if !a:0 | let self.tchanged = 1 | endif
-
-    if s:F.not_VM() || !g:VM_live_editing && !a:0 | return | endif
+    if s:F.not_VM() || !g:VM_live_editing && !a:insert_leave | return | endif
 
     call vm#comp#TextChangedI()  "compatibility tweaks
 
@@ -233,24 +228,26 @@ fun! s:Insert.update_text(...) abort
 
     " coln needs some adjustments though:
     "   -  in insert mode, 1 is subtracted to find the current cursor position
-    "   -  but when insert mode stops (a:0 == 1) this isn't true
+    "   -  but when insert mode stops (a:insert_leave == 1) this isn't true
 
-    " moreover, when exiting insert mode (a:0) we should check if the last
+    " moreover, when exiting insert mode (a:insert_leave) we should check if the last
     " inserted character is multibyte, we do so by checking last char of @.,
     " that has just been updated
 
     " no need to check extra bytes if not exiting insert mode, otherwise the
     " extra coln adjustment will be:
-    "   strlen(lastchar) -1     ( extra bytes of last entered character )
-    "   +1                      ( because exiting insert mode )
-    " = strlen(lastchar)
+    "   strlen(lastchar) - 1     ( extra bytes of last entered character )
 
-    let lastchar = strcharpart(@., strchars(@.)-1)
-    let extra = a:0 ? strlen(lastchar) : 0
-    let text = getline(ln)[(pos-1):(coln-2+extra)]
+    if a:insert_leave
+        let lastchar = strcharpart(@., strchars(@.)-1)
+        let I.xbytes = strlen(lastchar) - 1
+        let text     = getline(ln)[ (pos-1) : (coln-1 + I.xbytes) ]
+    else
+        let text = getline(ln)[ (pos-1) : (coln-2) ]
+    endif
 
     " now update the current change: secondary cursors need this value updated
-    let I.change = coln - pos + a:0
+    let I.change = coln - pos + a:insert_leave
 
     " update the lines (also the current line is updated with setline(), this
     " should ensure that the same text is entered everywhere)
@@ -262,8 +259,8 @@ fun! s:Insert.update_text(...) abort
         endif
     endfor
 
-    " store the last known column position, it will be checked on InsertLeave
-    let I.lastcol = coln
+    " store the buffer size after the edits, it will be checked on InsertLeave
+    let I.size = s:F.size()
 
     " put the cursor where it should stay after the lines update
     " as said before, the actual cursor can be pushed by cursors behind it
@@ -280,18 +277,13 @@ fun! s:Insert.stop(...) abort
     " Called on InsertLeave.
     if s:F.not_VM() | return | endif
 
-    " text will be updated again after CompleteDone, or abbreviation expansion
-    " because in these cases TextChangedI wasn't triggered
-    if &modified
-        " confront the last known edited column with the one at which insert
-        " mode was actually exited
-        let column_mismatch = self.lastcol && col("'^") != self.lastcol
-        if ( s:v.complete_done || column_mismatch ||
-                    \ !g:VM_live_editing && self.tchanged )
-            call self.update_text(1)
-        endif
+    " there could be a mismatch between last recorded buffer size and final
+    " one, this can happen after CompleteDone, or abbreviation expansion,
+    " because in these cases TextChangedI isn't triggered, if this happen we
+    " must update lines again
+    if s:F.size() != self.size
+        call self.update_text(1)
     endif
-    let s:v.complete_done = 0
 
     call self.clear_hi() | call self.auto_end() | let i = 0
 
@@ -542,9 +534,8 @@ fun! s:Insert.auto_start() abort
     " Initialize autocommands.
     augroup VM_insert
         au!
-        au TextChangedI * call b:VM_Selection.Insert.update_text()
+        au TextChangedI * call b:VM_Selection.Insert.update_text(0)
         au InsertLeave  * call b:VM_Selection.Insert.stop()
-        au CompleteDone * let s:v.complete_done = 1
     augroup END
 endfun
 
@@ -599,9 +590,21 @@ fun! s:step_back() abort
     if s:v.single_region && s:Insert.type ==? 'i'
         return
     endif
+
+    " MULTIBYTE CHARACTERS: the shift is equal to the byte size of the last
+    " entered character if an additional update has been triggered at
+    " InsertLeave, the final column has been adjusted already
+
+    if !s:Insert.xbytes
+        let lastchar = strcharpart(@., strchars(@.)-1)
+        let n = strlen(lastchar)
+    else
+        let n = 1
+    endif
+
     for r in s:v.single_region ? [s:R()[s:Insert.index]] : s:R()
         if r.a != col([r.l, '$']) && r.a > 1
-            call r.shift(-1,-1)
+            call r.shift(-n,-n)
         endif
     endfor
 endfun
