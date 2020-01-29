@@ -7,6 +7,7 @@ let s:Insert = {'index': -1, 'cursors': [], 'replace': 0, 'type': ''}
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#insert#init() abort
+    " Init script variables.
     let s:V    = b:VM_Selection
     let s:v    = s:V.Vars
     let s:G    = s:V.Global
@@ -16,6 +17,8 @@ fun! vm#insert#init() abort
     return s:Insert
 endfun
 
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Lambdas
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -24,11 +27,13 @@ let s:R = { -> s:V.Regions }
 let s:X = { -> g:Vm.extend_mode }
 
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Insert mode
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.key(type) abort
+    " Starting insert mode with a key (i,I,a,A...), make adjustments if needed.
     if empty(self.type)
         let self.type = a:type
     endif
@@ -78,9 +83,9 @@ fun! s:Insert.key(type) abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.start(...) abort
+    " Initialize and then start insert mode.
     "--------------------------------------------------------------------------
 
     "Initialize Insert Mode dict. 'begin' is the initial ln/col, and will be
@@ -185,12 +190,14 @@ fun! s:Insert.start(...) abort
     endif
 endfun
 
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Insert mode update
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.update_text(...) abort
-    """Update the text on TextChangedI event, and just after InsertLeave.
+    " Update the text on TextChangedI event, and just after InsertLeave.
 
     " set the flag that TextChangedI has been triggered at least once
     if !a:0 | let self.tchanged = 1 | endif
@@ -263,11 +270,14 @@ fun! s:Insert.update_text(...) abort
     call cursor(ln, I.col)
 endfun
 
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Insert mode stop
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.stop(...) abort
+    " Called on InsertLeave.
     if s:F.not_VM() | return | endif
 
     " text will be updated again after CompleteDone, or abbreviation expansion
@@ -365,10 +375,9 @@ fun! s:Insert.stop(...) abort
     endif
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.clear_hi() abort
-    """Clear cursors highlight.
+    " Clear cursors highlight.
     if !s:v.keep_matches
         call clearmatches()
     else
@@ -377,6 +386,7 @@ fun! s:Insert.clear_hi() abort
         endfor
     endif
 endfun
+
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -394,7 +404,7 @@ let s:Cursor = {}
 
 
 fun! s:Cursor.new(ln, col) abort
-    "Create new cursor.
+    " Create new cursor.
     let C        = copy(self)
     let C.index  = len(s:Insert.cursors)
     let C.txt    = ''
@@ -408,10 +418,9 @@ fun! s:Cursor.new(ln, col) abort
     return C
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Cursor.update(ln, change) abort
-    "Update cursor position and highlight.
+    " Update cursor position and highlight.
     let C = self
     let C._a = C.a + a:change
 
@@ -419,15 +428,17 @@ fun! s:Cursor.update(ln, change) abort
     let C.hl  = matchaddpos('MultiCursor', [[C.l, C._a]], 40)
 endfun
 
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Line class
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:Line = {}
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Line.new(line, cursor) abort
+    " Line object constructor.
     let L         = copy(self)
     let L.l       = a:line
     let L.txt     = getline(a:line)
@@ -435,9 +446,9 @@ fun! s:Line.new(line, cursor) abort
     return L
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Line.update(change, text) abort
+    " Update a line in insert mode.
     let text     = self.txt
     let I        = s:V.Insert
     let extraChg = 0  " cumulative change for additional cursors in same line
@@ -493,9 +504,8 @@ fun! s:Line.update(change, text) abort
 endfun
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:Line.replace(change, text) abort
+    " Update a line in replace mode.
     let text     = self.txt
     let I        = s:V.Insert
     let inserted = a:text
@@ -523,11 +533,13 @@ fun! s:Line.replace(change, text) abort
 endfun
 
 
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Autocommands
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.auto_start() abort
+    " Initialize autocommands.
     augroup VM_insert
         au!
         au TextChangedI * call b:VM_Selection.Insert.update_text()
@@ -536,11 +548,17 @@ fun! s:Insert.auto_start() abort
     augroup END
 endfun
 
+
 fun! s:Insert.auto_end() abort
+    " Terminate autocommands.
     autocmd! VM_insert
     augroup! VM_insert
 endfun
 
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Helpers
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:smart_case_change(cursor, txt) abort
@@ -566,20 +584,18 @@ fun! s:smart_case_change(cursor, txt) abort
 endfun
 
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:do_reindent() abort
-    """Check if lines must be reindented when exiting insert mode.
+    " Check if lines must be reindented when exiting insert mode.
     if empty(&ft) | return | endif
 
     return index(vm#comp#no_reindents(), &ft) < 0 &&
                 \ index(g:VM_reindent_filetypes, &ft) >= 0
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:step_back() abort
-    """Go back one char after exiting insert mode, as vim does.
+    " Go back one char after exiting insert mode, as vim does.
     if s:v.single_region && s:Insert.type ==? 'i'
         return
     endif
@@ -590,32 +606,31 @@ fun! s:step_back() abort
     endfor
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:map_single_mode(stop) abort
-  """If single_region is active, map Tab to cycle regions.
-  if !s:v.single_region || !get(g:, 'VM_single_mode_maps', 1) | return | endif
+    " If single_region is active, map Tab to cycle regions.
+    if !s:v.single_region || !get(g:, 'VM_single_mode_maps', 1) | return | endif
 
-  let next = get(g:VM_maps, 'I Next', '<Tab>')
-  let prev = get(g:VM_maps, 'I Prev', '<S-Tab>')
+    let next = get(g:VM_maps, 'I Next', '<Tab>')
+    let prev = get(g:VM_maps, 'I Prev', '<S-Tab>')
 
-  if a:stop
-      exe 'iunmap <buffer>' next
-      exe 'iunmap <buffer>' prev
-      if exists('s:v.single_mode_running')
-          if s:v.single_mode_running
-              let s:v.single_mode_running = 0
-          else
-              if get(g:, 'VM_single_mode_auto_reset', 1)
-                  call s:F.toggle_option('single_region')
-              endif
-              unlet s:v.single_mode_running
-          endif
-      endif
-  else
-      exe 'imap <buffer>' next '<Plug>(VM-I-Next)'
-      exe 'imap <buffer>' prev '<Plug>(VM-I-Prev)'
-  endif
+    if a:stop
+        exe 'iunmap <buffer>' next
+        exe 'iunmap <buffer>' prev
+        if exists('s:v.single_mode_running')
+            if s:v.single_mode_running
+                let s:v.single_mode_running = 0
+            else
+                if get(g:, 'VM_single_mode_auto_reset', 1)
+                    call s:F.toggle_option('single_region')
+                endif
+                unlet s:v.single_mode_running
+            endif
+        endif
+    else
+        exe 'imap <buffer>' next '<Plug>(VM-I-Next)'
+        exe 'imap <buffer>' prev '<Plug>(VM-I-Prev)'
+    endif
 endfun
 
-" vim: et ts=4 sw=4 sts=4 :
+" vim: et sw=4 ts=4 sts=4 fdm=indent fdn=1
