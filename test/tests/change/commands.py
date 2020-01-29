@@ -3,7 +3,11 @@ L = '\\\\\\\\'
 
 keys(':set tw=79\<CR>')
 keys(':set autoindent\<CR>')
-keys('2\<C-Down>gciw')
+keys('2\<C-Down>')
+keys('I')
+keys('back_delete_test\<C-w>')
+keys('\<Esc>')
+keys('gciw')
 keys('smart case')
 keys('\<Esc>')
 keys('ea')

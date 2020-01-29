@@ -242,8 +242,10 @@ fun! s:Insert.update_text(insert_leave) abort
         let lastchar = strcharpart(@., strchars(@.)-1)
         let I.xbytes = strlen(lastchar) - 1
         let text     = getline(ln)[ (pos-1) : (coln-1 + I.xbytes) ]
-    else
+    elseif coln > 1
         let text = getline(ln)[ (pos-1) : (coln-2) ]
+    else
+        let text = ''
     endif
 
     " now update the current change: secondary cursors need this value updated
@@ -281,7 +283,7 @@ fun! s:Insert.stop(...) abort
     " one, this can happen after CompleteDone, or abbreviation expansion,
     " because in these cases TextChangedI isn't triggered, if this happen we
     " must update lines again
-    if s:F.size() != self.size
+    if s:F.size() > self.size
         call self.update_text(1)
     endif
 
