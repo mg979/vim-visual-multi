@@ -99,14 +99,14 @@ Hopefully you won't need to alter any of these.
   To remap any standard motion (h,j,k,l,f...) commands. See |vm-faq-remap|.
 
 
-*g:VM_insert_special_keys*                         Default: ['c-a', 'c-e', 'c-v']
+*g:VM_insert_special_keys*                         Default: ['c-v']
 
-  Some keys in insert mode have a different behaviour, compared to vim
-  defaults. If you don't want some or any them, remove them from the list.
+  Some keys in insert mode can have a different behaviour, compared to vim
+  defaults. Possible values:
 
-  <C-A> go to the beginning of the line, at indent level (same as <Esc>I)
-  <C-E> go to the end of the line (same as <Esc>A)
-  <C-V> paste from VM unnamed register
+  `c-a`  <C-A> go to the beginning of the line, at indent level
+  `c-e`  <C-E> go to the end of the line
+  `c-v`  <C-V> paste from VM unnamed register
 
 
 *g:VM_single_mode_maps*                            Default: 1

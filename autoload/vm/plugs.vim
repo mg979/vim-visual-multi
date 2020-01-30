@@ -210,9 +210,10 @@ fun! vm#plugs#buffer() abort
   inoremap <silent><expr> <Plug>(VM-I-CtrlD)            <sid>Insert('x')
   inoremap <silent><expr> <Plug>(VM-I-Del)              <sid>Insert('x')
   inoremap <silent><expr> <Plug>(VM-I-Home)             <sid>Insert('0')
-  inoremap <silent><expr> <Plug>(VM-I-End)              <sid>Insert('c-e')
-  inoremap <silent><expr> <Plug>(VM-I-CtrlA)            <sid>Insert('c-a')
-  inoremap <silent><expr> <Plug>(VM-I-CtrlE)            <sid>Insert('c-e')
+  inoremap <silent><expr> <Plug>(VM-I-End)              <sid>Insert('A')
+  inoremap <silent><expr> <Plug>(VM-I-CtrlE)            <sid>Insert('A')
+  inoremap <silent><expr> <Plug>(VM-I-Ctrl^)            <sid>Insert('I')
+  inoremap <silent><expr> <Plug>(VM-I-CtrlA)            <sid>Insert('I')
   inoremap <silent><expr> <Plug>(VM-I-CtrlB)            <sid>Insert('h')
   inoremap <silent><expr> <Plug>(VM-I-CtrlF)            <sid>Insert('l')
   inoremap <silent><expr> <Plug>(VM-I-Next)             vm#icmds#goto(1)
@@ -268,14 +269,13 @@ fun! s:Insert(key) abort
         \ 'x': "\<esc>:call vm#icmds#x('".a:key."')\<cr>".i,
         \ 'ge': "\<esc>:call vm#commands#motion('h".a:key."l', 1, 0, 0)\<cr>".i,
         \ 'e': "\<esc>:call vm#commands#motion('".a:key."l', 1, 0, 0)\<cr>".i,
-        \ 'c-e': "\<esc>:call b:VM_Selection.Insert.key('A')\<cr>",
-        \ 'c-a': "\<esc>:call b:VM_Selection.Insert.key('I')\<cr>",
+        \ 'a': "\<esc>:call b:VM_Selection.Insert.key('A')\<cr>",
+        \ 'i': "\<esc>:call b:VM_Selection.Insert.key('I')\<cr>",
         \ 'c-v': "\<esc>:call vm#icmds#paste()\<cr>".a,
         \ 'c-w': "\<esc>:call vm#icmds#cw(0)\<cr>",
         \ 'c-u': "\<esc>:call vm#icmds#cw(1)\<cr>",
         \ 'ins': "\<esc>".i,
         \}[tolower(a:key)]
-  endif
 endfun
 
 fun! s:Yank() abort

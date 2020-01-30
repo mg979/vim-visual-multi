@@ -126,10 +126,9 @@ Some settings are temporarily disabled to prevent trouble:
 
     'indentkeys', 'cinkeys', 'softtabstop', 'textwidth'
 
-Some keys have a special behaviour:
+Some keys have a special behaviour (different from vim):
 
-    <C-A>   go to start of line
-    <C-E>   go to end of line
+    <C-^>   go to start of line (at indent level)
     <C-F>   one character forward
     <C-B>   one character backward
     <C-D>   same as <Del>
@@ -141,6 +140,8 @@ solutions, for others not. See |vm-faq-remap|.
 
 NOTE: Since <C-V> is remapped, you should use <C-Q> to insert special
 characters.
+
+NOTE: see |g:VM_insert_special_keys| for some options.
 
 ------------------------------------------------------------  *vm-replace-mode*
 

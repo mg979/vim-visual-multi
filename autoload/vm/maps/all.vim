@@ -196,6 +196,7 @@ fun! vm#maps#all#buffer() abort
         \"I CtrlW":                 ['<C-w>',       'i'],
         \"I CtrlU":                 ['<C-u>',       'i'],
         \"I CtrlD":                 ['<C-d>',       'i'],
+        \"I Ctrl^":                 ['<C-^>',       'i'],
         \"I Del":                   ['<Del>',       'i'],
         \"I Home":                  ['<Home>',      'i'],
         \"I End":                   ['<End>',       'i'],
@@ -204,7 +205,7 @@ fun! vm#maps#all#buffer() abort
         \"I Replace":               ['<Insert>',    'i'],
         \})
 
-  let insert_keys = get(g:, 'VM_insert_special_keys', ['c-a', 'c-e', 'c-v'])
+  let insert_keys = get(g:, 'VM_insert_special_keys', ['c-v'])
   if index(insert_keys, 'c-a') >= 0
     let maps["I CtrlA"] = ['<C-a>', 'i']
   endif
