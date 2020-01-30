@@ -187,6 +187,9 @@ fun! s:build_buffer_maps() abort
     for m in (g:Vm.motions + g:Vm.find_motions)
         let maps['Motion ' . m] = [m, 'n']
     endfor
+    for m in keys(g:Vm.tobj_motions)
+        let maps['Motion ' . g:Vm.tobj_motions[m]] = [m, 'n']
+    endfor
 
     "integrate custom motions and commands
     for m in keys(g:VM_custom_motions)

@@ -91,6 +91,8 @@ There is built-in support for:
     |vim-surround|      example: `ysiw(` to enclose in parentheses
     |vim-abolish|       example: `cr_` to change current word to snake case
 
+Also see |vm-motions|.
+
 
 -------------------------------------------------------------  *vm-extend-mode*
 
@@ -105,7 +107,7 @@ Some commands are specific to |extend-mode|, such as:
     R       replace pattern in regions
     \\s     split regions by pattern
 
-And more, commands will be covered further on.
+More specific commands will be covered further on.
 
 
 -------------------------------------------------------------  *vm-insert-mode*
@@ -180,6 +182,9 @@ up in a different line, and selections similarly.
 You may still want to do so, at times. You'll have to enable |multiline-mode|,
 for which the default mapping is `\\M`.
 
+Note that multiline mode must be enabled for some text objects motions, or they
+will fail. See |vm-motions|.
+
 
 ---------------------------------------------------------------  *vm-registers*
 
@@ -188,6 +193,28 @@ region that is yanked/deleted. You can read more about them in the
 |visual-multi-registers| section, since this is an accessory topic.
 
 
+-----------------------------------------------------------------  *vm-motions*
+
+Most basic vim motions are supported in VM. They behave differently from other
+commands because their result is dependent on the mode: in `cursor mode` they
+will move cursors, in `extend mode` they extend selections.
+
+Also keep in mind that all motions are restricted by default to the current
+line, that is, they cannot cross line boundaries unless |multiline-mode| is
+enabled.
+
+Finally, some |object-motions| and |various-motions| require |multiline-mode|,
+and some are aliased to avoid conflict with VM mappings `[` and `]`:
+
+   vim    VM~
+    (     (       [count] sentences backward
+    )     )       [count] sentences forward
+    {     {       [count] paragraphs backward
+    }     }       [count] paragraphs forward
+    [(    g(      go to [count] previous unmatched '('
+    [{    g{      go to [count] previous unmatched '{'
+    ])    g)      go to [count] next unmatched ')'
+    ]}    g}      go to [count] next unmatched '}'
 
 
 

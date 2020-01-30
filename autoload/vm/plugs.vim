@@ -41,6 +41,7 @@ fun! vm#plugs#buffer() abort
 
   let g:Vm.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '$', '0', '^', '%', 'ge', 'gE', '\|']
   let g:Vm.find_motions   = ['f', 'F', 't', 'T']
+  let g:Vm.tobj_motions   = { '{': '{', '}': '}', '(': '(', ')': ')', 'g{': '[{', 'g}': ']}', 'g)': '])', 'g(': '[(' }
 
   nnoremap <silent>       <Plug>(VM-Select-Operator)         :<c-u>call vm#operators#select(v:count)<cr>
   nmap <expr><silent>     <Plug>(VM-Find-Operator)           vm#operators#find(1, 0)
@@ -101,6 +102,11 @@ fun! vm#plugs#buffer() abort
 
   for m in g:Vm.find_motions
     exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :call vm#commands#find_motion('".m."', '')\<cr>"
+  endfor
+
+  let tobj = g:Vm.tobj_motions
+  for m in keys(tobj)
+    exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :\<C-u>call vm#commands#motion('".tobj[m]."', v:count1, 0, 0)\<cr>"
   endfor
 
   for m in g:Vm.select_motions
