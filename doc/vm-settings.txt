@@ -72,16 +72,16 @@ Hopefully you won't need to alter any of these.
   You could want to do it for performance reasons.
 
 
-*g:VM_reindent_filetypes*                          Default: []
-
-Autoindentation (via |indentkeys|) is temporarily disabled in insert mode, and
-you have to reindent edited lines yoursef. For filetypes included in this list,
-edited lines are automatically reindented when exiting insert mode in VM.
-
-
 *g:VM_exit_on_1_cursor_left*                       Default: 0
 
   Automatically exit VM if there's a single cursor left after a command.
+
+
+*VM_recursive_operations_at_cursors*               Default: 1
+
+  When executing normal commands in cursor mode (`dw` and similar), by default
+  recursive mappings are used, so that user text object can be used as well.
+  Set to 0 if you always want commands in cursor mode to be non-recursive.
 
 
 *g:VM_custom_remaps*                               Default: {}
@@ -131,6 +131,13 @@ automatically when exiting insert mode, unless this value is 0.
 
   If true VM registers will be stored in the |viminfo|. The 'viminfo' option
   must include !, for this to work. Also see |:VMRegisters|.
+
+
+*g:VM_reindent_filetypes*                          Default: []
+
+  Autoindentation (via |indentkeys|) is temporarily disabled in insert mode,
+  and you have to reindent edited lines yoursef. For filetypes included in this
+  list, edited lines are automatically reindented when exiting insert mode.
 
 
 *g:VM_keep_buffer_hl*                              Default: 1

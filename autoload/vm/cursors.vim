@@ -109,7 +109,7 @@ fun! s:d_cursors(M, reg, n) abort
   "no matter the entered register, we're using default register
   "we're passing the register in the options dictionary instead
   "fill_register function will be called and take care of it, if appropriate
-  call s:V.Edit.run_normal('d'.S, {'count': N, 'store': a:reg})
+  call s:V.Edit.run_normal('d'.S, {'count': N, 'store': a:reg, 'recursive': s:recursive})
   call s:G.reorder_regions()
   call s:G.merge_regions()
 endfun
@@ -175,7 +175,11 @@ fun! s:c_cursors(M, reg, n) abort
     call s:V.Edit.delete(1, reg, 1, 0)
     call s:V.Insert.key('i')
 
-  elseif index(['ip', 'ap'] + vm#comp#add_line(), S) >= 0
+  elseif index(['ip', 'ap'], S) >= 0
+    call s:V.Edit.run_normal('d'.S, {'count': N, 'store': reg, 'recursive': s:recursive})
+    call s:V.Insert.key('O')
+
+  elseif s:recursive && index(vm#comp#add_line(), S) >= 0
     call s:V.Edit.run_normal('d'.S, {'count': N, 'store': reg})
     call s:V.Insert.key('O')
 
@@ -197,7 +201,7 @@ fun! s:c_cursors(M, reg, n) abort
     call feedkeys('"'.reg."c")
 
   else
-    call s:V.Edit.run_normal('d'.S, {'count': N, 'store': reg})
+    call s:V.Edit.run_normal('d'.S, {'count': N, 'store': reg, 'recursive': s:recursive})
     call s:G.merge_regions()
     call feedkeys("i")
   endif
@@ -213,6 +217,8 @@ fun! s:init() abort
   let s:G         = s:V.Global
   let s:F         = s:V.Funcs
   let s:Search    = s:V.Search
+
+  let s:recursive = get(g:, 'VM_recursive_operations_at_cursors', 1)
   call s:G.cursor_mode()
 endfun
 
