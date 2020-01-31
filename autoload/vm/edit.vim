@@ -58,10 +58,18 @@ fun! s:Edit.run_normal(cmd, ...) abort
 
     "-----------------------------------------------------------------------
 
-    " defaults: commands are recursive, count 1
-    let args = { 'recursive': 1, 'count': 1, 'vimreg': 0,
-                \'silent': get(g:, 'VM_silent_ex_commands', 0) }
+    " defaults: commands are recursive, count=1, vim registers untouched
+    let args = {
+                \'recursive': 1, 'count': 1, 'vimreg': 0,
+                \'silent': get(g:, 'VM_silent_ex_commands', 0)
+                \}
+
     if a:0 | call extend(args, a:1) | endif
+
+    " if it's a VM internal operation, never use recursive mappings
+    if has_key(args, 'store') && args.store == '§'
+        let args.recursive = 0
+    endif
 
     let n = args.count > 1 ? args.count : ''
     let c = args.recursive ? ("normal ".n.cmd) : ("normal! ".n.cmd)
@@ -255,9 +263,9 @@ fun! s:Edit.process(cmd, ...) abort
 
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
-    let store           = a:0 && exists('a:1.store') && a:1.store != "_"
-    let backup_txt      = a:0 && exists('a:1.store')
-    let stay_put        = a:0 && exists('a:1.stay_put')
+    let store           = a:0 && has_key(a:1, 'store') && a:1.store != "_"
+    let backup_txt      = a:0 && has_key(a:1, 'store')
+    let stay_put        = a:0 && has_key(a:1, 'stay_put')
     let do_cursor_moved = !exists("##TextYankPost")
 
     call s:G.backup_regions()
