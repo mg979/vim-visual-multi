@@ -66,21 +66,25 @@ or use |g:VM_custom_remaps| (normal mode only), e.g.:
 >
   let g:VM_custom_remaps = {'<c-p>': 'N', '<c-s>': 'q'}
 <
-This will preserve the function of the original mapping.
-If you want to replace it entirely, see |g:VM_maps|.
+This will preserve the function of the original VM mapping.
+If you want to replace it entirely, see |vm-faq-mappings|.
 
 With |g:VM_custom_noremaps| you can remap any key to a normal! command. Example:
 >
-  let g:VM_custom_noremaps  = {'==': '==', '))': '])', ')}': ']}'}
+  let g:VM_custom_noremaps = {'==': '==', '<<': '<<', '>>': '>>'}
 <
-would create mappings for each key-value pair.
+would create commands that will work on all cursors inside VM, for each
+key-value pair. It's a way to remap built-in vim commands, without having
+too many default mappings that can cause conflicts with other plugins. They
+only work (and enforce) cursor mode.
 
 With |g:VM_custom_motions| you can remap most motions, for example this inverts
 'h' and 'l' motions:
 >
   let g:VM_custom_motions  = {'h': 'l', 'l': 'h'}
 
-Valid motions that you can remap are:
+It can be useful if you use keyboard layouts other than QWERTY. Valid motions
+that you can remap are:
 >
     h j k l w W b B e E ge gE , ; $ 0 ^ % \| f F t T
 
