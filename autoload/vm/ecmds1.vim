@@ -159,8 +159,13 @@ fun! s:Edit.block_paste(before) abort
             let s = remove(text, 0)
             call s:F.set_reg(s)
 
-            if a:before | normal! P
-            else        | normal! p
+            if a:before
+                normal! P
+            else
+                normal! p
+                " update cursor position after the command
+                let diff = col('.') - r.a - 1
+                call r.shift(diff, diff)
             endif
 
             "update changed size
