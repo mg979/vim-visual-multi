@@ -50,7 +50,7 @@ endfun
 
 fun! s:check_block_mode() abort
     " Enable block mode when adding cursors up/down from extend mode.
-    if s:X() && get(g:, 'VM_auto_block_mode', 1)
+    if s:X() && get(g:, 'VM_auto_block_mode', 0)
         call s:V.Block.start()
     endif
 endfun
