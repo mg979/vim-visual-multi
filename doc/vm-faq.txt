@@ -89,6 +89,21 @@ that you can remap are:
     h j k l w W b B e E ge gE , ; $ 0 ^ % \| f F t T
 
 -------------------------------------------------------------------------------
+                                                       *vm-faq-search-register*
+
+How to start VM with matches from current search register? ~
+
+So you typed a pattern with / or ?, and now you want to reuse it in VM.
+You can start VM in regex mode (default mapping: `\\/`), press <Up><CR> to set
+last pattern, then select all (default mapping: `\\A`).
+
+But this won't work if you set the |quote/| register via |:let|.
+
+Just use this command:
+
+  |:VMFromSearch|   (with ! to select all matches)
+
+-------------------------------------------------------------------------------
                                                      *vm-faq-creative-mappings*
 Can I have a mapping for...? ~
 
@@ -98,16 +113,9 @@ If you find yourself repeating a certain action, you can create mappings like:
 <
 This would create a column of cursors that spans the current inner paragraph.
 >
-  nmap \* <Plug>(VM-Start-Regex-Search)<Up><CR>
-  nmap \S <Plug>(VM-Start-Regex-Search)<Up><CR><Plug>(VM-Select-All)
-<
-The first mapping would start VM by selecting the first occurrence of the
-current search register (|@/|, the one you get with |star|).
-The second mapping would select all matches.
-
 Obviously you can just use keys rather than plugs:
 >
-  nmap  \*    \\/<Up><CR>\\A
+  nmap  cp vip\\c
 <
 
  vim: ft=help et sw=2 ts=2 sts=2 tw=79

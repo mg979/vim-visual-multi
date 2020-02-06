@@ -315,6 +315,30 @@ endfun
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Get all from current search                                              {{{1
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#special#commands#from_search(bang) abort
+  if exists('b:visual_multi')
+    return
+  endif
+  let search = @/
+  try
+    call vm#init_buffer(1)
+    let g:Vm.extend_mode = 1
+    call s:V.Search.get_slash_reg(search)
+    call vm#commands#find_next(0, 0)
+    if a:bang
+      call vm#commands#find_all(0, 0)
+    endif
+  catch
+    call vm#reset(1)
+    echo '[visual multi] pattern not found'
+  endtry
+endfun
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Ex Commands and helpers                                                  {{{1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 

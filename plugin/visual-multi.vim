@@ -32,6 +32,8 @@ com!    VMConfig call vm#special#config#start()
 com!    VMDebug  call vm#special#commands#debug()
 com!    VMClear  call vm#clearmatches()
 
+com! -bang VMFromSearch call vm#special#commands#from_search(<bang>0)
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let g:Vm = { 'hi'          : {},

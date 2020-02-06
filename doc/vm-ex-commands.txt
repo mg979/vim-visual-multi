@@ -8,6 +8,7 @@ The following Ex commands can be run at any time:
   |:VMDebug|
   |:VMClear|
   |:VMRegisters|
+  |:VMFromSearch|
 
 The following are only available inside a VM session:
 
@@ -39,6 +40,13 @@ can be necessary if VM exited with errors for some reason.
 
 Show VM registers, or single [register]. With <bang>, delete a [register], or
 all of them if no register is specified.
+
+------------------------------------------------------------------------------
+
+    VMFromSearch[!]                                            *:VMFromSearch*
+
+Select next region (or all regions with !) that matches the current search
+register |quote/|. It won't do anything if VM has been already started.
 
 ------------------------------------------------------------------------------
 
