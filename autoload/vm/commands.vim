@@ -157,7 +157,7 @@ fun! vm#commands#find_by_regex(mode) abort
     " Entry point for VM regex search.
     if !g:Vm.is_active | call s:init(0, 2, 1) | endif
     let s:v.using_regex = a:mode
-    let s:v.regex_backup = empty(@/) ? '\%^' : @/
+    let s:v.regex_backup = empty(@/) ? s:v.oldsearch[0] : @/
 
     "if visual regex, reposition cursor to the beginning of the selection
     if a:mode == 2
