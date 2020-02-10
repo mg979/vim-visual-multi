@@ -157,7 +157,7 @@ fun! vm#commands#find_by_regex(mode) abort
     " Entry point for VM regex search.
     if !g:Vm.is_active | call s:init(0, 2, 1) | endif
     let s:v.using_regex = a:mode
-    let s:v.regex_backup = empty(@/) ? s:v.oldsearch[0] : @/
+    let s:v.regex_backup = empty(@/) ? '\%^' : @/
 
     "if visual regex, reposition cursor to the beginning of the selection
     if a:mode == 2
@@ -168,8 +168,8 @@ fun! vm#commands#find_by_regex(mode) abort
     let s:regex_pos = winsaveview()
 
     cnoremap <silent> <buffer> <cr>  <cr>:call vm#commands#regex_done()<cr>
-    cnoremap <silent><nowait><buffer> <esc><esc> <C-r>=b:VM_Selection.Vars.regex_backup<cr><esc>:call vm#commands#regex_abort()<cr>
-    cnoremap <silent><nowait><buffer> <esc>      <C-r>=b:VM_Selection.Vars.regex_backup<cr><esc>:call vm#commands#regex_abort()<cr>
+    cnoremap <silent><nowait><buffer> <esc><esc> <C-u><C-r>=b:VM_Selection.Vars.regex_backup<cr><esc>:call vm#commands#regex_abort()<cr>
+    cnoremap <silent><nowait><buffer> <esc>      <C-u><C-r>=b:VM_Selection.Vars.regex_backup<cr><esc>:call vm#commands#regex_abort()<cr>
     call s:F.special_statusline('VM-REGEX')
     return '/'
 endfun
