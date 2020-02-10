@@ -16,9 +16,7 @@
 If possible, use this minimal vimrc.
 Save it to a file, then run it with:
     vim -u this_vimrc -U NONE some_file
--->
 
-```vim
 set runtimepath=$VIMRUNTIME
 set packpath=
 set nocompatible
@@ -27,7 +25,7 @@ set nocompatible
 set runtimepath^=path/to/vim-visual-multi
 
 runtime plugin/visual-multi.vim
-```
+-->
 
 -----
 <!-- NOTE: contents inside arrows will be ignored. -->
