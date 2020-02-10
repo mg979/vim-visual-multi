@@ -35,6 +35,13 @@ Hopefully you won't need to alter any of these.
   up statusline integration.
 
 
+*g:VM_show_warnings*                               Default: 1
+
+  When entering VM and there are mapping conflicts, a warning is displayed. Set
+  to 0 to disable this warning. You can still run |:VMDebug| to see if there
+  are conflicts.
+
+
 *g:VM_verbose_commands*                            Default: 0
 
   Set to 1 if you want command prompts to be more informative, rather than as

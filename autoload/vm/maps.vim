@@ -275,7 +275,8 @@ endfun
 
 fun! s:check_warnings() abort
     " Notify once per buffer if errors have happened.
-    if !empty(b:VM_Debug.lines) && !has_key(b:VM_Debug, 'maps_warning')
+    if get(g:, 'VM_show_warnings', 1) && !empty(b:VM_Debug.lines)
+                \ && !has_key(b:VM_Debug, 'maps_warning')
         let b:VM_Debug.maps_warning = 1
         call s:V.Funcs.msg('VM has started with warnings. :VMDebug for more info')
     endif
