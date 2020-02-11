@@ -30,7 +30,6 @@ fun! vm#commands#init() abort
     let s:G        = s:V.Global
     let s:F        = s:V.Funcs
     let s:Search   = s:V.Search
-    let s:Block    = s:V.Block
     let s:v.motion = ''
 endfun
 
@@ -47,14 +46,6 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Add cursor
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:check_block_mode() abort
-    " Enable block mode when adding cursors up/down from extend mode.
-    if s:X() && get(g:, 'VM_auto_block_mode', 0)
-        call s:V.Block.start()
-    endif
-endfun
-
 
 fun! s:skip_shorter_lines() abort
     " When adding cursors below or above, don't add on shorter lines.
@@ -76,8 +67,7 @@ fun! s:skip_shorter_lines() abort
         if ( col < vcol || col == endline ) | return 1 | endif
     endif
 
-    "in block mode, cursor creation is handled in block script
-    if !s:V.Block.vertical() | call s:G.new_cursor() | endif
+    call s:G.new_cursor()
 endfun
 
 
@@ -92,7 +82,6 @@ endfun
 fun! vm#commands#add_cursor_at_pos(extend) abort
     " Add/toggle a single cursor at current position.
     call s:set_extend_mode(a:extend)
-    call s:Block.stop()
     call s:G.new_cursor(1)
 endfun
 
@@ -101,7 +90,6 @@ fun! vm#commands#add_cursor_down(extend, count) abort
     " Add cursors vertically, downwards.
     if s:last_line() | return | endif
     call s:set_extend_mode(a:extend)
-    call s:check_block_mode()
     let s:v.vertical_col = s:F.get_vertcol()
     call s:G.new_cursor()
     let N = a:count
@@ -120,7 +108,6 @@ fun! vm#commands#add_cursor_up(extend, count) abort
     " Add cursors vertically, upwards.
     if s:first_line() | return | endif
     call s:set_extend_mode(a:extend)
-    call s:check_block_mode()
     let s:v.vertical_col = s:F.get_vertcol()
     call s:G.new_cursor()
     let N = a:count
@@ -352,7 +339,7 @@ fun! s:navigate(force, dir) abort
             let i = a:dir? r.index+1 : r.index-1
         endif
         call s:G.select_region(i)
-        return s:keep_block()
+        return 1
     endif
 endfun
 
@@ -362,12 +349,6 @@ fun! s:skip() abort
     else        | call r.clear()
     endif
 endfun
-
-fun! s:keep_block() abort
-    if s:v.block_mode | let s:v.block[3] = 1 | endif
-    return 1
-endfun
-
 
 fun! vm#commands#find_next(skip, nav) abort
     " Find next region, always downwards.
@@ -419,7 +400,6 @@ fun! vm#commands#skip(just_remove) abort
         let r = s:G.region_at_pos()
         if !empty(r)
             call s:G.remove_last_region(r.id)
-            call s:keep_block()
         endif
 
     elseif s:v.nav_direction
@@ -511,9 +491,7 @@ fun! vm#commands#motion(motion, count, select, single) abort
         call s:F.toggle_option('multiline')
     endif
 
-    call s:V.Block.horizontal(1)
     call s:call_motion(a:single)
-    call s:V.Block.horizontal(0)
 endfun
 
 
@@ -892,7 +870,6 @@ endfun
 
 let s:X                = { -> g:Vm.extend_mode }
 let s:R                = { -> s:V.Regions      }
-let s:B                = { -> s:v.block_mode && g:Vm.extend_mode }
 let s:is_r             = { -> g:Vm.is_active && !empty(s:G.region_at_pos()) }
 let s:first_line       = { -> line('.') == 1 }
 let s:last_line        = { -> line('.') == line('$') }

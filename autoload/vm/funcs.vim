@@ -334,15 +334,14 @@ fun! s:Funcs.infoline() abort
 
     let i1 = [' '  , hl] | let m1 = g:Vm.mappings_enabled? ["M\+", H1] : ["m\-", H2]
     let i2 = [' / ', hl] | let m2 = s:v.multiline?         ["V\+", H1] : ["v\-", H2]
-    let i3 = [' / ', hl] | let m3 = s:v.block_mode?        ["B\+", H1] : ["b\-", H2]
-    let i4 = [' / ', hl] | let m4 = s:v.single_region?     ["O\+", H1] : ["o\-", H2]
+    let i3 = [' / ', hl] | let m3 = s:v.single_region?     ["S\+", H1] : ["s\-", H2]
 
     let s = len(s:R())>1 ? 's.' : '.'
     let t = g:Vm.extend_mode? ' region' : ' cursor'
     let R = [len(s:R()).t.s, hl]
     let s1 = ['   Current patterns: ', hl]
     let s2 = [self.pad(string(s:v.search), &columns - 1), H1]
-    let msg = [i1, m1, i2, m2, i3, m3, i4, m4, ix, R, s1, s2]
+    let msg = [i1, m1, i2, m2, i3, m3, ix, R, s1, s2]
     call self.msg(msg)
 endfun
 
@@ -362,9 +361,7 @@ fun! s:Funcs.toggle_option(option) abort
     exe "let" s "= !".s
 
     if a:option == 'multiline'
-        if s:v.multiline
-            call s:V.Block.stop()
-        else
+        if !s:v.multiline
             call vm#commands#split_lines()
         endif
 
@@ -376,17 +373,6 @@ fun! s:Funcs.toggle_option(option) abort
             else
                 call self.msg([a, ['deactivated', 'WarningMsg']])
             endif
-        endif
-
-    elseif a:option == 'block_mode'
-        if s:v.block_mode
-            if s:v.multiline
-                let s:v.multiline = 0
-                call vm#commands#split_lines()
-            endif
-            call s:V.Block.start()
-        else
-            call s:V.Block.stop()
         endif
 
     elseif a:option == 'whole_word'

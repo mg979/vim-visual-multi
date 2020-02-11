@@ -87,7 +87,6 @@ fun! vm#maps#all#buffer() abort
   "basic
   call extend(maps, {
         \"Switch Mode":             ['<Tab>',       'n'],
-        \"Toggle Block":            [leader.'<BS>', 'n'],
         \"Toggle Single Region":    [leader.'<CR>', 'n'],
         \})
 

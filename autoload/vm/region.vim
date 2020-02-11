@@ -11,7 +11,6 @@ endfun
 
 let s:X = { -> g:Vm.extend_mode }
 let s:R = { -> s:V.Regions }
-let s:B = { -> s:v.block_mode && g:Vm.extend_mode }
 
 
 
@@ -327,10 +326,7 @@ fun! s:move_region(r) abort
     endif
 
     "assign new values
-    if s:v.block_mode
-        return s:V.Block.positions(r, newcol, went_back, went_forth)
-
-    elseif went_back
+    if went_back
         let r.dir = 0
         let r.a = newcol
         let r.b = r.k
@@ -573,16 +569,6 @@ fun! s:region_vars(r, cursor, ...) abort
         let R.b     = R.a
 
         call s:fix_pos(R)
-
-        if s:B() && s:v.block[1] && s:v.block[0]
-            if R.dir && R.a > s:v.block[0]
-                let R.a = s:v.block[0]
-                let R.b = s:v.block[1]
-            elseif !R.dir && R.b < s:v.block[0]
-                let R.b = s:v.block[0]
-                let R.a = s:v.block[1]
-            endif
-        endif
 
         let R.txt   = R.char()              " character under cursor in extend mode
         let R.pat   = s:pattern(R)

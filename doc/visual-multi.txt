@@ -422,16 +422,6 @@ Find Operator ~
   Example: `mip` would find all patterns in the current paragraph.
 
 
---------------------------------------------------------------  *vm-block-mode*
-Block Mode ~
-
-  Default mapping: \\<BS>
-
-  The |block-mode| is a minor mode that works inside the |extend-mode|. It can
-  help keeping the same width when adding new regions vertically with <C-Down>
-  or <C-Up>, but there isn't much else about it right now.
-
-
 ----------------------------------------------------------------  *vm-infoline*
 Show Infoline ~
 
@@ -444,7 +434,6 @@ Show Infoline ~
 >
     M+ / m- : whether mappings are enabled or not
     V+ / v- : whether multiline is enabled or not
-    B+ / b- : whether block mode is enabled or not
     O+ / o- : whether single region mode is enabled or not
 <
   After that: >

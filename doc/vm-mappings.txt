@@ -173,7 +173,6 @@ Toggle Whole Word     \\w         toggle whole word search
 Case Setting          \\c         cycle case setting ('scs' -> 'noic' -> 'ic')
 Toggle Multiline      \\M         see |vm-multiline-mode|
 Toggle Mappings       \\<Space>   toggle VM mappings
-Toggle Block          \\<BS>      toggle block mode
 Toggle Single Region  \\<CR>      toggle single region mode
 
  vim: ft=help et sw=2 ts=2 sts=2 tw=79

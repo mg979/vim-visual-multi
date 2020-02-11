@@ -102,7 +102,6 @@ fun! VMInfos() abort
     let VM = b:VM_Selection
 
     let m = g:Vm.mappings_enabled ?    'M' : 'm'
-    let b = VM.Vars.block_mode ?       'B' : 'b'
     let s = VM.Vars.single_region ?    'S' : 's'
     let l = VM.Vars.multiline ?        'V' : 'v'
 
@@ -110,7 +109,7 @@ fun! VMInfos() abort
     let infos.total = len(VM.Regions)
     let infos.ratio = infos.current . ' / ' . infos.total
     let infos.patterns = VM.Vars.search
-    let infos.status = m.b.s.l
+    let infos.status = m.s.l
     return infos
 endfun
 

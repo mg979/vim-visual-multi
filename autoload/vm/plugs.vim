@@ -54,7 +54,6 @@ fun! vm#plugs#buffer() abort
 
   nnoremap <silent>       <Plug>(VM-Toggle-Mappings)         :call b:VM_Selection.Maps.mappings_toggle()<cr>
   nnoremap <silent>       <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline')<cr>
-  nnoremap <silent>       <Plug>(VM-Toggle-Block)            :call b:VM_Selection.Funcs.toggle_option('block_mode')<cr>
   nnoremap <silent>       <Plug>(VM-Toggle-Whole-Word)       :call b:VM_Selection.Funcs.toggle_option('whole_word')<cr>
   nnoremap <silent>       <Plug>(VM-Toggle-Single-Region)    :call b:VM_Selection.Funcs.toggle_option('single_region')<cr>
   nnoremap <silent>       <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>

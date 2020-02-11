@@ -72,7 +72,6 @@ fun! vm#init_buffer(empty) abort
         let s:V.Search     = vm#search#init()
         let s:V.Edit       = vm#edit#init()
         let s:V.Insert     = vm#insert#init()
-        let s:V.Block      = vm#block#init()
         let s:V.Case       = vm#special#case#init()
 
         call s:V.Maps.enable()
@@ -226,14 +225,7 @@ fun! vm#au_cursor(end) abort
 endfun
 
 fun! s:cursor_moved() abort
-    if s:v.block_mode
-        if !s:v.block[3]
-            call s:V.Block.stop()
-        else
-            let s:v.block[3] = 0
-        endif
-
-    elseif !s:v.eco
+    if !s:v.eco
         " if currently on a region, set the index to this region
         " so that it's possible to select next/previous from it
         let r = s:V.Global.region_at_pos()

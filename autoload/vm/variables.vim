@@ -74,11 +74,6 @@ fun! vm#variables#init() abort
 
   "init new vars
 
-  "block: [ left edge, right edge,
-  "         minimum edge for all regions,
-  "         flag for autocommand ]
-
-  let v.block            = [0,0,0,0]
   let v.search           = []
   let v.IDs_list         = []
   let v.ID               = 0
@@ -91,7 +86,6 @@ fun! vm#variables#init() abort
   let v.single_region    = 0
   let v.using_regex      = 0
   let v.multiline        = 0
-  let v.block_mode       = 0
   let v.yanked           = 0
   let v.merge            = 0
   let v.insert           = 0

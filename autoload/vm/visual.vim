@@ -23,7 +23,6 @@ fun! vm#visual#add(mode) abort
 
     if h | let s:v.multiline = 1 | endif
     call s:G.update_and_select_region({'id': s:v.IDs_list[-1]})
-    if w | call s:F.toggle_option('block_mode') | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

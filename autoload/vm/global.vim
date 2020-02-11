@@ -13,7 +13,6 @@ fun! vm#global#init() abort
 
     let s:X = { -> g:Vm.extend_mode }
     let s:R = { -> s:V.Regions      }
-    let s:B = { -> s:v.block_mode && g:Vm.extend_mode }
 
     return s:Global
 endfun
@@ -310,7 +309,6 @@ fun! s:Global.erase_regions() abort
     " Erase all regions.
 
     call self.remove_highlight()
-    call s:V.Block.stop()
     let s:V.Regions = []
     let s:V.Bytes = {}
     let s:v.index = -1
@@ -359,7 +357,6 @@ fun! s:Global.collapse_regions() abort
     " Collapse regions to cursors and turn off extend mode.
 
     call self.reset_byte_map(0)
-    call s:V.Block.stop()
 
     for r in s:R() | call r.update_cursor([r.l, (r.dir? r.a : r.b)]) | endfor
     let g:Vm.extend_mode = 0
