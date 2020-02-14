@@ -21,22 +21,9 @@ let s:Search = {}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.get_pattern(register, regex) abort
-    let t = getreg(a:register)
-    let p = t
-    if !a:regex
-        let t = self.escape_pattern(t)
-        let p = s:v.whole_word? '\<'.t.'\>' : t
-        "if whole word, ensure pattern can be found
-        let p = search(p, 'nc')? p : t
-    endif
-    return p
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:update_search(p) abort
-    """Update search patterns, unless s:v.no_search is set.
+    " Update search patterns, unless s:v.no_search is set.
     if s:v.no_search | return | endif
 
     if !empty(a:p) && index(s:v.search, a:p) < 0   "not in list
@@ -44,20 +31,32 @@ fun! s:update_search(p) abort
     endif
 
     if s:v.eco | let @/ = s:v.search[0]
-    else       | let @/ = join(s:v.search, '\|')
+    else       | call s:Search.join()
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
+fun! s:Search.get_pattern(register) abort
+    let t = getreg(a:register)
+    let t = self.escape_pattern(t)
+    let p = s:v.whole_word ? '\<'.t.'\>' : t
+    "if whole word, ensure pattern can be found
+    let p = search(p, 'nc')? p : t
+    return p
+endfun
+
 
 fun! s:Search.add(...) abort
-    """Add a new search pattern."
-    let pat = a:0? a:1 : self.get_pattern(s:v.def_reg, 0)
+    " Add a new search pattern.
+    let pat = a:0? a:1 : self.get_pattern(s:v.def_reg)
     call s:update_search(pat)
 endfun
 
+
 fun! s:Search.add_if_empty(...) abort
-    """Add a new search pattern, only if no pattern is set.
+    " Add a new search pattern, only if no pattern is set.
     if empty(s:v.search)
         if a:0 | call self.add(a:1)
         else   | call self.add(s:R()[s:v.index].pat)
@@ -65,10 +64,19 @@ fun! s:Search.add_if_empty(...) abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.get() abort
-    """Get a new search pattern from the selected region, with a fallback."
+fun! s:Search.ensure_is_set(...) abort
+    " Ensure there is an active search.
+    if empty(s:v.search)
+        if !len(s:R()) | call self.get_slash_reg()
+        else           | call self.add(self.escape_pattern(s:R()[0].txt))
+        endif
+    endif
+endfun
+
+
+fun! s:Search.get_from_region() abort
+    " Get a new search pattern from the selected region, with a fallback.
     let r = s:G.region_at_pos()
     if !empty(r)
         let pat = self.escape_pattern(r.txt)
@@ -79,30 +87,108 @@ fun! s:Search.get() abort
     if empty(s:v.search) | call self.ensure_is_set() | endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Search.get_slash_reg(...) abort
-    """Get pattern from current "/" register. Use backup register if empty."
+    " Get pattern from current "/" register. Use backup register if empty.
     if a:0 | let @/ = a:1 | endif
-    call s:update_search(self.get_pattern('/', 1))
+    call s:update_search(getreg('/'))
     if empty(s:v.search) | call s:update_search(s:v.oldreg[1]) | endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.ensure_is_set(...) abort
-    """Ensure there is an active search.
-    if empty(s:v.search)
-        if !len(s:R()) | call self.get_slash_reg()
-        else           | call self.add(self.escape_pattern(s:R()[0].txt))
-        endif
+fun! s:Search.validate() abort
+    " Check whether the current search is valid, if not, clear the search.
+    if s:v.eco || empty(s:v.search) | return | endif
+
+    call self.join()
+
+    "pattern found, ok
+    if search(@/, 'cnw') | return | endif
+
+    while 1
+        let i = 0
+        for p in s:v.search
+            if !search(@/, 'cnw') | call remove(s:v.search, i) | break | endif
+            let i += 1
+        endfor
+        break
+    endwhile
+    call self.join()
+endfun
+
+
+fun! s:Search.update_patterns(...) abort
+    " Update the search patterns if the active search isn't listed.
+    let current = a:0? [a:1] : split(@/, '\\|')
+    for p in current
+        if index(s:v.search, p) >= 0 | return | endif
+    endfor
+    if a:0 | call self.get_from_region()
+    else   | call self.get_slash_reg()
     endif
 endfun
 
+
+fun! s:Search.escape_pattern(t) abort
+    return substitute(escape(a:t, '\/.*$^~[]'), "\n", '\\n', "g")
+endfun
+
+
+fun! s:Search.join(...) abort
+    " Join current patterns, optionally replacing them.
+    if a:0 | let s:v.search = a:1 | endif
+    let @/ = join(s:v.search, '\|')
+endfun
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Search menu and options
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Search.update_current(...) abort
-    """Update current search pattern to index 0 or <arg>."""
+
+fun! s:pattern_rewritten(t, i) abort
+    " Return true if a pattern has been rewritten.
+    if @/ == '' | return | endif
+
+    let p = s:v.search[a:i]
+    if a:t =~ p || p =~ a:t
+        let old = s:v.search[a:i]
+        let s:v.search[a:i] = a:t
+        call s:G.update_region_patterns(a:t)
+        call s:Search.join()
+        let [ wm, L ] = [ 'WarningMsg', 'Label' ]
+        call s:F.msg([['Pattern updated:   [', wm ], [old, L],
+                    \     [']  ->  [', wm],          [a:t, L],
+                    \     ["]\n", wm]])
+        return 1
+    endif
+endfun
+
+
+fun! s:Search.rewrite(last) abort
+    " Rewrite patterns, if substrings of the selected text.
+    let r = s:G.region_at_pos() | if empty(r) | return | endif
+
+    let t = self.escape_pattern(r.txt)
+
+    if a:last
+        "add a new pattern if not found
+        if !s:pattern_rewritten(t, 0)
+            call self.add(t)
+        endif
+    else
+        "rewrite if found among any pattern, else do nothing
+        for i in range ( len(s:v.search) )
+            if s:pattern_rewritten(t, i) | break | endif
+        endfor
+    endif
+endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
+fun! s:update_current(...) abort
+    " Update current search pattern to index 0 or <arg>.
 
     if empty(s:v.search)          | let @/ = ''
     elseif !a:0                   | let @/ = s:v.search[0]
@@ -112,10 +198,9 @@ fun! s:Search.update_current(...) abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Search.remove(also_regions) abort
-    """Remove a search pattern, and optionally its associated regions."""
+    " Remove a search pattern, and optionally its associated regions.
     let pats = s:v.search
 
     if !empty(pats)
@@ -128,7 +213,7 @@ fun! s:Search.remove(also_regions) abort
         call s:F.msg("\n")
         let pat = pats[i]
         call remove(pats, i)
-        call self.update_current()
+        call s:update_current()
     else
         return s:F.msg('No search patters yet.')
     endif
@@ -147,59 +232,11 @@ fun! s:Search.remove(also_regions) abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Search.validate() abort
-    """Check whether the current search is valid, if not, clear the search."""
-    if s:v.eco || empty(s:v.search) | return | endif
-
-    let @/ = join(s:v.search, '\|')
-
-    "pattern found, ok
-    if search(@/, 'cnw') | return | endif
-
-    while 1
-        let i = 0
-        for p in s:v.search
-            if !search(@/, 'cnw') | call remove(s:v.search, i) | break | endif
-            let i += 1
-        endfor
-        break
-    endwhile
-    let @/ = join(s:v.search, '\|')
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Search.check_pattern(...) abort
-    """Update the search patterns if the active search isn't listed."""
-    let current = a:0? [a:1] : split(@/, '\\|')
-    for p in current
-        if index(s:v.search, p) >= 0 | return | endif
-    endfor
-    if a:0 | call self.get()
-    else   | call self.get_slash_reg()
-    endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Search.escape_pattern(t) abort
-    return substitute(escape(a:t, '\/.*$^~[]'), "\n", '\\n', "g")
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:Search.apply(...) abort
-    """Apply current patterns, optionally replacing them.
-    if a:0 | let s:v.search = a:1 | endif
-    let @/ = join(s:v.search, '\|')
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
 fun! s:Search.case() abort
+    " Cycle case settings.
     if &smartcase              "smartcase        ->  case sensitive
         set nosmartcase
         set noignorecase
@@ -216,48 +253,6 @@ fun! s:Search.case() abort
     endif
 endfun
 
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Search rewrite
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Try to rewrite last or all patterns, if one of the matches is a substring of
-"the selected text.
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-fun! s:pattern_found(t, i) abort
-    if @/ == '' | return | endif
-
-    let p = s:v.search[a:i]
-    if a:t =~ p || p =~ a:t
-        let old = s:v.search[a:i]
-        let s:v.search[a:i] = a:t
-        call s:G.update_region_patterns(a:t)
-        let @/ = join(s:v.search, '\|')
-        let [ wm, L ] = [ 'WarningMsg', 'Label' ]
-        call s:F.msg([['Pattern updated:   [', wm ], [old, L],
-                    \     [']  ->  [', wm],          [a:t, L],
-                    \     ["]\n", wm]])
-        return 1
-    endif
-endfun
-
-fun! s:Search.rewrite(last) abort
-    let r = s:G.region_at_pos() | if empty(r) | return | endif
-
-    let t = self.escape_pattern(r.txt)
-
-    if a:last
-        "add a new pattern if not found
-        if !s:pattern_found(t, 0) | call self.add(t) | endif
-    else
-        "rewrite if found among any pattern, else do nothing
-        for i in range ( len(s:v.search) )
-            if s:pattern_found(t, i) | break | endif
-        endfor
-    endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Search.menu() abort
     echohl WarningMsg | echo "1 - " | echohl Type | echon "Rewrite Last Search"   | echohl None
@@ -276,7 +271,7 @@ fun! s:Search.menu() abort
     elseif c == 3
         call self.get_slash_reg()
     elseif c == 4
-        call self.get()
+        call self.get_from_region()
     elseif c == 5
         call self.remove(0)
     elseif c == 6
@@ -284,4 +279,6 @@ fun! s:Search.menu() abort
     endif
     call feedkeys("\<cr>", 'n')
 endfun
-" vim: et ts=4 sw=4 sts=4 :
+
+
+" vim: et sw=4 ts=4 sts=4 fdm=indent fdn=1

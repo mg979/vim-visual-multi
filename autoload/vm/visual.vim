@@ -107,7 +107,7 @@ fun! vm#visual#split() abort
 
     "subtract regions and rebuild from map
     call s:merge(1)
-    call s:V.Search.apply(oldsearch)
+    call s:V.Search.join(oldsearch)
     call s:G.update_and_select_region()
 endfun
 

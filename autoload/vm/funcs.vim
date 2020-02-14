@@ -393,7 +393,7 @@ fun! s:Funcs.toggle_option(option) abort
                         \['Search ->'              , wm], ['  not whole word ', L],
                         \[' ->  Current patterns: ', wm], [pats               , L]])
         endif
-        call s:V.Search.apply()
+        call s:V.Search.join()
         return
     endif
 endfun

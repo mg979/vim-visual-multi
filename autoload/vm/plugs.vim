@@ -60,7 +60,7 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Rewrite-Last-Search)     :call b:VM_Selection.Search.rewrite(1)<cr>
   nnoremap <silent>       <Plug>(VM-Rewrite-All-Search)      :call b:VM_Selection.Search.rewrite(0)<cr>
   nnoremap <silent>       <Plug>(VM-Read-From-Search)        :call b:VM_Selection.Search.get_slash_reg()<cr>
-  nnoremap <silent>       <Plug>(VM-Add-Search)              :call b:VM_Selection.Search.get()<cr>
+  nnoremap <silent>       <Plug>(VM-Add-Search)              :call b:VM_Selection.Search.get_from_region()<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Search)           :call b:VM_Selection.Search.remove(0)<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Search-Regions)   :call b:VM_Selection.Search.remove(1)<cr>
   nnoremap <silent>       <Plug>(VM-Search-Menu)             :call b:VM_Selection.Search.menu()<cr>

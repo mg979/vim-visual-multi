@@ -272,12 +272,12 @@ fun! vm#commands#find_all(visual, whole) abort
         if empty(R)
             let R = vm#commands#find_under(0, a:whole)
         endif
-        call s:Search.check_pattern(R.pat)
+        call s:Search.update_patterns(R.pat)
     else
         let R = vm#commands#find_under(1, a:whole)
     endif
 
-    let @/ = join(s:v.search, '\|')
+    call s:Search.join()
     let s:v.nav_direction = 1
     call s:G.erase_regions()
     call s:G.get_all_regions()

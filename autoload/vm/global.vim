@@ -35,7 +35,7 @@ fun! s:Global.new_region() abort
 
     if !s:v.eco
         call self.select_region(R.index)
-        call s:V.Search.check_pattern()
+        call s:V.Search.update_patterns()
         call s:F.restore_reg()
     endif
     return R

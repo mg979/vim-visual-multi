@@ -1,9 +1,12 @@
+
 fun! vm#region#init() abort
     let s:V = b:VM_Selection
     let s:v = s:V.Vars
     let s:G = s:V.Global
     let s:F = s:V.Funcs
 endfun
+
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Lambdas
@@ -18,7 +21,7 @@ let s:R = { -> s:V.Regions }
 " Region class
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-" A new region will only been created if not already existant
+" A new region will only been created if not already existent at position.
 
 " b:VM_Selection (= s:V) contains Regions, Matches, Vars (= s:v = plugin variables)
 
@@ -28,7 +31,9 @@ let s:R = { -> s:V.Regions }
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+
 fun! vm#region#new(cursor, ...) abort
+    " Create region from marks, offsets or positions.
 
     "----------------------------------------------------------------------
 
@@ -81,8 +86,9 @@ endfun
 
 let s:Region = {}
 
+
 fun! s:Region.new(cursor, ...) abort
-    """Initialize region variables and methods.
+    " Initialize region variables and methods.
     "
     " Uppercase variables (A,B,K) are for byte offsets, except L (end line).
 
@@ -123,42 +129,53 @@ fun! s:Region.new(cursor, ...) abort
     return R
 endfun
 
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Region methods
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 
 fun! s:Region.empty() abort
     return self.A == self.B
 endfun
 
+
 fun! s:Region.A_() abort
     return line2byte(self.l) + self.a - 1
 endfun
 
+
 fun! s:Region.B_() abort
-    " the final byte will be higher than the byte of the column, if multibyte
+    " Last byte of the last character in the region.
+    " This will be greater than the column, if character is multibyte.
     let bytes = len(self.txt) ? strlen(self.txt[-1:-1]) : 1
     return line2byte(self.L) + self.b + bytes - 2
 endfun
+
 
 fun! s:Region.cur_ln() abort
     return self.dir ? self.L : self.l
 endfun
 
+
 fun! s:Region.cur_col() abort
     return self.dir ? self.b : self.a
 endfun
+
 
 fun! s:Region.cur_Col() abort
     return self.cur_col() == self.b ? self.B : self.A
 endfun
 
+
 fun! s:Region.char() abort
     return s:X()? s:F.char_at_pos(self.l, self.cur_col()) : ''
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.shift(x, y) abort
-    """Shift region offsets by integer values.
+    " Shift region offsets by integer values.
     "TODO: this will surely cause trouble in insert mode with multibyte chars
     "all r.shift() in insert mode should be replaced with r.update_cursor()
     let r = self
@@ -174,12 +191,15 @@ fun! s:Region.shift(x, y) abort
     return [r.l, r.L, r.a, r.b]
 endfun
 
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Remove region
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+
 fun! s:Region.remove() abort
-    """Remove a region and its id, then update indices."""
+    " Remove a region and its id, then update indices.
     call self.remove_highlight()
     call remove(s:R(), self.index)
     call remove(s:v.IDs_list, index(s:v.IDs_list, self.id))
@@ -192,14 +212,16 @@ fun! s:Region.remove() abort
     return self
 endfun
 
+
 fun! s:Region.clear(...) abort
-    """Called if it's necessary to clear the byte map as well."""
+    " Called if it's necessary to clear the byte map as well.
     call self.remove_from_byte_map(a:0)
     return self.remove()
 endfun
 
+
 fun! s:Region.remove_from_byte_map(all) abort
-    """Remove a region from the bytes map."""
+    " Remove a region from the bytes map.
     if !s:X() | return | endif
 
     if a:all
@@ -220,7 +242,9 @@ endfun
 " Region motions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+
 fun! s:Region.move(...) abort
+    " Move cursors, or extend regions by motion.
     let s:motion = a:0? a:1 : s:v.motion
 
     if !s:X()
@@ -230,10 +254,9 @@ fun! s:Region.move(...) abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.set_vcol(...) abort
-    """Set vertical column if motion is j or k, and vcol not previously set.
+    " Set vertical column if motion is j or k, and vcol not previously set.
     if !s:vertical()
         let self.vcol = 0
     elseif !self.vcol
@@ -241,16 +264,14 @@ fun! s:Region.set_vcol(...) abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:vertical() abort
     return index(['j', 'k'], s:motion[0]) >=0
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:move_cursor(r) abort
-    """If not in extend mode, just move the cursors."""
+    " If not in extend mode, just move the cursors.
 
     call cursor(a:r.l, a:r.a)
     call a:r.set_vcol()
@@ -264,10 +285,9 @@ fun! s:move_cursor(r) abort
     call a:r.update_cursor_pos()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:keep_line(r, ln) abort
-    """Ensure line boundaries aren't crossed. Force cursor merging."""
+    " Ensure line boundaries aren't crossed. Force cursor merging.
     let r = a:r
 
     if     ( a:ln > r.l ) | call cursor ( r.l, col([r.l, '$'])-1 ) | let s:v.merge = s:X()? s:v.merge : 1
@@ -276,10 +296,9 @@ fun! s:keep_line(r, ln) abort
     endif
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:keep_vertical_col(r) abort
-    """Keep the vertical column if moving vertically."""
+    " Keep the vertical column if moving vertically.
     let vcol    = a:r.vcol
     let lnum    = line('.')
     let endline = (col('$') > 1)? col('$') - 1 : 1
@@ -291,9 +310,9 @@ fun! s:keep_vertical_col(r) abort
     endif
 endfun
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:move_region(r) abort
+    " Perform the motion.
     let r = a:r | let a = r.a | let b = r.b | let up = 0 | let down = 0
 
     "move the cursor to the current head and perform the motion
@@ -345,20 +364,23 @@ fun! s:move_region(r) abort
     call r.update_region()
 endfun
 
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Update functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+
 fun! s:Region.update() abort
+    " Update region.
     if s:X() | call self.update_region()
     else     | call self.update_cursor()
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_cursor(...) abort
-    """Update cursor vars from position [line, col] or offset.
+    " Update cursor vars from position [line, col] or offset.
     let r = self
 
     if a:0 && !type(a:1)
@@ -373,17 +395,17 @@ fun! s:Region.update_cursor(...) abort
     call self.update_vars()
 endfun
 
+
 fun! s:Region.update_cursor_pos() abort
-    """Update cursor to current position.
+    " Update cursor to current position.
     let [ self.l, self.a ] = getpos('.')[1:2]
     call s:fix_pos(self)
     call self.update_vars()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_content() abort
-    """Get region content if in extend mode.
+    " Get region content if in extend mode.
     let r = self
     call cursor(r.l, r.a)   | keepjumps normal! m[
     call cursor(r.L, r.b+1) | silent keepjumps normal! m]`[y`]
@@ -401,10 +423,9 @@ fun! s:Region.update_content() abort
     let r.pat = s:pattern(r)
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_region(...) abort
-    """Update the main region positions."""
+    " Update the main region positions.
     let r = self
 
     if a:0 == 4
@@ -416,10 +437,9 @@ fun! s:Region.update_region(...) abort
     call self.update_vars()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_vars() abort
-    """Update the rest of the region variables."""
+    " Update the rest of the region variables.
 
     let r         = self
     let s:v.index = r.index
@@ -444,12 +464,15 @@ fun! s:Region.update_vars() abort
     endif
 endfun
 
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Highlight functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+
 fun! s:Region.highlight() abort
-    """Create the highlight entries."""
+    " Create the highlight entries.
 
     if s:v.eco | return | endif
     let R = self
@@ -486,10 +509,9 @@ fun! s:Region.highlight() abort
     let R.matches.cursor = matchaddpos('MultiCursor', [cursor], 40)
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.remove_highlight() abort
-    """Remove the highlight entries."""
+    " Remove the highlight entries.
 
     let r       = self.matches.region
     let c       = self.matches.cursor
@@ -498,18 +520,17 @@ fun! s:Region.remove_highlight() abort
     silent! call matchdelete(c)
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_highlight() abort
-    """Update the region highlight."""
+    " Update the region highlight.
 
     call self.remove_highlight()
     call self.highlight()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Region.update_bytes_map() abort
+    " Update bytes map for region.
     if !s:X() | return | endif
 
     for b in range(self.A, self.B)
@@ -517,12 +538,15 @@ fun! s:Region.update_bytes_map() abort
     endfor
 endfun
 
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Misc functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+
 fun! s:pattern(r) abort
-    """Find the search pattern associated with the region."""
+    " Find the search pattern associated with the region.
 
     if empty(s:v.search) | return s:V.Search.escape_pattern(a:r.txt) | endif
 
@@ -539,10 +563,9 @@ fun! s:pattern(r) abort
     return a:r.pat
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:fix_pos(r) abort
-    "fix positions in endline
+    " Fix positions at end of line.
     let r = a:r
     let eol = col([r.l, '$']) - 1
     let eoL = col([r.L, '$']) - 1
@@ -556,9 +579,9 @@ fun! s:fix_pos(r) abort
     endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:region_vars(r, cursor, ...) abort
+    " Update region variables.
     let R = a:r
 
     if !a:0 && a:cursor    "/////////// CURSOR ////////////
@@ -620,4 +643,6 @@ fun! s:region_vars(r, cursor, ...) abort
         let R.vcol  = 0                     " vertical column
     endif
 endfun
-" vim: et ts=4 sw=4 sts=4 :
+
+
+" vim: et sw=4 ts=4 sts=4 fdm=indent fdn=1
