@@ -243,12 +243,7 @@ fun! vm#commands#find_under(visual, whole, ...) abort
     if a:0 && s:is_r() | return vm#commands#find_next(0, 0) | endif
 
     " yank and create region
-    if !a:visual
-        exe 'normal! viwy`]'
-    elseif visualmode() ==# 'v' && empty(getline("'>"))
-        call cursor(line("'>"), col("'>"))
-        k]
-    endif
+    if !a:visual | exe 'normal! viwy`]' | endif
 
     "replace region if calling the command on an existing region
     if s:is_r()  | call s:G.region_at_pos().remove()        | endif
@@ -312,15 +307,7 @@ endfun
 
 fun! s:get_next() abort
     if s:X()
-        if visualmode() ==# 'V'
-            silent keepjumps normal! ngnVy`]
-        else
-            silent keepjumps normal! ngny`]
-            if getline("'>") == ''
-                normal! k$
-                k]
-            endif
-        endif
+        silent keepjumps normal! ngny`]
         let R = s:G.new_region()
     else
         silent keepjumps normal! ngny`[
