@@ -162,9 +162,7 @@ fun! s:Edit.block_paste(before) abort
                 normal! P
             else
                 normal! p
-                " update cursor position after the command
-                let diff = col('.') - r.a - 1
-                call r.shift(diff, diff)
+                call r.update_cursor_pos()
             endif
 
             "update changed size
