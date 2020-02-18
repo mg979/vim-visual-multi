@@ -203,7 +203,7 @@ fun! s:c_cursors(M, reg, n) abort
   else
     call s:V.Edit.run_normal('d'.S, {'count': N, 'store': reg, 'recursive': s:recursive})
     call s:G.merge_regions()
-    call feedkeys("i")
+    call s:V.Insert.key('i')
   endif
 endfun
 
