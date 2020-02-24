@@ -1,6 +1,10 @@
 <!-- Before posting an issue, read at least:
 
     :help visual-multi-faq
+    :help visual-multi-settings
+
+    Please don't post requests for mappings, and be sure to read the faq to see
+    how you can customize them, if you need.
 -->
 **Describe the issue:**
 

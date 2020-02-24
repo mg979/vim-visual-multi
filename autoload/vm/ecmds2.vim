@@ -73,6 +73,7 @@ fun! s:Edit.surround() abort
     if !len(s:R()) | return | endif
     if !s:X() | call vm#operators#select(1, 'iw') | endif
 
+    if !s:v.direction | call vm#commands#invert_direction() | endif
     let s:v.W = self.store_widths()
     let c = nr2char(getchar())
 
