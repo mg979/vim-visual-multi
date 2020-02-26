@@ -477,7 +477,7 @@ fun! vm#commands#motion(motion, count, select, single) abort
     "-----------------------------------------------------------------------
 
     if a:motion == '|' && a:count <= 1
-        let s:v.motion = col('.').a:motion
+        let s:v.motion = virtcol('.').a:motion
     else
         let s:v.motion = a:count>1? a:count.a:motion : a:motion
     endif
