@@ -34,6 +34,10 @@ Or you can rely on a user autocommand:  >
   autocmd User visual_multi_start   call MyVmStart()
   autocmd User visual_multi_exit    call MyVmExit()
 <
+If you want to override some VM mapping (and you know what you're doing), this
+autocommand is triggered after mappings have been set:
+>
+  autocmd User visual_multi_mappings  call MyVmMappings()
 
 -------------------------------------------------------------------------------
                                                       *vm-faq-disable-mappings*
