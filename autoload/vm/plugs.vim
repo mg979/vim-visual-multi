@@ -91,6 +91,7 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Remove-Last-Region)      :call b:VM_Selection.Global.remove_last_region()<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Every-n-Regions)  :<c-u>call vm#commands#remove_every_n_regions(v:count)<cr>
   nnoremap <silent>       <Plug>(VM-Show-Infoline)           :call b:VM_Selection.Funcs.infoline()<cr>
+  nnoremap <silent>       <Plug>(VM-One-Per-Line)            :call b:VM_Selection.Global.one_region_per_line()<bar>call b:VM_Selection.Global.update_and_select_region()<cr>
 
   nnoremap <silent>       <Plug>(VM-Hls)                     :set hls<cr>
 

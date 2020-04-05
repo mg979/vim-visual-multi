@@ -117,6 +117,7 @@ fun! vm#maps#all#buffer() abort
         \"Search Menu":             [leader.'S',      'n'],
         \"Rewrite Last Search":     [leader.'r',      'n'],
         \"Show Infoline":           [leader.'l',      'n'],
+        \"One Per Line":            [leader.'L',      'n'],
         \"Filter Regions":          [leader.'f',      'n'],
         \"Toggle Multiline":        [leader.'M',      'n'],
         \})

@@ -153,6 +153,7 @@ Merge Regions         \\m         merge overlapping regions
 Duplicate             \\d         duplicate regions
 Shrink                \\-         reduce regions from the sides
 Enlarge               \\+         enlarge regions from the sides
+One Per Line          \\L         keep at most one region per line
 Numbers               \\n         see |vm-numbering|
 Numbers Append        \\N         ,,
 
