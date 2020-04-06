@@ -174,6 +174,7 @@ fun! s:Edit.shift(dir) abort
 
     call self.yank('"', 1)
     if a:dir
+        let s:v.dont_move_cursors = 1
         call self.paste(0, 0, 1, '"')
     else
         call self.delete(1, "_", 0, 0)

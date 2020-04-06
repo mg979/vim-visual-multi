@@ -162,7 +162,9 @@ fun! s:Edit.block_paste(before) abort
                 normal! P
             else
                 normal! p
-                call r.update_cursor_pos()
+                if !exists('s:v.dont_move_cursors')
+                    call r.update_cursor_pos()
+                endif
             endif
 
             "update changed size
@@ -171,6 +173,7 @@ fun! s:Edit.block_paste(before) abort
             break
         endif
     endfor
+    silent! unlet s:v.dont_move_cursors
     call s:F.restore_reg()
 endfun " }}}
 
