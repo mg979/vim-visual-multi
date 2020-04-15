@@ -39,7 +39,18 @@ fun! vm#cursors#operation(op, n, register, ...) abort
       if s:ia(c)
         let c = nr2char(getchar())  | echon c | let M .= c
       endif
-      let c = nr2char(getchar())    | echon c | let M .= c | break
+      let c = nr2char(getchar())    | echon c
+      if c == '<' || c == 't'
+        redraw
+        let tag = s:V.Edit.surround_tags()
+        if tag == ''
+          echon ' ...Aborted'       | return
+        else
+          let M .= tag              | break
+        endif
+      else
+        let M .= c                  | break
+      endif
 
     elseif a:op ==# 'd' && c==#'s'  | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c | break

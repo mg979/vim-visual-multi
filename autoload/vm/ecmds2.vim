@@ -75,11 +75,18 @@ fun! s:Edit.surround() abort
 
     if !s:v.direction | call vm#commands#invert_direction() | endif
     let s:v.W = self.store_widths()
+    let reselect = 1
+
     let c = nr2char(getchar())
 
-    "not possible
-    if c == '<' || c == '>'
-        return s:F.msg('Not possible. Use visual command (\\v) instead. ')
+    if c == '<' || c ==# 't'
+        let reselect = 0
+        let c = self.surround_tags()
+        if c == ''
+            redraw
+            echo
+            return
+        endif
     endif
 
     nunmap <buffer> S
@@ -90,10 +97,46 @@ fun! s:Edit.surround() abort
     else
         call map(s:v.W, 'v:val + 1')
     endif
-    call self.post_process(1, 0)
+    if reselect
+        call self.post_process(1, 0)
+    else
+        call self.post_process(0)
+    endif
 
     nmap <silent> <nowait> <buffer> S <Plug>(VM-Surround)
 endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Edit.surround_tags() abort
+    let c = '<'
+    echo c
+
+    while v:true
+        let ch = getchar()
+        if ch == 27 "esc
+            return ''
+        endif
+        if ch == "\<BS>"
+            if strlen(c) > 1
+                let c = c[:-2]
+            else
+                "no more chars
+                return ''
+            endif
+        else
+            let c .= nr2char(ch)
+            if ch == 62 || ch == 13 "> or CR
+                break
+            endif
+        endif
+        redraw
+        echo c
+    endwhile
+
+    return c
+endfun
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
