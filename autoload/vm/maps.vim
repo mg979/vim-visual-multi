@@ -85,6 +85,9 @@ fun! s:Maps.start() abort
     nmap              <nowait> <buffer> :          <Plug>(VM-:)
     nmap              <nowait> <buffer> /          <Plug>(VM-/)
     nmap              <nowait> <buffer> ?          <Plug>(VM-?)
+
+    " user autocommand after mappings have been set
+    silent doautocmd <nomodeline> User visual_multi_mappings
 endfun
 
 

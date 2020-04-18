@@ -76,9 +76,6 @@ fun! vm#init_buffer(empty) abort
 
         call s:V.Maps.enable()
 
-        " user autocommand after mappings have been set
-        silent doautocmd <nomodeline> User visual_multi_mappings
-
         call vm#region#init()
         call vm#commands#init()
         call vm#operators#init()

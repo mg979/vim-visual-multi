@@ -51,7 +51,7 @@ features that can make up for it, namely: powerful macros, visual block, |gn|
 text object, |:global| command and more.
 
 Still I think that multiple selections cover a middle ground for which macros
-and other methods are a bit cumbersome, or you just want somw visual feedback
+and other methods are a bit cumbersome, or you just want some visual feedback
 on what you're doing.
 
 I think of them as an evolution of visual block, so if you think visual block
