@@ -104,14 +104,14 @@ endfun
 fun! vm#themes#statusline() abort
   let v = b:VM_Selection.Vars
   let vm = VMInfos()
-  let color  = exists('g:loaded_airline') ? '%#airline_a_bold#' : '%#VM_Extend#'
+  let color  = '%#VM_Extend#'
   let single = b:VM_Selection.Vars.single_region ? '%#VM_Mono# SINGLE ' : ''
   try
     if v.insert
       if b:VM_Selection.Insert.replace
         let [ mode, color ] = [ 'V-R', '%#VM_Mono#' ]
       else
-        let [ mode, color ] = [ 'V-I', '%#VM_Curser#' ]
+        let [ mode, color ] = [ 'V-I', '%#VM_Cursor#' ]
       endif
     else
       let mode = { 'n': 'V-M', 'v': 'V', 'V': 'V-L', "\<C-v>": 'V-B' }[mode()]
