@@ -34,6 +34,23 @@ And more... of course, you can enter insert mode and autocomplete will work.
 With vim-plug:
 
     Plug "mg979/vim-visual-multi", {'branch': 'master'}
+    
+With Vim 8+:
+
+    Add `packloadall` to your `.vimrc` (if you haven't already):
+
+    `.vimrc`:
+
+    ```vim
+    packloadall
+    ```
+
+    Clone `vim-visual-multi` into your `~/.vim/pack/plugins/start` directory:
+
+    ```bash
+    mkdir -p ~/.vim/pack/plugins/start
+    git clone https://github.com/mg979/vim-visual-multi ~/.vim/pack/plugins/start/vim-visual-multi
+    ```
 
 
 ### Documentation
