@@ -75,7 +75,7 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Filter-Lines-Strip)      :call vm#special#commands#filter_lines(1)<cr>
   nnoremap <silent>       <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
   nnoremap <silent>       <Plug>(VM-Switch-Mode)             :call b:VM_Selection.Global.change_mode(1)<cr>
-  nnoremap <silent>       <Plug>(VM-Reset)                   :<c-u><C-r>=b:VM_Selection.Vars.noh<CR>call vm#reset()<cr>
+  nnoremap <silent>       <Plug>(VM-Exit)                    :<c-u><C-r>=b:VM_Selection.Vars.noh<CR>call vm#reset()<cr>
   nnoremap <silent>       <Plug>(VM-Undo)                    :call vm#commands#undo()<cr>
   nnoremap <silent>       <Plug>(VM-Redo)                    :call vm#commands#redo()<cr>
 

@@ -65,6 +65,7 @@ visual mappings, and buffer mappings.
   Name                Keys        Notes ~
 -------------------------------------------------------------------------------
                                                               *visual-multi-qr*
+Exit                  <Esc>       quit VM
 Find Under            <C-n>       select the word under cursor
 Find Subword Under    <C-n>       from visual mode, without word boundaries
 Add Cursor Down       <C-Down>    create cursors vertically

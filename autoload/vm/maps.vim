@@ -96,7 +96,7 @@ fun! s:Maps.map_esc_and_toggle() abort
     if !has('nvim') && !has('gui_running')
         nnoremap <nowait><buffer> <esc><esc> <esc><esc>
     endif
-    nmap <nowait><buffer> <esc> <Plug>(VM-Reset)
+    exe 'nmap <nowait><buffer>' g:Vm.maps.exit '<Plug>(VM-Exit)'
     exe 'nmap <nowait><buffer>' g:Vm.maps.toggle '<Plug>(VM-Toggle-Mappings)'
 endfun
 
@@ -128,7 +128,7 @@ endfun
 fun! s:Maps.unmap_esc_and_toggle() abort
     " Esc and 'toggle' keys are handled separately.
     silent! exe 'nunmap <buffer>' g:Vm.maps.toggle
-    silent! nunmap <buffer> <esc>
+    silent! exe 'nunmap <buffer>' g:Vm.maps.exit
     if !has('nvim') && !has('gui_running')
         silent! nunmap <buffer> <esc><esc>
     endif
@@ -227,6 +227,8 @@ fun! s:build_buffer_maps() abort
     "store the key used to toggle mappings
     let g:Vm.maps.toggle = has_key(g:VM_maps, 'Toggle Mappings') ?
                 \ g:VM_maps['Toggle Mappings'] : g:Vm.leader.buffer . '<Space>'
+    let g:Vm.maps.exit   = has_key(g:VM_maps, 'Exit') ?
+                \ g:VM_maps['Exit'] : '<Esc>'
 
     "generate list of 'exe' commands for unmappings
     for key in keys(maps)

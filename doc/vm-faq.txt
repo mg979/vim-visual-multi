@@ -21,6 +21,7 @@ For a full list of mappings and other informations, see |vm-mappings.txt|.
   let g:VM_maps['Find Subword Under'] = '<C-d>'   " replace visual C-n
   let g:VM_maps["Add Cursor Down"]    = '<M-j>'   " new cursor down
   let g:VM_maps["Add Cursor Up"]      = '<M-k>'   " new cursor up
+  let g:VM_maps["Exit"]               = '<Space>' " quit VM
 
 -------------------------------------------------------------------------------
                                                              *vm-faq-functions*
