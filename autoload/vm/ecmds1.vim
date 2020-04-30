@@ -108,6 +108,15 @@ fun! s:Edit.delete(X, register, count, manual) abort
 endfun " }}}
 
 
+fun! s:Edit.xdelete(key, cnt) abort
+    " Delete with 'x' or 'X' key, use black hole register in extend mode
+    if s:X()
+        call self.delete(1, '_', a:cnt, 1)
+    else
+        call self.run_normal(a:key, {'count': a:cnt, 'recursive': 0})
+    endif
+endfun
+
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Paste

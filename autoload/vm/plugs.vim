@@ -136,8 +136,8 @@ fun! vm#plugs#buffer() abort
   "Edit commands
   nnoremap <silent>        <Plug>(VM-D)                       :<C-u>call vm#cursors#operation('d', 0, v:register, 'd$')<cr>
   nnoremap <silent>        <Plug>(VM-Y)                       :<C-u>call vm#cursors#operation('y', 0, v:register, 'y$')<cr>
-  nnoremap <silent>        <Plug>(VM-x)                       :<C-u>call b:VM_Selection.Edit.run_normal('x', {'count': v:count1, 'recursive': 0})<cr>
-  nnoremap <silent>        <Plug>(VM-X)                       :<C-u>call b:VM_Selection.Edit.run_normal('X', {'count': v:count1, 'recursive': 0})<cr>
+  nnoremap <silent>        <Plug>(VM-x)                       :<C-u>call b:VM_Selection.Edit.xdelete('x', v:count1)<cr>
+  nnoremap <silent>        <Plug>(VM-X)                       :<C-u>call b:VM_Selection.Edit.xdelete('X', v:count1)<cr>
   nnoremap <silent>        <Plug>(VM-J)                       :<C-u>call b:VM_Selection.Edit.run_normal('J', {'count': v:count1, 'recursive': 0})<cr>
   nnoremap <silent>        <Plug>(VM-~)                       :<C-u>call b:VM_Selection.Edit.run_normal('~', {'recursive': 0})<cr>
   nnoremap <silent>        <Plug>(VM-&)                       :<C-u>call b:VM_Selection.Edit.run_normal('&', {'recursive': 0, 'silent': 1})<cr>
