@@ -33,7 +33,7 @@ And more... of course, you can enter insert mode and autocomplete will work.
 
 With vim-plug:
 
-    Plug "mg979/vim-visual-multi", {'branch': 'master'}
+    Plug 'mg979/vim-visual-multi', {'branch': 'master'}
 
 
 ### Documentation
