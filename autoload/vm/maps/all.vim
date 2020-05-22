@@ -119,7 +119,7 @@ fun! vm#maps#all#buffer() abort
         \"Show Infoline":           [leader.'l',      'n'],
         \"One Per Line":            [leader.'L',      'n'],
         \"Filter Regions":          [leader.'f',      'n'],
-        \"Toggle Multiline":        [leader.'M',      'n'],
+        \"Toggle Multiline":        ['M',             'n'],
         \})
 
   "commands

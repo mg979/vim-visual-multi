@@ -181,7 +181,7 @@ modes, cursors and selections are 'kept in line', that is, cursors cannot end
 up in a different line, and selections similarly.
 
 You may still want to do so, at times. You'll have to enable |multiline-mode|,
-for which the default mapping is `\\M`.
+for which the default mapping is `M`.
 
 Note that multiline mode must be enabled for some text objects motions, or they
 will fail. See |vm-motions|.
@@ -445,7 +445,7 @@ Show Infoline ~
 
 
 
-RUN ... AT CURSORS                                      *visual-run-at-cursors*
+RUN ... AT CURSORS                                *visual-multi-run-at-cursors*
 ===============================================================================
 
 This kind of commands is certainly alien to any other multiple cursor system,

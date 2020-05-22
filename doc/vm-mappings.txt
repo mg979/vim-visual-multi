@@ -114,6 +114,7 @@ Seek Next             <C-f>       fast go to next (from next page)
 Seek Prev             <C-b>       fast go to previous (from previous page)
 Skip Region             q         skip and find to next
 Remove Region           Q         remove region under cursor
+Toggle Multiline        M         see |vm-multiline-mode|
 
 The following are valid in extend-mode: ~
 
@@ -173,7 +174,6 @@ Case Conversion Menu  \\C         works better in extend mode
 Show Registers        \\"         show VM registers in the command line
 Toggle Whole Word     \\w         toggle whole word search
 Case Setting          \\c         cycle case setting ('scs' -> 'noic' -> 'ic')
-Toggle Multiline      \\M         see |vm-multiline-mode|
 Toggle Mappings       \\<Space>   toggle VM mappings
 Toggle Single Region  \\<CR>      toggle single region mode
 
