@@ -4,37 +4,69 @@
 
 fun! vm#cursors#operation(op, n, register, ...) abort
   call s:init()
-  let reg = a:register   | let r = "\"".reg
+  let reg = a:register | let r = "\"".reg | let oper = a:op
 
   "shortcut for command in a:1
-  if a:0 | call s:process(a:op, a:1, reg, 0) | return | endif
+  if a:0 | call s:process(oper, a:1, reg, 0) | return | endif
 
   call s:F.msg('[VM] ')
 
   "starting string
-  let M = (a:n>1? a:n : '').( reg == s:v.def_reg? '' : '"'.reg ).a:op
+  let M = (a:n>1? a:n : '').( reg == s:v.def_reg? '' : '"'.reg ).oper
 
   "preceding count
   let n = a:n>1? a:n : 1
 
+  "make a dict with custom user operators, if they have been defined
+  let user_ops = {}
+  for user_op in get(g:, 'VM_user_operators', [])
+    if type(user_op) == v:t_dict
+      let key = keys(user_op)[0]
+      let user_ops[key] = user_op[key]
+    else
+      let user_ops[user_op] = 0
+    endif
+  endfor
+
   echon M
   while 1
     let c = nr2char(getchar())
-    if str2nr(c) > 0                | echon c | let M .= c
+    let is_user_op = index(keys(user_ops), M . c) >= 0
+
+    if str2nr(c) > 0
+      echon c | let M .= c
+
+    elseif is_user_op
+      " let the entered characters be our operator
+      echon c | let M .= c | let oper = M
+      if !user_ops[M]
+        " accepts a regular text object
+        continue
+      else
+        " accepts a specific number of any characters
+        let chars2read = user_ops[M]
+        while chars2read
+          let c = nr2char(getchar())
+          echon c | let M .= c
+          let chars2read -= 1
+        endwhile
+        break
+      endif
+
     elseif s:double(c)              | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c | break
 
     elseif s:ia(c)                  | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c | break
 
-    elseif a:op ==# 'c' && c==?'r'  | echon c | let M .= c
+    elseif oper ==# 'c' && c==?'r'  | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c | break
 
-    elseif a:op ==# 'c' && c==?'s'  | echon c | let M .= c
+    elseif oper ==# 'c' && c==?'s'  | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c | break
 
-    elseif a:op ==# 'y' && c==?'s'  | echon c | let M .= c
+    elseif oper ==# 'y' && c==?'s'  | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c
       if s:ia(c)
         let c = nr2char(getchar())  | echon c | let M .= c
@@ -52,17 +84,17 @@ fun! vm#cursors#operation(op, n, register, ...) abort
         let M .= c                  | break
       endif
 
-    elseif a:op ==# 'd' && c==#'s'  | echon c | let M .= c
+    elseif oper ==# 'd' && c==#'s'  | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c | break
 
     elseif s:single(c)                        | let M .= c | break
-    elseif a:op ==# c                         | let M .= c | break
+    elseif oper ==# c                         | let M .= c | break
 
     else | echon ' ...Aborted'      | return
     endif
   endwhile
 
-  call s:process(a:op, M, reg, n)
+  call s:process(oper, M, reg, n)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -74,6 +106,8 @@ fun! s:process(op, M, reg, n) abort
   if a:op ==# 'd'     | call s:d_cursors(a:M, a:reg, a:n)
   elseif a:op ==# 'c' | call s:c_cursors(a:M, a:reg, a:n)
   elseif a:op ==# 'y' | call s:y_cursors(a:M, a:reg, a:n)
+  else                | call s:V.Edit.run_normal(a:M,
+        \               {'count': a:n, 'store': a:reg, 'recursive': 1})
   endif
 endfun
 
