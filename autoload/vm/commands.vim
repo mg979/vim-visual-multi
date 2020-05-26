@@ -825,11 +825,12 @@ fun! vm#commands#reselect_last()
             call vm#region#new(1, r.A, r.B)
         endfor
         let g:Vm.extend_mode = b:VM_LastBackup.extend
+        let s:v.search = b:VM_LastBackup.search
     catch
         return s:F.exit('Error while restoring regions.')
     endtry
 
-    call s:G.update_and_select_region()
+    call s:G.update_and_select_region({'index': b:VM_LastBackup.index})
 endfun
 
 
