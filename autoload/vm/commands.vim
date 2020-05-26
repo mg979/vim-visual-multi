@@ -1,21 +1,29 @@
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Commands
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Functions in this script are associated with plugs, all commands that can
 " start VM have their entry point here.
 
-fun! s:init(whole, empty, extend_mode) abort
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function: s:init
+" Most commands call this function to ensure VM is initialized.
+" @param whole: use word boundaries
+" @param type: 0 if a pattern will be added, 1 if not, 2 if using regex
+" @param extend_mode: 1 if forcing extend mode
+" Returns: 1 if VM was already active when called
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""
+fun! s:init(whole, type, extend_mode) abort
     " Ensure the buffer is initialized, set starting options.
     if a:extend_mode | let g:Vm.extend_mode = 1 | endif
 
-    "return true if already initialized
     if g:Vm.is_active
         call s:F.Scroll.get()
         if s:v.using_regex | call vm#commands#regex_reset() | endif
         let s:v.whole_word = a:whole
-        return 1
+        return 1    " return true if already initialized
     else
-        let error = vm#init_buffer(a:empty)
+        let error = vm#init_buffer(a:type)
         if type(error) == v:t_string | throw error | endif
         call s:F.Scroll.get()
         let s:v.whole_word = a:whole
@@ -246,7 +254,7 @@ fun! vm#commands#find_under(visual, whole, ...) abort
     if !a:visual | exe 'normal! viwy`]' | endif
 
     "replace region if calling the command on an existing region
-    if s:is_r()  | call s:G.region_at_pos().remove()        | endif
+    if s:is_r() | call s:G.region_at_pos().remove() | endif
 
     call s:Search.add()
     let R = s:G.new_region()
@@ -352,7 +360,7 @@ endfun
 
 fun! vm#commands#find_next(skip, nav) abort
     " Find next region, always downwards.
-    if ( a:nav || a:skip ) && s:F.no_regions()                 | return | endif
+    if ( a:nav || a:skip ) && s:F.no_regions() | return | endif
 
     "write search pattern if not navigating and no search set
     if s:X() && !a:nav | call s:Search.add_if_empty() | endif
@@ -369,7 +377,7 @@ endfun
 
 fun! vm#commands#find_prev(skip, nav) abort
     " Find previous region, always upwards.
-    if ( a:nav || a:skip ) && s:F.no_regions()                 | return | endif
+    if ( a:nav || a:skip ) && s:F.no_regions() | return | endif
 
     "write search pattern if not navigating and no search set
     if s:X() && !a:nav | call s:Search.add_if_empty() | endif
@@ -617,7 +625,7 @@ fun! vm#commands#align_char(count) abort
     let s:v.restore_index = s:v.index
     call s:F.Scroll.get(1)
     let n = a:count | let s = n>1? 's' : ''
-    echohl Label    | echo 'Align with '.n.' char'.s.' > '   | echohl None
+    echohl Label    | echo 'Align with '.n.' char'.s.' > ' | echohl None
 
     let C = []
     while n
@@ -654,7 +662,7 @@ fun! vm#commands#align_regex() abort
     call s:F.Scroll.get(1)
 
     echohl Label | let rx = input('Align with regex > ')   | echohl None
-    if empty(rx) | echohl WarningMsg | echon ' ...Aborted' | return  | endif
+    if empty(rx) | echohl WarningMsg | echon ' ...Aborted' | return | endif
 
     for r in s:R()
         call cursor(r.l, r.a)
@@ -873,9 +881,9 @@ let s:R                = { -> s:V.Regions      }
 let s:is_r             = { -> g:Vm.is_active && !empty(s:G.region_at_pos()) }
 let s:first_line       = { -> line('.') == 1 }
 let s:last_line        = { -> line('.') == line('$') }
-let s:symbol           = {   -> index(['^', '0', '%', '$'],          s:v.motion) >= 0 }
-let s:horizontal       = {   -> index(['h', 'l'],                    s:v.motion) >= 0 }
-let s:vertical         = {   -> index(['j', 'k'],                    s:v.motion) >= 0 }
-let s:simple           = { m -> index(split('hlwebWEB', '\zs'),      m)        >= 0   }
+let s:symbol           = {   -> index(['^', '0', '%', '$'],     s:v.motion) >= 0 }
+let s:horizontal       = {   -> index(['h', 'l'],               s:v.motion) >= 0 }
+let s:vertical         = {   -> index(['j', 'k'],               s:v.motion) >= 0 }
+let s:simple           = { m -> index(split('hlwebWEB', '\zs'), m)          >= 0 }
 
 " vim: et sw=4 ts=4 sts=4 fdm=indent fdn=1

@@ -31,11 +31,11 @@ call vm#plugs#buffer()
 " function classes (Global, Funcs, Edit, Search, Insert, etc)
 
 " Parameters:
-"   empty:  if > 0, the search register will be set to an empty string
-"           adding cursors uses 1, starting regex uses 2
+"   cmd_type: if > 0, the search register will be set to an empty string
+"             adding cursors uses 1, starting regex uses 2
 
-fun! vm#init_buffer(empty) abort
-    """If already initialized, return current instance."""
+fun! vm#init_buffer(cmd_type) abort
+    " If already initialized, return current instance.
     let v:errmsg = ""
     try
         if exists('b:visual_multi') | return s:V | endif
@@ -43,13 +43,13 @@ fun! vm#init_buffer(empty) abort
         let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Bytes': {}}
         let b:visual_multi = 1
 
-        let b:VM_Debug           = get(b:, 'VM_Debug', {'lines': []})
-        let b:VM_Backup          = {'ticks': [], 'last': 0, 'first': undotree().seq_cur}
+        let b:VM_Debug  = get(b:, 'VM_Debug', {'lines': []})
+        let b:VM_Backup = {'ticks': [], 'last': 0, 'first': undotree().seq_cur}
 
         " funcs script must be sourced first
-        let s:V            = b:VM_Selection
-        let s:v            = s:V.Vars
-        let s:V.Funcs      = vm#funcs#init()
+        let s:V       = b:VM_Selection
+        let s:v       = s:V.Vars
+        let s:V.Funcs = vm#funcs#init()
 
         " init plugin variables
         call vm#variables#init()
@@ -61,18 +61,18 @@ fun! vm#init_buffer(empty) abort
         endif
 
         " init search register
-        let @/ = a:empty ? '' : @/
+        let @/ = a:cmd_type ? '' : @/
 
         " hooks and compatibility tweaks before applying mappings
         call vm#comp#init()
 
         " init classes
-        let s:V.Maps       = vm#maps#init()
-        let s:V.Global     = vm#global#init()
-        let s:V.Search     = vm#search#init()
-        let s:V.Edit       = vm#edit#init()
-        let s:V.Insert     = vm#insert#init()
-        let s:V.Case       = vm#special#case#init()
+        let s:V.Maps   = vm#maps#init()
+        let s:V.Global = vm#global#init()
+        let s:V.Search = vm#search#init()
+        let s:V.Edit   = vm#edit#init()
+        let s:V.Insert = vm#insert#init()
+        let s:V.Case   = vm#special#case#init()
 
         call s:V.Maps.enable()
 
@@ -97,7 +97,7 @@ fun! vm#init_buffer(empty) abort
             exe g:Vm.Search
         endif
 
-        if !v:hlsearch && a:empty != 2
+        if !v:hlsearch && a:cmd_type != 2
             call feedkeys("\<Plug>(VM-Hls)")
         endif
 
@@ -108,7 +108,7 @@ fun! vm#init_buffer(empty) abort
             let b:VM_sync_minlines = s:V.Funcs.sync_minlines()
         endif
 
-        let g:Vm.is_active = 1
+        let g:Vm.is_active = bufnr('')
         return s:V
     catch
         let v:errmsg = 'VM cannot start, unhandled exception.'
@@ -247,7 +247,7 @@ fun! s:buffer_enter() abort
 endfun
 
 fun! s:set_reg() abort
-    "Replace old default register if yanking in VM outside a region or cursor
+    " Replace old default register if yanking in VM outside a region or cursor.
     if s:v.yanked
         let s:v.yanked = 0
         let g:Vm.registers['"'] = []
@@ -255,8 +255,10 @@ fun! s:set_reg() abort
     endif
 endfun
 
+
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"python section
+" Python section
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 if !has('python3')
@@ -278,4 +280,5 @@ python_root_dir = normpath(join(root_dir, '..', 'python'))
 sys.path.insert(0, python_root_dir)
 import vm
 EOF
+
 " vim: et ts=4 sw=4 sts=4 :
