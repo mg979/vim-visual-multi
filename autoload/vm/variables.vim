@@ -130,7 +130,7 @@ fun! vm#variables#reset()
   let &concealcursor = v.concealcursor
 
   if get(g:, 'VM_set_statusline', 2)
-    let &statusline  = v.statusline
+    let &l:statusline  = v.statusline
   endif
 endfun
 
