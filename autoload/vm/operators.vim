@@ -11,7 +11,7 @@ endfun
 
 fun! s:init() abort
     let g:Vm.extend_mode = 1
-    if !g:Vm.is_active | call vm#init_buffer(0) | endif
+    if !g:Vm.buffer | call vm#init_buffer(0) | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -129,7 +129,7 @@ endfun
 
 fun! vm#operators#find(start, visual, ...) abort
     if a:start
-        if !g:Vm.is_active
+        if !g:Vm.buffer
             call s:backup_map_find()
             if a:visual
                 "use search register if just starting from visual mode

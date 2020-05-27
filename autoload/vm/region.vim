@@ -51,7 +51,7 @@ fun! vm#region#new(cursor, ...) abort
 
     let cursor = a:cursor || ( a:0 && c==d && a==b )          "cursor or region?
 
-    if !g:Vm.is_active | call vm#init_buffer(cursor) | endif  "activate if needed
+    if !g:Vm.buffer | call vm#init_buffer(cursor) | endif     "activate if needed
 
     if !a:0 | let R = s:Region.new(cursor)                    "create region
     else    | let R = s:Region.new(0, a, b, c, d)

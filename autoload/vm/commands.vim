@@ -17,7 +17,7 @@ fun! s:init(whole, type, extend_mode) abort
     " Ensure the buffer is initialized, set starting options.
     if a:extend_mode | let g:Vm.extend_mode = 1 | endif
 
-    if g:Vm.is_active
+    if g:Vm.buffer
         call s:F.Scroll.get()
         if s:v.using_regex | call vm#commands#regex_reset() | endif
         let s:v.whole_word = a:whole
@@ -150,7 +150,7 @@ endfun
 
 fun! vm#commands#find_by_regex(mode) abort
     " Entry point for VM regex search.
-    if !g:Vm.is_active | call s:init(0, 2, 1) | endif
+    if !g:Vm.buffer | call s:init(0, 2, 1) | endif
     let s:v.using_regex = a:mode
     let s:v.regex_backup = empty(@/) ? '\%^' : @/
 
@@ -478,7 +478,7 @@ fun! vm#commands#motion(motion, count, select, single) abort
     " - there are no regions
     " - called with (single_region) and cursor not on a region
 
-    if !g:Vm.is_active || s:F.no_regions() || ( a:single && !s:is_r() )
+    if !g:Vm.buffer || s:F.no_regions() || ( a:single && !s:is_r() )
         call s:G.new_cursor()
     endif
 
@@ -878,7 +878,7 @@ endfun
 
 let s:X                = { -> g:Vm.extend_mode }
 let s:R                = { -> s:V.Regions      }
-let s:is_r             = { -> g:Vm.is_active && !empty(s:G.region_at_pos()) }
+let s:is_r             = { -> g:Vm.buffer && !empty(s:G.region_at_pos()) }
 let s:first_line       = { -> line('.') == 1 }
 let s:last_line        = { -> line('.') == line('$') }
 let s:symbol           = {   -> index(['^', '0', '%', '$'],     s:v.motion) >= 0 }

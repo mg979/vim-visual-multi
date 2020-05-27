@@ -287,7 +287,7 @@ endfun
 
 fun! s:Visual(cmd) abort
   " Restore register after a visual yank.
-  if !g:Vm.is_active
+  if !g:Vm.buffer
     let g:Vm.visual_reg = ['"', getreg('"'), getregtype('"')]
     let r = "g:Vm.visual_reg[0], g:Vm.visual_reg[1], g:Vm.visual_reg[2]"
     let r = ":let b:VM_Selection.Vars.oldreg = g:Vm.visual_reg\<cr>:call setreg(".r.")\<cr>"

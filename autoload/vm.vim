@@ -108,7 +108,7 @@ fun! vm#init_buffer(cmd_type) abort
             let b:VM_sync_minlines = s:V.Funcs.sync_minlines()
         endif
 
-        let g:Vm.is_active = bufnr('')
+        let g:Vm.buffer = bufnr('')
         return s:V
     catch
         let v:errmsg = 'VM cannot start, unhandled exception.'

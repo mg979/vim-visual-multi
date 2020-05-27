@@ -37,7 +37,7 @@ com! -bang VMFromSearch call vm#special#commands#from_search(<bang>0)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let g:Vm = { 'hi'          : {},
-      \ 'is_active'        : 0,
+      \ 'buffer'           : 0,
       \ 'extend_mode'      : 0,
       \ 'finding'          : 0,
       \ 'mappings_enabled' : 0,

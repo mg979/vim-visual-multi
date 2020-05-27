@@ -371,7 +371,7 @@ endfun
 "------------------------------------------------------------------------------
 
 fun! s:not_active() abort
-  if !g:Vm.is_active
+  if !g:Vm.buffer
     echohl ErrorMsg | echo "VM is not enabled" | echohl None | return 1
   endif
 endfun

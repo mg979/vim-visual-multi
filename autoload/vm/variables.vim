@@ -140,7 +140,7 @@ endfun
 fun! vm#variables#reset_globals()
   let b:VM_Backup = {}
   let b:VM_Selection = {}
-  let g:Vm.is_active = 0
+  let g:Vm.buffer = 0
   let g:Vm.extend_mode = 0
   let g:Vm.finding = 0
 endfun
