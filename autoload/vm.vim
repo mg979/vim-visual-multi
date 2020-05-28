@@ -235,7 +235,9 @@ fun! s:cursor_moved() abort
 endfun
 
 fun! s:buffer_leave() abort
-    if !empty(get(b:, 'VM_Selection', {})) && !b:VM_Selection.Vars.insert
+    if exists('b:VM_skip_reset_once_on_bufleave')
+        unlet b:VM_skip_reset_once_on_bufleave
+    elseif !empty(get(b:, 'VM_Selection', {})) && !b:VM_Selection.Vars.insert
         call vm#reset(1)
     endif
 endfun

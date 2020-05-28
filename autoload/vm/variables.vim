@@ -132,6 +132,8 @@ fun! vm#variables#reset()
   if get(g:, 'VM_set_statusline', 2)
     let &l:statusline  = v.statusline
   endif
+
+  silent! unlet b:VM_skip_reset_once_on_bufleave
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
