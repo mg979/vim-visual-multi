@@ -33,10 +33,7 @@ fun! vm#cursors#operation(op, n, register, ...) abort
     let c = nr2char(getchar())
     let is_user_op = index(keys(user_ops), M . c) >= 0
 
-    if str2nr(c) > 0
-      echon c | let M .= c
-
-    elseif is_user_op
+    if is_user_op
       " let the entered characters be our operator
       echon c | let M .= c | let oper = M
       if !user_ops[M]
@@ -88,6 +85,9 @@ fun! vm#cursors#operation(op, n, register, ...) abort
       let c = nr2char(getchar())    | echon c | let M .= c | break
 
     elseif s:single(c)                        | let M .= c | break
+
+    elseif str2nr(c) > 0            | echon c | let M .= c
+
     elseif oper ==# c                         | let M .= c | break
 
     else | echon ' ...Aborted'      | return
@@ -114,19 +114,22 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:reorder_cmd(M, r, n, op) abort
-  """Reorder command, so that the exact count is found.
+  " Reorder command, so that the exact count is found.
+
   "remove register
   let S = substitute(a:M, a:r, '', '')
+
   "what comes after operator
   let S = substitute(S, '^\d*'.a:op.'\(.*\)$', '\1', '')
 
+  "if object is n/N, ensure there is a search pattern
   if S ==? 'n' && empty(@/)
     let @/ = s:v.oldsearch[0]
   endif
 
   "count that comes after operator
-  let x = match(S, '\d') >= 0? substitute(S, '\D', '', 'g') : 0
-  if x | let S = substitute(S, x, '', '') | endif
+  let x = match(S, '^\d') >= 0? substitute(S, '^\d\zs.*', '', 'g') : 0
+  if x | let S = substitute(S, '^' . x, '', '') | endif
 
   "final count
   let n = a:n
