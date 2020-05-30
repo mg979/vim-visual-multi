@@ -23,6 +23,10 @@ For a full list of mappings and other informations, see |vm-mappings.txt|.
   let g:VM_maps["Add Cursor Up"]      = '<M-k>'   " new cursor up
   let g:VM_maps["Exit"]               = '<Space>' " quit VM
 
+To disable a specific mapping, set it to an empty string:
+>
+  let g:VM_maps["Select Operator"]    = ''
+<
 -------------------------------------------------------------------------------
                                                              *vm-faq-functions*
 How can I do something before VM starts, or after VM ends? ~
@@ -81,7 +85,7 @@ With |g:VM_custom_noremaps| you can remap any key to a normal! command. Example:
 would create commands that will work on all cursors inside VM, for each
 key-value pair. It's a way to remap built-in vim commands, without having
 too many default mappings that can cause conflicts with other plugins. They
-only work (and enforce) cursor mode.
+only work in (and enforce) cursor mode.
 
 With |g:VM_custom_motions| you can remap most motions, for example this inverts
 'h' and 'l' motions:
