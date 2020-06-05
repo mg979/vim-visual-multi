@@ -244,10 +244,8 @@ fun! vm#maps#all#buffer() abort
         \"Replace Characters":      ['r',           'n'],
         \"Replace":                 ['R',           'n'],
         \"Transform Regions":       [leader.'e',    'n'],
-        \"p Paste Regions":         ['p',           'n'],
-        \"P Paste Regions":         ['P',           'n'],
-        \"p Paste Vimreg":          [leader.'p',    'n'],
-        \"P Paste Vimreg":          [leader.'P',    'n'],
+        \"p Paste":                 ['p',           'n'],
+        \"P Paste":                 ['P',           'n'],
         \"Yank":                    ['y',           'n'],
         \})
 

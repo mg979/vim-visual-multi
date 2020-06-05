@@ -161,8 +161,8 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>        <Plug>(VM-Replace-Characters)      :<C-u>call b:VM_Selection.Edit.replace_chars()<cr>
   nnoremap <silent>        <Plug>(VM-Replace)                 :<C-u>call b:VM_Selection.Edit.replace()<cr>
   nnoremap <silent>        <Plug>(VM-Transform-Regions)       :<C-u>call b:VM_Selection.Edit.replace_expression()<cr>
-  nnoremap <silent>        <Plug>(VM-p-Paste-Regions)         :call b:VM_Selection.Edit.paste((g:Vm.extend_mode? 1 : 0), 0, g:Vm.extend_mode, v:register)<cr>
-  nnoremap <silent>        <Plug>(VM-P-Paste-Regions)         :call b:VM_Selection.Edit.paste((g:Vm.extend_mode? 1 : 1), 0, g:Vm.extend_mode, v:register)<cr>
+  nnoremap <silent>        <Plug>(VM-p-Paste)                 :call b:VM_Selection.Edit.paste((g:Vm.extend_mode? 1 : 0), 0, g:Vm.extend_mode, v:register)<cr>
+  nnoremap <silent>        <Plug>(VM-P-Paste)                 :call b:VM_Selection.Edit.paste((g:Vm.extend_mode? 1 : 1), 0, g:Vm.extend_mode, v:register)<cr>
   nnoremap <silent>        <Plug>(VM-p-Paste-Vimreg)          :call b:VM_Selection.Edit.paste((g:Vm.extend_mode? 1 : 0), 1, g:Vm.extend_mode, v:register)<cr>
   nnoremap <silent>        <Plug>(VM-P-Paste-Vimreg)          :call b:VM_Selection.Edit.paste((g:Vm.extend_mode? 1 : 1), 1, g:Vm.extend_mode, v:register)<cr>
   nnoremap <silent> <expr> <Plug>(VM-Yank)                    <SID>Yank()
