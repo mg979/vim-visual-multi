@@ -59,17 +59,7 @@ fun! vm#visual#cursors(mode) abort
     let [pos, start, end] = [getpos('.')[1:2],
                 \            getpos("'<")[1:2], getpos("'>")[1:2]]
 
-    call cursor(start)
-
-    if ( end[0] > start[0] )
-        while line('.') < end[0]
-            call vm#commands#add_cursor_down(0, 1)
-        endwhile
-
-    elseif empty(s:G.region_at_pos())
-        " ensure there's at least a cursor
-        call s:G.new_cursor()
-    endif
+    call s:create_cursors(start, end)
 
     if a:mode ==# 'V' && get(g:, 'VM_autoremove_empty_lines', 1)
         call s:G.remove_empty_lines()
@@ -112,22 +102,28 @@ fun! vm#visual#split() abort
     call s:G.update_and_select_region()
 endfun
 
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Helpers
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:vchar() abort
-    "characterwise
+    "characterwise selection
     silent keepjumps normal! `<y`>`]
     call s:G.check_mutliline(0, s:G.new_region())
 endfun
 
+
 fun! s:vline() abort
-    "linewise
+    "linewise selection
     silent keepjumps normal! '<y'>`]
     call s:G.new_region()
 endfun
 
+
 fun! s:vblock(extend) abort
-    "blockwise
+    "blockwise selection
     let start = getpos("'<")[1:2]
     let end = getpos("'>")[1:2]
 
@@ -143,24 +139,14 @@ fun! s:vblock(extend) abort
 
     let block_width = abs(virtcol("'>") - virtcol("'<"))
 
-    "create cursors downwards until end of block
-    call cursor(start)
-
-    if ( end[0] > start[0] )
-        while line('.') < end[0]
-            call vm#commands#add_cursor_down(0, 1)
-        endwhile
-
-    elseif empty(s:G.region_at_pos())
-        " ensure there's at least a cursor
-        call s:G.new_cursor()
-    endif
+    call s:create_cursors(start, end)
 
     if a:extend && block_width
         call vm#commands#motion('l', block_width, 1, 0)
     endif
     return !inverted
 endfun
+
 
 fun! s:backup_map() abort
     "use temporary regions, they will be merged later
@@ -173,6 +159,7 @@ fun! s:backup_map() abort
     return X
 endfun
 
+
 fun! s:visual_merge() abort
     "merge regions
     let new_map = copy(s:V.Bytes)
@@ -180,6 +167,7 @@ fun! s:visual_merge() abort
     call s:G.merge_maps(new_map)
     unlet new_map
 endfun
+
 
 fun! s:visual_subtract() abort
     "subtract regions
@@ -189,6 +177,7 @@ fun! s:visual_subtract() abort
     unlet new_map
 endfun
 
+
 fun! s:init() abort
     "init script vars
     let s:V = b:VM_Selection
@@ -197,8 +186,25 @@ fun! s:init() abort
     let s:F = s:V.Funcs
 endfun
 
+
+fun! s:create_cursors(start, end) abort
+    "create cursors that span over visual selection
+    call cursor(a:start)
+
+    if ( a:end[0] > a:start[0] )
+        while line('.') < a:end[0]
+            call vm#commands#add_cursor_down(0, 1)
+        endwhile
+
+    elseif empty(s:G.region_at_pos())
+        " ensure there's at least a cursor
+        call s:G.new_cursor()
+    endif
+endfun
+
+
 let s:R = { -> s:V.Regions }
 let s:X = { -> g:Vm.extend_mode }
 
 
-" vim: et ts=4 sw=4 sts=4 :
+" vim: et sw=4 ts=4 sts=4 fdm=indent fdn=1
