@@ -55,28 +55,27 @@ endfun
 
 fun! vm#visual#cursors(mode) abort
     " Create cursors, one for each line of the visual selection.
-    call s:backup_map()
+    call s:init()
+    let [pos, start, end] = [getpos('.')[1:2],
+                \            getpos("'<")[1:2], getpos("'>")[1:2]]
 
-    "convert to visual block, if not V
-    if a:mode ==# 'v' | exe "normal! \<C-v>" | endif
+    call cursor(start)
 
-    if a:mode ==# 'V' | call s:vline()
-    else              | call s:vblock(0)
+    if ( end[0] > start[0] )
+        while line('.') < end[0]
+            call vm#commands#add_cursor_down(0, 1)
+        endwhile
+
+    elseif empty(s:G.region_at_pos())
+        " ensure there's at least a cursor
+        call s:G.new_cursor()
     endif
 
-    call s:visual_merge()
-
-    if a:mode ==# 'V'
-        call s:G.split_lines()
-        call s:G.cursor_mode()
-        if get(g:, 'VM_autoremove_empty_lines', 1)
-            call s:G.remove_empty_lines()
-        endif
-    else
-        call s:G.cursor_mode()
+    if a:mode ==# 'V' && get(g:, 'VM_autoremove_empty_lines', 1)
+        call s:G.remove_empty_lines()
     endif
 
-    call s:G.update_and_select_region({'id': s:v.IDs_list[-1]})
+    call s:G.update_and_select_region(pos)
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -142,23 +141,22 @@ fun! s:vblock(extend) abort
         let inverted = line(".") == line("'<")
     endif
 
-    let block_width = end[1] - start[1]
+    let block_width = abs(virtcol("'>") - virtcol("'<"))
 
     "create cursors downwards until end of block
     call cursor(start)
 
     if ( end[0] > start[0] )
-        while getpos('.')[1] < end[0]
+        while line('.') < end[0]
             call vm#commands#add_cursor_down(0, 1)
         endwhile
-    else
+
+    elseif empty(s:G.region_at_pos())
         " ensure there's at least a cursor
-        if !len(s:R())
-            call s:G.new_cursor()
-        endif
+        call s:G.new_cursor()
     endif
 
-    if a:extend
+    if a:extend && block_width
         call vm#commands#motion('l', block_width, 1, 0)
     endif
     return !inverted

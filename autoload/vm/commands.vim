@@ -719,7 +719,7 @@ endfun
 
 fun! vm#commands#visual_cursors() abort
     " Create a column of cursors from visual mode.
-    call s:set_extend_mode(1)
+    call s:set_extend_mode(0)
     call vm#visual#cursors(visualmode())
 endfun
 

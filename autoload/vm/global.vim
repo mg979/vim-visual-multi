@@ -697,6 +697,7 @@ fun! s:Global.merge_cursors() abort
 
     let ids_to_remove = [] | let last_A = 0 | let pos = getpos('.')[1:2]
 
+    " we only check offset r.A, since for cursors r.A == r.B
     for r in s:R()
         if r.A == last_A | call add(ids_to_remove, r.id) | endif
         let last_A = r.A
