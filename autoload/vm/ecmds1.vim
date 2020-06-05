@@ -124,7 +124,12 @@ endfun "}}}
 
 
 fun! s:Edit.paste(before, vim_reg, reselect, register, ...) abort
-    " Perform a paste, of the appropriate type. {{{1
+    " Perform a paste of the appropriate type. {{{1
+    " @param before: 'P' or 'p' behaviour 
+    " @param vim_reg: if forcing regular vim registers
+    " @param reselect: trigger reselection if run from extend mode
+    " @param register: the register being used
+    " @param ...: optional list with replacement text for regions
     let X                = s:X()
     let s:v.use_register = a:register
     let vim_reg          = a:vim_reg || !has_key(g:Vm.registers, a:register) ||

@@ -33,13 +33,6 @@ action, you could write it as:
 
 ------------------------------------------------------------------------------
 
-There is currently a bug in vim 8.1 that prevents VM and coc.nvim to work well
-toghether. Vim 8.0 and nvim are unaffected.
-
-                         {https://github.com/mg979/vim-visual-multi/issues/75}
-
-------------------------------------------------------------------------------
-
 In |vm-single-region| mode, some insert mode mappings (<C-w>, <C-u>, <CR>) are
 disabled because they don't behave well. <BS> and <Del> are not disabled, but
 they cause issues when deleting other cursors, so be careful. They are not
