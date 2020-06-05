@@ -339,6 +339,20 @@ endfun
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Sort regions                                                             {{{1
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#special#commands#sort(...) abort
+  if s:not_active() | return | endif
+  if a:0
+    call s:V.Edit.replace_regions_with_text(sort(s:G.regions_text(), a:1))
+  else
+    call s:V.Edit.replace_regions_with_text(sort(s:G.regions_text()))
+  endif
+endfun
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Ex Commands and helpers                                                  {{{1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -349,6 +363,7 @@ fun! s:set_commands() abort
   command! VMRegionsToBuffer              call vm#special#commands#regions_to_buffer()
   command! VMMassTranspose                call vm#special#commands#mass_transpose()
   command! -bang VMQfix                   call vm#special#commands#qfix(!<bang>0)
+  command! -nargs=? VMSort                call vm#special#commands#sort(<args>)
 endfun
 
 fun! vm#special#commands#unset()
@@ -358,6 +373,7 @@ fun! vm#special#commands#unset()
   delcommand VMRegionsToBuffer
   delcommand VMMassTranspose
   delcommand VMQfix
+  delcommand VMSort
 endfun
 
 "------------------------------------------------------------------------------

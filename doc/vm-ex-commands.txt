@@ -12,6 +12,7 @@ The following Ex commands can be run at any time:
 
 The following are only available inside a VM session:
 
+  |:VMSort|
   |:VMQfix|
   |:VMFilterRegions|
   |:VMFilterLines|
@@ -47,6 +48,12 @@ all of them if no register is specified.
 
 Select next region (or all regions with !) that matches the current search
 register |quote/|. It won't do anything if VM has been already started.
+
+------------------------------------------------------------------------------
+
+    VMSort [arg]                                                    *:VMSort*
+
+Sort regions. Optional [arg] is the same as {func} of the |sort()| function.
 
 ------------------------------------------------------------------------------
 
