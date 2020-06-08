@@ -165,7 +165,7 @@ fun! vm#reset(...)
     if !get(g:, 'VM_silent_exit', 0) && !a:0
         call s:V.Funcs.msg('Exited Visual-Multi.')
     else
-        call s:V.Funcs.msg('')
+        echo "\r"
     endif
 
     call vm#variables#reset_globals()
