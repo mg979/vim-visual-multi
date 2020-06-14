@@ -711,7 +711,7 @@ endfun
 fun! s:Global.merge_regions(...) abort
     " Merge overlapping regions.
 
-    if !len(s:R()) | return                      | endif
+    if !len(s:R()) | return {}                   | endif
     if !s:X()      | return self.merge_cursors() | endif
 
     let s:v.eco = 1
@@ -727,7 +727,10 @@ fun! s:Global.merge_maps(map) abort
     for b in keys(a:map)
         let s:V.Bytes[b] = get(s:V.Bytes, b, 0) + a:map[b]
     endfor
-    return self.merge_regions()
+    if empty(s:V.Bytes) | return {} | endif
+    let pos = getpos('.')[1:2]
+    call self.rebuild_from_map(s:V.Bytes)
+    return self.update_map_and_select_region(pos)
 endfun
 
 

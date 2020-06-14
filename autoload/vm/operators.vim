@@ -140,7 +140,6 @@ fun! vm#operators#find(start, visual, ...) abort
             call s:backup_map_find()
         endif
 
-
         call s:updatetime()
         let g:Vm.finding = 1
         let s:vblock = a:visual && mode() == "\<C-v>"
@@ -156,11 +155,9 @@ fun! vm#operators#find(start, visual, ...) abort
     let [startline, startcol] = getpos('.')[1:2]
 
     if !search(join(s:v.search, '\|'), 'znp', endline)
-        call s:F.msg('No matches found.')
+        call s:merge_find()
         if !len(s:R())
             call vm#reset(1)
-        else
-            call s:G.update_map_and_select_region()
         endif
         return
     endif

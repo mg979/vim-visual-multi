@@ -68,8 +68,10 @@ endfun
 fun! s:Search.ensure_is_set(...) abort
     " Ensure there is an active search.
     if empty(s:v.search)
-        if !len(s:R()) | call self.get_slash_reg()
-        else           | call self.add(self.escape_pattern(s:R()[0].txt))
+        if !len(s:R()) || empty(s:R()[0].txt)
+            call self.get_slash_reg()
+        else
+            call self.add(self.escape_pattern(s:R()[0].txt))
         endif
     endif
 endfun
@@ -92,7 +94,7 @@ fun! s:Search.get_slash_reg(...) abort
     " Get pattern from current "/" register. Use backup register if empty.
     if a:0 | let @/ = a:1 | endif
     call s:update_search(getreg('/'))
-    if empty(s:v.search) | call s:update_search(s:v.oldreg[1]) | endif
+    if empty(s:v.search) | call s:update_search(s:v.oldsearch[0]) | endif
 endfun
 
 
