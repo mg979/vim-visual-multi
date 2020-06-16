@@ -248,6 +248,7 @@ fun! s:Global.update_and_select_region(...) abort
     "   {'id': i}           ->  id
 
     let nR = len(s:R())
+    if !nR | return vm#reset() | endif
 
     if !g:VM_reselect_first
         if exists('s:v.restore_index')
@@ -275,7 +276,7 @@ fun! s:Global.update_and_select_region(...) abort
     endif
 
     if g:VM_exit_on_1_cursor_left && nR == 1
-        call vm#reset()
+        return vm#reset()
     else
         return R
     endif
