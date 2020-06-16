@@ -179,18 +179,10 @@ endfun
 
 fun! s:Global.remove_highlight() abort
     " Remove all regions' highlight.
-
-    if !s:v.keep_matches
-        call clearmatches()
-    else
-        for r in s:R()
-            call r.remove_highlight()
-        endfor
-        if exists('s:v.clear_vm_matches')
-            unlet s:v.clear_vm_matches
-            call vm#clearmatches()
-        endif
-    endif
+    for r in s:R()
+        call r.remove_highlight()
+    endfor
+    call vm#clearmatches()
 endfun
 
 

@@ -512,7 +512,6 @@ endfun
 
 fun! s:Region.remove_highlight() abort
     " Remove the highlight entries.
-
     let r       = self.matches.region
     let c       = self.matches.cursor
 
@@ -523,7 +522,6 @@ endfun
 
 fun! s:Region.update_highlight() abort
     " Update the region highlight.
-
     call self.remove_highlight()
     call self.highlight()
 endfun

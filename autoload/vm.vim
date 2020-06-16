@@ -126,7 +126,6 @@ fun! vm#reset(...)
     call vm#variables#reset()
     call vm#commands#regex_reset()
 
-    let s:v.clear_vm_matches = 1
     call s:V.Global.remove_highlight()
     call s:V.Global.backup_last_regions()
 

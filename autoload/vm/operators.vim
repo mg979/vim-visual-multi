@@ -147,8 +147,6 @@ fun! vm#operators#find(start, visual, ...) abort
         return 'y'
     endif
 
-    let s:v.clear_vm_matches = 1
-
     "set the cursor to the start of the yanked region, then find occurrences until end mark is met
     let [endline, endcol] = getpos("']")[1:2]
     keepjumps normal! `[
