@@ -436,8 +436,8 @@ Show Infoline ~
   to both.
 >
     M+ / m- : whether mappings are enabled or not
-    V+ / v- : whether multiline is enabled or not
-    O+ / o- : whether single region mode is enabled or not
+    V+ / v- : whether multiline mode is enabled or not
+    S+ / s- : whether single region mode is enabled or not
 <
   After that: >
     [n] : index of currently selected region

@@ -96,7 +96,7 @@ fun! vm#themes#complete(A, L, P) abort
       call add(valid, k)
     endif
   endfor
-  return sort(valid)
+  return filter(sort(valid), 'v:val=~#a:A')
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
