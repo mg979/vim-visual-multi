@@ -145,6 +145,7 @@ fun! s:save_regions() abort
   for r in R
     call vm#region#new(0, r.l, r.L, r.a, r.b)
   endfor
+  call s:G.extend_mode()
   call s:V.Edit.replace_regions_with_text(lines)
 endfun
 

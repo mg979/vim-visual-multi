@@ -394,7 +394,7 @@ fun! s:Edit.replace_regions_with_text(text, ...) abort
     " Paste a custom list of strings into current regions. {{{1
     call self.fill_register('"', a:text, 0)
     let before = !a:0 || !a:1
-    call self.paste(before, 0, 1, '"')
+    call self.paste(before, 0, s:X(), '"')
 endfun " }}}
 
 
