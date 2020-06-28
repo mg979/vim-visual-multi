@@ -276,6 +276,7 @@ fun! s:Edit.replace_expression() abort
     for r in s:R()
         call add(T, eval(expr))
     endfor
+    call map(T, 'type(v:val) != v:t_string ? string(v:val) : v:val')
     call self.replace_regions_with_text(T)
     call s:G.select_region(ix)
 endfun " }}}
