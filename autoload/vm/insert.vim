@@ -589,11 +589,12 @@ fun! s:step_back() abort
         return
     endif
 
-    " MULTIBYTE CHARACTERS: the shift is equal to the byte size of the last
-    " entered character if an additional update has been triggered at
-    " InsertLeave, the final column has been adjusted already
+    " MULTIBYTE CHARACTERS:
+    " the shift is equal to the byte size of the last entered character
+    " if an additional update has been triggered at InsertLeave, the final
+    " column has been adjusted already (then I.xbytes != 0)
 
-    if !s:Insert.xbytes
+    if strlen(@.) && s:Insert.xbytes == 0
         let lastchar = strcharpart(@., strchars(@.)-1)
         let n = strlen(lastchar)
     else
