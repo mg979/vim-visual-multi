@@ -4,7 +4,7 @@
 
 fun! vm#cursors#operation(op, n, register, ...) abort
   call s:init()
-  let reg = a:register | let r = "\"".reg | let oper = a:op
+  let reg = a:register | let oper = a:op
 
   "shortcut for command in a:1
   if a:0 | call s:process(oper, a:1, reg, 0) | return | endif
@@ -12,7 +12,7 @@ fun! vm#cursors#operation(op, n, register, ...) abort
   call s:F.msg('[VM] ')
 
   "starting string
-  let M = (a:n>1? a:n : '').( reg == s:v.def_reg? '' : '"'.reg ).oper
+  let M = (a:n>1? a:n : '') . (reg == s:v.def_reg? '' : '"'.reg) . oper
 
   "preceding count
   let n = a:n>1? a:n : 1
@@ -53,9 +53,6 @@ fun! vm#cursors#operation(op, n, register, ...) abort
     elseif s:double(c)              | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c | break
 
-    elseif s:ia(c)                  | echon c | let M .= c
-      let c = nr2char(getchar())    | echon c | let M .= c | break
-
     elseif oper ==# 'c' && c==?'r'  | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c | break
 
@@ -65,7 +62,7 @@ fun! vm#cursors#operation(op, n, register, ...) abort
 
     elseif oper ==# 'y' && c==?'s'  | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c
-      if s:ia(c)
+      if s:double(c)
         let c = nr2char(getchar())  | echon c | let M .= c
       endif
       let c = nr2char(getchar())    | echon c
@@ -106,15 +103,16 @@ fun! s:process(op, M, reg, n) abort
   if a:op ==# 'd'     | call s:d_cursors(a:M, a:reg, a:n)
   elseif a:op ==# 'c' | call s:c_cursors(a:M, a:reg, a:n)
   elseif a:op ==# 'y' | call s:y_cursors(a:M, a:reg, a:n)
-  else                | call s:V.Edit.run_normal(a:M,
-        \               {'count': a:n, 'store': a:reg, 'recursive': 1})
+  else
+    " if it's a custom operator, pass the mapping as-is, and hope for the best
+    call s:V.Edit.run_normal(a:M, {'count': a:n, 'store': a:reg, 'recursive': 1})
   endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:reorder_cmd(M, r, n, op) abort
-  " Reorder command, so that the exact count is found.
+fun! s:parse_cmd(M, r, n, op) abort
+  " Parse command, so that the exact count is found.
 
   "remove register
   let S = substitute(a:M, a:r, '', '')
@@ -143,13 +141,13 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:d_cursors(M, reg, n) abort
-  let M = a:M | let r = '"'.a:reg
+  let M = a:M
 
   "ds surround
   if M[:1] ==# 'ds' | return s:V.Edit.run_normal(M) | endif
 
   "reorder command; DD = 'dd'
-  let [S, N, DD] = s:reorder_cmd(M, r, a:n, 'd')
+  let [S, N, DD] = s:parse_cmd(M, '"'.a:reg, a:n, 'd')
 
   "for D, d$, dd: ensure there is only one region per line
   if (S == '$' || S == 'd') | call s:G.one_region_per_line() | endif
@@ -167,7 +165,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:y_cursors(M, reg, n) abort
-  let M = a:M | let r = '"'.a:reg
+  let M = a:M
 
   "ys surround
   if M[:1] ==? 'ys' | return s:V.Edit.run_normal(M) | endif
@@ -178,7 +176,7 @@ fun! s:y_cursors(M, reg, n) abort
   call s:G.change_mode()
 
   "reorder command; YY = 'yy'
-  let [S, N, YY] = s:reorder_cmd(M, r, a:n, 'y')
+  let [S, N, YY] = s:parse_cmd(M, '"'.a:reg, a:n, 'y')
 
   "for Y, y$, yy, ensure there is only one region per line
   if (S == '$' || S == 'y') | call s:G.one_region_per_line() | endif
@@ -191,7 +189,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:c_cursors(M, reg, n) abort
-  let M = a:M | let r = '"'.a:reg
+  let M = a:M
 
   "cs surround
   if M[:1] ==? 'cs' | return s:V.Edit.run_normal(M) | endif
@@ -200,7 +198,7 @@ fun! s:c_cursors(M, reg, n) abort
   if M[:1] ==? 'cr' | return feedkeys("\<Plug>(VM-Run-Normal)".M."\<cr>") | endif
 
   "reorder command; CC = 'cc'
-  let [S, N, CC] = s:reorder_cmd(M, r, a:n, 'c')
+  let [S, N, CC] = s:parse_cmd(M, '"'.a:reg, a:n, 'c')
 
   "convert w,W to e,E (if motions), also in dot
   if     S ==# 'w' | let S = 'e' | call substitute(s:v.dot, 'w', 'e', '')
@@ -244,7 +242,7 @@ fun! s:c_cursors(M, reg, n) abort
     endif
     call feedkeys('"'.reg."c")
 
-  elseif s:forw(S) || s:ia(S[:0])
+  elseif s:forward(S) || s:ia(S[:0])
     call vm#operators#select(1, N.S)
     call feedkeys('"'.reg."c")
 
@@ -279,10 +277,18 @@ endfun
 " Lambdas
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let s:R      = { -> s:V.Regions      }
-let s:forw   = { c -> index(split('weWE%', '\zs'), c) >= 0                }
-let s:ia     = { c -> index(['i', 'a'], c) >= 0                           }
+let s:R = { -> s:V.Regions }
+
+" motions that move the cursor forward
+let s:forward = { c -> index(split('weWE%', '\zs'), c) >= 0 }
+
+" text objects starting with 'i' or 'a'
+let s:ia = { c -> index(['i', 'a'], c) >= 0 }
+
+" single character motions
 let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
-let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0              }
+
+" motions that expect a second character
+let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0 }
 
 " vim: et ts=2 sw=2 sts=2 :
