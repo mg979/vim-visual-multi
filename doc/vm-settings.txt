@@ -108,15 +108,15 @@ Hopefully you won't need to alter any of these.
 
 *g:VM_user_operators*                              Default: []
 
-  To support user operators that start with `y`, `d` or `c`. Cursor mode only.
-  The elements of the list can be simple strings (then a standard text object
-  can be accepted) or a dictionary with the operator as key, and the number of
-  characters to be accepted as value. Example:
+  Cursor mode only. The elements of the list can be simple strings (then
+  any text object can be accepted) or a dictionary with the operator as key,
+  and the number of characters to be typed as value. Example:
 >
-  let VM_user_operators = ['yd', 'cx', {'cs': 2}]
+  let VM_user_operators = ['gU', 'gu', 'yd', 'cx', {'cs': 2}]
 <
-  This will accept commands like `ydE`, `cxiw`, or `cs` followed by two
-  characters, for example `cs{[`.
+  This will accept commands like `gUiw`, `ydE`, `cxiw`, or `cs` followed by two
+  characters, for example `cs{[`. These operators can be either vim or
+  plugin operators, mappings are passed recursively.
 
   Note: |vim-surround| and |vim-abolish| have built-in support, this isn't
   needed for them to work.

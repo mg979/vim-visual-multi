@@ -193,6 +193,14 @@ fun! s:build_buffer_maps() abort
     for m in keys(g:Vm.tobj_motions)
         let maps['Motion ' . g:Vm.tobj_motions[m]] = [m, 'n']
     endfor
+    for op in keys(g:Vm.user_ops)
+        " don't map the operator if it starts with a key that would interfere
+        " with VM operations in extend mode, eg. if 'cx' gets mapped, then 'c'
+        " will not work as it should (it would have a delay in extend mode)
+        if index(['y', 'c', 'd'], op[:0]) == -1
+            let maps['User Operator ' . op] = [op, 'n']
+        endif
+    endfor
 
     "integrate custom motions and commands
     for m in keys(g:VM_custom_motions)

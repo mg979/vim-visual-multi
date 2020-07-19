@@ -91,10 +91,10 @@ There is built-in support for:
     |vim-surround|      example: `ysiw(` to enclose in parentheses
     |vim-abolish|       example: `cr_` to change current word to snake case
 
-You can also let custom operators be recognized, if they start with `y`,
-`d` or `c`, see |g:VM_user_operators|.
+Other operators can be recognized, but you have to define them.
+See |g:VM_user_operators|.
 
-Also see |vm-motions|.
+Also see |vm-motions| for supported motions in VM (some with differences).
 
 
 -------------------------------------------------------------  *vm-extend-mode*

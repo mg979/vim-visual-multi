@@ -17,31 +17,20 @@ fun! vm#cursors#operation(op, n, register, ...) abort
   "preceding count
   let n = a:n>1? a:n : 1
 
-  "make a dict with custom user operators, if they have been defined
-  let user_ops = {}
-  for user_op in get(g:, 'VM_user_operators', [])
-    if type(user_op) == v:t_dict
-      let key = keys(user_op)[0]
-      let user_ops[key] = user_op[key]
-    else
-      let user_ops[user_op] = 0
-    endif
-  endfor
-
   echon M
   while 1
     let c = nr2char(getchar())
-    let is_user_op = index(keys(user_ops), M . c) >= 0
+    let is_user_op = index(keys(g:Vm.user_ops), M . c) >= 0
 
     if is_user_op
       " let the entered characters be our operator
       echon c | let M .= c | let oper = M
-      if !user_ops[M]
+      if !g:Vm.user_ops[M]
         " accepts a regular text object
         continue
       else
         " accepts a specific number of any characters
-        let chars2read = user_ops[M]
+        let chars2read = g:Vm.user_ops[M]
         while chars2read
           let c = nr2char(getchar())
           echon c | let M .= c

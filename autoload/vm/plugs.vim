@@ -113,6 +113,21 @@ fun! vm#plugs#buffer() abort
     exe "nnoremap <silent> <Plug>(VM-Single-Select-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 1, 1)\<cr>"
   endfor
 
+  "make a dict with custom user operators, if they have been defined
+  "the key holds the operator, the value is the expected characters of the
+  "text object, 0 means any kind of text object
+  let g:Vm.user_ops = {}
+  for op in get(g:, 'VM_user_operators', [])
+    if type(op) == v:t_dict
+      let key = keys(op)[0]
+      let g:Vm.user_ops[key] = op[key]
+    else
+      let key = op
+      let g:Vm.user_ops[key] = 0
+    endif
+    exe "nnoremap <silent> <Plug>(VM-User-Operator-".key.") :\<C-u>call <sid>Operator('".key."', v:count1, v:register)\<cr>"
+  endfor
+
   let remaps = g:VM_custom_remaps
   for m in keys(remaps)
     exe "nmap <silent> <Plug>(VM-Remap-".remaps[m].") ".remaps[m]
@@ -298,4 +313,14 @@ fun! s:Visual(cmd) abort
         \ ? "y:call vm#commands#find_all(1, 0)\<cr>".r."`]"
         \ : "y:call vm#commands#find_under(1, 0)\<cr>".r."`]"
 endfun
+
+fun! s:Operator(op, n, reg) abort
+  " User operator wrapper that checks extend mode
+  if !g:Vm.extend_mode
+    call vm#cursors#operation(a:op, a:n, a:reg)
+  else
+    echo '[visual-multi] only in cursor mode'
+  endif
+endfun
+
 " vim: et ts=2 sw=2 sts=2 :
