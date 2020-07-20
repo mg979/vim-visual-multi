@@ -3,6 +3,7 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#cursors#operation(op, n, register, ...) abort
+  " Operations at cursors (yank, delete, change)
   call s:init()
   let reg = a:register | let oper = a:op
 
@@ -61,16 +62,16 @@ fun! vm#cursors#operation(op, n, register, ...) abort
         if tag == ''
           echon ' ...Aborted'       | return
         else
-          let M .= tag              | break
+          let M .= tag              | echon c | break
         endif
       else
-        let M .= c                  | break
+        let M .= c                  | echon c | break
       endif
 
     elseif oper ==# 'd' && c==#'s'  | echon c | let M .= c
       let c = nr2char(getchar())    | echon c | let M .= c | break
 
-    elseif s:single(c)                        | let M .= c | break
+    elseif s:single(c)              | echon c | let M .= c | break
 
     elseif str2nr(c) > 0            | echon c | let M .= c
 
@@ -84,162 +85,171 @@ fun! vm#cursors#operation(op, n, register, ...) abort
   call s:process(oper, M, reg, n)
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function: s:process
+" @param op: the operator
+" @param M: the whole command
+" @param reg: the register
+" @param n: the count
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""
 fun! s:process(op, M, reg, n) abort
+  " Process the whole command
   let s:v.dot = a:M
   let s:v.deleting = a:op == 'd' || a:op == 'c'
 
-  if a:op ==# 'd'     | call s:d_cursors(a:M, a:reg, a:n)
-  elseif a:op ==# 'c' | call s:c_cursors(a:M, a:reg, a:n)
-  elseif a:op ==# 'y' | call s:y_cursors(a:M, a:reg, a:n)
+  if a:op ==# 'd'     | call s:delete_at_cursors(a:M, a:reg, a:n)
+  elseif a:op ==# 'c' | call s:change_at_cursors(a:M, a:reg, a:n)
+  elseif a:op ==# 'y' | call s:yank_at_cursors(a:M, a:reg, a:n)
   else
     " if it's a custom operator, pass the mapping as-is, and hope for the best
     call s:V.Edit.run_normal(a:M, {'count': a:n, 'store': a:reg, 'recursive': 1})
   endif
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Function: s:parse_cmd
+" @param M: the whole command
+" @param r: the register
+" @param n: count that comes before the operator
+" @param op: the operator
+" Returns: [ text object, count ]
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""
 fun! s:parse_cmd(M, r, n, op) abort
   " Parse command, so that the exact count is found.
 
   "remove register
-  let S = substitute(a:M, a:r, '', '')
+  let Cmd = substitute(a:M, a:r, '', '')
 
   "what comes after operator
-  let S = substitute(S, '^\d*'.a:op.'\(.*\)$', '\1', '')
+  let Obj = substitute(Cmd, '^\d*'.a:op.'\(.*\)$', '\1', '')
 
   "if object is n/N, ensure there is a search pattern
-  if S ==? 'n' && empty(@/)
+  if Obj ==? 'n' && empty(@/)
     let @/ = s:v.oldsearch[0]
   endif
 
   "count that comes after operator
-  let x = match(S, '^\d') >= 0? substitute(S, '^\d\zs.*', '', 'g') : 0
-  if x | let S = substitute(S, '^' . x, '', '') | endif
+  let x = match(Obj, '^\d') >= 0? substitute(Obj, '^\d\zs.*', '', 'g') : 0
+  if x | let Obj = substitute(Obj, '^' . x, '', '') | endif
 
   "final count
   let n = a:n
-  let N = x? n*x : n>1? n : 1 | let N = N>1? N : ''
+  let N = x? n*x : n>1? n : 1
+  let N = N>1? N : ''
 
   " if the text object is the last character of the operator (eg 'yy')
-  if S ==# a:op[-1:-1]
-    let S = '_'
+  if Obj ==# a:op[-1:-1]
+    let Obj = '_'
   endif
 
-  return [S, N]
+  return [Obj, N]
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"delete
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:d_cursors(M, reg, n) abort
-  let M = a:M
+fun! s:delete_at_cursors(M, reg, n) abort
+  " delete operation at cursors
+  let Cmd = a:M
 
   "ds surround
-  if M[:1] ==# 'ds' | return s:V.Edit.run_normal(M) | endif
+  if Cmd[:1] ==# 'ds' | return s:V.Edit.run_normal(Cmd) | endif
 
-  let [S, N] = s:parse_cmd(M, '"'.a:reg, a:n, 'd')
+  let [Obj, N] = s:parse_cmd(Cmd, '"'.a:reg, a:n, 'd')
 
   "for D, d$, dd: ensure there is only one region per line
-  if (S == '$' || S == '_') | call s:G.one_region_per_line() | endif
+  if (Obj == '$' || Obj == '_') | call s:G.one_region_per_line() | endif
 
   "no matter the entered register, we're using default register
   "we're passing the register in the options dictionary instead
   "fill_register function will be called and take care of it, if appropriate
-  call s:V.Edit.run_normal('d'.S, {'count': N, 'store': a:reg, 'recursive': s:recursive})
+  call s:V.Edit.run_normal('d'.Obj, {'count': N, 'store': a:reg, 'recursive': s:recursive})
   call s:G.reorder_regions()
   call s:G.merge_regions()
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"yank
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:y_cursors(M, reg, n) abort
-  let M = a:M
+fun! s:yank_at_cursors(M, reg, n) abort
+  " yank operation at cursors
+  let Cmd = a:M
 
   "ys surround
-  if M[:1] ==? 'ys' | return s:V.Edit.run_normal(M) | endif
+  if Cmd[:1] ==? 'ys' | return s:V.Edit.run_normal(Cmd) | endif
 
   "reset dot for yank command
   let s:v.dot = ''
 
   call s:G.change_mode()
 
-  let [S, N] = s:parse_cmd(M, '"'.a:reg, a:n, 'y')
+  let [Obj, N] = s:parse_cmd(Cmd, '"'.a:reg, a:n, 'y')
 
   "for Y, y$, yy, ensure there is only one region per line
-  if (S == '$' || S == '_') | call s:G.one_region_per_line() | endif
+  if (Obj == '$' || Obj == '_') | call s:G.one_region_per_line() | endif
 
-  call s:V.Edit.run_normal('y'.S, {'count': N, 'store': a:reg, 'vimreg': 1})
+  call s:V.Edit.run_normal('y'.Obj, {'count': N, 'store': a:reg, 'vimreg': 1})
 endfun
 
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"change
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:c_cursors(M, reg, n) abort
-  let M = a:M
+fun! s:change_at_cursors(M, reg, n) abort
+  " change operation at cursors
+  let Cmd = a:M
 
   "cs surround
-  if M[:1] ==? 'cs' | return s:V.Edit.run_normal(M) | endif
+  if Cmd[:1] ==? 'cs' | return s:V.Edit.run_normal(Cmd) | endif
 
   "cr coerce (vim-abolish)
-  if M[:1] ==? 'cr' | return feedkeys("\<Plug>(VM-Run-Normal)".M."\<cr>") | endif
+  if Cmd[:1] ==? 'cr' | return feedkeys("\<Plug>(VM-Run-Normal)".Cmd."\<cr>") | endif
 
-  let [S, N] = s:parse_cmd(M, '"'.a:reg, a:n, 'c')
+  let [Obj, N] = s:parse_cmd(Cmd, '"'.a:reg, a:n, 'c')
 
   "convert w,W to e,E (if motions), also in dot
-  if     S ==# 'w' | let S = 'e' | call substitute(s:v.dot, 'w', 'e', '')
-  elseif S ==# 'W' | let S = 'E' | call substitute(s:v.dot, 'W', 'E', '')
+  if     Obj ==# 'w' | let Obj = 'e' | call substitute(s:v.dot, 'w', 'e', '')
+  elseif Obj ==# 'W' | let Obj = 'E' | call substitute(s:v.dot, 'W', 'E', '')
   endif
 
   "for c$, cc, ensure there is only one region per line
-  if (S == '$' || S == '_') | call s:G.one_region_per_line() | endif
+  if (Obj == '$' || Obj == '_') | call s:G.one_region_per_line() | endif
 
   "replace c with d because we're doing a delete followed by multi insert
-  let S = substitute(S, '^c', 'd', '')
+  let Obj = substitute(Obj, '^c', 'd', '')
 
   "we're using _ register, unless a register has been specified
   let reg = a:reg != s:v.def_reg? a:reg : "_"
 
-  if S == '_'
+  if Obj == '_'
     call vm#commands#motion('^', 1, 0, 0)
     call vm#operators#select(1, '$')
     call s:backup_changed_text()
     call s:V.Edit.delete(1, reg, 1, 0)
     call s:V.Insert.key('i')
 
-  elseif index(['ip', 'ap'], S) >= 0
-    call s:V.Edit.run_normal('d'.S, {'count': N, 'store': reg, 'recursive': s:recursive})
+  elseif index(['ip', 'ap'], Obj) >= 0
+    call s:V.Edit.run_normal('d'.Obj, {'count': N, 'store': reg, 'recursive': s:recursive})
     call s:V.Insert.key('O')
 
-  elseif s:recursive && index(vm#comp#add_line(), S) >= 0
-    call s:V.Edit.run_normal('d'.S, {'count': N, 'store': reg})
+  elseif s:recursive && index(vm#comp#add_line(), Obj) >= 0
+    call s:V.Edit.run_normal('d'.Obj, {'count': N, 'store': reg})
     call s:V.Insert.key('O')
 
-  elseif S=='$'
+  elseif Obj=='$'
     call vm#operators#select(1, '$')
     call s:backup_changed_text()
     call s:V.Edit.delete(1, reg, 1, 0)
     call s:V.Insert.key('i')
 
-  elseif S=='l'
+  elseif Obj=='l'
     call s:G.extend_mode()
     if N > 1
       call vm#commands#motion('l', N-1, 0, 0)
     endif
     call feedkeys('"'.reg."c")
 
-  elseif s:forward(S) || s:ia(S[:0])
-    call vm#operators#select(1, N.S)
+  elseif s:forward(Obj) || s:ia(Obj[:0])
+    call vm#operators#select(1, N.Obj)
     call feedkeys('"'.reg."c")
 
   else
-    call s:V.Edit.run_normal('d'.S, {'count': N, 'store': reg, 'recursive': s:recursive})
+    call s:V.Edit.run_normal('d'.Obj, {'count': N, 'store': reg, 'recursive': s:recursive})
     call s:G.merge_regions()
     call s:V.Insert.key('i')
   endif
@@ -250,6 +260,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:init() abort
+  "set up script variables
   let s:V         = b:VM_Selection
   let s:v         = s:V.Vars
   let s:G         = s:V.Global
@@ -283,4 +294,4 @@ let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN_', '\zs'), c) >= 0 }
 " motions that expect a second character
 let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0 }
 
-" vim: et ts=2 sw=2 sts=2 :
+" vim: et sw=2 ts=2 sts=2 fdm=indent fdn=1
