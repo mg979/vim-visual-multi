@@ -248,6 +248,8 @@ fun! vm#maps#all#buffer() abort
         \"Transform Regions":       [leader.'e',    'n'],
         \"p Paste":                 ['p',           'n'],
         \"P Paste":                 ['P',           'n'],
+        \"p Paste Linewise":        [leader.'p',    'n'],
+        \"P Paste Linewise":        [leader.'P',    'n'],
         \"Yank":                    ['y',           'n'],
         \})
 

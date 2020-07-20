@@ -129,21 +129,46 @@ fun! s:Edit.paste(before, vim_reg, reselect, register, ...) abort
     " @param vim_reg: if forcing regular vim registers
     " @param reselect: trigger reselection if run from extend mode
     " @param register: the register being used
-    " @param ...: optional list with replacement text for regions
+    " @param ...: optional dict with options (linewise, new_text)
     let X                = s:X()
     let s:v.use_register = a:register
-    let vim_reg          = a:vim_reg || !has_key(g:Vm.registers, a:register) ||
-                \          empty(g:Vm.registers[a:register])
-    let vim_V            = vim_reg && getregtype(a:register) ==# 'V'
+    let vim_reg          = a:vim_reg || empty(get(g:Vm.registers, a:register, []))
+    let vim_linewise     = vim_reg && getregtype(a:register) ==# 'V'
+    let VM_linewise      = a:0 && get(a:1, 'linewise', 0)
+    let with_text        = a:0 && !empty(get(a:1, 'new_text', []))
 
     if empty(s:v.old_text) | let s:v.old_text = s:G.regions_text() | endif
 
-    if vim_V
+    " simple paste from vim linewise register
+    if vim_linewise
         return self.run_normal('"' . a:register . 'p', {'recursive': 0})
 
-    elseif a:0     | let s:v.new_text = a:1
-    elseif vim_reg | let s:v.new_text = self.convert_vimreg(a:vim_reg)
-    else           | let s:v.new_text = s:fix_regions_text(g:Vm.registers[a:register])
+    " forcing a linewise paste, from VM or vim register
+    elseif VM_linewise && !with_text
+        let text = get(g:Vm.registers, a:register, self.convert_vimreg(a:register, 0))
+        call self.fill_register(a:register, text, 0)
+        let current_register = [ getreg('"'), getregtype('"') ]
+        let added_lines = 0
+        for r in s:R()
+            let to_paste = g:Vm.registers[a:register][r.index]
+            call setreg('"', to_paste, 'V')
+            if added_lines || a:before
+                let r.l += added_lines
+            endif
+            call cursor(r.l, r.a)
+            exe 'normal!' ( a:before ? 'P' : 'p' )
+            let added_lines += 1
+        endfor
+        call setreg('"', current_register[0], current_register[1])
+
+    " same, but also providing a replacement text
+    elseif VM_linewise && with_text
+        call self.fill_register(a:register, a:1.new_text, 0)
+        return self.paste(a:before, a:vim_reg, a:reselect, a:register, {'linewise': 1})
+
+    elseif with_text | let s:v.new_text = a:1
+    elseif vim_reg   | let s:v.new_text = self.convert_vimreg(a:register, a:vim_reg)
+    else             | let s:v.new_text = s:fix_regions_text(g:Vm.registers[a:register])
     endif
 
     call s:G.backup_regions()
@@ -191,6 +216,12 @@ fun! s:Edit.block_paste(before) abort
     call s:F.restore_reg()
 endfun " }}}
 
+
+fun! s:Edit.linewise_paste(before, reg) abort
+    call s:G.cursor_mode()
+    call self.paste(a:before, 0, 0, a:reg, {'linewise': 1})
+    call s:G.update_and_select_region()
+endfun
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -301,15 +332,15 @@ fun! s:fix_regions_text(replacement) abort
 endfun " }}}
 
 
-fun! s:Edit.convert_vimreg(as_block) abort
+fun! s:Edit.convert_vimreg(register, as_block) abort
     " Fill the content to paste with the chosen vim register. {{{1
     let text = []
-    let block = char2nr(getregtype(s:v.use_register)[0]) == 22
+    let block = char2nr(getregtype(a:register)[0]) == 22
 
     if block
         "default register is of block type, assign a line to each region
-        let width   = getregtype(s:v.use_register)[1:]
-        let content = split(getreg(s:v.use_register), "\n")
+        let width   = getregtype(a:register)[1:]
+        let content = split(getreg(a:register), "\n")
 
         "ensure all regions have the same width, fill the rest with spaces
         if a:as_block
@@ -324,7 +355,7 @@ fun! s:Edit.convert_vimreg(as_block) abort
             call add(text, content[n])
         endfor
     else
-        for n in range(len(s:R())) | call add(text, getreg(s:v.use_register)) | endfor
+        for n in range(len(s:R())) | call add(text, getreg(a:register)) | endfor
     endif
     return text
 endfun " }}}
