@@ -93,18 +93,37 @@ Hopefully you won't need to alter any of these.
 
 *g:VM_custom_remaps*                               Default: {}
 
-  To remap VM keys. See |vm-faq-remap|.
-
+  To remap VM keys while preserving the function of the original VM mapping.
+  Example:
+  >
+  " also use <c-p> to select previous and <c-s> to skip current
+  let g:VM_custom_remaps = {'<c-p>': 'N', '<c-s>': 'q'}
+<
 
 *g:VM_custom_noremaps*                             Default: {}
 
-  To remap any key to normal! commands. See |vm-faq-remap|.
+  To remap any key to normal! commands. Example:
+  >
+  let g:VM_custom_noremaps = {'==': '==', '<<': '<<', '>>': '>>'}
+<
+  would create commands that will work on all cursors inside VM, for each
+  key-value pair. It's a way to remap built-in vim commands, without having
+  too many default mappings that can cause conflicts with other plugins. They
+  only work in (and enforce) cursor mode.
 
 
 *g:VM_custom_motions*                              Default: {}
 
-  To remap any standard motion (h,j,k,l,f...) commands. See |vm-faq-remap|.
-
+  To remap any standard motion (h,j,k,l,f...) commands. For example this
+  inverts 'h' and 'l' motions:
+>
+  let g:VM_custom_motions  = {'h': 'l', 'l': 'h'}
+<
+  It can be useful if you use keyboard layouts other than QWERTY. Valid motions
+  that you can remap are:
+>
+    h j k l w W b B e E ge gE , ; $ 0 ^ % \| f F t T
+<
 
 *g:VM_user_operators*                              Default: []
 
@@ -112,14 +131,20 @@ Hopefully you won't need to alter any of these.
   any text object can be accepted) or a dictionary with the operator as key,
   and the number of characters to be typed as value. Example:
 >
-  let VM_user_operators = ['gU', 'gu', 'yd', 'cx', {'cs': 2}]
+  let VM_user_operators = ['yd', 'cx', {'cs': 2}]
 <
-  This will accept commands like `gUiw`, `ydE`, `cxiw`, or `cs` followed by two
+  This will accept commands like `ydE`, `cxiw`, or `cs` followed by two
   characters, for example `cs{[`. These operators can be either vim or
   plugin operators, mappings are passed recursively.
 
   Note: |vim-surround| and |vim-abolish| have built-in support, this isn't
   needed for them to work.
+
+
+*g:VM_use_first_cursor_in_line*                    Default: 0
+
+  In insert mode, the active cursor is normally the last selected one. Set this
+  option to `1` to always use the first cursor in the line.
 
 
 *g:VM_insert_special_keys*                         Default: ['c-v']

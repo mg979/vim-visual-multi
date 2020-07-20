@@ -76,24 +76,15 @@ At any time you can switch between them with the <Tab> key.
 In |cursor-mode| commands expect a motion, so if you type `c`, it will have to
 be followed by the text object you want to change. Supported commands:
 
-    c/y/d   change/yank/delete (+ text object)
-    |       set column for all cursors (to current column or [count])
-    r       replace single character
-    R       enter |vm-replace-mode|
-    ~       change case of single character
-    &       repeat last substitution
-    w/b/%   and all other basic motions
-    <C-A>   increase number
-    <C-X>   decrease number
-    gu/gU   change case operators
-
-There is built-in support for:
-
-    |vim-surround|      example: `ysiw(` to enclose in parentheses
-    |vim-abolish|       example: `cr_` to change current word to snake case
-
-Other operators can be recognized, but you have to define them.
-See |g:VM_user_operators|.
+    operators   see |vm-operators|
+    motions     see |vm-motions|
+    |           set column for all cursors (to current column or [count])
+    r           replace single character
+    R           enter |vm-replace-mode|
+    ~           change case of single character
+    &           repeat last substitution
+    <C-A>       increase number
+    <C-X>       decrease number
 
 Also see |vm-motions| for supported motions in VM (some with differences).
 
@@ -110,9 +101,58 @@ Some commands are specific to |extend-mode|, such as:
     S       |vim-surround| is required
     R       replace pattern in regions
     \\s     split regions by pattern
-    gu/gU   change case operators (instead of vim default u/U)
+
+Some commands enforce |cursor-mode| when run from |extend-mode|, such as:
+
+    <C-A>   increase number
+    <C-X>   decrease number
+
+Others can use a different mapping:
+
+    gu/gU   change case (instead of vim default u/U)
 
 More specific commands will be covered further on.
+
+
+-----------------------------------------------------------------  *vm-motions*
+
+Most basic vim motions (including |%|) are supported in VM. They behave
+differently from other commands because their result is dependent on the mode:
+in `cursor mode` they will move cursors, in `extend mode` they extend
+selections.
+
+Also keep in mind that all motions are restricted by default to the current
+line, that is, they cannot cross line boundaries unless |multiline-mode| is
+enabled.
+
+Finally, some |object-motions| and |various-motions| require |multiline-mode|,
+and some are aliased to avoid conflict with VM mappings `[` and `]`:
+
+   vim    VM~
+    (     (       [count] sentences backward
+    )     )       [count] sentences forward
+    {     {       [count] paragraphs backward
+    }     }       [count] paragraphs forward
+    [(    g(      go to [count] previous unmatched '('
+    [{    g{      go to [count] previous unmatched '{'
+    ])    g)      go to [count] next unmatched ')'
+    ]}    g}      go to [count] next unmatched '}'
+
+
+---------------------------------------------------------------  *vm-operators*
+
+VM supports several operators by default:
+
+  y/d/c       yank/delete/change
+  gu/gU       change case
+
+There is also built-in support for:
+
+    |vim-surround|      example: `ysiw(` to enclose in parentheses
+    |vim-abolish|       example: `cr_` to change current word to snake case
+
+Other operators can be used, but you have to define them.
+See |g:VM_user_operators|.
 
 
 -------------------------------------------------------------  *vm-insert-mode*
@@ -146,7 +186,10 @@ solutions, for others not. See |vm-faq-remap|.
 NOTE: Since <C-V> is remapped, you should use <C-Q> to insert special
 characters.
 
-NOTE: see |g:VM_insert_special_keys| for some options.
+NOTE: insert mode related options:
+  |g:VM_insert_special_keys|
+  |g:VM_use_first_cursor_in_line|
+
 
 ------------------------------------------------------------  *vm-replace-mode*
 
@@ -160,6 +203,7 @@ more regions in the same line, they will be collapsed first.
 
 Another limitation concerns special keys like <BS>, that work like in insert
 mode. Only typed characters will replace underlying text.
+
 
 -------------------------------------------------------------  *vm-visual-mode*
 
@@ -199,28 +243,6 @@ region that is yanked/deleted. You can read more about them in the
 |visual-multi-registers| section, since this is an accessory topic.
 
 
------------------------------------------------------------------  *vm-motions*
-
-Most basic vim motions are supported in VM. They behave differently from other
-commands because their result is dependent on the mode: in `cursor mode` they
-will move cursors, in `extend mode` they extend selections.
-
-Also keep in mind that all motions are restricted by default to the current
-line, that is, they cannot cross line boundaries unless |multiline-mode| is
-enabled.
-
-Finally, some |object-motions| and |various-motions| require |multiline-mode|,
-and some are aliased to avoid conflict with VM mappings `[` and `]`:
-
-   vim    VM~
-    (     (       [count] sentences backward
-    )     )       [count] sentences forward
-    {     {       [count] paragraphs backward
-    }     }       [count] paragraphs forward
-    [(    g(      go to [count] previous unmatched '('
-    [{    g{      go to [count] previous unmatched '{'
-    ])    g)      go to [count] next unmatched ')'
-    ]}    g}      go to [count] next unmatched '}'
 
 
 
@@ -453,24 +475,23 @@ Show Infoline ~
 RUN ... AT CURSORS                                *visual-multi-run-at-cursors*
 ===============================================================================
 
-This kind of commands is certainly alien to any other multiple cursor system,
-but they can be very powerful.
-
-For example, to swap lines with regions with the lines below them: >
+You can enter any kind of normal/visual/ex command, and it will be repeated at
+each cursor. For example, to swap lines with regions with the lines below them:
+>
   \\z   normal ddp
-
+<
 With the dot command you can repeat:
 
-- in VM the last edit done outside of VM (also edits done in |replace-mode|)
+- the last edit done outside of VM (also edits done in |replace-mode|)
 - operations at cursors (`daw`, `ciw`, etc)
 - the last VM normal command (`x`, `X`, `~`, etc)
-- the last VM normal command as entered with \\z
+- the last VM normal command as entered with `\\z`
 
 Quick reference ~
 
 Dot        .       run |single-repeat|                          *vm-run-dot*
 Normal     \\z     run |:normal| (recursive)                    *vm-run-normal*
-Visual     \\v     |extend-mode| only!                          *vm-run-visual*
+Visual     \\v     |extend-mode| only                           *vm-run-visual*
 Ex         \\x     run any ex command at cursors              *vm-run-ex*
 Macro      \\@     run a macro at cursors                     *vm-run-macro*
 

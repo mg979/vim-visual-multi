@@ -32,6 +32,14 @@ action, you could write it as:
                          {https://github.com/mg979/vim-visual-multi/issues/91}
 
 ------------------------------------------------------------------------------
+                                                           *vm-autocompletion*
+Some autocompletion plugins can cause trouble if the active cursor is not the
+first cursor in the line. In this case this can help:
+>
+  let g:VM_use_first_cursor_in_line = 1
+
+
+------------------------------------------------------------------------------
 
 In |vm-single-region| mode, some insert mode mappings (<C-w>, <C-u>, <CR>) are
 disabled because they don't behave well. <BS> and <Del> are not disabled, but
