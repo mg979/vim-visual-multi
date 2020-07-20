@@ -200,11 +200,17 @@ fun! s:Edit.align() abort
     let max = max(map(copy(s:R()), 'virtcol([v:val.l, v:val.a])'))
     let reg = g:Vm.registers['§']
     for r in s:R()
-        let s = ''
-        while len(s) < (max - virtcol([r.l, r.a])) | let s .= ' ' | endwhile
+        let spaces = ''
         let L = getline(r.l)
-        call setline(r.l, L[:r.a-1].s.L[r.a:].reg[r.index])
-        call r.update_cursor([r.l, r.a+len(s)])
+        if empty(L)
+            while len(spaces) < max | let spaces .= ' ' | endwhile
+            call setline(r.l, L[:r.a-1] . spaces . L[r.a:] . reg[r.index])
+            call r.update_cursor([r.l, r.a + len(spaces) - 1])
+        else
+            while len(spaces) < (max - virtcol([r.l, r.a])) | let spaces .= ' ' | endwhile
+            call setline(r.l, L[:r.a-1] . spaces . L[r.a:] . reg[r.index])
+            call r.update_cursor([r.l, r.a + len(spaces)])
+        endif
     endfor
     call s:G.update_and_select_region()
     call vm#commands#motion('l', 1, 0, 0)
