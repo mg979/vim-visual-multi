@@ -102,6 +102,10 @@ Visual Reduce          \\r        remove regions outside of visual selection
 
 -------------------------------------------------------------------------------
 BUFFER MAPPINGS                                            *vm-buffer-mappings*
+
+Not included are the mappings that mimic default vim commands (motions, several
+text objects), unless specified.
+
 -------------------------------------------------------------------------------
   Name                Keys        Notes ~
 -------------------------------------------------------------------------------
@@ -136,8 +140,8 @@ Find Operator           m         see |vm-find-operator|
 
 Special commands: ~
 
-Increase              <C-A>       increase numbers
-Decrease              <C-X>       decrease numbers
+Increase              <C-A>       increase numbers (same as vim)
+Decrease              <C-X>       decrease numbers (same as vim)
 Alpha-Increase        \\<C-A>     same but +alpha (see |'nrformats'|)
 Alpha-Decrease        \\<C-X>     ,,
 

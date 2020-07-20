@@ -239,6 +239,8 @@ fun! vm#maps#all#buffer() abort
         \"O":                       [leader.'O',    'n'],
         \"c":                       ['c',           'n'],
         \"gc":                      ['gc',          'n'],
+        \"gu":                      ['gu',          'n'],
+        \"gU":                      ['gU',          'n'],
         \"C":                       ['C',           'n'],
         \"Delete":                  ['d',           'n'],
         \"Replace Characters":      ['r',           'n'],

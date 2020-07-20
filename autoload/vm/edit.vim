@@ -447,7 +447,7 @@ endfun
 
 fun! s:visual_reselect(cmd) abort
     " Ensure selections are reselected after some commands.
-    let reselect = a:cmd == '~' || a:cmd =~? 'gu'
+    let reselect = a:cmd == '~' || a:cmd =~? 'u'
     return s:X() && reselect
 endfun
 

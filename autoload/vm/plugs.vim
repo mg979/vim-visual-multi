@@ -170,6 +170,8 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>        <Plug>(VM-O)                       :<C-u>call b:VM_Selection.Insert.key('O')<cr>
   nnoremap <silent>        <Plug>(VM-c)                       :<C-u>call b:VM_Selection.Edit.change(g:Vm.extend_mode, v:count1, v:register, 0)<cr>
   nnoremap <silent>        <Plug>(VM-gc)                      :<C-u>call b:VM_Selection.Edit.change(g:Vm.extend_mode, v:count1, v:register, 1)<cr>
+  nnoremap <silent>        <Plug>(VM-gu)                      :<C-u>call <sid>Operator('gu', v:count1, v:register)<cr>
+  nnoremap <silent>        <Plug>(VM-gU)                      :<C-u>call <sid>Operator('gU', v:count1, v:register)<cr>
   nnoremap <silent>        <Plug>(VM-C)                       :<C-u>call vm#cursors#operation('c', 0, v:register, 'c$')<cr>
   nnoremap <silent>        <Plug>(VM-Delete)                  :<C-u>call b:VM_Selection.Edit.delete(g:Vm.extend_mode, v:register, v:count1, 1)<cr>
   nnoremap <silent>        <Plug>(VM-Delete-Exit)             :<C-u>call b:VM_Selection.Edit.delete(g:Vm.extend_mode, v:register, v:count1, 1)<cr>:call vm#reset()<cr>
@@ -318,6 +320,8 @@ fun! s:Operator(op, n, reg) abort
   " User operator wrapper that checks extend mode
   if !g:Vm.extend_mode
     call vm#cursors#operation(a:op, a:n, a:reg)
+  elseif a:op ==? 'gu'
+    call b:VM_Selection.Edit.run_visual(a:op[1:1], 0)
   else
     echo '[visual-multi] only in cursor mode'
   endif

@@ -85,6 +85,7 @@ be followed by the text object you want to change. Supported commands:
     w/b/%   and all other basic motions
     <C-A>   increase number
     <C-X>   decrease number
+    gu/gU   change case operators
 
 There is built-in support for:
 
@@ -109,6 +110,7 @@ Some commands are specific to |extend-mode|, such as:
     S       |vim-surround| is required
     R       replace pattern in regions
     \\s     split regions by pattern
+    gu/gU   change case operators (instead of vim default u/U)
 
 More specific commands will be covered further on.
 
