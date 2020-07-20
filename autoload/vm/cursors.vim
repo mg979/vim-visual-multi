@@ -74,7 +74,8 @@ fun! vm#cursors#operation(op, n, register, ...) abort
 
     elseif str2nr(c) > 0            | echon c | let M .= c
 
-    elseif oper ==# c                         | let M .= c | break
+    " if the entered char is the last character of the operator (eg 'yy', 'gUU')
+    elseif oper[-1:-1] ==# c        | echon c | let M .= '_' | break
 
     else | echon ' ...Aborted'      | return
     endif
@@ -122,7 +123,12 @@ fun! s:parse_cmd(M, r, n, op) abort
   let n = a:n
   let N = x? n*x : n>1? n : 1 | let N = N>1? N : ''
 
-  return [S, N, S[0]==#a:op]
+  " if the text object is the last character of the operator (eg 'yy')
+  if S ==# a:op[-1:-1]
+    let S = '_'
+  endif
+
+  return [S, N]
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -135,11 +141,10 @@ fun! s:d_cursors(M, reg, n) abort
   "ds surround
   if M[:1] ==# 'ds' | return s:V.Edit.run_normal(M) | endif
 
-  "reorder command; DD = 'dd'
-  let [S, N, DD] = s:parse_cmd(M, '"'.a:reg, a:n, 'd')
+  let [S, N] = s:parse_cmd(M, '"'.a:reg, a:n, 'd')
 
   "for D, d$, dd: ensure there is only one region per line
-  if (S == '$' || S == 'd') | call s:G.one_region_per_line() | endif
+  if (S == '$' || S == '_') | call s:G.one_region_per_line() | endif
 
   "no matter the entered register, we're using default register
   "we're passing the register in the options dictionary instead
@@ -164,11 +169,10 @@ fun! s:y_cursors(M, reg, n) abort
 
   call s:G.change_mode()
 
-  "reorder command; YY = 'yy'
-  let [S, N, YY] = s:parse_cmd(M, '"'.a:reg, a:n, 'y')
+  let [S, N] = s:parse_cmd(M, '"'.a:reg, a:n, 'y')
 
   "for Y, y$, yy, ensure there is only one region per line
-  if (S == '$' || S == 'y') | call s:G.one_region_per_line() | endif
+  if (S == '$' || S == '_') | call s:G.one_region_per_line() | endif
 
   call s:V.Edit.run_normal('y'.S, {'count': N, 'store': a:reg, 'vimreg': 1})
 endfun
@@ -186,8 +190,7 @@ fun! s:c_cursors(M, reg, n) abort
   "cr coerce (vim-abolish)
   if M[:1] ==? 'cr' | return feedkeys("\<Plug>(VM-Run-Normal)".M."\<cr>") | endif
 
-  "reorder command; CC = 'cc'
-  let [S, N, CC] = s:parse_cmd(M, '"'.a:reg, a:n, 'c')
+  let [S, N] = s:parse_cmd(M, '"'.a:reg, a:n, 'c')
 
   "convert w,W to e,E (if motions), also in dot
   if     S ==# 'w' | let S = 'e' | call substitute(s:v.dot, 'w', 'e', '')
@@ -195,7 +198,7 @@ fun! s:c_cursors(M, reg, n) abort
   endif
 
   "for c$, cc, ensure there is only one region per line
-  if (S == '$' || S == 'c') | call s:G.one_region_per_line() | endif
+  if (S == '$' || S == '_') | call s:G.one_region_per_line() | endif
 
   "replace c with d because we're doing a delete followed by multi insert
   let S = substitute(S, '^c', 'd', '')
@@ -203,7 +206,7 @@ fun! s:c_cursors(M, reg, n) abort
   "we're using _ register, unless a register has been specified
   let reg = a:reg != s:v.def_reg? a:reg : "_"
 
-  if CC
+  if S == '_'
     call vm#commands#motion('^', 1, 0, 0)
     call vm#operators#select(1, '$')
     call s:backup_changed_text()
@@ -275,7 +278,7 @@ let s:forward = { c -> index(split('weWE%', '\zs'), c) >= 0 }
 let s:ia = { c -> index(['i', 'a'], c) >= 0 }
 
 " single character motions
-let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN', '\zs'), c) >= 0 }
+let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN_', '\zs'), c) >= 0 }
 
 " motions that expect a second character
 let s:double = { c -> index(split('iafFtTg', '\zs'), c) >= 0 }
