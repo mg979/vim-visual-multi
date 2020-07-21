@@ -103,7 +103,7 @@ fun! s:process(op, M, reg, n) abort
   elseif a:op ==# 'y' | call s:yank_at_cursors(a:M, a:reg, a:n)
   else
     " if it's a custom operator, pass the mapping as-is, and hope for the best
-    call s:V.Edit.run_normal(a:M, {'count': a:n, 'store': a:reg, 'recursive': 1})
+    call s:V.Edit.run_normal(a:M, {'count': a:n, 'recursive': 1})
   endif
 endfun
 
