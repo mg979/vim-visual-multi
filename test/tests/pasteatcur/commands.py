@@ -1,9 +1,8 @@
 # paste at cursor position
-L = '\\\\\\\\'
 
-keys('vip\<C-V>$y')
-keys('vip' + L + 'c')
-keys('f_p')
-keys('a')
-keys('Hello')
-keys('\<Esc>')
+keys(r'vip\<C-V>$y')
+keys(r'vip\\\\c')
+keys(r'f_p')
+keys(r'a')
+keys(r'Hello')
+keys(r'\<Esc>')

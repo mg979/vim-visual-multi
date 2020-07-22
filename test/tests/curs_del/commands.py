@@ -1,11 +1,10 @@
 # delete operations at cursors
-L = '\\\\\\\\'
 
-keys('j0')
-keys('5\<C-Down>ww')
-keys('dWbP')
-keys('5W'+L+'a')
-keys('wllb'+L+'a')
-keys('Bd2l')
-keys('d4h')
-keys('\<Esc>')
+keys(r'j0')
+keys(r'5\<C-Down>ww')
+keys(r'dWbP')
+keys(r'5W\\\\a')
+keys(r'wllb\\\\a')
+keys(r'Bd2l')
+keys(r'd4h')
+keys(r'\<Esc>')

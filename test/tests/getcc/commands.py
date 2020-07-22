@@ -1,8 +1,7 @@
 # visual select, cc
-L = '\\\\\\\\'
-keys('ve')
-keys(L + 'A')
-keys('\<Tab>')
-keys('cc')
-keys('test')
-keys('\<Esc>\<Esc>')
+keys(r've')
+keys(r'\\\\A')
+keys(r'\<Tab>')
+keys(r'cc')
+keys(r'test')
+keys(r'\<Esc>\<Esc>')

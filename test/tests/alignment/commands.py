@@ -1,3 +1,3 @@
 # test alignment feature
-keys('\\\\\\\\A')
-keys('\\\\\\\\a')
+keys(r'\\\\A')
+keys(r'\\\\a')

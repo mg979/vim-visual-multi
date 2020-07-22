@@ -1,5 +1,5 @@
 # 3x C-Down, i
-keys('\<C-Down>\<C-Down>\<C-Down>')
-keys('i')
-keys('Hello')
-keys('\<Esc>')
+keys(r'\<C-Down>\<C-Down>\<C-Down>')
+keys(r'i')
+keys(r'Hello')
+keys(r'\<Esc>')

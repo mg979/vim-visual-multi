@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path, PurePath
 import os
 import sys
+import json
 import shutil
 import filecmp
 import vimrunner
@@ -13,6 +14,31 @@ import subprocess
 from pynvim import attach
 
 
+# -------------------------------------------------------------
+# global varialbes
+# -------------------------------------------------------------
+KEY_PRESS_INTERVAL = 0.1
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+SUCCESS_STR = "{}SUCCESS{}".format(bcolors.OKGREEN, bcolors.ENDC)
+FAIL_STR = "{}FAIL{}".format(bcolors.FAIL, bcolors.ENDC)
+CLIENT = None
+
+
+# -------------------------------------------------------------
+# functions
+# -------------------------------------------------------------
 def log(string, f=None):
     """Log to terminal and to file."""
     print(string)
@@ -39,27 +65,22 @@ def get_test_description(test):
     with open(commands) as file:
         desc = file.readline()
     if desc[0] == '#':
-        return (1, desc[2:-1] )
+        return (desc[2:-1] )
     else:
-        return (0, '')
+        return ('')
 
 
 def get_test_info(test, nvim, vimrc):
     """Generate line for test logging."""
     desc = get_test_description(test)
-    rc = 'default' if vimrc == DEFAULT_VIMRC else 'test'
-    if desc[0]:
-        return desc[1].ljust(40) + "using " + rc + " vimrc"
-    else:
-        return "./test.py " + ("", "-n ")[nvim] + \
-                test + "\t" + "using " + rc + " vimrc"
+    return test.ljust(20) + desc.ljust(40)
 
 
 def print_tests_list(tests, f):
     """Print the list of available tests, with their descriptions."""
     log("\n" + '-' * 60)
     for t in tests:
-        desc = get_test_description(t)[1]
+        desc = get_test_description(t)
         log(t.ljust(20) + "\t" + desc)
     log('-' * 60)
 
@@ -70,14 +91,31 @@ def get_paths(test, f):
     paths["vimrc"] = get_vimrc(test, f)
     paths["command"] = Path('tests/', test, 'commands.py').resolve(strict=True)
     paths["in_file"] = Path('tests/', test, 'input_file.txt').resolve(strict=True)
+    paths["config"] = Path('tests/', test, 'config.json').resolve()
     paths["exp_out_file"] = Path('tests/', test, 'expected_output_file.txt').resolve(strict=True)
     paths["gen_out_file"] = Path('tests/', test, 'generated_output_file.txt').resolve()
     paths["socket"] = Path('socket_' + test).resolve()
     return paths
 
 
+def keys_nvim(key_str):
+    """nvim implementation of keys()"""
+    key_str = key_str.replace('\<', '<')
+    key_str = key_str.replace(r'\"', r'"')
+    key_str = key_str.replace('\\\\', '\\')
+    CLIENT.input(key_str)
+    time.sleep(KEY_PRESS_INTERVAL)
+
+
+def keys_vim(key_str):
+    """vim implementation of keys()"""
+    CLIENT.feedkeys(key_str)
+    time.sleep(KEY_PRESS_INTERVAL)
+
+
 def run_core(paths, nvim=False):
-    """Start the test."""
+    """Start the test and return commands_cpu_time."""
+    global CLIENT
     if nvim:
         # client/server connection
         server = multiprocessing.Process(
@@ -87,27 +125,26 @@ def run_core(paths, nvim=False):
         )
         server.start()
         time.sleep(1)
-        client = attach('socket', path=str(paths["socket"]))
+        CLIENT = attach('socket', path=str(paths["socket"]))
         # run test
-        client.command('e %s' % paths["in_file"])
-        keys = client.input
-        for line in open(paths["command"]):
-            l = line.replace('\<', '<')
-            l = l.replace("\\\\", "\\")
-            exec(l)
-            time.sleep(0.3)
-        client.command(':w! %s' % paths["gen_out_file"])
-        client.quit()
+        CLIENT.command('e %s' % paths["in_file"])
+        keys = keys_nvim
+        start_time = time.process_time()
+        exec(open(paths["command"]).read())
+        end_time = time.process_time()
+        CLIENT.command(':w! %s' % paths["gen_out_file"])
+        CLIENT.quit()
     else:
         vim = vimrunner.Server(noplugin=False, vimrc=paths["vimrc"], executable=VIM)
-        client = vim.start()
-        client.edit(paths["in_file"])
-        keys = client.feedkeys
-        for line in open(paths["command"]):
-            exec(line)
-            time.sleep(0.3)
-        client.feedkeys('\<Esc>')
-        client.feedkeys(':wq! %s\<CR>' % paths["gen_out_file"])
+        CLIENT = vim.start()
+        CLIENT.edit(paths["in_file"])
+        keys = keys_vim
+        start_time = time.process_time()
+        exec(open(paths["command"]).read())
+        end_time = time.process_time()
+        CLIENT.feedkeys('\<Esc>')
+        CLIENT.feedkeys(':wq! %s\<CR>' % paths["gen_out_file"])
+    return end_time - start_time
 
 
 def run_one_test(test, f=None, nvim=False):
@@ -115,18 +152,28 @@ def run_one_test(test, f=None, nvim=False):
     # input/output files
     paths = get_paths(test, f)
     info = get_test_info(test, nvim, paths['vimrc'])
+    config = {}
+    if os.path.exists(paths["config"]):
+        config = json.load(open(paths["config"]))
     # remove previously generated file
     if os.path.exists(paths["gen_out_file"]):
         os.remove(paths["gen_out_file"])
     # run test
-    run_core(paths, nvim)
-    time.sleep(0.5)
+    time.sleep(.5)
+    commands_cpu_time = run_core(paths, nvim)
+    time.sleep(.5)
     # check results
+    time_str = "(took {:.3f} sec)".format(commands_cpu_time)
     if filecmp.cmp(paths["exp_out_file"], paths["gen_out_file"]):
-        log(info + "... success", f)
+        if "max_cpu_time" in config and config["max_cpu_time"] < commands_cpu_time:
+            log("{} {} {}[slow]{} {}".format(info, FAIL_STR,
+                                             bcolors.WARNING, bcolors.ENDC, time_str), f)
+            return False
+        log("{} {} {}".format(info, SUCCESS_STR, time_str), f)
         return True
     else:
-        log(info + "... FAIL", f)
+        log("{} {} {}[mismatch]{} {}".format(info, FAIL_STR,
+                                             bcolors.WARNING, bcolors.ENDC, time_str), f)
         return False
 
 
@@ -157,9 +204,9 @@ def main():
             if run_one_test(t, f, args.nvim) is not True:
                 failing_tests.append(t)
         if failing_tests == []:
-            print_banner("summary: SUCCESS", f)
+            print_banner("summary: " + SUCCESS_STR, f)
         else:
-            print_banner("summary: FAIL", f)
+            print_banner("summary: " + FAIL_STR, f)
             log("the following tests failed:", f)
             log("\n".join(failing_tests), f)
     f.close()
@@ -167,5 +214,8 @@ def main():
         sys.exit(1)
 
 
+# -------------------------------------------------------------
+# execution
+# -------------------------------------------------------------
 if __name__ == '__main__':
     main()

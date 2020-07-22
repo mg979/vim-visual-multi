@@ -10,16 +10,20 @@
 
 # Add a Test
 ## create a directory in tests/ then add the following files:
-    input_file.txt
-    commands.py
-    expected_output_file.txt
+  - input_file.txt
+  - commands.py
+    - a literal backslash is written `\\`
+    - a literal double quote is written `\"`
+    - key notation have to be escaped `\<CR>`
+  - expected_output_file.txt
 
 ## (optional) if you don't want to use default/vimrc.vim, add:
-    vimrc.vim
+  - vimrc.vim
 
-# Reminders
-
-When creating tests, some characters need special escaping:
-
-* a literal backslash is written `\\\\`
-* a literal double quote is written `\\"`
+## (optional) if you want to add extra constraints, add:
+  - config.json
+```json
+{
+  "max_cpu_time": 2.7
+}
+```

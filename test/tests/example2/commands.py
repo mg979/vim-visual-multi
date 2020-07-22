@@ -1,6 +1,6 @@
 # 2x C-n, c
-keys('\<C-n>')
-keys('\<C-n>')
-keys('C')
-keys('hello')
-keys('\<Esc>')
+keys(r'\<C-n>')
+keys(r'\<C-n>')
+keys(r'C')
+keys(r'hello')
+keys(r'\<Esc>')
