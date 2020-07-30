@@ -30,7 +30,7 @@ fun! vm#operators#select(count, ...) abort
     let pos = getpos('.')[1:2]
     call s:F.Scroll.get(1)
 
-    if a:0 | return s:select('y'.a:1) | endif
+    if a:0 | return s:select(a:1) | endif
 
     let [ abort, s, n ] = [ 0, '', '' ]
     let x = a:count>1? a:count : 1
@@ -59,18 +59,27 @@ fun! vm#operators#select(count, ...) abort
 
     if abort | return | endif
 
+    " change $ in g_
+    let s = substitute(s, '\$', 'g_', 'g')
+
     let n = n<1? 1 : n
     let n = n*x>1? n*x : ''
-    call s:select('v'.n.s.'y')
+    call s:select(n . s)
     call s:G.update_and_select_region(pos)
     call s:F.Scroll.restore()
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:select(cmd) abort
+fun! s:select(obj) abort
     call s:updatetime()
     call s:V.Maps.disable(1)
+
+    if a:obj =~ '"' || a:obj =~ "'"
+        let cmd = 'v' . a:obj . 'y'
+    else
+        let cmd = 'y' . a:obj
+    endif
 
     silent! nunmap <buffer> y
 
@@ -79,7 +88,7 @@ fun! s:select(cmd) abort
 
     for r in Rs
         call cursor(r[0], r[1])
-        exe "normal" a:cmd
+        exe "normal" cmd
         call s:get_region(0)
     endfor
 
