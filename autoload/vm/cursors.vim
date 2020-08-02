@@ -244,7 +244,7 @@ fun! s:change_at_cursors(M, reg, n) abort
     endif
     call feedkeys('"'.reg."c")
 
-  elseif s:forward(Obj) || s:ia(Obj[:0])
+  elseif s:forward(Obj) || s:ia(Obj) && !s:inside(Obj)
     call vm#operators#select(1, N.Obj)
     call feedkeys('"'.reg."c")
 
@@ -286,7 +286,10 @@ let s:R = { -> s:V.Regions }
 let s:forward = { c -> index(split('weWE%', '\zs'), c) >= 0 }
 
 " text objects starting with 'i' or 'a'
-let s:ia = { c -> index(['i', 'a'], c) >= 0 }
+let s:ia = { c -> index(['i', 'a'], c[:0]) >= 0 }
+
+" inside brackets/quotes/tags
+let s:inside = { c -> c[:0] == 'i' && index(split('bBt[](){}"''`<>', '\zs'), c[1:1]) >= 0 }
 
 " single character motions
 let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN_', '\zs'), c) >= 0 }

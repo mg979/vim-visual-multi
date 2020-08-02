@@ -282,7 +282,7 @@ fun! s:Edit.process(cmd, ...) abort
         exe a:cmd
 
         " store deleted text during deletions/changes at cursors
-        if store
+        if backup_txt
             call add(txt, getreg(s:v.def_reg))
         endif
 
