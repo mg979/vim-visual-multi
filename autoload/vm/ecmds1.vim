@@ -3,6 +3,7 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:Edit = {}
+let s:old_text = []
 
 fun! vm#ecmds1#init() abort
     let s:V       = b:VM_Selection
@@ -58,7 +59,9 @@ endfun " }}}
 
 
 fun! s:Edit.delete(X, register, count, manual) abort
-    " Delete the selected text and change to cursor mode. {{{1
+    " Delete the selected text and change to cursor mode.
+    " Return the deleted text.
+    " {{{1
     if s:F.no_regions() | return | endif
     if !s:v.direction | call vm#commands#invert_direction() | endif
 
@@ -70,7 +73,8 @@ fun! s:Edit.delete(X, register, count, manual) abort
     let size         = s:F.size()
     let change       = 0
     let ix           = s:G.select_region_at_pos('.').index
-    let s:v.old_text = s:G.regions_text()
+    let s:old_text   = s:G.regions_text()
+    let retVal       = copy(s:old_text)
     let s:v.deleting = 1
 
     " manual deletion: backup current regions
@@ -93,7 +97,7 @@ fun! s:Edit.delete(X, register, count, manual) abort
     endfor
 
     "write custom and possibly vim registers.
-    call self.fill_register(a:register, s:v.old_text, a:manual)
+    call self.fill_register(a:register, s:old_text, a:manual)
 
     call s:G.change_mode()
     call s:G.select_region(ix)
@@ -103,8 +107,9 @@ fun! s:Edit.delete(X, register, count, manual) abort
         call s:G.update_and_select_region()
     endif
     if a:register == "_" | call s:F.restore_reg() | endif
-    let s:v.old_text = []
     call s:F.Scroll.force(winline)
+    let s:old_text = []
+    return retVal
 endfun " }}}
 
 
@@ -136,7 +141,7 @@ fun! s:Edit.paste(before, vim_reg, reselect, register, ...) abort
                 \          empty(g:Vm.registers[a:register])
     let vim_V            = vim_reg && getregtype(a:register) ==# 'V'
 
-    if empty(s:v.old_text) | let s:v.old_text = s:G.regions_text() | endif
+    if empty(s:old_text) | let s:old_text = s:G.regions_text() | endif
 
     if vim_V
         return self.run_normal('"' . a:register . 'p', {'recursive': 0})
@@ -154,7 +159,7 @@ fun! s:Edit.paste(before, vim_reg, reselect, register, ...) abort
 
     let s:v.W = self.store_widths(s:v.new_text)
     call self.post_process((X? 1 : a:reselect), !a:before)
-    let s:v.old_text = []
+    let s:old_text = []
 endfun " }}}
 
 
@@ -294,7 +299,7 @@ fun! s:fix_regions_text(replacement) abort
     let i = len(s:R()) - len(L)
 
     while i>0
-        call add(L, empty(s:v.old_text)? '' : s:v.old_text[-i])
+        call add(L, empty(s:old_text)? '' : s:old_text[-i])
         let i -= 1
     endwhile
     return L

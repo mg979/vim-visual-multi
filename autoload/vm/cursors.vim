@@ -219,8 +219,7 @@ fun! s:change_at_cursors(M, reg, n) abort
   if Obj == '_'
     call vm#commands#motion('^', 1, 0, 0)
     call vm#operators#select(1, '$')
-    call s:backup_changed_text()
-    call s:V.Edit.delete(1, reg, 1, 0)
+    let s:v.changed_text =  s:V.Edit.delete(1, reg, 1, 0)
     call s:V.Insert.key('i')
 
   elseif index(['ip', 'ap'], Obj) >= 0
@@ -233,8 +232,7 @@ fun! s:change_at_cursors(M, reg, n) abort
 
   elseif Obj=='$'
     call vm#operators#select(1, '$')
-    call s:backup_changed_text()
-    call s:V.Edit.delete(1, reg, 1, 0)
+    let s:v.changed_text =  s:V.Edit.delete(1, reg, 1, 0)
     call s:V.Insert.key('i')
 
   elseif Obj=='l'
@@ -269,11 +267,6 @@ fun! s:init() abort
 
   let s:recursive = get(g:, 'VM_recursive_operations_at_cursors', 1)
   call s:G.cursor_mode()
-endfun
-
-fun! s:backup_changed_text() abort
-  "backup original regions text since it could used
-  let s:v.changed_text = map(copy(s:R()), 'v:val.txt')
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""

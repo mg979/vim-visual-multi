@@ -12,7 +12,6 @@ fun! vm#edit#init() abort
     let s:F = s:V.Funcs
 
     let s:v.new_text     = []
-    let s:v.old_text     = []
     let s:v.W            = []
     let s:v.storepos     = []
     let s:v.extra_spaces = []
