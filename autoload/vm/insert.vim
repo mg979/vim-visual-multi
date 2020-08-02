@@ -552,11 +552,8 @@ endfun
 
 fun! s:smart_case_change(cursor, txt) abort
     " the active cursor isn't affected, text is entered as typed
-    " if smart_case_change has been set by VMSmartChange, eval the function
     if a:cursor.active
         return a:txt
-    elseif type(s:v.smart_case_change) == v:t_func
-        return s:v.smart_case_change(a:cursor, a:txt)
     endif
     try
         let original = s:v.changed_text[a:cursor.index]

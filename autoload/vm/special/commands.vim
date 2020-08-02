@@ -358,7 +358,6 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:set_commands() abort
-  command! -bang -nargs=1 VMSmartChange   call s:smart_change(<bang>0, <q-args>)
   command! -bang -nargs=? VMFilterRegions call vm#special#commands#filter_regions(<bang>0, <q-args>, empty(<q-args>))
   command! VMFilterLines                  call vm#special#commands#filter_lines()
   command! VMRegionsToBuffer              call vm#special#commands#regions_to_buffer()
@@ -368,21 +367,12 @@ fun! s:set_commands() abort
 endfun
 
 fun! vm#special#commands#unset()
-  delcommand VMSmartChange
   delcommand VMFilterRegions
   delcommand VMFilterLines
   delcommand VMRegionsToBuffer
   delcommand VMMassTranspose
   delcommand VMQfix
   delcommand VMSort
-endfun
-
-"------------------------------------------------------------------------------
-
-fun! s:smart_change(bang, qargs) abort
-  if a:bang | let s:v.smart_case_change = 0
-  else      | let s:v.smart_case_change = function(a:qargs)
-  endif
 endfun
 
 "------------------------------------------------------------------------------
