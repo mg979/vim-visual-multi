@@ -283,7 +283,7 @@ fun! s:Insert.stop(...) abort
     " one, this can happen after CompleteDone, or abbreviation expansion,
     " because in these cases TextChangedI isn't triggered, if this happen we
     " must update lines again
-    if s:F.size() > self.size
+    if s:F.size() > self.size || self.replace && !g:VM_live_editing
         call self.update_text(1)
     endif
 
@@ -511,7 +511,7 @@ fun! s:Line.replace(change, text) abort
             let t2 = text[ insPoint + strwidth(inserted) : ]
             let text = t1 . inserted . t2
         else
-            let text = inserted . text[ len(inserted) : ]
+            let text = inserted . text[ strwidth(inserted) : ]
         endif
 
         call c.update(self.l, a:change)
