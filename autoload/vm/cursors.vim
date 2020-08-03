@@ -282,7 +282,7 @@ let s:forward = { c -> index(split('weWE%', '\zs'), c) >= 0 }
 let s:ia = { c -> index(['i', 'a'], c[:0]) >= 0 }
 
 " inside brackets/quotes/tags
-let s:inside = { c -> c[:0] == 'i' && index(split('bBt[](){}"''`<>', '\zs'), c[1:1]) >= 0 }
+let s:inside = { c -> c[:0] == 'i' && index(split('bBt[](){}"''`<>', '\zs') + vm#comp#iobj(), c[1:1]) >= 0 }
 
 " single character motions
 let s:single = { c -> index(split('hljkwebWEB$^0{}()%nN_', '\zs'), c) >= 0 }

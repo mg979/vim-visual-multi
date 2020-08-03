@@ -81,6 +81,12 @@ fun! vm#comp#conceallevel() abort
 endfun "}}}
 
 
+fun! vm#comp#iobj() abort
+    " Inner text objects that should avoid using the select operator. {{{1
+    return exists('g:loaded_targets') ? ['q'] : []
+endfun "}}}
+
+
 fun! vm#comp#reset() abort
     " Called during VM exit. "{{{1
     if exists('g:loaded_deoplete') && s:disabled_deoplete
