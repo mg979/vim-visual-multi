@@ -136,7 +136,6 @@ fun! s:Insert.start(...) abort
     let I.cursors   = []
     let I.lines     = {}
     let I.change    = 0         " text change, only if g:VM_live_editing
-    let I.xbytes    = 0         " to handle multibyte characters
     let I.col       = col('.')
 
     " remove current regions highlight
@@ -230,18 +229,12 @@ fun! s:Insert.update_text(insert_leave) abort
     "   -  in insert mode, 1 is subtracted to find the current cursor position
     "   -  but when insert mode stops (a:insert_leave == 1) this isn't true
 
-    " moreover, when exiting insert mode (a:insert_leave) we should check if the last
-    " inserted character is multibyte, we do so by checking last char of @.,
-    " that has just been updated
-
-    " no need to check extra bytes if not exiting insert mode, otherwise the
-    " extra coln adjustment will be:
-    "   strlen(lastchar) - 1     ( extra bytes of last entered character )
-
+    " when exiting insert mode (a:insert_leave), if the last last inserted
+    " character is multibyte, any extra bytes will have to be added to the
+    " final column
     if a:insert_leave
-        let lastchar = strcharpart(@., strchars(@.)-1)
-        let I.xbytes = strlen(lastchar) - 1
-        let text     = getline(ln)[ (pos-1) : (coln-1 + I.xbytes) ]
+        let extra = s:cur_char_bytes() - 1
+        let text = getline(ln)[ (pos-1) : (coln-1 + extra) ]
     elseif coln > 1
         let text = getline(ln)[ (pos-1) : (coln-2) ]
     else
@@ -570,6 +563,11 @@ fun! s:smart_case_change(cursor, txt) abort
 endfun
 
 
+fun! s:cur_char_bytes()
+    " Bytesize of character under cursor
+    return strlen(matchstr(getline('.'), '\%' . col('.') . 'c.'))
+endfun
+
 
 fun! s:do_reindent() abort
     " Check if lines must be reindented when exiting insert mode.
@@ -588,12 +586,8 @@ fun! s:step_back() abort
 
     " MULTIBYTE CHARACTERS:
     " the shift is equal to the byte size of the last entered character
-    " if an additional update has been triggered at InsertLeave, the final
-    " column has been adjusted already (then I.xbytes != 0)
-
-    if strlen(@.) && s:Insert.xbytes == 0
-        let lastchar = strcharpart(@., strchars(@.)-1)
-        let n = strlen(lastchar)
+    if g:VM_live_editing
+        let n = s:cur_char_bytes()
     else
         let n = 1
     endif
