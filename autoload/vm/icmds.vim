@@ -134,7 +134,7 @@ fun! vm#icmds#return() abort
 
         "we also consider at EOL cursors that have trailing spaces after them
         "if not at EOL, CR will cut the line and carry over the remaining text
-        let at_eol = match(strpart(rline, r.a-1, len(rline)), ' *$') == 0
+        let at_eol = match(strpart(rline, r.a-1, len(rline)), '\s*$') == 0
 
         "if carrying over some text, delete it now, for better indentexpr
         "otherwise delete the trailing spaces that would be left at EOL
@@ -150,13 +150,13 @@ fun! vm#icmds#return() abort
         "also keep the indent whitespace only, removing any non-space character
         "such as comments, and everything after them
         let extra_space = at_eol ? ' ' : ''
-        let indent = substitute(g:Vm.indent, '[^ \t].*', '', 'g')
+        let indent = substitute(g:Vm.indent, '\S\+.*', '', 'g')
         call setline('.', indent . extra_space)
 
         "if carrying over some text, paste it after the indent
         "but strip preceding whitespace found in the text
         if !at_eol
-            let @" = substitute(@", '^ *', '', '')
+            let @" = substitute(@", '^\s*', '', '')
             normal! $p
         endif
 
