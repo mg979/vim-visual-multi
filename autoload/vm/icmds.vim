@@ -39,7 +39,22 @@ fun! vm#icmds#x(cmd) abort
         " we want to emulate the behaviour that <del> and <bs> have in insert
         " mode, but implemented as normal mode commands
 
-        if a:cmd ==# 'x' && s:eol(r)        "at eol, join lines
+        if s:V.Insert.replace
+            " in replace mode, we don't allow line joining
+            if a:cmd ==# 'X' && r.a > 1
+                call r.shift(-1,-1)
+                if r.a > 1
+                    let pre = getline(r.l)[:(r.a - 2)]
+                    let post = s:V.Insert._lines[r.l][(r.a - 1):]
+                else
+                    let pre = ''
+                    let post = s:V.Insert._lines[r.l]
+                endif
+                call setline(r.l, pre . post)
+            elseif a:cmd ==# 'x' && !s:eol(r)
+                normal! x
+            endif
+        elseif a:cmd ==# 'x' && s:eol(r)    "at eol, join lines
             normal! gJ
         elseif a:cmd ==# 'x'                "normal delete
             normal! x
@@ -203,17 +218,7 @@ fun! s:get_indent() abort
     return ''
 endfun
 
-if v:version >= 800
-    let s:E   = { r -> col([r.l, '$']) }
-    let s:eol = { r -> r.a == (s:E(r) - 1) }
-    finish
-endif
-
-fun! s:E(r) abort
-    return col([a:r.l, '$'])
-endfun
-
-fun! s:eol(r) abort
-    return a:r.a == (s:E(a:r) - 1)
+fun! s:eol(r)
+    return a:r.a == (col([a:r.l, '$']) - 1)
 endfun
 " vim: et ts=4 sw=4 sts=4 :

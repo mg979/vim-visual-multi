@@ -164,6 +164,11 @@ fun! s:Insert.start(...) abort
         if C.index == I.index | let I.nth = C.nth | endif
     endfor
 
+    " create a backup of the original lines
+    if self.replace && !exists('I._lines')
+        let I._lines = map(copy(I.lines), 'v:val.txt')
+    endif
+
     "start tracking text changes
     let s:v.insert = 1 | call I.auto_start()
 
@@ -263,7 +268,6 @@ fun! s:Insert.update_text(insert_leave) abort
 endfun
 
 
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Insert mode stop
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -359,6 +363,7 @@ fun! s:Insert.stop(...) abort
     if !s:v.single_region
         let self.replace = 0
         let self.type = ''
+        silent! unlet self._lines
     endif
 endfun
 
