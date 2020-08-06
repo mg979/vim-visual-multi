@@ -9,6 +9,7 @@ The following Ex commands can be run at any time:
   |:VMClear|
   |:VMRegisters|
   |:VMFromSearch|
+  |:VMLive|
 
 The following are only available inside a VM session:
 
@@ -34,6 +35,12 @@ mappings could not be applied).
 
 Clear any remnant of VM-specific highlight matches in the current buffer. It
 can be necessary if VM exited with errors for some reason.
+
+------------------------------------------------------------------------------
+
+    VMLive                                                           *:VMLive*
+
+Toggle |g:VM_live_editing|.
 
 ------------------------------------------------------------------------------
 

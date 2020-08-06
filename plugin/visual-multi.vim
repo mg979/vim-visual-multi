@@ -28,9 +28,10 @@ com! -nargs=? -complete=customlist,vm#themes#complete
 com! -nargs=? -bang
       \ VMRegisters  call vm#special#commands#show_registers(<bang>0, <q-args>)
 
-com!    VMConfig call vm#special#config#start()
-com!    VMDebug  call vm#special#commands#debug()
-com!    VMClear  call vm#clearmatches()
+com! -bar VMConfig call vm#special#config#start()
+com! -bar VMDebug  call vm#special#commands#debug()
+com! -bar VMClear  call vm#clearmatches()
+com! -bar VMLive   call vm#special#commands#live()
 
 com! -bang VMFromSearch call vm#special#commands#from_search(<bang>0)
 

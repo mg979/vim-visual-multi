@@ -326,6 +326,16 @@ fun! vm#special#commands#sort(...) abort
 endfun "}}}
 
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#special#commands#live()
+  " Toggle live editing {{{1
+  let g:VM_live_editing = !get(g:, 'VM_live_editing', 1)
+  let active = g:VM_live_editing ? 'active' : 'inactive'
+  echo '[VM] live editing is' active
+endfun "}}}
+
+
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
