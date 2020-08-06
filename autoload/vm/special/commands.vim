@@ -1,21 +1,13 @@
 " Special commands that can be selected through the Tools Menu (<leader>x)
 
-fun! vm#special#commands#init() abort
-  let s:V = b:VM_Selection
-  let s:F = s:V.Funcs
-  let s:G = s:V.Global
-  call s:set_commands()
-endfun
-
 let s:R = { -> s:V.Regions }
 let s:X = { -> g:Vm.extend_mode }
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Tools menu                                                               {{{1
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#special#commands#menu() abort
+  " Tools menu. {{{1
   let opts = [
         \['"    - ', "Show VM registers"],
         \['i    - ', "Show regions info"],
@@ -55,15 +47,13 @@ fun! vm#special#commands#menu() abort
   else
     call feedkeys("\<cr>", 'n')
   endif
-endfun
+endfun "}}}
 
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Filter lines                                                             {{{1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#special#commands#filter_lines() abort
-  """Filter lines containing regions, and paste them in a new buffer.
+  " Filter lines containing regions, and paste them in a new buffer. {{{1
   if !len(s:R()) | return | endif
 
   let lines = sort(keys(s:G.lines_with_regions(0)))
@@ -84,7 +74,6 @@ fun! vm#special#commands#filter_lines() abort
   autocmd BufWriteCmd <buffer> call s:save_lines()
 endfun
 
-"------------------------------------------------------------------------------
 
 fun! s:save_lines() abort
   setlocal nomodified
@@ -101,14 +90,13 @@ fun! s:save_lines() abort
     call setline(l, lines[i])
     let i += 1
   endfor
-endfun
+endfun "}}}
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Regions to buffer                                                        {{{1
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#special#commands#regions_to_buffer() abort
-  """Paste selected regions in a new buffer.
+  " Paste selected regions in a new buffer. {{{1
   if !s:X() || !len(s:R()) | return | endif
 
   let txt = []
@@ -130,7 +118,6 @@ fun! vm#special#commands#regions_to_buffer() abort
   autocmd BufWriteCmd <buffer> call s:save_regions()
 endfun
 
-"------------------------------------------------------------------------------
 
 fun! s:save_regions() abort
   setlocal nomodified
@@ -147,17 +134,13 @@ fun! s:save_regions() abort
   endfor
   call s:G.extend_mode()
   call s:V.Edit.replace_regions_with_text(lines)
-endfun
+endfun "}}}
 
 
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Filter by expression                                                     {{{1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#special#commands#filter_regions(type, exp, prompt) abort
-  """Filter regions based on pattern or expression."""
-  if s:not_active() | return | endif
+  " Filter regions based on pattern or expression. {{{1
   if a:type == 0 || a:type > 2
     let s:filter_type = 0
   else
@@ -181,22 +164,18 @@ fun! vm#special#commands#filter_regions(type, exp, prompt) abort
   endif
 endfun
 
-"------------------------------------------------------------------------------
 
 fun! s:filter_regions(fill) abort
   let s:filter_type += 1
   let args = s:filter_type . ", '" . a:fill . "', 1"
   return "\<C-U>\<Esc>:call vm#special#commands#filter_regions(".args.")\<cr>"
-endfun
+endfun "}}}
 
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Mass transpose                                                           {{{1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#special#commands#mass_transpose()
-  if s:not_active() | return | endif
-
+  " Mass transpose. {{{1
   let VM = b:VM_Selection
   if len(VM.Regions) == 1 || !g:Vm.extend_mode
     echo "Not possible"
@@ -226,14 +205,13 @@ fun! vm#special#commands#mass_transpose()
   " fill register and paste new text
   call VM.Edit.fill_register('"', new_text, 0)
   call VM.Edit.paste(1, 0, 1, '"')
-endfun
+endfun "}}}
 
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Debug                                                                    {{{1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#special#commands#debug() abort
+  " Debug. {{{1
   if !exists('b:VM_Debug')
     return
   elseif empty(b:VM_Debug.lines)
@@ -246,14 +224,13 @@ fun! vm#special#commands#debug() abort
       echom line
     endif
   endfor
-endfun
+endfun "}}}
 
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Qfix                                                                     {{{1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#special#commands#qfix(full_line)
+  " Regions to qfix list. {{{1
   call vm#reset()
   let qfix = []
   if a:full_line
@@ -268,14 +245,13 @@ fun! vm#special#commands#qfix(full_line)
   call setqflist(qfix)
   copen
   cc
-endfun
+endfun "}}}
 
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Show registers                                                           {{{1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#special#commands#show_registers(delete, args) abort
+  " Show VM registers in the command line. {{{1
   if a:delete
     if a:args != ''
       " don't delete " or - registers, they are reset anyway at VM restart
@@ -312,14 +288,13 @@ fun! vm#special#commands#show_registers(delete, args) abort
     endfor
   endfor
   echohl None
-endfun
+endfun "}}}
 
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Get all from current search                                              {{{1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#special#commands#from_search(bang) abort
+  " Get pattern from the current search register, select all with bang. {{{1
   if exists('b:visual_multi')
     return
   endif
@@ -336,62 +311,66 @@ fun! vm#special#commands#from_search(bang) abort
     call vm#reset(1)
     echo '[visual multi] pattern not found'
   endtry
-endfun
+endfun "}}}
 
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Sort regions                                                             {{{1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#special#commands#sort(...) abort
-  if s:not_active() | return | endif
+  " Sort regions. {{{1
   if a:0
     call s:V.Edit.replace_regions_with_text(sort(s:G.regions_text(), a:1))
   else
     call s:V.Edit.replace_regions_with_text(sort(s:G.regions_text()))
   endif
+endfun "}}}
+
+
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Initializations and helpers
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
+fun! vm#special#commands#init() abort
+  " Initialize {{{1
+  let s:V = b:VM_Selection
+  let s:F = s:V.Funcs
+  let s:G = s:V.Global
+  call s:set_commands()
 endfun
 
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Ex Commands and helpers                                                  {{{1
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:set_commands() abort
-  command! -bang -nargs=? VMFilterRegions call vm#special#commands#filter_regions(<bang>0, <q-args>, empty(<q-args>))
-  command! VMFilterLines                  call vm#special#commands#filter_lines()
-  command! VMRegionsToBuffer              call vm#special#commands#regions_to_buffer()
-  command! VMMassTranspose                call vm#special#commands#mass_transpose()
-  command! -bang VMQfix                   call vm#special#commands#qfix(!<bang>0)
-  command! -nargs=? VMSort                call vm#special#commands#sort(<args>)
-endfun
+  command! -buffer -bang -nargs=? VMFilterRegions call vm#special#commands#filter_regions(<bang>0, <q-args>, empty(<q-args>))
+  command! -buffer VMFilterLines                  call vm#special#commands#filter_lines()
+  command! -buffer VMRegionsToBuffer              call vm#special#commands#regions_to_buffer()
+  command! -buffer VMMassTranspose                call vm#special#commands#mass_transpose()
+  command! -buffer -bang VMQfix                   call vm#special#commands#qfix(!<bang>0)
+  command! -buffer -nargs=? VMSort                call vm#special#commands#sort(<args>)
+endfun "}}}
+
 
 fun! vm#special#commands#unset()
+  " Unset buffer commands. {{{1
   delcommand VMFilterRegions
   delcommand VMFilterLines
   delcommand VMRegionsToBuffer
   delcommand VMMassTranspose
   delcommand VMQfix
   delcommand VMSort
-endfun
+endfun "}}}
 
-"------------------------------------------------------------------------------
-
-fun! s:not_active() abort
-  if !g:Vm.buffer
-    echohl ErrorMsg | echo "VM is not enabled" | echohl None | return 1
-  endif
-endfun
-
-"------------------------------------------------------------------------------
 
 fun! s:temp_buffer() abort
+  " {{{1
   setlocal buftype=acwrite
   setlocal bufhidden=wipe
   setlocal noswapfile
   setlocal nobuflisted
   setlocal nomodified
   let b:VM_buf = s:buf
-endfun
+endfun "}}}
 
-" vim: et ts=2 sw=2 sts=2 :
+" vim: et sw=2 ts=2 sts=2 fdm=marker
