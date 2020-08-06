@@ -17,8 +17,6 @@ from pynvim import attach
 # -------------------------------------------------------------
 # global varialbes
 # -------------------------------------------------------------
-KEY_PRESS_INTERVAL = 0.1
-
 
 class bcolors:
     HEADER = '\033[95m'
@@ -130,7 +128,10 @@ def run_core(paths, nvim=False):
         CLIENT.command('e %s' % paths["in_file"])
         keys = keys_nvim
         start_time = time.process_time()
-        exec(open(paths["command"]).read())
+        commands = open(paths["command"]).read()
+        if not LIVE_EDITING:
+            commands = 'keys(r":let g:VM_live_editing = 0\<CR>")\n' + commands
+        exec(commands)
         end_time = time.process_time()
         CLIENT.command(':w! %s' % paths["gen_out_file"])
         CLIENT.quit()
@@ -182,14 +183,18 @@ def main():
     # arg parsing
     parser = argparse.ArgumentParser(description='Run test suite. See README.')
     parser.add_argument('test', nargs='?', help='run <test> only instead of running all tests')
+    parser.add_argument('-t', '--time', nargs=1, type=float, default=[0.1], help='set key delay in seconds (default 0.1)')
     parser.add_argument('-n', '--nvim', action='store_true', help='run in neovim instead of vim')
     parser.add_argument('-l', '--list', action='store_true', help='list all tests')
+    parser.add_argument('-L', '--nolive', action='store_false', help='disable live editing')
     args = parser.parse_args()
 
     # vim version and default vimrc
-    global VIM, DEFAULT_VIMRC
+    global VIM, DEFAULT_VIMRC, KEY_PRESS_INTERVAL, LIVE_EDITING
     VIM = shutil.which('vim' if not args.nvim else 'nvim')
     DEFAULT_VIMRC = Path('default/', 'vimrc.vim').resolve(strict=True)
+    KEY_PRESS_INTERVAL = args.time[0]
+    LIVE_EDITING = args.nolive
 
     # execution
     failing_tests = []
