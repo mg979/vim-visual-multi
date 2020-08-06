@@ -52,17 +52,17 @@ fun! vm#icmds#x(cmd) abort
                 endif
                 call setline(r.l, pre . post)
             elseif a:cmd ==# 'x' && !s:eol(r)
-                normal! x
+                keepjumps normal! x
             endif
         elseif a:cmd ==# 'x' && s:eol(r)    "at eol, join lines
-            normal! gJ
+            keepjumps normal! gJ
         elseif a:cmd ==# 'x'                "normal delete
-            normal! x
+            keepjumps normal! x
         elseif a:cmd ==# 'X' && r.a == 1    "at bol, go up and join lines
-            normal! kgJ
+            keepjumps normal! kgJ
             call r.shift(-1,-1)
         else                                "normal backspace
-            normal! X
+            keepjumps normal! X
             call r.update_cursor_pos()
         endif
 
@@ -98,13 +98,13 @@ fun! vm#icmds#cw(ctrlu) abort
         let ws_only = r.a > 1 && match(L[:(r.a-2)], '[^ \t]') < 0
 
         if a:ctrlu          "ctrl-u
-            normal! d^
+            keepjumps normal! d^
         elseif r.a == 1     "at bol, go up and join lines
-            normal! kgJ
+            keepjumps normal! kgJ
         elseif ws_only      "whitespace only before, delete it
-            normal! d0
+            keepjumps normal! d0
         else                "normal deletion
-            normal! db
+            keepjumps normal! db
         endif
         call r.update_cursor_pos()
 
@@ -138,12 +138,12 @@ fun! vm#icmds#return() abort
 
         "if carrying over some text, delete it now, for better indentexpr
         "otherwise delete the trailing spaces that would be left at EOL
-        if !at_eol  | normal! d$
-        else        | normal! "_d$
+        if !at_eol  | keepjumps normal! d$
+        else        | keepjumps normal! "_d$
         endif
 
         "append a line and get the indent
-        noautocmd exe "silent normal! o\<C-R>=<SID>get_indent()\<CR>"
+        noautocmd exe "silent keepjumps normal! o\<C-R>=<SID>get_indent()\<CR>"
 
         "fill the line with tabs or spaces, according to the found indent
         "an extra space must be added, if not carrying over any text
@@ -157,7 +157,7 @@ fun! vm#icmds#return() abort
         "but strip preceding whitespace found in the text
         if !at_eol
             let @" = substitute(@", '^\s*', '', '')
-            normal! $p
+            keepjumps normal! $p
         endif
 
         "cursor line will be moved down by the next cursors
@@ -168,7 +168,7 @@ fun! vm#icmds#return() abort
     let s:V.Regions = reverse(s:R())
 
     "ensure cursors are at indent level
-    normal ^
+    keepjumps normal ^
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -180,7 +180,7 @@ fun! vm#icmds#insert_line(above) abort
     for r in s:R()
         "append a line below or above
         call cursor(r.l, r.a)
-        noautocmd exe "silent normal!" (a:above ? 'O' : 'o')."\<C-R>=<SID>get_indent()\<CR>"
+        noautocmd exe "silent keepjumps normal!" (a:above ? 'O' : 'o')."\<C-R>=<SID>get_indent()\<CR>"
 
         "remove comment or other chars, fill the line with tabs or spaces
         let indent = substitute(g:Vm.indent, '[^ \t].*', '', 'g')
@@ -195,7 +195,7 @@ fun! vm#icmds#insert_line(above) abort
     let s:V.Regions = reverse(s:R())
 
     "ensure cursors are at indent level
-    normal ^
+    keepjumps normal ^
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
