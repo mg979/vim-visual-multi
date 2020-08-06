@@ -52,6 +52,13 @@ fun! vm#icmds#x(cmd) abort
                 endif
                 call setline(r.l, pre . post)
             elseif a:cmd ==# 'x' && !s:eol(r)
+                " also update original line
+                let line = s:V.Insert._lines[r.l]
+                if r.a > 1
+                    let s:V.Insert._lines[r.l] = line[:(r.a -2)] . line[(r.a + 0):]
+                else
+                    let s:V.Insert._lines[r.l] = line[r.a:]
+                endif
                 keepjumps normal! x
             endif
         elseif a:cmd ==# 'x' && s:eol(r)    "at eol, join lines
