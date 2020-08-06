@@ -28,7 +28,7 @@ let s:X = { -> g:Vm.extend_mode }
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Insert mode
+" Insert mode start
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert.key(type) abort
@@ -96,39 +96,7 @@ fun! s:Insert.start(...) abort
     let I = self
     let I._index = get(I, '_index', -1)
 
-    " get winline and backup regions when insert mode is entered the first time
-    if !exists('s:v.winline_insert')
-        let s:v.winline_insert = winline()
-        call s:G.backup_regions()
-    endif
-
-    " syn minlines/synmaxcol settings
-    if !s:v.insert
-        if g:VM_disable_syntax_in_imode
-            let &synmaxcol = 1
-        elseif get(g:, 'VM_reduce_sync_minlines', 1) && len(b:VM_sync_minlines)
-            if get(b:, 'VM_minlines', 0)
-                exe 'syn sync minlines='.b:VM_minlines
-            else
-                syn sync minlines=1
-            endif
-        endif
-    endif
-
-    if g:VM_use_first_cursor_in_line || I.replace
-        let R = s:G.select_region_at_pos('.')
-        let ix = s:G.lines_with_regions(0, R.l)[R.l][0]
-        let R = s:G.select_region(ix)
-    elseif s:v.insert
-        let i = I.index >= len(s:R())? len(s:R())-1 : I.index
-        let R = s:G.select_region(i)
-    else
-        let R = s:G.select_region_at_pos('.')
-    endif
-
-    " restore winline anyway, because it could have been auto-restarted
-    call s:F.Scroll.force(s:v.winline_insert)
-    call s:F.Scroll.get(1)
+    let R = I.apply_settings()
 
     let I.index     = R.index
     let I.begin     = [R.l, R.a]
@@ -141,6 +109,7 @@ fun! s:Insert.start(...) abort
     " remove current regions highlight
     call s:G.remove_highlight()
 
+    " create cursors and line objects
     for r in s:R()
         let C = s:Cursor.new(r.l, r.a)
         call add(I.cursors, C)
@@ -175,15 +144,6 @@ fun! s:Insert.start(...) abort
     "change/update cursor highlight
     call s:G.update_cursor_highlight()
 
-    "disable indentkeys and other settings that may mess up the text
-    "keep o,O to detect indent fo <CR>, though
-    set indentkeys=o,O
-    set cinkeys=o,O
-    set textwidth=0
-    if !&expandtab
-        set softtabstop=0
-    endif
-
     "start insert mode
     if self.replace
         startreplace
@@ -191,6 +151,56 @@ fun! s:Insert.start(...) abort
         startinsert
     endif
 endfun
+
+
+fun! s:Insert.apply_settings() abort
+    " Apply/disable settings related to insert mode. Return current region.
+
+    " get winline and backup regions when insert mode is entered the first time
+    if !exists('s:v.winline_insert')
+        let s:v.winline_insert = winline()
+        call s:G.backup_regions()
+    endif
+
+    " syn minlines/synmaxcol settings
+    if !s:v.insert
+        if g:VM_disable_syntax_in_imode
+            let &synmaxcol = 1
+        elseif get(g:, 'VM_reduce_sync_minlines', 1) && len(b:VM_sync_minlines)
+            if get(b:, 'VM_minlines', 0)
+                exe 'syn sync minlines='.b:VM_minlines
+            else
+                syn sync minlines=1
+            endif
+        endif
+    endif
+
+    if g:VM_use_first_cursor_in_line || self.replace
+        let R = s:G.select_region_at_pos('.')
+        let ix = s:G.lines_with_regions(0, R.l)[R.l][0]
+        let R = s:G.select_region(ix)
+    elseif s:v.insert
+        let i = self.index >= len(s:R())? len(s:R())-1 : self.index
+        let R = s:G.select_region(i)
+    else
+        let R = s:G.select_region_at_pos('.')
+    endif
+
+    " restore winline anyway, because it could have been auto-restarted
+    call s:F.Scroll.force(s:v.winline_insert)
+    call s:F.Scroll.get(1)
+
+    "disable indentkeys and other settings that may mess up the text
+    "keep o,O to detect indent for <CR>, though
+    setlocal indentkeys=o,O
+    setlocal cinkeys=o,O
+    setlocal textwidth=0
+    if !&expandtab
+        setlocal softtabstop=0
+    endif
+    return R
+endfun
+
 
 
 
