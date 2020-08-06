@@ -187,14 +187,16 @@ def main():
     parser.add_argument('-n', '--nvim', action='store_true', help='run in neovim instead of vim')
     parser.add_argument('-l', '--list', action='store_true', help='list all tests')
     parser.add_argument('-L', '--nolive', action='store_false', help='disable live editing')
+    parser.add_argument('-d', '--diff', action='store_true', help='diff falied tests')
     args = parser.parse_args()
 
     # vim version and default vimrc
-    global VIM, DEFAULT_VIMRC, KEY_PRESS_INTERVAL, LIVE_EDITING
+    global VIM, DEFAULT_VIMRC, KEY_PRESS_INTERVAL, LIVE_EDITING, DIFF_FAILED
     VIM = shutil.which('vim' if not args.nvim else 'nvim')
     DEFAULT_VIMRC = Path('default/', 'vimrc.vim').resolve(strict=True)
     KEY_PRESS_INTERVAL = args.time[0]
     LIVE_EDITING = args.nolive
+    DIFF_FAILED = args.diff
 
     # execution
     failing_tests = []
@@ -214,6 +216,12 @@ def main():
             print_banner("summary: " + FAIL_STR, f)
             log("the following tests failed:", f)
             log("\n".join(failing_tests), f)
+            if DIFF_FAILED:
+                for t in failing_tests:
+                    print_banner(t)
+                    exp = 'tests/' + t + '/expected_output_file.txt'
+                    gen = 'tests/' + t + '/generated_output_file.txt'
+                    subprocess.run('diff --color=always ' + exp + ' ' + gen, shell=True)
     f.close()
     if failing_tests != []:
         sys.exit(1)
