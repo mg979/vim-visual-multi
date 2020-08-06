@@ -261,13 +261,16 @@ fun! s:Insert.update_text(insert_leave) abort
 
     " update the lines (also the current line is updated with setline(), this
     " should ensure that the same text is entered everywhere)
-    for l in sort(keys(L))
-        if I.replace
-            call L[l].replace(I.change, text)
-        else
+    if I.replace
+        let width = strwidth(text)
+        for l in sort(keys(L))
+            call L[l].replace(I.change, text, width)
+        endfor
+    else
+        for l in sort(keys(L))
             call L[l].update(I.change, text)
-        endif
-    endfor
+        endfor
+    endif
 
     " store the buffer size after the edits, it will be checked on InsertLeave
     let I.size = s:F.size()
@@ -502,31 +505,24 @@ fun! s:Line.update(change, text) abort
 endfun
 
 
-fun! s:Line.replace(change, text) abort
+fun! s:Line.replace(change, replacementText, width) abort
     " Update a line in replace mode.
-    let text     = self.txt
-    let I        = s:V.Insert
-    let inserted = a:text
+    let c        = self.cursors[0]         " there's a single cursor in replace mode
+    let original = s:Insert._lines[self.l] " the original line
+    let replaced = a:replacementText       " the typed replacement
 
-    for c in self.cursors
-        if s:v.single_region && !c.active
-            continue
-        endif
+    if c.a > 1
+        let t1 = strpart(getline(c.l), 0, c.a - 1)
+        let t2 = strcharpart(original, strwidth(t1) + a:width)
+        let text = t1 . replaced . t2
+    else
+        let text = replaced . strcharpart(original, a:width)
+    endif
 
-        if c.a > 1
-            let insPoint = c.a - 1
-            let t1 = text[ 0 : (insPoint - 1) ]
-            let t2 = text[ insPoint + strwidth(inserted) : ]
-            let text = t1 . inserted . t2
-        else
-            let text = inserted . text[ strwidth(inserted) : ]
-        endif
+    call c.update(self.l, a:change)
 
-        call c.update(self.l, a:change)
-
-        " c._a is the updated cursor position, c.a stays the same
-        if c.active | let I.col = c._a | endif
-    endfor
+    " c._a is the updated cursor position, c.a stays the same
+    if c.active | let s:Insert.col = c._a | endif
     call setline(self.l, text)
 endfun
 
