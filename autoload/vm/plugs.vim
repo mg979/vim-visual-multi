@@ -3,6 +3,7 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#plugs#permanent() abort
+  " Plugs and mappings for non <buffer> keys.
   xmap <expr><silent>     <Plug>(VM-Visual-Find)             vm#operators#find(1, 1)
 
   nnoremap <silent>       <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0)<cr>
@@ -34,11 +35,11 @@ fun! vm#plugs#permanent() abort
   for m in g:Vm.select_motions
     exe "nnoremap <silent> <Plug>(VM-Select-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 1, 0)\<cr>"
   endfor
-
 endfun
 
-fun! vm#plugs#buffer() abort
 
+fun! vm#plugs#buffer() abort
+  " Plugs and mappings for <buffer> keys.
   let g:Vm.motions        = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', ',', ';', '$', '0', '^', '%', 'ge', 'gE', '\|']
   let g:Vm.find_motions   = ['f', 'F', 't', 'T']
   let g:Vm.tobj_motions   = { '{': '{', '}': '}', '(': '(', ')': ')', 'g{': '[{', 'g}': ']}', 'g)': '])', 'g(': '[(' }
@@ -243,11 +244,13 @@ fun! vm#plugs#buffer() abort
   nnoremap         <expr> <Plug>(VM-?)                  vm#commands#regex_reset('?')
 endfun
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Helper functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Insert(key) abort
+  " Handle keys in insert mode.
   let VM = b:VM_Selection
   let i  = ":call b:VM_Selection.Insert.key('i')\<cr>"
   let a  = ":call b:VM_Selection.Insert.key('a')\<cr>"
@@ -258,6 +261,12 @@ fun! s:Insert(key) abort
     elseif a:key == 'c-e' | return "\<C-e>"
     endif
   endif
+
+  if a:key == 'ins'
+    let VM.Insert.replace = !VM.Insert.replace
+  endif
+
+  if VM.Insert.replace | return s:Replace(a:key) | endif
 
   " in single region mode, some keys must be handled differently, or the
   " function must return prematurely
@@ -271,10 +280,6 @@ fun! s:Insert(key) abort
     endif
   else
     let VM.Vars.restart_insert = 1
-  endif
-
-  if a:key == 'ins'
-    let VM.Insert.replace = !VM.Insert.replace
   endif
 
   if index(split('hjklwbWB0', '\zs'), a:key) >= 0
@@ -295,12 +300,27 @@ fun! s:Insert(key) abort
         \}[tolower(a:key)]
 endfun
 
+
+fun! s:Replace(key) abort
+  " Handle keys in replace mode.
+  let b:VM_Selection.Vars.restart_insert = 1
+  let i  = ":call b:VM_Selection.Insert.key('i')\<cr>"
+  let keys = {
+        \ 'x': "\<esc>:call vm#icmds#x('".a:key."')\<cr>".i,
+        \ 'ins': "\<esc>".i,
+        \}
+  return has_key(keys, tolower(a:key)) ? keys[tolower(a:key)] : ''
+endfun
+
+
 fun! s:Yank() abort
+  " Wrapper for yank key.
   if empty(b:VM_Selection.Global.region_at_pos())
     let b:VM_Selection.Vars.yanked = 1 | return 'y'
   endif
   return ":\<C-u>call b:VM_Selection.Edit.yank(v:register, 1, 1)\<cr>"
 endfun
+
 
 fun! s:Visual(cmd) abort
   " Restore register after a visual yank.
@@ -316,8 +336,9 @@ fun! s:Visual(cmd) abort
         \ : "y:call vm#commands#find_under(1, 0)\<cr>".r."`]"
 endfun
 
+
 fun! s:Operator(op, n, reg) abort
-  " User operator wrapper that checks extend mode
+  " User operator wrapper that checks extend mode.
   if !g:Vm.extend_mode
     call vm#cursors#operation(a:op, a:n, a:reg)
   elseif a:op ==? 'gu'
@@ -327,4 +348,5 @@ fun! s:Operator(op, n, reg) abort
   endif
 endfun
 
-" vim: et ts=2 sw=2 sts=2 :
+
+" vim: et sw=2 ts=2 sts=2 fdm=indent fdn=1
