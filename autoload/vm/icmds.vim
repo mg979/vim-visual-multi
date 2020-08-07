@@ -78,6 +78,7 @@ fun! vm#icmds#x(cmd) abort
     endfor
 
     call s:G.merge_regions()
+    call s:G.select_region(s:V.Insert.index)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
