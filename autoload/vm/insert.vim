@@ -524,6 +524,10 @@ fun! s:Line.replace(change, replacementText, width) abort
     " c._a is the updated cursor position, c.a stays the same
     if c.active | let s:Insert.col = c._a | endif
     call setline(self.l, text)
+
+    if c._a >= col([c.l, '$'])
+        call s:V.Edit.extra_spaces.add(c, 1)
+    endif
 endfun
 
 

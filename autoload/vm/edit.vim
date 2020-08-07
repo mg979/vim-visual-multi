@@ -376,12 +376,16 @@ fun! s:Edit.extra_spaces.remove(...) abort
 endfun
 
 
-fun! s:Edit.extra_spaces.add(r) abort
+fun! s:Edit.extra_spaces.add(r, ...) abort
     " It may be necessary to add spaces over empty lines, or if at EOL.
-    "add space if empty line(>) or eol(=)
-    let L = getline(a:r.L)
-    if a:r.b >= strwidth(L)
-        call setline(a:r.L, L.' ')
+    " add space if empty line(>) or eol(=)
+    " optional arg is when called in insert mode (cursors are different)
+    let [end, line] = a:0? [a:r._a, a:r.l] : [a:r.b, a:r.L]
+    let L = getline(line)
+    " use strwidth because multibyte chars cause problems at EOL
+    " this will result in more extra spaces than necessary but no big deal
+    if end >= strwidth(L)
+        call setline(line, L.' ')
         call add(s:v.extra_spaces, a:r.index)
     endif
 endfun
