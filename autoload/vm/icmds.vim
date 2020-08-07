@@ -42,24 +42,22 @@ fun! vm#icmds#x(cmd) abort
         if s:V.Insert.replace
             " in replace mode, we don't allow line joining
             if a:cmd ==# 'X' && r.a > 1
+                let original = s:V.Insert._lines[r.l] " the original line
+                if strpart(getline(r.l), r.a) =~ '\s*$' " at EOL
+                    call search('\s*$', '', r.l)
+                endif
                 call r.shift(-1,-1)
                 if r.a > 1
-                    let pre = getline(r.l)[:(r.a - 2)]
-                    let post = s:V.Insert._lines[r.l][(r.a - 1):]
+                    let t1 = strpart(getline('.'), 0, r.a - 1)
+                    let wd = strwidth(t1)
+                    let tc = strcharpart(original, wd, 1)
+                    let t2 = strcharpart(original, wd + 1)
+                    call setline(r.l, t1 . tc . t2)
                 else
                     let pre = ''
-                    let post = s:V.Insert._lines[r.l]
+                    let post = original
+                    call setline(r.l, pre . post)
                 endif
-                call setline(r.l, pre . post)
-            elseif a:cmd ==# 'x' && !s:eol(r)
-                " also update original line
-                let line = s:V.Insert._lines[r.l]
-                if r.a > 1
-                    let s:V.Insert._lines[r.l] = line[:(r.a -2)] . line[(r.a + 0):]
-                else
-                    let s:V.Insert._lines[r.l] = line[r.a:]
-                endif
-                keepjumps normal! x
             endif
         elseif a:cmd ==# 'x' && s:eol(r)    "at eol, join lines
             keepjumps normal! gJ

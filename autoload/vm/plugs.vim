@@ -305,11 +305,16 @@ fun! s:Replace(key) abort
   " Handle keys in replace mode.
   let b:VM_Selection.Vars.restart_insert = 1
   let i  = ":call b:VM_Selection.Insert.key('i')\<cr>"
+
+  if index(split('hl', '\zs'), a:key) >= 0
+    return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
+  endif
+
   let keys = {
-        \ 'x': "\<esc>:call vm#icmds#x('".a:key."')\<cr>".i,
+        \ 'X': "\<esc>:call vm#icmds#x('".a:key."')\<cr>".i,
         \ 'ins': "\<esc>".i,
         \}
-  return has_key(keys, tolower(a:key)) ? keys[tolower(a:key)] : ''
+  return has_key(keys, a:key) ? keys[a:key] : ''
 endfun
 
 
