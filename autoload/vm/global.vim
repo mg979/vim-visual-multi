@@ -50,9 +50,9 @@ fun! s:Global.new_cursor(...) abort
     if empty(R)
         return vm#region#new(1)
     elseif a:0  " toggle cursor
-        return R.clear()
+        call R.clear()
     endif
-    return R
+    return s:F.should_quit() ? vm#reset() : R
 endfun
 
 
@@ -260,11 +260,7 @@ fun! s:Global.update_and_select_region(...) abort
         let R = self.select_region(0)
     endif
 
-    if g:VM_exit_on_1_cursor_left && nR == 1
-        return vm#reset()
-    else
-        return R
-    endif
+    return s:F.should_quit() ? vm#reset() : R
 endfun
 
 
@@ -282,11 +278,7 @@ fun! s:Global.update_map_and_select_region(...) abort
     call self.update_highlight()
     let R = self.select_region_at_pos(a:0? a:1 : '.')
 
-    if g:VM_exit_on_1_cursor_left && len(s:R()) == 1
-        call vm#reset()
-    else
-        return R
-    endif
+    return s:F.should_quit() ? vm#reset() : R
 endfun
 
 
@@ -489,8 +481,10 @@ fun! s:Global.remove_last_region(...) abort
         endif
     endfor
 
-    if len(s:R()) "reselect previous region
-
+    if s:F.should_quit()
+        return vm#reset()
+    else
+        "reselect previous region
         let i = a:0? (r.index > 0? r.index-1 : 0) : s:v.index
         call self.select_region(i)
     endif

@@ -165,6 +165,16 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! s:Funcs.should_quit() abort
+    " VM should quit if there are no regions, or 1 left if option is set.
+    let nR = len(s:V.Global.active_regions())
+    return !nR || nR == 1 &&
+                \ g:VM_exit_on_1_cursor_left && !s:v.single_region
+endfun
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! s:Funcs.syntax(pos) abort
     " Find syntax element at position.
     if type(a:pos) == type([])    "list [line, col]
