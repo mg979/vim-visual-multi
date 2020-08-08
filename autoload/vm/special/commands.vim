@@ -229,6 +229,25 @@ endfun "}}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+let s:root = fnamemodify(expand('<sfile>'), ':p:h:h:h:h')
+
+fun! vm#special#commands#new_test() abort
+  " Create directory and files for a new test. {{{1
+  let name = input('Name of test: ')
+  if name == '' | return | endif
+  let dir = s:root . '/test/tests/' . name . '/'
+  exe 'tabedit' fnameescape(dir . 'input_file.txt')
+  put ='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+  set tw=79
+  normal! gg"_ddgq_
+  exe 'split' fnameescape(dir . 'expected_output_file.txt')
+  exe 'topleft vsplit' fnameescape(dir . 'commands.py')
+  call append('$', "keys(r'\\<C-Down>')")
+  call feedkeys('ggO# ', 'n')
+endfun "}}}
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#special#commands#qfix(full_line)
   " Regions to qfix list. {{{1
   call vm#reset()
