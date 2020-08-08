@@ -105,6 +105,7 @@ fun! s:Insert.start(...) abort
     let I.lines     = {}
     let I.change    = 0         " text change, only if g:VM_live_editing
     let I.col       = col('.')
+    let I.char      = ''        " set by InsertCharPre
 
     " remove current regions highlight
     call s:G.remove_highlight()
@@ -293,8 +294,9 @@ fun! s:Insert.stop(...) abort
     " one, this can happen after CompleteDone, or abbreviation expansion,
     " because in these cases TextChangedI isn't triggered, if this happen we
     " must update lines again
-    if s:F.size() > self.size || self.replace && !g:VM_live_editing
+    if self.char != ''
         call self.update_text(1)
+        let self.char = ''
     endif
 
     call self.clear_hi() | call self.auto_end() | let i = 0
@@ -540,8 +542,9 @@ fun! s:Insert.auto_start() abort
     " Initialize autocommands.
     augroup VM_insert
         au!
-        au TextChangedI * call b:VM_Selection.Insert.update_text(0)
-        au InsertLeave  * call b:VM_Selection.Insert.stop()
+        au TextChangedI  * call b:VM_Selection.Insert.update_text(0)
+        au InsertLeave   * call b:VM_Selection.Insert.stop()
+        au InsertCharPre * let b:VM_Selection.Insert.char = v:char
     augroup END
 endfun
 
