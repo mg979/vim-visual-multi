@@ -602,17 +602,12 @@ fun! s:step_back() abort
         return
     endif
 
-    " MULTIBYTE CHARACTERS:
-    " the shift is equal to the byte size of the last entered character
-    if g:VM_live_editing
-        let n = s:cur_char_bytes()
-    else
-        let n = 1
-    endif
-
     for r in s:v.single_region ? [s:R()[s:Insert.index]] : s:R()
         if r.a != col([r.l, '$']) && r.a > 1
-            call r.shift(-n,-n)
+            " move one byte back
+            call r.shift(-1,-1)
+            " fix column in case of multibyte chars by using a motion
+            call r.move('lh')
         endif
     endfor
 endfun
