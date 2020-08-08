@@ -17,10 +17,6 @@ let s:R = { -> s:V.Regions }
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Backup/restore buffer state on buffer change
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Functions
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -46,7 +42,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.curs2byte() abort
-    """Return the offset of the current cursor position.
+    " Return the offset of the current cursor position.
     let pos = getcurpos()[1:2]
     return (line2byte(pos[0]) + pos[1] - 1)
 endfun
@@ -54,7 +50,7 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.byte2pos(byte) abort
-    """Return the (line, col) position of a byte offset.
+    " Return the (line, col) position of a byte offset.
 
     let line = byte2line(a:byte)
     let col  = a:byte - line2byte(line) + 1
@@ -170,7 +166,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.syntax(pos) abort
-    """Find syntax element at position."""
+    " Find syntax element at position.
     if type(a:pos) == type([])    "list [line, col]
         let line = a:pos[0]
         let col = a:pos[1]
@@ -198,7 +194,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.sync_minlines() abort
-    """Get the current sync minlines setting for the buffer.
+    " Get the current sync minlines setting for the buffer.
     let sync = split(execute('syn sync'), '\n')
     let sync = len(sync) > 1 ? sync[1] : sync[0]
     return matchstr(sync, '\d\+')
@@ -243,7 +239,7 @@ fun! s:ask_char()
 endfun
 
 fun! s:Funcs.search_chars(n) abort
-  """Ask for [count] or 1 regex-interpretable character(s).
+  " Ask for [count] or 1 regex-interpretable character(s).
   let [ s:chars, s:chars2go, s:char_escape ] = [ '', a:n, 0 ]
   let ns = a:n > 1 ? 's' : ''
   let pre = printf('Find regex [%d char'.ns.'] ', a:n)
@@ -270,20 +266,20 @@ fun! s:Funcs.Scroll.can_see_bof() abort
 endfun
 
 fun! s:Funcs.Scroll.get(...) abort
-    """Store winline().
+    " Store winline().
     if a:0 | let s:v.restore_scroll = 1 | endif
     let s:v.winline = winline()
 endfun
 
 fun! s:Funcs.Scroll.force(line) abort
-    """Restore arbitrary winline().
+    " Restore arbitrary winline().
     let s:v.restore_scroll = 1
     let s:v.winline = a:line
     call self.restore()
 endfun
 
 fun! s:Funcs.Scroll.restore(...) abort
-    """Restore viewport position when done.
+    " Restore viewport position when done.
     if s:v.restore_scroll | let s:v.restore_scroll = 0 | else | return | endif
 
     " restoring should be avoided if it's possible to see EOF or BOF
@@ -451,7 +447,7 @@ fun! s:Funcs.region_txt(r) abort
 endfun
 
 fun! s:Funcs.not_VM() abort
-    return !exists('b:VM_Selection') || empty(b:VM_Selection)
+    return !exists('b:visual_multi')
 endfun
 
 " vim: et ts=4 sw=4 sts=4 tw=85 :

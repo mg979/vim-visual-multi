@@ -127,14 +127,12 @@ endfun
 
 fun! s:Global.cursor_mode() abort
     " Set cursor mode. Return 1 if mode had to be changed.
-
     if s:X() | call self.change_mode() | return 1 | endif
 endfun
 
 
 fun! s:Global.extend_mode() abort
     " Set extend mode. Return 1 if mode had to be changed.
-
     if !s:X() | call self.change_mode() | return 1 | endif
 endfun
 
@@ -146,7 +144,6 @@ endfun
 
 fun! s:Global.update_highlight(...) abort
     " Update highlight for all regions.
-
     if s:v.eco | return | endif
 
     call self.remove_highlight()
@@ -160,7 +157,6 @@ endfun
 
 fun! s:Global.update_cursor_highlight(...) abort
     " Set cursor highlight, depending on extending mode.
-
     if s:v.eco | return | endif
 
     highlight clear MultiCursor
@@ -193,7 +189,6 @@ endfun
 
 fun! s:Global.all_empty() abort
     " If not all regions are empty, turn on extend mode.
-
     for r in s:R()
         if r.a != r.b
             if !s:X() | let g:Vm.extend_mode = 1 | endif
@@ -206,7 +201,6 @@ endfun
 
 fun! s:Global.update_regions() abort
     " Force regions update.
-
     if s:v.eco | return | endif
 
     if s:X()
@@ -221,7 +215,6 @@ endfun
 
 fun! s:Global.update_and_select_region(...) abort
     " Update regions and select region at position, index or id.
-
     if s:v.merge
         let s:v.merge = 0 | return self.merge_regions()
     endif
@@ -278,7 +271,6 @@ endfun
 fun! s:Global.update_map_and_select_region(...) abort
     " Update only the bytes map, skipping region update.
     " Regions have been just created and there's no need to update them.
-
     if s:v.find_all_overlap
         let s:v.find_all_overlap = 0
         return self.merge_regions()
@@ -300,7 +292,6 @@ endfun
 
 fun! s:Global.erase_regions() abort
     " Erase all regions.
-
     call self.remove_highlight()
     let s:V.Regions = []
     let s:V.Bytes = {}
@@ -310,7 +301,6 @@ endfun
 
 fun! s:Global.restore_regions(index) abort
     " Restore previous regions from backup.
-
     let backup = b:VM_Backup | call self.erase_regions()
 
     let tick = backup.ticks[a:index]
@@ -492,7 +482,6 @@ endfun
 
 fun! s:Global.remove_last_region(...) abort
     " Remove last region and reselect the previous one.
-
     for r in s:R()
         if r.id == ( a:0? a:1 : s:v.IDs_list[-1] )
             call r.clear()
