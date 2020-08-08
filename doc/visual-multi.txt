@@ -201,7 +201,8 @@ NOTE: insert mode related options:
 The main limitation is that only one region per line is allowed, so if you have
 more regions in the same line, they will be collapsed first.
 
-<BS> and <Del> only work inside the same lines, and <CR> doesn't work.
+<BS> only works inside the same lines.
+Keys other than <Left> and <Right> don't work.
 
 
 -------------------------------------------------------------  *vm-visual-mode*
