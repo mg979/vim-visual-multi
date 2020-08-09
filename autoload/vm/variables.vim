@@ -104,7 +104,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Reset vim variables to previous values
 
-fun! vm#variables#reset()
+fun! vm#variables#reset() abort
   let v = b:VM_Selection.Vars
 
   if !v.oldhls

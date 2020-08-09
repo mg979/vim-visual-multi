@@ -175,6 +175,13 @@ endfun
 
 "------------------------------------------------------------------------------
 
+fun! vm#hard_reset()
+    silent! call vm#reset(1)
+    call vm#clearmatches()
+endfun
+
+"------------------------------------------------------------------------------
+
 fun! vm#clearmatches() abort
     for m in getmatches()
         if m.group == 'VM_Extend' || m.group == 'MultiCursor'

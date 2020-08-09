@@ -30,7 +30,7 @@ com! -nargs=? -bang
 
 com! -bar VMConfig call vm#special#config#start()
 com! -bar VMDebug  call vm#special#commands#debug()
-com! -bar VMClear  call vm#clearmatches()
+com! -bar VMClear  call vm#hard_reset()
 com! -bar VMLive   call vm#special#commands#live()
 
 com! -bang VMFromSearch call vm#special#commands#from_search(<bang>0)
