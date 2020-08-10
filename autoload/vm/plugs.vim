@@ -320,10 +320,16 @@ endfun
 
 fun! s:Yank() abort
   " Wrapper for yank key.
-  if empty(b:VM_Selection.Global.region_at_pos())
-    let b:VM_Selection.Vars.yanked = 1 | return 'y'
-  endif
-  return ":\<C-u>call b:VM_Selection.Edit.yank(v:register, 1, 1)\<cr>"
+  try
+    if empty(b:VM_Selection.Global.region_at_pos())
+      let b:VM_Selection.Vars.yanked = 1
+      return 'y'
+    endif
+    return ":\<C-u>call b:VM_Selection.Edit.yank(v:register, 1, 1)\<cr>"
+  catch
+    VMClear
+    return 'y'
+  endtry
 endfun
 
 
