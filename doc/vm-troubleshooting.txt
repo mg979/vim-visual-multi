@@ -56,7 +56,7 @@ PLUGINS COMPATIBILITY                             *visual-multi-compatibility*
 
 As mentioned above, snippets plugins cannot work with VM. Other plugins can
 have incompatibilities, especially if they apply buffer mappings. In this
-case, VM will not replace the conflicting keys, but whis can result in missing
+case, VM will not replace the conflicting keys, but this can result in missing
 VM functionalities or even render VM unusable. If you notice some mappings
 don't work in VM, run |:VMDebug| to see if a plugin is the cause.
 
