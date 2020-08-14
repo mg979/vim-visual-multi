@@ -1,3 +1,7 @@
+if &compatible
+  set nocompatible
+endif
+
 set runtimepath=$VIMRUNTIME
 cd `=expand('<sfile>:p:h')`
 set runtimepath^=.
