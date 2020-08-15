@@ -35,6 +35,13 @@ Hopefully you won't need to alter any of these.
   up statusline integration.
 
 
+*g:VM_quit_after_leaving_insert_mode*              Default: 0
+
+  So that you don't have to type <Esc> twice. If you set this to 1, maybe you
+  can remap `Reselect Last`, so that you can quickly restart VM with your last
+  selection. See |visual-multi-qr|.
+
+
 *g:VM_show_warnings*                               Default: 1
 
   When entering VM and there are mapping conflicts, a warning is displayed. Set

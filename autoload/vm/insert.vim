@@ -380,6 +380,10 @@ fun! s:Insert.stop(...) abort
         let self.type = ''
         silent! unlet self._lines
     endif
+
+    if get(g:, 'VM_quit_after_leaving_insert_mode', 0)
+        call vm#reset()
+    endif
 endfun
 
 
