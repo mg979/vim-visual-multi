@@ -56,25 +56,23 @@ fun! vm#themes#init() abort
   exe "highlight! VM_Mono"   s:Themes[theme].mono
   exe "highlight! VM_Insert" s:Themes[theme].insert
   exe "highlight! VM_Cursor" s:Themes[theme].cursor
-  let g:Vm.hi.extend  = 'VM_Extend'
-  let g:Vm.hi.mono    = 'VM_Mono'
-  let g:Vm.hi.insert  = 'VM_Insert'
-  let g:Vm.hi.cursor  = 'VM_Cursor'
   highlight! link MultiCursor VM_Cursor
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#themes#hi() abort
-  """Init Search highlight.
+  " Init Search highlight.
   let g:Vm.Search = g:VM_highlight_matches == 'underline' ? 'hi Search term=underline cterm=underline gui=underline' :
-        \           g:VM_highlight_matches == 'red'       ? 'hi Search ctermfg=196 guifg=#ff0000' : g:VM_highlight_matches
+        \           g:VM_highlight_matches == 'red'       ? 'hi Search ctermfg=196 guifg=#ff0000' :
+        \           g:VM_highlight_matches =~ '^hi!\? '   ? g:VM_highlight_matches
+        \                                                 : 'hi Search term=underline cterm=underline gui=underline'
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#themes#load(theme) abort
-  """Load a theme."""
+  " Load a theme.
   if empty(a:theme)
     let g:VM_theme = 'default'
     echo 'Theme set to default'
