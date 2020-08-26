@@ -262,7 +262,7 @@ fun! s:Edit.replace() abort
     let text = s:G.regions_text()
     let T = []
     for t in text
-        call add(T, substitute(t, pat, repl, 'g'))
+        call add(T, substitute(t, '\C' . pat, repl, 'g'))
     endfor
     call self.replace_regions_with_text(T)
     call s:G.select_region(ix)
