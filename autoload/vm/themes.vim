@@ -1,21 +1,11 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Set up highlighting
-
-let g:Vm.hi.extend  = get(g:, 'VM_Selection_hl',     'Visual')
-let g:Vm.hi.mono    = get(g:, 'VM_Mono_Cursor_hl',   'DiffChange')
-let g:Vm.hi.insert  = get(g:, 'VM_Ins_Mode_hl',      'Pmenu')
-let g:Vm.hi.cursor  = get(g:, 'VM_Normal_Cursor_hl', 'ToolbarLine')
-let g:Vm.hi.message = get(g:, 'VM_Message_hl',       'WarningMsg')
-
-exe "highlight link MultiCursor ".g:Vm.hi.cursor
-
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let s:Themes = {}
 
 fun! vm#themes#init() abort
   if !exists('g:Vm') | return | endif
-  let default = &background == 'light' ? 'lightblue1' : 'blue1'
   let theme = get(g:, 'VM_theme', 'default')
 
   silent! hi clear VM_Mono
@@ -42,9 +32,11 @@ fun! vm#themes#init() abort
   let g:Vm.hi.cursor  = 'VM_Cursor'
   let g:Vm.hi.extend  = 'VM_Extend'
   let g:Vm.hi.insert  = 'VM_Insert'
+  let g:Vm.hi.message = get(g:, 'VM_Message_hl', 'WarningMsg')
+
 
   if theme == 'default'
-    exe "highlight! link VM_Mono     ".get(g:, 'VM_Mono_hl',   'DiffText')
+    exe "highlight! link VM_Mono     ".get(g:, 'VM_Mono_hl',   'IncSearch')
     exe "highlight! link VM_Cursor   ".get(g:, 'VM_Cursor_hl', 'Visual')
     exe "highlight! link VM_Extend   ".get(g:, 'VM_Extend_hl', 'DiffAdd')
     exe "highlight! link VM_Insert   ".get(g:, 'VM_Insert_hl', 'DiffChange')
@@ -52,10 +44,7 @@ fun! vm#themes#init() abort
     return
   endif
 
-  exe "highlight! VM_Extend" s:Themes[theme].extend
-  exe "highlight! VM_Mono"   s:Themes[theme].mono
-  exe "highlight! VM_Insert" s:Themes[theme].insert
-  exe "highlight! VM_Cursor" s:Themes[theme].cursor
+  call s:Themes[theme]()
   highlight! link MultiCursor VM_Cursor
 endfun
 
@@ -86,14 +75,11 @@ fun! vm#themes#load(theme) abort
 endfun
 
 fun! vm#themes#complete(A, L, P) abort
-  let valid = []
-  for k in keys(s:Themes)
-    if     &background=='light' && has_key(s:Themes[k], 'type') && s:Themes[k].type != 'light'
-    elseif &background=='dark'  && has_key(s:Themes[k], 'type') && s:Themes[k].type != 'dark'
-    else
-      call add(valid, k)
-    endif
-  endfor
+  if &background=='light'
+    let valid = ['sand', 'lightblue1', 'lightblue2', 'lightpurple1', 'lightpurple2']
+  elseif &background=='dark'
+    let valid = ['iceblue', 'ocean', 'neon', 'purplegray', 'nord', 'codedark', 'spacegray', 'olive', 'sand']
+  endif
   return filter(sort(valid), 'v:val=~#a:A')
 endfun
 
@@ -125,108 +111,96 @@ fun! vm#themes#statusline() abort
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"old mono #F2C38F
-"missing: grey(see neodark), acqua/lightacqua(see seoul)
-let s:Themes.iceblue = {
-      \ 'type':   "dark",
-      \ 'extend': "ctermbg=24  guibg=#005f87",
-      \ 'cursor': "ctermbg=31  guibg=#0087af ctermfg=237 guifg=#87dfff",
-      \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermbg=180 guibg=#dfaf87 ctermfg=235 guifg=#262626",
-      \}
 
-let s:Themes.ocean = {
-      \ 'type':   "dark",
-      \ 'extend': "ctermbg=25  guibg=#005faf",
-      \ 'cursor': "ctermbg=39  guibg=#87afff ctermfg=239 guifg=#4e4e4e",
-      \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermbg=186 guibg=#dfdf87 ctermfg=239 guifg=#4e4e4e",
-      \}
+fun! s:Themes.iceblue()
+  hi! VM_Extend ctermbg=24                   guibg=#005f87
+  hi! VM_Cursor ctermbg=31    ctermfg=237    guibg=#0087af    guifg=#87dfff
+  hi! VM_Insert ctermbg=239                  guibg=#4c4e50
+  hi! VM_Mono   ctermbg=180   ctermfg=235    guibg=#dfaf87    guifg=#262626
+endfun
 
-let s:Themes.neon = {
-      \ 'type':   "dark",
-      \ 'extend': "ctermfg=109 guifg=#89afaf ctermbg=26  guibg=#005fdf",
-      \ 'cursor': "ctermbg=39  guibg=#00afff ctermfg=239 guifg=#4e4e4e",
-      \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermbg=221 guibg=#ffdf5f ctermfg=239 guifg=#4e4e4e",
-      \}
+fun! s:Themes.ocean()
+  hi! VM_Extend ctermbg=25                   guibg=#005faf
+  hi! VM_Cursor ctermbg=39    ctermfg=239    guibg=#87afff    guifg=#4e4e4e
+  hi! VM_Insert ctermbg=239                  guibg=#4c4e50
+  hi! VM_Mono   ctermbg=186   ctermfg=239    guibg=#dfdf87    guifg=#4e4e4e
+endfun
 
-let s:Themes.lightblue1 = {
-      \ 'type':   "light",
-      \ 'extend': "ctermbg=153 guibg=#afdfff",
-      \ 'cursor': "ctermbg=111 guibg=#87afff ctermfg=239 guifg=#4e4e4e",
-      \ 'insert': "ctermbg=180 guibg=#dfaf87 ctermfg=235 guifg=#262626",
-      \ 'mono':   "ctermbg=167 guibg=#df5f5f ctermfg=253 guifg=#dadada cterm=bold term=bold gui=bold",
-      \}
+fun! s:Themes.neon()
+  hi! VM_Extend ctermbg=26    ctermfg=109    guibg=#005fdf    guifg=#89afaf
+  hi! VM_Cursor ctermbg=39    ctermfg=239    guibg=#00afff    guifg=#4e4e4e
+  hi! VM_Insert ctermbg=239                  guibg=#4c4e50
+  hi! VM_Mono   ctermbg=221   ctermfg=239    guibg=#ffdf5f    guifg=#4e4e4e
+endfun
 
-let s:Themes.lightblue2 = {
-      \ 'type':   "light",
-      \ 'extend': "ctermbg=117 guibg=#87dfff",
-      \ 'cursor': "ctermbg=111 guibg=#87afff ctermfg=239 guifg=#4e4e4e",
-      \ 'insert': "ctermbg=180 guibg=#dfaf87 ctermfg=235 guifg=#262626",
-      \ 'mono':   "ctermbg=167 guibg=#df5f5f ctermfg=253 guifg=#dadada cterm=bold term=bold gui=bold",
-      \}
+fun! s:Themes.lightblue1()
+  hi! VM_Extend ctermbg=153                  guibg=#afdfff
+  hi! VM_Cursor ctermbg=111   ctermfg=239    guibg=#87afff    guifg=#4e4e4e
+  hi! VM_Insert ctermbg=180   ctermfg=235    guibg=#dfaf87    guifg=#262626
+  hi! VM_Mono   ctermbg=167   ctermfg=253    guibg=#df5f5f    guifg=#dadada cterm=bold term=bold gui=bold
+endfun
 
-let s:Themes.purplegray = {
-      \ 'type':   "dark",
-      \ 'extend': "ctermbg=60  guibg=#544a65",
-      \ 'cursor': "ctermbg=103 guibg=#8787af ctermfg=54  guifg=#5f0087",
-      \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermbg=141 guibg=#af87ff ctermfg=235 guifg=#262626",
-      \}
+fun! s:Themes.lightblue2()
+  hi! VM_Extend ctermbg=117                  guibg=#87dfff
+  hi! VM_Cursor ctermbg=111   ctermfg=239    guibg=#87afff    guifg=#4e4e4e
+  hi! VM_Insert ctermbg=180   ctermfg=235    guibg=#dfaf87    guifg=#262626
+  hi! VM_Mono   ctermbg=167   ctermfg=253    guibg=#df5f5f    guifg=#dadada cterm=bold term=bold gui=bold
+endfun
 
-let s:Themes.nord = {
-      \ 'type':   "dark",
-      \ 'extend': "ctermbg=239 guibg=#434C5E",
-      \ 'cursor': "ctermbg=245 guibg=#8a8a8a ctermfg=24 guifg=#005f87",
-      \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermfg=235 guifg=#262626 ctermbg=131 guibg=#AF5F5F",
-      \}
+fun! s:Themes.purplegray()
+  hi! VM_Extend ctermbg=60                   guibg=#544a65
+  hi! VM_Cursor ctermbg=103   ctermfg=54     guibg=#8787af    guifg=#5f0087
+  hi! VM_Insert ctermbg=239                  guibg=#4c4e50
+  hi! VM_Mono   ctermbg=141   ctermfg=235    guibg=#af87ff    guifg=#262626
+endfun
 
-let s:Themes.codedark = {
-      \ 'type':   "dark",
-      \ 'extend': "ctermbg=242 guibg=#264F78",
-      \ 'cursor': "ctermbg=239 ctermfg=252 guifg=#C5D4DD guibg=#6A7D89",
-      \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermfg=235 guifg=#262626 ctermbg=131 guibg=#AF5F5F",
-      \}
+fun! s:Themes.nord()
+  hi! VM_Extend ctermbg=239                  guibg=#434C5E
+  hi! VM_Cursor ctermbg=245   ctermfg=24     guibg=#8a8a8a    guifg=#005f87
+  hi! VM_Insert ctermbg=239                  guibg=#4c4e50
+  hi! VM_Mono   ctermbg=131   ctermfg=235    guibg=#AF5F5F    guifg=#262626
+endfun
 
-let s:Themes.spacegray = {
-      \ 'type':   "dark",
-      \ 'extend': "ctermbg=237 guibg=#404040",
-      \ 'cursor': "ctermbg=242 guibg=Grey50 ctermfg=239 guifg=#4e4e4e",
-      \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermfg=235 guifg=#262626 ctermbg=131 guibg=#AF5F5F",
-      \}
+fun! s:Themes.codedark()
+  hi! VM_Extend ctermbg=242                  guibg=#264F78
+  hi! VM_Cursor ctermbg=239   ctermfg=252    guibg=#6A7D89    guifg=#C5D4DD
+  hi! VM_Insert ctermbg=239                  guibg=#4c4e50
+  hi! VM_Mono   ctermbg=131   ctermfg=235    guibg=#AF5F5F    guifg=#262626
+endfun
 
-let s:Themes.sand = {
-      \ 'extend': "ctermbg=143 ctermfg=0 guibg=darkkhaki guifg=black",
-      \ 'cursor': "ctermbg=64 guibg=olivedrab ctermfg=186 guifg=khaki",
-      \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermfg=235 guifg=#262626 ctermbg=131 guibg=#AF5F5F",
-      \}
+fun! s:Themes.spacegray()
+  hi! VM_Extend ctermbg=237                  guibg=#404040
+  hi! VM_Cursor ctermbg=242   ctermfg=239    guibg=Grey50     guifg=#4e4e4e
+  hi! VM_Insert ctermbg=239                  guibg=#4c4e50
+  hi! VM_Mono   ctermbg=131   ctermfg=235    guibg=#AF5F5F    guifg=#262626
+endfun
 
-let s:Themes.olive = {
-      \ 'extend': "ctermbg=3 guibg=olive ctermfg=0 guifg=black",
-      \ 'cursor': "ctermbg=64 guibg=olivedrab ctermfg=186 guifg=khaki",
-      \ 'insert': "ctermbg=239 guibg=#4c4e50",
-      \ 'mono':   "ctermfg=235 guifg=#262626 ctermbg=131 guibg=#AF5F5F",
-      \}
+fun! s:Themes.sand()
+  hi! VM_Extend ctermbg=143   ctermfg=0      guibg=darkkhaki  guifg=black
+  hi! VM_Cursor ctermbg=64    ctermfg=186    guibg=olivedrab  guifg=khaki
+  hi! VM_Insert ctermbg=239                  guibg=#4c4e50
+  hi! VM_Mono   ctermbg=131   ctermfg=235    guibg=#AF5F5F    guifg=#262626
+endfun
 
-let s:Themes.lightpurple1 = {
-      \ 'type':   "light",
-      \ 'extend': "ctermbg=225 guibg=#ffdfff",
-      \ 'cursor': "ctermbg=183 guibg=#dfafff ctermfg=54  guifg=#5f0087 cterm=bold term=bold gui=bold",
-      \ 'insert': "ctermbg=146 guibg=#afafdf ctermfg=235 guifg=#262626",
-      \ 'mono':   "ctermbg=135 guibg=#af5fff ctermfg=225 guifg=#ffdfff cterm=bold term=bold gui=bold",
-      \}
+fun! s:Themes.olive()
+  hi! VM_Extend ctermbg=3     ctermfg=0      guibg=olive      guifg=black
+  hi! VM_Cursor ctermbg=64    ctermfg=186    guibg=olivedrab  guifg=khaki
+  hi! VM_Insert ctermbg=239                  guibg=#4c4e50
+  hi! VM_Mono   ctermbg=131   ctermfg=235    guibg=#AF5F5F    guifg=#262626
+endfun
 
-let s:Themes.lightpurple2 = {
-      \ 'type':   "light",
-      \ 'extend': "ctermbg=189 guibg=#dfdfff",
-      \ 'cursor': "ctermbg=183 guibg=#dfafff ctermfg=54  guifg=#5f0087 cterm=bold term=bold gui=bold",
-      \ 'insert': "ctermbg=225 guibg=#ffdfff ctermfg=235 guifg=#262626",
-      \ 'mono':   "ctermbg=135 guibg=#af5fff ctermfg=225 guifg=#ffdfff cterm=bold term=bold gui=bold",
-      \}
+fun! s:Themes.lightpurple1()
+  hi! VM_Extend ctermbg=225                  guibg=#ffdfff
+  hi! VM_Cursor ctermbg=183   ctermfg=54     guibg=#dfafff    guifg=#5f0087 cterm=bold term=bold gui=bold
+  hi! VM_Insert ctermbg=146   ctermfg=235    guibg=#afafdf    guifg=#262626
+  hi! VM_Mono   ctermbg=135   ctermfg=225    guibg=#af5fff    guifg=#ffdfff cterm=bold term=bold gui=bold
+endfun
+
+fun! s:Themes.lightpurple2()
+  hi! VM_Extend ctermbg=189                  guibg=#dfdfff
+  hi! VM_Cursor ctermbg=183   ctermfg=54     guibg=#dfafff    guifg=#5f0087 cterm=bold term=bold gui=bold
+  hi! VM_Insert ctermbg=225   ctermfg=235    guibg=#ffdfff    guifg=#262626
+  hi! VM_Mono   ctermbg=135   ctermfg=225    guibg=#af5fff    guifg=#ffdfff cterm=bold term=bold gui=bold
+endfun
 
 " vim: et ts=2 sw=2 sts=2 :
