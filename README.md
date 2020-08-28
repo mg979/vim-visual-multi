@@ -38,8 +38,11 @@ With vim-plug:
 
 ### Documentation
 
-`:help visual-multi`
+    :help visual-multi
 
+For some specific topic it's often:
+
+    :help vm-some-topic
 
 ### Tutorial
 
@@ -84,11 +87,6 @@ Select operator, here shown with 'wellle/targets.vim' plugin: sib, sia, saa + se
 ![Imgur](https://i.imgur.com/yM3Fele.gif)
 
 -------
-Single region mode in insert mode, `Tab` moves to the next cursor
-
-![Imgur](https://i.imgur.com/s8ce3KK.gif)
-
--------
 Synched column transposition
 
 ![Imgur](https://i.imgur.com/9JDaLBi.gif)
@@ -103,11 +101,6 @@ Shift regions left and right (M-S-\<\>)
 
 ![Imgur](https://i.imgur.com/Q7EF8YI.gif)
 
--------
-Independent anchoring
-
-![Imgur](https://i.imgur.com/kN3BYjU.gif)
-
 ------
 Find words under cursor, add new words (patterns stack), navigate regions, skip them, add regions with regex.
 
@@ -119,7 +112,7 @@ Normal/Visual/Ex commands at cursors
 ![Imgur](https://i.imgur.com/5aiQscj.gif)
 
 -------
-Macros. Shorter lines are skipped when adding cursors above/below.
+Macros. Shorter lines are skipped when adding cursors vertically.
 
 ![Imgur](https://i.imgur.com/3IsZzF3.gif)
 
