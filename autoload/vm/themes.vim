@@ -76,7 +76,7 @@ endfun
 
 fun! vm#themes#complete(A, L, P) abort
   if &background=='light'
-    let valid = ['sand', 'lightblue1', 'lightblue2', 'lightpurple1', 'lightpurple2']
+    let valid = ['sand', 'paper', 'lightblue1', 'lightblue2', 'lightpurple1', 'lightpurple2']
   elseif &background=='dark'
     let valid = ['iceblue', 'ocean', 'neon', 'purplegray', 'nord', 'codedark', 'spacegray', 'olive', 'sand']
   endif
@@ -180,6 +180,13 @@ fun! s:Themes.sand()
   hi! VM_Cursor ctermbg=64    ctermfg=186    guibg=olivedrab  guifg=khaki
   hi! VM_Insert ctermbg=239                  guibg=#4c4e50
   hi! VM_Mono   ctermbg=131   ctermfg=235    guibg=#AF5F5F    guifg=#262626
+endfun
+
+fun! s:Themes.paper()
+  hi! VM_Extend ctermbg=250   ctermfg=16     guibg=#bfbcaf    guifg=black
+  hi! VM_Cursor ctermbg=239   ctermfg=188    guibg=#4c4e50    guifg=#d8d5c7
+  hi! VM_Insert ctermbg=167   ctermfg=253    guibg=#df5f5f    guifg=#dadada cterm=bold term=bold gui=bold
+  hi! VM_Mono   ctermbg=16    ctermfg=188    guibg=#000000    guifg=#d8d5c7
 endfun
 
 fun! s:Themes.olive()
