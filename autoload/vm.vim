@@ -209,12 +209,12 @@ fun! vm#augroup(end) abort
         au BufEnter     * call s:buffer_enter()
 
         if exists("##TextYankPost")
-            au TextYankPost * call s:set_reg()
-            au TextYankPost * call vm#operators#after_yank()
+            au TextYankPost <buffer> call s:set_reg()
+            au TextYankPost <buffer> call vm#operators#after_yank()
         else
-            au CursorMoved  * call s:set_reg()
-            au CursorMoved  * call vm#operators#after_yank()
-            au CursorHold   * call vm#operators#after_yank()
+            au CursorMoved  <buffer> call s:set_reg()
+            au CursorMoved  <buffer> call vm#operators#after_yank()
+            au CursorHold   <buffer> call vm#operators#after_yank()
         endif
     augroup END
 endfun
@@ -228,9 +228,9 @@ fun! vm#au_cursor(end) abort
 
     augroup VM_cursormoved
         au!
-        au CursorMoved  * call s:cursor_moved()
-        au CursorMoved  * call s:V.Funcs.set_statusline(2)
-        au CursorHold   * call s:V.Funcs.set_statusline(1)
+        au CursorMoved  <buffer> call s:cursor_moved()
+        au CursorMoved  <buffer> call s:V.Funcs.set_statusline(2)
+        au CursorHold   <buffer> call s:V.Funcs.set_statusline(1)
     augroup END
 endfun
 
