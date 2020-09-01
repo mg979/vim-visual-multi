@@ -8,7 +8,7 @@ The following Ex commands can be run at any time:
   |:VMDebug|
   |:VMClear|
   |:VMRegisters|
-  |:VMFromSearch|
+  |:VMSearch|
   |:VMLive|
 
 The following are only available inside a VM session:
@@ -51,10 +51,16 @@ all of them if no register is specified.
 
 ------------------------------------------------------------------------------
 
-    VMFromSearch[!]                                            *:VMFromSearch*
+    [range] VMSearch [pattern]                                     *:VMSearch*
 
-Select next region (or all regions with !) that matches the current search
-register |quote/|. It won't do anything if VM has been already started.
+Select next region that matches the current search register |quote/|, or the
+given [pattern]. If started from visual mode or with a [range], it will select
+all occurrences in |range|. Examples:
+>
+  :VMSearch                     -> select the next occurrence of @/
+  :VMSearch \<pattern\>         -> select the next occurrence of \<pattern\>
+  :%VMSearch \<pattern\>        -> select all occurrences of \<pattern\>
+  :'<,'>VMSearch \<pattern\>    -> range is visual selection
 
 ------------------------------------------------------------------------------
 

@@ -312,23 +312,43 @@ endfun "}}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#special#commands#from_search(bang) abort
-  " Get pattern from the current search register, select all with bang. {{{1
-  if exists('b:visual_multi')
-    return
-  endif
-  let search = @/
+fun! vm#special#commands#search(l1, l2, pattern) abort
+  " Search pattern in range. {{{1
+  let just_started = !exists('b:visual_multi')
+  let pat = a:pattern != '' ? a:pattern : @/
+  let pos = getcurpos()[1:2]
+  let view = winsaveview()
   try
     call vm#init_buffer(1)
     let g:Vm.extend_mode = 1
-    call s:V.Search.get_slash_reg(search)
-    call vm#commands#find_next(0, 0)
-    if a:bang
-      call vm#commands#find_all(0, 0)
+    if search(pat, 'n')
+      call s:V.Search.get_slash_reg(pat)
+    else
+      throw 'not found'
     endif
+    if a:l1 == 1 && a:l2 == line('$')
+      call vm#commands#find_next(0, 0)
+      let r = vm#commands#find_all(0, 0)
+    elseif a:l1 != a:l2
+      let start = line2byte(a:l1)
+      let end = line2byte(a:l2) + col([a:l2, '$']) - 1
+      let r = s:G.get_all_regions(start, end)
+    else
+      let r = vm#commands#find_next(0, 0)
+    endif
+    call winrestview(view)
+    call s:G.select_region_at_pos([r.l, r.a])
   catch
-    call vm#reset(1)
+    if just_started
+      VMClear
+    endif
+    call setpos('.', pos)
+    call winrestview(view)
+    redraw
     echo '[visual multi] pattern not found'
+    if !just_started
+      call s:G.select_region_at_pos('.')
+    endif
   endtry
 endfun "}}}
 
