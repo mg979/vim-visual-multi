@@ -171,6 +171,7 @@ fun! vm#reset(...)
     call vm#special#commands#unset()
     unlet b:visual_multi
     call garbagecollect()
+    return {}
 endfun
 
 "------------------------------------------------------------------------------

@@ -286,7 +286,7 @@ fun! vm#commands#find_all(visual, whole) abort
     call s:G.get_all_regions()
 
     let s:v.restore_scroll = 1
-    call s:G.update_map_and_select_region(pos)
+    return s:G.update_map_and_select_region(pos)
 endfun
 
 
@@ -407,7 +407,7 @@ fun! vm#commands#skip(just_remove) abort
     if a:just_remove
         let r = s:G.region_at_pos()
         if !empty(r)
-            call s:G.remove_last_region(r.id)
+            return s:G.remove_last_region(r.id)
         endif
 
     elseif s:v.nav_direction

@@ -89,6 +89,7 @@ fun! s:Global.get_all_regions(...) abort
         endtry
     endwhile
     let &wrapscan = ows
+    return R
 endfun
 
 
@@ -116,12 +117,13 @@ fun! s:Global.change_mode(...) abort
         call self.collapse_regions()
     endif
 
-    call self.select_region(ix)
+    let R = self.select_region(ix)
 
     if a:0  "called manually
         let s:v.restore_scroll = 1
         call s:F.Scroll.restore()
     endif
+    return R
 endfun
 
 
@@ -298,7 +300,7 @@ fun! s:Global.restore_regions(index) abort
     let tick = backup.ticks[a:index]
     let s:V.Regions = deepcopy(backup[tick].regions)
     let g:Vm.extend_mode = backup[tick].X
-    call self.update_and_select_region()
+    return self.update_and_select_region()
 endfun
 
 
@@ -486,7 +488,7 @@ fun! s:Global.remove_last_region(...) abort
     else
         "reselect previous region
         let i = a:0? (r.index > 0? r.index-1 : 0) : s:v.index
-        call self.select_region(i)
+        return self.select_region(i)
     endif
 endfun
 
