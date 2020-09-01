@@ -23,17 +23,15 @@ set cpo&vim
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-com! -nargs=? -complete=customlist,vm#themes#complete
-      \ VMTheme  call vm#themes#load(<q-args>)
-com! -nargs=? -bang
-      \ VMRegisters  call vm#special#commands#show_registers(<bang>0, <q-args>)
+com! -nargs=? -complete=customlist,vm#themes#complete VMTheme call vm#themes#load(<q-args>)
 
 com! -bar VMConfig call vm#special#config#start()
 com! -bar VMDebug  call vm#special#commands#debug()
 com! -bar VMClear  call vm#hard_reset()
 com! -bar VMLive   call vm#special#commands#live()
 
-com! -bang VMFromSearch call vm#special#commands#from_search(<bang>0)
+com! -bang  -nargs=? VMRegisters  call vm#special#commands#show_registers(<bang>0, <q-args>)
+com! -bang           VMFromSearch call vm#special#commands#from_search(<bang>0)
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -116,4 +114,4 @@ endfun
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
-" vim: et ts=2 sw=2 sts=2 :
+" vim: ft=vim et sw=2 ts=2 sts=2 fdm=marker

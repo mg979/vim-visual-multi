@@ -402,4 +402,13 @@ fun! s:temp_buffer() abort
   let b:VM_buf = s:buf
 endfun "}}}
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! vm#special#commands#deprecated(cmd) abort
+  let cmds = {'VMFromSearch': 'VMSearch'}
+  echohl WarningMsg
+  echo '[visual-multi]' a:cmd 'is deprecated, use' cmds[a:cmd] 'instead'
+  echohl None
+endfun
+
 " vim: et sw=2 ts=2 sts=2 fdm=marker
