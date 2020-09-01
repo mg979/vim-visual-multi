@@ -63,7 +63,7 @@ def get_test_description(test):
     with open(commands) as file:
         desc = file.readline()
     if desc[0] == '#':
-        return (desc[2:-1] )
+        return (desc[2:-1])
     else:
         return ('')
 
@@ -98,7 +98,7 @@ def get_paths(test, f):
 
 def keys_nvim(key_str):
     """nvim implementation of keys()"""
-    key_str = key_str.replace('\<', '<')
+    key_str = key_str.replace(r'\<', '<')
     key_str = key_str.replace(r'\"', r'"')
     key_str = key_str.replace('\\\\', '\\')
     CLIENT.input(key_str)
@@ -130,7 +130,7 @@ def run_core(paths, nvim=False):
         start_time = time.process_time()
         commands = open(paths["command"]).read()
         if not LIVE_EDITING:
-            commands = 'keys(r":let g:VM_live_editing = 0\<CR>")\n' + commands
+            commands = r'keys(r":let g:VM_live_editing = 0\<CR>")\n' + commands
         exec(commands)
         end_time = time.process_time()
         CLIENT.command(':w! %s' % paths["gen_out_file"])
@@ -143,8 +143,8 @@ def run_core(paths, nvim=False):
         start_time = time.process_time()
         exec(open(paths["command"]).read())
         end_time = time.process_time()
-        CLIENT.feedkeys('\<Esc>')
-        CLIENT.feedkeys(':wq! %s\<CR>' % paths["gen_out_file"])
+        CLIENT.feedkeys(r'\<Esc>')
+        CLIENT.feedkeys(r':wq! %s\<CR>' % paths["gen_out_file"])
     return end_time - start_time
 
 

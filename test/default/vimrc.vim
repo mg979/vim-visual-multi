@@ -1,9 +1,6 @@
 " needed by vimrunner
 function! VimrunnerPyEvaluateCommandOutput(command)
-  redir => output
-    silent exe a:command
-  redir END
-  return output
+  return execute(a:command)
 endfunction
 
 set runtimepath=$VIMRUNTIME
