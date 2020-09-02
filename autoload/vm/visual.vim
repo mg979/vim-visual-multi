@@ -3,7 +3,7 @@
 
 fun! vm#visual#add(mode) abort
     " Add visually selected region to current regions.
-    call s:backup_map()
+    let oldmap = s:backup_map()
     let pos = getpos('.')[1:2]
 
     if a:mode ==# 'v'     | call s:vchar()
@@ -11,7 +11,7 @@ fun! vm#visual#add(mode) abort
     else                  | let s:v.direction = s:vblock(1)
     endif
 
-    call s:visual_merge()
+    call s:visual_merge(oldmap)
 
     if a:mode ==# 'V'
         call s:G.split_lines()
@@ -29,14 +29,15 @@ endfun
 
 fun! vm#visual#subtract(mode) abort
     " Subtract visually selected region from current regions.
-    let X = s:backup_map()
+    let X = s:G.extend_mode()
+    let oldmap = s:backup_map()
 
     if a:mode ==# 'v'     | call s:vchar()
     elseif a:mode ==# 'V' | call s:vline()
     else                  | call s:vblock(1)
     endif
 
-    call s:visual_subtract()
+    call s:visual_subtract(oldmap)
     call s:G.update_and_select_region({'id': s:v.IDs_list[-1]})
     if X | call s:G.cursor_mode() | endif
 endfun
@@ -45,8 +46,9 @@ endfun
 
 fun! vm#visual#reduce() abort
     " Remove regions outside of visual selection.
-    let X = s:backup_map()
-    call s:G.rebuild_from_map(s:Bytes, [s:F.pos2byte("'<"), s:F.pos2byte("'>")])
+    let X = s:G.extend_mode()
+    let oldmap = s:backup_map()
+    call s:G.rebuild_from_map(oldmap, [s:F.pos2byte("'<"), s:F.pos2byte("'>")])
     if X | call s:G.cursor_mode() | endif
     call s:G.update_and_select_region()
 endfun
@@ -79,16 +81,21 @@ fun! vm#visual#split() abort
     echohl Type   | let pat = input('Pattern to remove > ') | echohl None
     if empty(pat) | return s:F.msg('Command aborted.')      | endif
 
+    if pat =~ '^\%(\\.\|\.\)\*$'
+        call s:F.msg("Pattern can match with zero-width, not allowed")
+        return s:G.select_region(s:v.index)
+    endif
+
     let start = s:R()[0]                "first region
     let stop = s:R()[-1]                "last region
 
     call s:F.Cursor(start.A)            "check for a match first
     if !search(pat, 'nczW', stop.L)     "search method: accept at cursor position
-        call s:F.msg("\t\tPattern not found")
+        call s:F.msg("Pattern not found")
         return s:G.select_region(s:v.index)
     endif
 
-    call s:backup_map()
+    let oldmap = s:backup_map()
 
     "backup old patterns and create new regions
     let oldsearch = copy(s:v.search)
@@ -97,7 +104,7 @@ fun! vm#visual#split() abort
     call s:G.get_all_regions(start.A, stop.B)
 
     "subtract regions and rebuild from map
-    call s:visual_subtract()
+    call s:visual_subtract(oldmap)
     call s:V.Search.join(oldsearch)
     call s:G.update_and_select_region()
 endfun
@@ -151,30 +158,28 @@ endfun
 fun! s:backup_map() abort
     "use temporary regions, they will be merged later
     call s:init()
-    let X = s:G.extend_mode()
-    let s:Bytes = copy(s:V.Bytes)
+    let oldmap = copy(s:V.Bytes)
     call s:G.erase_regions()
     let s:v.no_search = 1
     let s:v.eco = 1
-    return X
+    return oldmap
 endfun
 
 
-fun! s:visual_merge() abort
+fun! s:visual_merge(oldmap) abort
     "merge regions
-    let new_map = copy(s:V.Bytes)
-    let s:V.Bytes = s:Bytes
-    call s:G.merge_maps(new_map)
-    unlet new_map
+    let to_merge = copy(s:V.Bytes)
+    let s:V.Bytes = a:oldmap
+    call s:G.merge_maps(to_merge)
+    unlet to_merge
 endfun
 
 
-fun! s:visual_subtract() abort
+fun! s:visual_subtract(oldmap) abort
     "subtract regions
-    let new_map = copy(s:V.Bytes)
-    let s:V.Bytes = s:Bytes
-    call s:G.subtract_maps(new_map)
-    unlet new_map
+    let to_subtract = copy(s:V.Bytes)
+    let s:V.Bytes = a:oldmap
+    call s:G.subtract_maps(to_subtract)
 endfun
 
 
