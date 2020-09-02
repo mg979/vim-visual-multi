@@ -64,7 +64,7 @@ visual mappings, and buffer mappings.
 -------------------------------------------------------------------------------
   Name                Keys        Notes ~
 -------------------------------------------------------------------------------
-                                                              *visual-multi-qr*
+                                         *visual-multi-qr* *vm-quick-reference*
 Exit                  <Esc>       quit VM
 Find Under            <C-n>       select the word under cursor
 Find Subword Under    <C-n>       from visual mode, without word boundaries
@@ -118,12 +118,12 @@ Seek Next             <C-f>       fast go to next (from next page)
 Seek Prev             <C-b>       fast go to previous (from previous page)
 Skip Region             q         skip and find to next
 Remove Region           Q         remove region under cursor
+Replace                 R         replace in regions, or start replace mode
 Toggle Multiline        M         see |vm-multiline-mode|
 
 The following are valid in extend-mode: ~
 
 Invert Direction        o         as |o| in visual mode
-Replace                 R         replace in regions, or start replace mode
 Surround                S         requires |vim-surround| plugin
 Move Right          <M-S-Right>   move all selections to the right
 Move Left           <M-S-Left>    ,,      ,,          to the left

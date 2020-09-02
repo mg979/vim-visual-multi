@@ -39,7 +39,7 @@ Hopefully you won't need to alter any of these.
 
   So that you don't have to type <Esc> twice. If you set this to 1, maybe you
   can remap `Reselect Last`, so that you can quickly restart VM with your last
-  selection. See |visual-multi-qr|.
+  selection. See |vm-quick-reference|.
 
 
 *g:VM_show_warnings*                               Default: 1
