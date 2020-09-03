@@ -227,9 +227,6 @@ endfun
 
 fun! g:Vm.cmd.ctrln(count) abort
     " Ctrl-N command: find word under cursor.
-    " TODO: remove this option
-    let no_reselect = get(g:, 'VM_notify_previously_selected', 0) == 2
-
     if !s:X() && s:is_r()
         let pos = getpos('.')[1:2]
         call vm#operators#select(1, "iw")
@@ -241,9 +238,6 @@ fun! g:Vm.cmd.ctrln(count) abort
                 let r = g:Vm.cmd.find_next(0, 0)
             else
                 let r = g:Vm.cmd.find_under(0, 1)
-            endif
-            if no_reselect && s:v.was_region_at_pos
-                break
             endif
         endfor
         return r
@@ -301,25 +295,6 @@ endfun
 " Find next/previous
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:get_region(next) abort
-    " Call the needed function and notify if reselecting a region.
-    if !get(g:, 'VM_notify_previously_selected', 0)
-        return a:next ? s:get_next() : s:get_prev()
-    endif
-    normal! m`
-    echo "\r"
-    let R = a:next ? s:get_next() : s:get_prev()
-    if s:v.was_region_at_pos
-        if g:VM_notify_previously_selected == 2
-            normal! ``
-            call s:F.msg('Already selected')
-            return s:G.region_at_pos()
-        endif
-        call s:F.msg('Already selected')
-    endif
-    return R
-endfun
-
 fun! s:get_next() abort
     if s:X()
         silent keepjumps normal! ngny`]
@@ -375,8 +350,7 @@ fun! g:Vm.cmd.find_next(skip, nav) abort
     if s:navigate(a:nav, 1) | return 0        "just navigate to previous
     elseif a:skip           | call s:skip()   "skip current match
     endif
-
-    return s:get_region(1)
+    return s:get_next()
 endfun
 
 
@@ -399,7 +373,7 @@ fun! g:Vm.cmd.find_prev(skip, nav) abort
 
     "move to the beginning of the current match
     call cursor(pos)
-    return s:get_region(0)
+    return s:get_prev()
 endfun
 
 
