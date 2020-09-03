@@ -11,7 +11,7 @@ endfun
 
 fun! s:init() abort
     let g:Vm.extend_mode = 1
-    if !g:Vm.buffer | call vm#init_buffer(0) | endif
+    if !g:Vm.buffer | call vm#init_buffer() | endif
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -105,10 +105,9 @@ endfun
 
 fun! vm#operators#after_yank() abort
     "find operator
-    if g:Vm.finding
-        let g:Vm.finding = 0
-        call vm#operators#find(0, s:v.visual_regex)
-        let s:v.visual_regex = 0
+    if g:Vm.find_operator
+        call vm#operators#find(0, s:v.regex_mode == 2)
+        let g:Vm.find_operator = 0
         call s:old_updatetime()
         nmap <silent> <nowait> <buffer> y <Plug>(VM-Yank)
     endif
@@ -138,20 +137,11 @@ endfun
 
 fun! vm#operators#find(start, visual, ...) abort
     if a:start
-        if !g:Vm.buffer
-            call s:backup_map_find()
-            if a:visual
-                "use search register if just starting from visual mode
-                call s:V.Search.get_slash_reg(s:v.oldsearch[0])
-            endif
-        else
-            call s:V.Search.ensure_is_set()
-            call s:backup_map_find()
-        endif
-
+        call s:backup_map_find()
+        call s:V.Search.ensure_is_set()
         call s:updatetime()
-        let g:Vm.finding = 1
-        let s:vblock = a:visual && mode() == "\<C-v>"
+        let g:Vm.find_operator = 1
+        let s:vblock = a:visual && visualmode() == "\<C-v>"
         silent! nunmap <buffer> y
         return 'y'
     endif

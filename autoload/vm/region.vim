@@ -45,16 +45,9 @@ fun! vm#region#new(cursor, ...) abort
         else                    "making a new region from positions
             let a = a:1 | let b = a:2 | let c = a:3 | let d = a:4
         endif
-    endif
-
-    "----------------------------------------------------------------------
-
-    let cursor = a:cursor || ( a:0 && c==d && a==b )          "cursor or region?
-
-    if !g:Vm.buffer | call vm#init_buffer(cursor) | endif     "activate if needed
-
-    if !a:0 | let R = s:Region.new(cursor)                    "create region
-    else    | let R = s:Region.new(0, a, b, c, d)
+        let R = s:Region.new(c==d && a==b, a, b, c, d)
+    else
+        let R = s:Region.new(a:cursor)
     endif
 
     "----------------------------------------------------------------------
@@ -554,7 +547,7 @@ fun! s:pattern(r) abort
 
     "return current search pattern in regex mode
     if !has_key(a:r, 'pat')
-        return s:v.using_regex ? s:v.search[0] : ''
+        return s:v.regex_mode ? s:v.search[0] : ''
     endif
 
     "return current pattern if one is present (in cursor mode text is empty)

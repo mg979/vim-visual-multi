@@ -69,7 +69,7 @@ fun! s:Search.ensure_is_set(...) abort
     " Ensure there is an active search.
     if empty(s:v.search)
         if !len(s:R()) || empty(s:R()[0].txt)
-            call self.get_slash_reg()
+            call self.slash_reg()
         else
             call self.add(self.escape_pattern(s:R()[0].txt))
         endif
@@ -90,11 +90,11 @@ fun! s:Search.get_from_region() abort
 endfun
 
 
-fun! s:Search.get_slash_reg(...) abort
+fun! s:Search.slash_reg(...) abort
     " Get pattern from current "/" register. Use backup register if empty.
     if a:0 | let @/ = a:1 | endif
-    call s:update_search(getreg('/'))
-    if empty(s:v.search) | call s:update_search(s:v.oldsearch[0]) | endif
+    if @/ == '' | let @/ = s:v.oldsearch[0] | endif
+    call s:update_search(@/)
 endfun
 
 
@@ -126,7 +126,7 @@ fun! s:Search.update_patterns(...) abort
         if index(s:v.search, p) >= 0 | return | endif
     endfor
     if a:0 | call self.get_from_region()
-    else   | call self.get_slash_reg()
+    else   | call self.slash_reg()
     endif
 endfun
 
@@ -271,7 +271,7 @@ fun! s:Search.menu() abort
     elseif c == 2
         call self.rewrite(0)
     elseif c == 3
-        call self.get_slash_reg()
+        call self.slash_reg()
     elseif c == 4
         call self.get_from_region()
     elseif c == 5

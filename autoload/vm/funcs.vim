@@ -81,15 +81,6 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:Funcs.no_regions() abort
-    if !len(s:R())
-        let s:v.index = -1
-        return 1
-    endif
-endfun
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
 fun! s:Funcs.char_under_cursor() abort
     return matchstr(getline('.'), '\%' . col('.') . 'c.')
 endfun
@@ -353,7 +344,7 @@ endfun
 
 fun! s:Funcs.exit(msg) abort
     call self.msg(a:msg)
-    call vm#reset(1)
+    call vm#reset(2)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -368,7 +359,7 @@ fun! s:Funcs.toggle_option(option) abort
 
     if a:option == 'multiline'
         if !s:v.multiline
-            call vm#commands#split_lines()
+            call g:Vm.cmd.split_lines()
         endif
 
     elseif a:option == 'single_region'

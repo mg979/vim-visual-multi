@@ -319,10 +319,10 @@ fun! vm#special#commands#search(bang, l1, l2, pattern) abort
   let pos = getcurpos()[1:2]
   let view = winsaveview()
   try
-    call vm#init_buffer(1)
+    call vm#init_buffer()
     let g:Vm.extend_mode = 1
     if search(pat, 'n')
-      call s:V.Search.get_slash_reg(pat)
+      call s:V.Search.slash_reg(pat)
     else
       throw 'not found'
     endif

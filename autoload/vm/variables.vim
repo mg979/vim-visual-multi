@@ -84,7 +84,7 @@ fun! vm#variables#init() abort
   let v.silence          = 0
   let v.eco              = 0
   let v.single_region    = 0
-  let v.using_regex      = 0
+  let v.regex_mode       = 0
   let v.multiline        = 0
   let v.yanked           = 0
   let v.merge            = 0
@@ -95,7 +95,6 @@ fun! vm#variables#init() abort
   let v.find_all_overlap = 0
   let v.dot              = ''
   let v.no_search        = 0
-  let v.visual_regex     = 0
   let v.use_register     = v.def_reg
   let v.deleting         = 0
   let v.vmarks           = [getpos("'<"), getpos("'>")]
@@ -141,7 +140,7 @@ fun! vm#variables#reset_globals()
   let b:VM_Selection = {}
   let g:Vm.buffer = 0
   let g:Vm.extend_mode = 0
-  let g:Vm.finding = 0
+  let g:Vm.find_operator = 0
 endfun
 
 " vim: et ts=2 sw=2 sts=2 tw=79 :

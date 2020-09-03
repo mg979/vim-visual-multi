@@ -213,9 +213,9 @@ fun! vm#icmds#goto(next) abort
   let s:v.single_mode_running = 1
   let t = ":call b:VM_Selection.Insert.key('".s:V.Insert.type."')\<cr>"
   if a:next
-      return "\<Esc>:call vm#commands#find_next(0,1)\<cr>".t
+      return "\<Esc>:call g:Vm.cmd.find_next(0,1)\<cr>".t
   else
-      return "\<Esc>:call vm#commands#find_prev(0,1)\<cr>".t
+      return "\<Esc>:call g:Vm.cmd.find_prev(0,1)\<cr>".t
   endif
 endfun
 

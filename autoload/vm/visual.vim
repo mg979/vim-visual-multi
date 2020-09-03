@@ -99,7 +99,7 @@ fun! vm#visual#split() abort
 
     "backup old patterns and create new regions
     let oldsearch = copy(s:v.search)
-    call s:V.Search.get_slash_reg(pat)
+    call s:V.Search.slash_reg(pat)
 
     call s:G.get_all_regions(start.A, stop.B)
 
@@ -149,7 +149,7 @@ fun! s:vblock(extend) abort
     call s:create_cursors(start, end)
 
     if a:extend && block_width
-        call vm#commands#motion('l', block_width, 1, 0)
+        call g:Vm.cmd.motion('l', block_width, 1)
     endif
     return !inverted
 endfun
@@ -198,7 +198,7 @@ fun! s:create_cursors(start, end) abort
 
     if ( a:end[0] > a:start[0] )
         while line('.') < a:end[0]
-            call vm#commands#add_cursor_down(0, 1)
+            call g:Vm.cmd.add_cursor_down(0, 1)
         endwhile
 
     elseif empty(s:G.region_at_pos())

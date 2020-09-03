@@ -30,91 +30,76 @@ call vm#plugs#buffer()
 " b:VM_Selection (= s:V) contains Regions, Vars (= s:v = plugin variables),
 " function classes (Global, Funcs, Edit, Search, Insert, etc)
 
-" Parameters:
-"   cmd_type: if > 0, the search register will be set to an empty string
-"             adding cursors uses 1, starting regex uses 2
-
-fun! vm#init_buffer(cmd_type) abort
+fun! vm#init_buffer() abort
     " If already initialized, return current instance.
-    let v:errmsg = ""
-    try
-        if exists('b:visual_multi') | return s:V | endif
+    if exists('b:visual_multi') | return s:V | endif
 
-        let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Bytes': {}}
-        let b:visual_multi = 1
+    let b:VM_Selection = {'Vars': {}, 'Regions': [], 'Bytes': {}}
+    let b:visual_multi = 1
 
-        let b:VM_Debug  = get(b:, 'VM_Debug', {'lines': []})
-        let b:VM_Backup = {'ticks': [], 'last': 0, 'first': undotree().seq_cur}
+    let b:VM_Debug  = get(b:, 'VM_Debug', {'lines': []})
+    let b:VM_Backup = {'ticks': [], 'last': 0, 'first': undotree().seq_cur}
 
-        " funcs script must be sourced first
-        let s:V       = b:VM_Selection
-        let s:v       = s:V.Vars
-        let s:V.Funcs = vm#funcs#init()
+    " funcs script must be sourced first
+    let s:V       = b:VM_Selection
+    let s:v       = s:V.Vars
+    let s:V.Funcs = vm#funcs#init()
 
-        " init plugin variables
-        call vm#variables#init()
+    " init plugin variables
+    call vm#variables#init()
 
-        if get(g:, 'VM_filesize_limit', 0) && s:V.Funcs.size() > gVM_filesize_limit
-            call vm#variables#reset_globals()
-            let v:errmsg = 'VM cannot start, buffer too big.'
-            return v:errmsg
-        endif
-
-        " init search register
-        let @/ = a:cmd_type ? '' : @/
-
-        " hooks and compatibility tweaks before applying mappings
-        call vm#comp#init()
-
-        " init classes
-        let s:V.Maps   = vm#maps#init()
-        let s:V.Global = vm#global#init()
-        let s:V.Search = vm#search#init()
-        let s:V.Edit   = vm#edit#init()
-        let s:V.Insert = vm#insert#init()
-        let s:V.Case   = vm#special#case#init()
-
-        call s:V.Maps.enable()
-
-        call vm#region#init()
-        call vm#commands#init()
-        call vm#operators#init()
-        call vm#special#commands#init()
-
-        call vm#augroup(0)
-        call vm#au_cursor(0)
-
-        " set vim variables
-        call vm#variables#set()
-
-        if !empty(g:VM_highlight_matches)
-            if !has_key(g:Vm, 'Search')
-                call vm#themes#init()
-            else
-                call vm#themes#hi()
-            endif
-            hi clear Search
-            exe g:Vm.Search
-        endif
-
-        if !v:hlsearch && a:cmd_type != 2
-            call feedkeys("\<Plug>(VM-Hls)")
-        endif
-
-        call s:V.Funcs.set_statusline(0)
-
-        " backup sync settings for the buffer
-        if !exists('b:VM_sync_minlines')
-            let b:VM_sync_minlines = s:V.Funcs.sync_minlines()
-        endif
-
-        let g:Vm.buffer = bufnr('')
-        return s:V
-    catch
-        let v:errmsg = 'VM cannot start, unhandled exception.'
+    if get(g:, 'VM_filesize_limit', 0) && s:V.Funcs.size() > gVM_filesize_limit
         call vm#variables#reset_globals()
+        let v:errmsg = 'VM cannot start, buffer too big.'
         return v:errmsg
-    endtry
+    endif
+
+    " clear search register
+    let @/ = ''
+
+    " hooks and compatibility tweaks before applying mappings
+    call vm#comp#init()
+
+    " init classes
+    let s:V.Maps   = vm#maps#init()
+    let s:V.Global = vm#global#init()
+    let s:V.Search = vm#search#init()
+    let s:V.Edit   = vm#edit#init()
+    let s:V.Insert = vm#insert#init()
+    let s:V.Case   = vm#special#case#init()
+
+    call s:V.Maps.enable()
+
+    call vm#region#init()
+    call vm#commands#init()
+    call vm#operators#init()
+    call vm#special#commands#init()
+
+    call vm#augroup(0)
+    call vm#au_cursor(0)
+
+    " set vim variables
+    call vm#variables#set()
+
+    if !empty(g:VM_highlight_matches)
+        if !has_key(g:Vm, 'Search')
+            call vm#themes#init()
+        else
+            call vm#themes#hi()
+        endif
+        hi clear Search
+        exe g:Vm.Search
+    endif
+
+    call s:V.Funcs.set_statusline(0)
+
+    " backup sync settings for the buffer
+    if !exists('b:VM_sync_minlines')
+        let b:VM_sync_minlines = s:V.Funcs.sync_minlines()
+    endif
+
+    let g:Vm.buffer = bufnr('')
+    return s:V
 endfun
 
 
@@ -124,7 +109,7 @@ endfun
 
 fun! vm#reset(...)
     call vm#variables#reset()
-    call vm#commands#regex_reset()
+    call g:Vm.cmd.regex_reset()
 
     call s:V.Global.remove_highlight()
     call s:V.Global.backup_last_regions()
@@ -163,7 +148,7 @@ fun! vm#reset(...)
     "exiting manually
     if !get(g:, 'VM_silent_exit', 0) && !a:0
         call s:V.Funcs.msg('Exited Visual-Multi.')
-    else
+    elseif a:1 != 2
         echo "\r"
     endif
 

@@ -6,34 +6,34 @@ fun! vm#plugs#permanent() abort
   " Plugs and mappings for non <buffer> keys.
   xmap <expr><silent>     <Plug>(VM-Visual-Find)             vm#operators#find(1, 1)
 
-  nnoremap <silent>       <Plug>(VM-Add-Cursor-At-Pos)       :call vm#commands#add_cursor_at_pos(0)<cr>
-  nnoremap <silent>       <Plug>(VM-Add-Cursor-At-Word)      :call vm#commands#add_cursor_at_word(1, 1)<cr>
-  nnoremap <silent>       <Plug>(VM-Add-Cursor-Down)         :<C-u>call vm#commands#add_cursor_down(0, v:count1)<cr>
-  nnoremap <silent>       <Plug>(VM-Add-Cursor-Up)           :<C-u>call vm#commands#add_cursor_up(0, v:count1)<cr>
-  nnoremap <silent>       <Plug>(VM-Select-Cursor-Down)      :<C-u>call vm#commands#add_cursor_down(1, v:count1)<cr>
-  nnoremap <silent>       <Plug>(VM-Select-Cursor-Up)        :<C-u>call vm#commands#add_cursor_up(1, v:count1)<cr>
+  nnoremap <silent>       <Plug>(VM-Add-Cursor-At-Pos)       :call g:Vm.run('add_cursor_at_pos', 0)<cr>
+  nnoremap <silent>       <Plug>(VM-Add-Cursor-At-Word)      :call g:Vm.run('add_cursor_at_word', 1, 1)<cr>
+  nnoremap <silent>       <Plug>(VM-Add-Cursor-Down)         :<C-u>call g:Vm.run('add_cursor_down', 0, v:count1)<cr>
+  nnoremap <silent>       <Plug>(VM-Add-Cursor-Up)           :<C-u>call g:Vm.run('add_cursor_up', 0, v:count1)<cr>
+  nnoremap <silent>       <Plug>(VM-Select-Cursor-Down)      :<C-u>call g:Vm.run('add_cursor_down', 1, v:count1)<cr>
+  nnoremap <silent>       <Plug>(VM-Select-Cursor-Up)        :<C-u>call g:Vm.run('add_cursor_up', 1, v:count1)<cr>
 
-  nnoremap <silent>       <Plug>(VM-Reselect-Last)           :call vm#commands#reselect_last()<cr>
-  nnoremap <silent>       <Plug>(VM-Select-All)              :call vm#commands#find_all(0, 1)<cr>
+  nnoremap <silent>       <Plug>(VM-Reselect-Last)           :call vm#commands#reselect_last(exists('b:visual_multi)'))<cr>
+  nnoremap <silent>       <Plug>(VM-Select-All)              :call g:Vm.run('find_all', 0, 1)<cr>
   xnoremap <silent><expr> <Plug>(VM-Visual-All)              <sid>Visual('all')
-  xnoremap <silent>       <Plug>(VM-Visual-Cursors)          <Esc>:call vm#commands#visual_cursors()<cr>
-  xnoremap <silent>       <Plug>(VM-Visual-Add)              <Esc>:call vm#commands#visual_add()<cr>
+  xnoremap <silent>       <Plug>(VM-Visual-Cursors)          <Esc>:call g:Vm.run('visual_cursors')<cr>
+  xnoremap <silent>       <Plug>(VM-Visual-Add)              <Esc>:call g:Vm.run('visual_add')<cr>
   xnoremap <silent>       <Plug>(VM-Visual-Reduce)           :<c-u>call vm#visual#reduce()<cr>
 
-  nnoremap <silent>       <Plug>(VM-Find-Under)              :<c-u>call vm#commands#ctrln(v:count1)<cr>
+  nnoremap <silent>       <Plug>(VM-Find-Under)              :<c-u>call g:Vm.run('ctrln', v:count1)<cr>
   xnoremap <silent><expr> <Plug>(VM-Find-Subword-Under)      <sid>Visual('under')
 
-  nnoremap <silent>       <Plug>(VM-Start-Regex-Search)      @=vm#commands#find_by_regex(1)<cr>
-  xnoremap <silent>       <Plug>(VM-Visual-Regex)            :call vm#commands#find_by_regex(2)<cr>:call feedkeys('/', 'n')<cr>
+  nnoremap <silent>       <Plug>(VM-Start-Regex-Search)      @=g:Vm.run('find_by_regex', 1)<cr>
+  xnoremap <silent>       <Plug>(VM-Visual-Regex)            <esc>@=g:Vm.run('find_by_regex', 2)<cr>
 
   nnoremap <silent>       <Plug>(VM-Left-Mouse)              <LeftMouse>
   nmap     <silent>       <Plug>(VM-Mouse-Cursor)            <Plug>(VM-Left-Mouse)<Plug>(VM-Add-Cursor-At-Pos)
   nmap     <silent>       <Plug>(VM-Mouse-Word)              <Plug>(VM-Left-Mouse)<Plug>(VM-Find-Under)
-  nnoremap <silent>       <Plug>(VM-Mouse-Column)            :call vm#commands#mouse_column()<cr>
+  nnoremap <silent>       <Plug>(VM-Mouse-Column)            :call g:Vm.run('mouse_column')<cr>
 
   let g:Vm.select_motions = ['h', 'j', 'k', 'l', 'w', 'W', 'b', 'B', 'e', 'E', 'ge', 'gE', 'BBW']
   for m in g:Vm.select_motions
-    exe "nnoremap <silent> <Plug>(VM-Select-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 1, 0)\<cr>"
+    exe "nnoremap <silent> <Plug>(VM-Select-".m.") :\<C-u>call g:Vm.run('motion', '".m."', v:count1, 1)\<cr>"
   endfor
 endfun
 
@@ -49,9 +49,9 @@ fun! vm#plugs#buffer() abort
 
   xnoremap <silent>       <Plug>(VM-Visual-Subtract)         :<c-u>call vm#visual#subtract(visualmode())<cr>
   nnoremap                <Plug>(VM-Split-Regions)           :<c-u>call vm#visual#split()<cr>
-  nnoremap <silent>       <Plug>(VM-Remove-Empty-Lines)      :<c-u>call vm#commands#remove_empty_lines()<cr>
-  nnoremap <silent>       <Plug>(VM-Goto-Regex)              :<c-u>call vm#commands#regex_motion('', v:count1, 0)<cr>
-  nnoremap <silent>       <Plug>(VM-Goto-Regex!)             :<c-u>call vm#commands#regex_motion('', v:count1, 1)<cr>
+  nnoremap <silent>       <Plug>(VM-Remove-Empty-Lines)      :<c-u>call g:Vm.cmd.remove_empty_lines()<cr>
+  nnoremap <silent>       <Plug>(VM-Goto-Regex)              :<c-u>call g:Vm.cmd.regex_motion('', v:count1, 0)<cr>
+  nnoremap <silent>       <Plug>(VM-Goto-Regex!)             :<c-u>call g:Vm.cmd.regex_motion('', v:count1, 1)<cr>
 
   nnoremap <silent>       <Plug>(VM-Toggle-Mappings)         :call b:VM_Selection.Maps.mappings_toggle()<cr>
   nnoremap <silent>       <Plug>(VM-Toggle-Multiline)        :call b:VM_Selection.Funcs.toggle_option('multiline')<cr>
@@ -60,7 +60,7 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Case-Setting)            :call b:VM_Selection.Search.case()<cr>
   nnoremap <silent>       <Plug>(VM-Rewrite-Last-Search)     :call b:VM_Selection.Search.rewrite(1)<cr>
   nnoremap <silent>       <Plug>(VM-Rewrite-All-Search)      :call b:VM_Selection.Search.rewrite(0)<cr>
-  nnoremap <silent>       <Plug>(VM-Read-From-Search)        :call b:VM_Selection.Search.get_slash_reg()<cr>
+  nnoremap <silent>       <Plug>(VM-Read-From-Search)        :call b:VM_Selection.Search.slash_reg()<cr>
   nnoremap <silent>       <Plug>(VM-Add-Search)              :call b:VM_Selection.Search.get_from_region()<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Search)           :call b:VM_Selection.Search.remove(0)<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Search-Regions)   :call b:VM_Selection.Search.remove(1)<cr>
@@ -77,41 +77,36 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>       <Plug>(VM-Merge-Regions)           :call b:VM_Selection.Global.merge_regions()<cr>
   nnoremap <silent>       <Plug>(VM-Switch-Mode)             :call b:VM_Selection.Global.change_mode(1)<cr>
   nnoremap <silent>       <Plug>(VM-Exit)                    :<c-u><C-r>=b:VM_Selection.Vars.noh<CR>call vm#reset()<cr>
-  nnoremap <silent>       <Plug>(VM-Undo)                    :call vm#commands#undo()<cr>
-  nnoremap <silent>       <Plug>(VM-Redo)                    :call vm#commands#redo()<cr>
+  nnoremap <silent>       <Plug>(VM-Undo)                    :call g:Vm.cmd.undo()<cr>
+  nnoremap <silent>       <Plug>(VM-Redo)                    :call g:Vm.cmd.redo()<cr>
 
-  nnoremap <silent>       <Plug>(VM-Invert-Direction)        :call vm#commands#invert_direction(1)<cr>
-  nnoremap <silent>       <Plug>(VM-Goto-Next)               :call vm#commands#find_next(0, 1)<cr>
-  nnoremap <silent>       <Plug>(VM-Goto-Prev)               :call vm#commands#find_prev(0, 1)<cr>
-  nnoremap <silent>       <Plug>(VM-Find-Next)               :call vm#commands#find_next(0, 0)<cr>
-  nnoremap <silent>       <Plug>(VM-Find-Prev)               :call vm#commands#find_prev(0, 0)<cr>
-  nnoremap <silent>       <Plug>(VM-Seek-Up)                 :call vm#commands#seek_up()<cr>
-  nnoremap <silent>       <Plug>(VM-Seek-Down)               :call vm#commands#seek_down()<cr>
-  nnoremap <silent>       <Plug>(VM-Skip-Region)             :call vm#commands#skip(0)<cr>
-  nnoremap <silent>       <Plug>(VM-Remove-Region)           :call vm#commands#skip(1)<cr>
+  nnoremap <silent>       <Plug>(VM-Invert-Direction)        :call g:Vm.run('invert_direction', 1)<cr>
+  nnoremap <silent>       <Plug>(VM-Goto-Next)               :call g:Vm.run('find_next', 0, 1)<cr>
+  nnoremap <silent>       <Plug>(VM-Goto-Prev)               :call g:Vm.run('find_prev', 0, 1)<cr>
+  nnoremap <silent>       <Plug>(VM-Find-Next)               :call g:Vm.run('find_next', 0, 0)<cr>
+  nnoremap <silent>       <Plug>(VM-Find-Prev)               :call g:Vm.run('find_prev', 0, 0)<cr>
+  nnoremap <silent>       <Plug>(VM-Seek-Up)                 :call g:Vm.run('seek_up')<cr>
+  nnoremap <silent>       <Plug>(VM-Seek-Down)               :call g:Vm.run('seek_down')<cr>
+  nnoremap <silent>       <Plug>(VM-Skip-Region)             :call g:Vm.run('skip', 0)<cr>
+  nnoremap <silent>       <Plug>(VM-Remove-Region)           :call g:Vm.run('skip', 1)<cr>
   nnoremap <silent>       <Plug>(VM-Remove-Last-Region)      :call b:VM_Selection.Global.remove_last_region()<cr>
-  nnoremap <silent>       <Plug>(VM-Remove-Every-n-Regions)  :<c-u>call vm#commands#remove_every_n_regions(v:count)<cr>
+  nnoremap <silent>       <Plug>(VM-Remove-Every-n-Regions)  :<c-u>call g:Vm.cmd.remove_every_n_regions(v:count)<cr>
   nnoremap <silent>       <Plug>(VM-Show-Infoline)           :call b:VM_Selection.Funcs.infoline()<cr>
   nnoremap <silent>       <Plug>(VM-One-Per-Line)            :call b:VM_Selection.Global.one_region_per_line()<bar>call b:VM_Selection.Global.update_and_select_region()<cr>
 
   nnoremap <silent>       <Plug>(VM-Hls)                     :set hls<cr>
 
   for m in g:Vm.motions
-    exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 0, 0)\<cr>"
-    exe "nnoremap <silent> <Plug>(VM-Single-Motion-".m.") :\<C-u>call vm#commands#motion('".m."',v:count1, 0, 1)\<cr>"
+    exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :\<C-u>call g:Vm.cmd.motion('".m."', v:count1, 0)\<cr>"
   endfor
 
   for m in g:Vm.find_motions
-    exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :call vm#commands#find_motion('".m."', '')\<cr>"
+    exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :call g:Vm.cmd.find_motion('".m."', '')\<cr>"
   endfor
 
   let tobj = g:Vm.tobj_motions
   for m in keys(tobj)
-    exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :\<C-u>call vm#commands#motion('".tobj[m]."', v:count1, 0, 0)\<cr>"
-  endfor
-
-  for m in g:Vm.select_motions
-    exe "nnoremap <silent> <Plug>(VM-Single-Select-".m.") :\<C-u>call vm#commands#motion('".m."', v:count1, 1, 1)\<cr>"
+    exe "nnoremap <silent> <Plug>(VM-Motion-".m.") :\<C-u>call g:Vm.cmd.motion('".tobj[m]."', v:count1, 0)\<cr>"
   endfor
 
   "make a dict with custom user operators, if they have been defined
@@ -144,10 +139,8 @@ fun! vm#plugs#buffer() abort
     exe "nnoremap <silent> <Plug>(VM-".m.") ".cm[m]
   endfor
 
-  nnoremap <silent>        <Plug>(VM-Shrink)                  :call vm#commands#shrink_or_enlarge(1)<cr>
-  nnoremap <silent>        <Plug>(VM-Enlarge)                 :call vm#commands#shrink_or_enlarge(0)<cr>
-  nnoremap <silent>        <Plug>(VM-Merge-To-Eol)            :call vm#commands#merge_to_beol(1, 0)<cr>
-  nnoremap <silent>        <Plug>(VM-Merge-To-Bol)            :call vm#commands#merge_to_beol(0, 0)<cr>
+  nnoremap <silent>        <Plug>(VM-Shrink)                  :call g:Vm.cmd.shrink_or_enlarge(1)<cr>
+  nnoremap <silent>        <Plug>(VM-Enlarge)                 :call g:Vm.cmd.shrink_or_enlarge(0)<cr>
 
   "Edit commands
   nnoremap <silent>        <Plug>(VM-D)                       :<C-u>call vm#cursors#operation('d', 0, v:register, 'd$')<cr>
@@ -159,10 +152,10 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>        <Plug>(VM-&)                       :<C-u>call b:VM_Selection.Edit.run_normal('&', {'recursive': 0, 'silent': 1})<cr>
   nnoremap <silent>        <Plug>(VM-Del)                     :<C-u>call b:VM_Selection.Edit.run_normal('x', {'count': v:count1, 'recursive': 0})<cr>
   nnoremap <silent>        <Plug>(VM-Dot)                     :<C-u>call b:VM_Selection.Edit.dot()<cr>
-  nnoremap <silent>        <Plug>(VM-Increase)                :<C-u>call vm#commands#increase_or_decrease(1, 0, v:count1)<cr>
-  nnoremap <silent>        <Plug>(VM-Decrease)                :<C-u>call vm#commands#increase_or_decrease(0, 0, v:count1)<cr>
-  nnoremap <silent>        <Plug>(VM-Alpha-Increase)          :<C-u>call vm#commands#increase_or_decrease(1, 1, v:count1)<cr>
-  nnoremap <silent>        <Plug>(VM-Alpha-Decrease)          :<C-u>call vm#commands#increase_or_decrease(0, 1, v:count1)<cr>
+  nnoremap <silent>        <Plug>(VM-Increase)                :<C-u>call g:Vm.cmd.increase_or_decrease(1, 0, v:count1)<cr>
+  nnoremap <silent>        <Plug>(VM-Decrease)                :<C-u>call g:Vm.cmd.increase_or_decrease(0, 0, v:count1)<cr>
+  nnoremap <silent>        <Plug>(VM-Alpha-Increase)          :<C-u>call g:Vm.cmd.increase_or_decrease(1, 1, v:count1)<cr>
+  nnoremap <silent>        <Plug>(VM-Alpha-Decrease)          :<C-u>call g:Vm.cmd.increase_or_decrease(0, 1, v:count1)<cr>
   nnoremap <silent>        <Plug>(VM-a)                       :<C-u>call b:VM_Selection.Insert.key('a')<cr>
   nnoremap <silent>        <Plug>(VM-A)                       :<C-u>call b:VM_Selection.Insert.key('A')<cr>
   nnoremap <silent>        <Plug>(VM-i)                       :<C-u>call b:VM_Selection.Insert.key('i')<cr>
@@ -191,9 +184,9 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>        <Plug>(VM-Rotate)                  :call b:VM_Selection.Edit.rotate()<cr>
   nnoremap <silent>        <Plug>(VM-Duplicate)               :call b:VM_Selection.Edit.duplicate()<cr>
 
-  nnoremap <silent>        <Plug>(VM-Align)                   :<C-u>call vm#commands#align()<cr>
-  nnoremap <silent>        <Plug>(VM-Align-Char)              :<C-u>call vm#commands#align_char(v:count1)<cr>
-  nnoremap <silent>        <Plug>(VM-Align-Regex)             :<C-u>call vm#commands#align_regex()<cr>
+  nnoremap <silent>        <Plug>(VM-Align)                   :<C-u>call g:Vm.cmd.align()<cr>
+  nnoremap <silent>        <Plug>(VM-Align-Char)              :<C-u>call g:Vm.cmd.align_char(v:count1)<cr>
+  nnoremap <silent>        <Plug>(VM-Align-Regex)             :<C-u>call g:Vm.cmd.align_regex()<cr>
   nnoremap <silent>        <Plug>(VM-Numbers)                 :<C-u>call b:VM_Selection.Edit.numbers(v:count1, 0)<cr>
   nnoremap <silent>        <Plug>(VM-Numbers-Append)          :<C-u>call b:VM_Selection.Edit.numbers(v:count1, 1)<cr>
   nnoremap <silent>        <Plug>(VM-Zero-Numbers)            :<C-u>call b:VM_Selection.Edit.numbers(v:count, 0)<cr>
@@ -239,9 +232,9 @@ fun! vm#plugs#buffer() abort
   inoremap <silent><expr> <Plug>(VM-I-Replace)          <sid>Insert('ins')
 
   "Cmdline
-  nnoremap         <expr> <Plug>(VM-:)                  vm#commands#regex_reset(':')
-  nnoremap         <expr> <Plug>(VM-/)                  vm#commands#regex_reset('/')
-  nnoremap         <expr> <Plug>(VM-?)                  vm#commands#regex_reset('?')
+  nnoremap         <expr> <Plug>(VM-:)                  g:Vm.cmd.regex_reset(':')
+  nnoremap         <expr> <Plug>(VM-/)                  g:Vm.cmd.regex_reset('/')
+  nnoremap         <expr> <Plug>(VM-?)                  g:Vm.cmd.regex_reset('?')
 endfun
 
 
@@ -283,14 +276,14 @@ fun! s:Insert(key) abort
   endif
 
   if index(split('hjklwbWB0', '\zs'), a:key) >= 0
-    return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
+    return "\<esc>:call g:Vm.cmd.motion('".a:key."', 1, 0)\<cr>".i
   endif
 
   return {
         \ 'cr': "\<esc>:call vm#icmds#return()\<cr>".i,
         \ 'x': "\<esc>:call vm#icmds#x('".a:key."')\<cr>".i,
-        \ 'ge': "\<esc>:call vm#commands#motion('h".a:key."l', 1, 0, 0)\<cr>".i,
-        \ 'e': "\<esc>:call vm#commands#motion('".a:key."l', 1, 0, 0)\<cr>".i,
+        \ 'ge': "\<esc>:call g:Vm.cmd.motion('h".a:key."l', 1, 0)\<cr>".i,
+        \ 'e': "\<esc>:call g:Vm.cmd.motion('".a:key."l', 1, 0)\<cr>".i,
         \ 'a': "\<esc>:call b:VM_Selection.Insert.key('A')\<cr>",
         \ 'i': "\<esc>:call b:VM_Selection.Insert.key('I')\<cr>",
         \ 'c-v': "\<esc>:call vm#icmds#paste()\<cr>".a,
@@ -307,7 +300,7 @@ fun! s:Replace(key) abort
   let i  = ":call b:VM_Selection.Insert.key('i')\<cr>"
 
   if index(split('hl', '\zs'), a:key) >= 0
-    return "\<esc>:call vm#commands#motion('".a:key."', 1, 0, 0)\<cr>".i
+    return "\<esc>:call g:Vm.cmd.motion('".a:key."', 1, 0)\<cr>".i
   endif
 
   let keys = {
@@ -343,8 +336,8 @@ fun! s:Visual(cmd) abort
     let r = ''
   endif
   return a:cmd == 'all'
-        \ ? "y:call vm#commands#find_all(1, 0)\<cr>".r."`]"
-        \ : "y:call vm#commands#find_under(1, 0)\<cr>".r."`]"
+        \ ? "y:call g:Vm.run('find_all', 1, 0)\<cr>".r."`]"
+        \ : "y:call g:Vm.run('find_under', 1, 0)\<cr>".r."`]"
 endfun
 
 

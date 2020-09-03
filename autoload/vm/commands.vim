@@ -4,33 +4,6 @@
 " Functions in this script are associated with plugs, all commands that can
 " start VM have their entry point here.
 
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Function: s:init
-" Most commands call this function to ensure VM is initialized.
-" @param whole: use word boundaries
-" @param type: 0 if a pattern will be added, 1 if not, 2 if using regex
-" @param extend_mode: 1 if forcing extend mode
-" Returns: 1 if VM was already active when called
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-""
-fun! s:init(whole, type, extend_mode) abort
-    " Ensure the buffer is initialized, set starting options.
-    if a:extend_mode | let g:Vm.extend_mode = 1 | endif
-
-    if g:Vm.buffer
-        call s:F.Scroll.get()
-        if s:v.using_regex | call vm#commands#regex_reset() | endif
-        let s:v.whole_word = a:whole
-        return 1    " return true if already initialized
-    else
-        let error = vm#init_buffer(a:type)
-        if type(error) == v:t_string | throw error | endif
-        call s:F.Scroll.get()
-        let s:v.whole_word = a:whole
-    endif
-endfun
-
-
 fun! vm#commands#init() abort
     " Variables initialization.
     let s:V        = b:VM_Selection
@@ -42,12 +15,45 @@ fun! vm#commands#init() abort
 endfun
 
 
-fun! s:set_extend_mode(X) abort
-    " If just starting, enable extend mode if appropriate.
-
-    if s:X() || a:X | return s:init(0, 1, 1)
-    else            | return s:init(0, 1, 0)
-    endif
+""
+" Function: vm#commands#run
+" Plugs that can start VM call this function to ensure VM is initialized.
+" Does also error checking. Quits VM if there are no active regions and some
+" command is executed.
+"
+" @param cmd: the g:Vm.cmd function that will be called
+" @param ...: arguments for the function to call
+" Returns: the same return value of the called function.
+""
+fun! vm#commands#run(cmd, ...) abort
+    let v:errmsg = ""
+    try
+        let args = join(map(copy(a:000), 'string(v:val)'), ',')
+        let cmd  = printf("g:Vm.cmd.%s(%s)", a:cmd, args)
+        if exists('b:visual_multi')
+            if s:F.should_quit()
+                call s:F.msg('[visual-multi] no regions, quit')
+                VMClear
+                return v:null
+            endif
+            let s:v.whole_word = 0
+            call s:F.Scroll.get()
+            if s:v.regex_mode | call g:Vm.cmd.regex_reset() | endif
+            return eval(cmd)
+        else
+            call vm#init_buffer()
+            if !v:hlsearch && a:cmd != 'find_by_regex'
+                call feedkeys("\<Plug>(VM-Hls)")
+            endif
+            return eval(cmd)
+        endif
+    catch
+        throw '[visual-multi] Error while starting ' . a:cmd . ', ' . args
+        echohl WarningMsg
+        echom v:errmsg
+        echohl None
+        VMClear
+    endtry
 endfun
 
 
@@ -63,18 +69,15 @@ fun! s:skip_shorter_lines() abort
     "   col      = 1
     "   endline  = 1
     " and the line would be skipped: check endline as 2, so that the cursor is added
-
     if get(g:, 'VM_skip_shorter_lines', 1)
         let vcol    = s:v.vertical_col
         let col     = virtcol('.')
         let endline = get(g:, 'VM_skip_empty_lines', 0) ? virtcol('$') :
                     \                                     virtcol('$') > 1 ?
                     \                                     virtcol('$') : 2
-
         "skip line
         if ( col < vcol || col == endline ) | return 1 | endif
     endif
-
     call s:G.new_cursor()
 endfun
 
@@ -87,17 +90,17 @@ fun! s:went_too_far() abort
 endfun
 
 
-fun! vm#commands#add_cursor_at_pos(extend) abort
+fun! g:Vm.cmd.add_cursor_at_pos(extend) abort
     " Add/toggle a single cursor at current position.
-    call s:set_extend_mode(a:extend)
+    if a:extend | call s:extend_mode() | endif
     call s:G.new_cursor(1)
 endfun
 
 
-fun! vm#commands#add_cursor_down(extend, count) abort
+fun! g:Vm.cmd.add_cursor_down(extend, count) abort
     " Add cursors vertically, downwards.
     if s:last_line() | return | endif
-    call s:set_extend_mode(a:extend)
+    if a:extend | call s:extend_mode() | endif
     let s:v.vertical_col = s:F.get_vertcol()
     call s:G.new_cursor()
     let N = a:count
@@ -112,10 +115,10 @@ fun! vm#commands#add_cursor_down(extend, count) abort
 endfun
 
 
-fun! vm#commands#add_cursor_up(extend, count) abort
+fun! g:Vm.cmd.add_cursor_up(extend, count) abort
     " Add cursors vertically, upwards.
     if s:first_line() | return | endif
-    call s:set_extend_mode(a:extend)
+    if a:extend | call s:extend_mode() | endif
     let s:v.vertical_col = s:F.get_vertcol()
     call s:G.new_cursor()
     let N = a:count
@@ -130,10 +133,8 @@ fun! vm#commands#add_cursor_up(extend, count) abort
 endfun
 
 
-fun! vm#commands#add_cursor_at_word(yank, search) abort
+fun! g:Vm.cmd.add_cursor_at_word(yank, search) abort
     " Add a pattern for current word, place cursor at word begin.
-    call s:init(0, 1, 0)
-
     if a:yank
         keepjumps normal! viwy`[
     endif
@@ -148,71 +149,72 @@ endfun
 " Find by regex
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#find_by_regex(mode) abort
+fun! g:Vm.cmd.find_by_regex(mode) abort
     " Entry point for VM regex search.
-    if !g:Vm.buffer | call s:init(0, 2, 1) | endif
-    let s:v.using_regex = a:mode
+    " FIXME: there is currently a problem: if no pattern is found,
+    " regex_done() isn't called after <CR> because the error prevents it.
+    " So you can be in VM with 0 regions, and trying to run VM commands will
+    " cause an error. To prevent this I should add checks or try blocks
+    " everywhere, and I'm not going to do this. As a workaround, I'm calling
+    " many plugs with g:Vm.run() instead of g:Vm.cmd, because the former
+    " does error checking.
+    call s:extend_mode()
+    let s:v.regex_mode = a:mode
     let s:v.regex_backup = empty(@/) ? '\%^' : @/
-
-    "if visual regex, reposition cursor to the beginning of the selection
-    if a:mode == 2
-        keepjumps normal! `<
-    endif
 
     "store position, restored if the search will be aborted
     let s:regex_pos = winsaveview()
-
-    cnoremap <silent> <buffer> <cr>  <cr>:call vm#commands#regex_done()<cr>
-    cnoremap <silent><nowait><buffer> <esc><esc> <C-u><C-r>=b:VM_Selection.Vars.regex_backup<cr><esc>:call vm#commands#regex_abort()<cr>
-    cnoremap <silent><nowait><buffer> <esc>      <C-u><C-r>=b:VM_Selection.Vars.regex_backup<cr><esc>:call vm#commands#regex_abort()<cr>
+    cnoremap <silent> <buffer>        <cr>       <CR>@=g:Vm.cmd.regex_done()<CR>
+    cnoremap <silent><nowait><buffer> <esc><esc> <Esc>@=g:Vm.cmd.regex_abort(0)<CR>
+    cnoremap <silent><nowait><buffer> <esc>      <Esc>@=g:Vm.cmd.regex_abort(0)<CR>
     call s:F.special_statusline('VM-REGEX')
-    return '/'
+    " TODO: \%V can't work because the visual marks '<'> are constantly
+    " overwritten by VM, I should restore them between commands
+    return (s:v.regex_mode == 2 ? "'<" : '') . ":set hls\<CR>/"
 endfun
 
 
-fun! vm#commands#regex_done() abort
+""
+" Function: g:Vm.cmd.regex_done
+" This is called when <CR> is pressed in the VM / command line.
+""
+fun! g:Vm.cmd.regex_done() abort
     " Terminate the VM regex mode after having entered search a pattern.
-    let s:v.visual_regex = s:v.using_regex == 2
-    call vm#commands#regex_reset()
+    let visual = s:v.regex_mode == 2
+    call g:Vm.cmd.regex_reset()
+    call s:Search.slash_reg()
 
-    if s:v.visual_regex
-        call s:Search.get_slash_reg()
-        let g:Vm.finding = 1
-        silent keepjumps normal! gv
-        exe "silent normal \<Plug>(VM-Visual-Find)"
-        return
-
-    elseif s:X() | silent keepjumps normal! gny`]
-    else         | silent keepjumps normal! gny
-    endif
-    call s:Search.get_slash_reg()
-
-    if s:X()
-        call s:G.new_region()
+    if visual
+        return "gv" . vm#operators#find(1, 1)
     else
-        call vm#commands#add_cursor_at_word(0, 0)
+        silent keepjumps normal! gny`]
+        call s:G.new_region()
+        return ""
     endif
 endfun
 
 
-fun! vm#commands#regex_abort()
+fun! g:Vm.cmd.regex_abort(not_found)
     " Abort the VM regex mode.
     call winrestview(s:regex_pos)
-    call vm#commands#regex_reset()
+    call g:Vm.cmd.regex_reset()
     if !len(s:R())
-        call feedkeys("\<esc>")
+        VMClear
+    elseif a:not_found
+        call s:F.msg('Pattern not found. ')
     else
         call s:F.msg('Regex search aborted. ')
     endif
+    return ''
 endfun
 
 
-fun! vm#commands#regex_reset(...) abort
+fun! g:Vm.cmd.regex_reset(...) abort
     " Reset the VM regex mode.
     silent! cunmap <buffer> <cr>
     silent! cunmap <buffer> <esc>
     silent! cunmap <buffer> <esc><esc>
-    let s:v.using_regex = 0
+    let s:v.regex_mode = 0
     silent! unlet s:v.statusline_mode
     if a:0 | return a:1 | endif
 endfun
@@ -223,32 +225,36 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
-fun! vm#commands#ctrln(count) abort
+fun! g:Vm.cmd.ctrln(count) abort
     " Ctrl-N command: find word under cursor.
-    call s:init(1, 0, 0)
+    " TODO: remove this option
     let no_reselect = get(g:, 'VM_notify_previously_selected', 0) == 2
 
     if !s:X() && s:is_r()
         let pos = getpos('.')[1:2]
         call vm#operators#select(1, "iw")
-        call s:G.update_and_select_region(pos)
+        return s:G.update_and_select_region(pos)
     else
+        call s:extend_mode()
         for i in range(a:count)
-            call vm#commands#find_under(0, 1, 1)
+            if s:is_r()
+                let r = g:Vm.cmd.find_next(0, 0)
+            else
+                let r = g:Vm.cmd.find_under(0, 1)
+            endif
             if no_reselect && s:v.was_region_at_pos
                 break
             endif
         endfor
+        return r
     endif
 endfun
 
 
-fun! vm#commands#find_under(visual, whole, ...) abort
+fun! g:Vm.cmd.find_under(visual, whole) abort
     " Generic command that adds word under cursor. Used by C-N and variations.
-    call s:init(a:whole, 0, 1)
-
-    "Ctrl-N command
-    if a:0 && s:is_r() | return vm#commands#find_next(0, 0) | endif
+    let s:v.whole_word = a:whole
+    call s:extend_mode()
 
     " yank and create region
     if !a:visual | exe 'normal! viwy`]' | endif
@@ -259,13 +265,14 @@ fun! vm#commands#find_under(visual, whole, ...) abort
     call s:Search.add()
     let R = s:G.new_region()
     call s:G.check_mutliline(0, R)
-    return (a:0 && a:visual)? s:G.region_at_pos() : s:G.merge_overlapping(R)
+    return s:G.merge_overlapping(R)
 endfun
 
 
-fun! vm#commands#find_all(visual, whole) abort
+fun! g:Vm.cmd.find_all(visual, whole) abort
     " Find all words under cursor or occurrences of visual selection.
-    call s:init(a:whole, 0, 1)
+    let s:v.whole_word = a:whole
+    call s:extend_mode()
 
     let pos = getpos('.')[1:2]
     let s:v.eco = 1
@@ -273,11 +280,11 @@ fun! vm#commands#find_all(visual, whole) abort
     if !a:visual
         let R = s:G.region_at_pos()
         if empty(R)
-            let R = vm#commands#find_under(0, a:whole)
+            let R = g:Vm.cmd.find_under(0, a:whole)
         endif
         call s:Search.update_patterns(R.pat)
     else
-        let R = vm#commands#find_under(1, a:whole)
+        let R = g:Vm.cmd.find_under(1, a:whole)
     endif
 
     call s:Search.join()
@@ -319,7 +326,7 @@ fun! s:get_next() abort
         let R = s:G.new_region()
     else
         silent keepjumps normal! ngny`[
-        let R = vm#commands#add_cursor_at_word(0, 0)
+        let R = g:Vm.cmd.add_cursor_at_word(0, 0)
     endif
     let s:v.nav_direction = 1
     return R
@@ -331,7 +338,7 @@ fun! s:get_prev() abort
         let R = s:G.new_region()
     else
         silent keepjumps normal! NgNy`[
-        let R = vm#commands#add_cursor_at_word(0, 0)
+        let R = g:Vm.cmd.add_cursor_at_word(0, 0)
     endif
     let s:v.nav_direction = 0
     return R
@@ -358,10 +365,8 @@ fun! s:skip() abort
     endif
 endfun
 
-fun! vm#commands#find_next(skip, nav) abort
+fun! g:Vm.cmd.find_next(skip, nav) abort
     " Find next region, always downwards.
-    if ( a:nav || a:skip ) && s:F.no_regions() | return | endif
-
     "write search pattern if not navigating and no search set
     if s:X() && !a:nav | call s:Search.add_if_empty() | endif
 
@@ -375,10 +380,8 @@ fun! vm#commands#find_next(skip, nav) abort
 endfun
 
 
-fun! vm#commands#find_prev(skip, nav) abort
+fun! g:Vm.cmd.find_prev(skip, nav) abort
     " Find previous region, always upwards.
-    if ( a:nav || a:skip ) && s:F.no_regions() | return | endif
-
     "write search pattern if not navigating and no search set
     if s:X() && !a:nav | call s:Search.add_if_empty() | endif
 
@@ -400,10 +403,8 @@ fun! vm#commands#find_prev(skip, nav) abort
 endfun
 
 
-fun! vm#commands#skip(just_remove) abort
+fun! g:Vm.cmd.skip(just_remove) abort
     " Skip region and get next, respecting current direction.
-    if s:F.no_regions() | return | endif
-
     if a:just_remove
         let r = s:G.region_at_pos()
         if !empty(r)
@@ -411,9 +412,9 @@ fun! vm#commands#skip(just_remove) abort
         endif
 
     elseif s:v.nav_direction
-        return vm#commands#find_next(1, 0)
+        return g:Vm.cmd.find_next(1, 0)
     else
-        return vm#commands#find_prev(1, 0)
+        return g:Vm.cmd.find_prev(1, 0)
     endif
 endfun
 
@@ -422,10 +423,8 @@ endfun
 " Cycle regions
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#seek_down() abort
+fun! g:Vm.cmd.seek_down() abort
     let nR = len(s:R())
-    if !nR | return | endif
-
     " don't jump down if nothing else to seek
     if !s:F.Scroll.can_see_eof()
         let r = s:G.region_at_pos()
@@ -443,9 +442,7 @@ fun! vm#commands#seek_down() abort
     return s:G.select_region(nR - 1)
 endfun
 
-fun! vm#commands#seek_up() abort
-    if !len(s:R()) | return | endif
-
+fun! g:Vm.cmd.seek_up() abort
     " don't jump up if nothing else to seek
     if !s:F.Scroll.can_see_bof()
         let r = s:G.region_at_pos()
@@ -469,18 +466,12 @@ endfun
 " Motion commands
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#motion(motion, count, select, single) abort
+fun! g:Vm.cmd.motion(motion, count, extend) abort
     " Entry point for motions in VM.
-    call s:init(0, 1, a:select)
+    if a:extend | call s:extend_mode() | endif
 
-    "create cursor if needed:
-    " - VM hasn't started yet
-    " - there are no regions
-    " - called with (single_region) and cursor not on a region
-
-    if !g:Vm.buffer || s:F.no_regions() || ( a:single && !s:is_r() )
-        call s:G.new_cursor()
-    endif
+    "create cursor if needed
+    if !len(s:R()) | call s:G.new_cursor() | endif
 
     "-----------------------------------------------------------------------
 
@@ -492,32 +483,28 @@ fun! vm#commands#motion(motion, count, select, single) abort
 
     "-----------------------------------------------------------------------
 
-    if s:symbol()          | let s:v.merge = 1          | endif
-    if a:select && !s:X()  | let g:Vm.extend_mode = 1   | endif
+    if s:symbol() | let s:v.merge = 1 | endif
 
-    if a:select && !s:v.multiline && s:vertical()
+    if a:extend && !s:v.multiline && s:vertical()
         call s:F.toggle_option('multiline')
     endif
 
-    call s:call_motion(a:single)
+    call s:call_motion()
 endfun
 
 
-fun! vm#commands#merge_to_beol(eol) abort
+fun! g:Vm.cmd.merge_motion(m) abort
     " Entry point for 0/^/$ motions.
-    if s:F.no_regions() | return | endif
     call s:G.cursor_mode()
 
-    let s:v.motion = a:eol? "\<End>" : '^'
+    let s:v.motion = a:m
     let s:v.merge = 1
     call s:call_motion()
 endfun
 
 
-fun! vm#commands#find_motion(motion, char) abort
+fun! g:Vm.cmd.find_motion(motion, char) abort
     " Entry point for f/F/t/T motions.
-    if s:F.no_regions() | return | endif
-
     if a:char != ''
         let s:v.motion = a:motion.a:char
     else
@@ -528,10 +515,8 @@ fun! vm#commands#find_motion(motion, char) abort
 endfun
 
 
-fun! vm#commands#regex_motion(regex, count, remove) abort
+fun! g:Vm.cmd.regex_motion(regex, count, remove) abort
     " Entry point for Goto-Regex motion.
-    if s:F.no_regions() | return | endif
-
     let regex = empty(a:regex) ? s:F.search_chars(a:count) : a:regex
     let case =    g:VM_case_setting == 'smart'  ? '' :
                 \ g:VM_case_setting == 'ignore' ? '\c' : '\C'
@@ -544,7 +529,7 @@ fun! vm#commands#regex_motion(regex, count, remove) abort
     let [ R, X ] = [ s:R()[ s:v.index ], s:X() ]
     call s:before_move()
 
-    for r in ( s:v.single_region ? [R] : s:R() )
+    for r in s:G.active_regions()
         call cursor(r.l, r.a)
         if !search(regex.case, 'zp', r.l)
             if a:remove | call r.remove() | endif
@@ -567,18 +552,12 @@ endfun
 " Motion event
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! s:call_motion(...) abort
-    if s:F.no_regions() | return | endif
+fun! s:call_motion() abort
     call s:F.Scroll.get()
     let R = s:R()[ s:v.index ]
 
-    let regions = (a:0 && a:1) || s:v.single_region ? [R] : s:R()
-
     call s:before_move()
-
-    for r in regions | call r.move() | endfor
-
-    "update variables, facing direction, highlighting
+    for r in s:G.active_regions() | call r.move() | endfor
     call s:after_move(R)
 endfun
 
@@ -590,6 +569,7 @@ endfun
 
 
 fun! s:after_move(R) abort
+    "update variables, facing direction, highlighting
     let s:v.direction = a:R.dir
     let s:v.restore_scroll = !s:v.insert
 
@@ -609,8 +589,7 @@ endfun
 " Align
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#align() abort
-    if s:F.no_regions() | return | endif
+fun! g:Vm.cmd.align() abort
     let s:v.restore_index = s:v.index
     call s:F.Scroll.get(1)
     call s:V.Edit.align()
@@ -618,8 +597,7 @@ fun! vm#commands#align() abort
 endfun
 
 
-fun! vm#commands#align_char(count) abort
-    if s:F.no_regions() | return | endif
+fun! g:Vm.cmd.align_char(count) abort
     call s:G.cursor_mode()
 
     let s:v.restore_index = s:v.index
@@ -655,8 +633,7 @@ fun! vm#commands#align_char(count) abort
 endfun
 
 
-fun! vm#commands#align_regex() abort
-    if s:F.no_regions() | return | endif
+fun! g:Vm.cmd.align_regex() abort
     call s:G.cursor_mode()
     let s:v.restore_index = s:v.index
     call s:F.Scroll.get(1)
@@ -678,9 +655,9 @@ endfun
 " Miscellaneous commands
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#invert_direction(...) abort
+fun! g:Vm.cmd.invert_direction(...) abort
     " Invert direction and reselect region.
-    if s:F.no_regions() || s:v.auto | return | endif
+    if s:v.auto | return | endif
 
     for r in s:R() | let r.dir = !r.dir | endfor
 
@@ -699,9 +676,8 @@ fun! vm#commands#invert_direction(...) abort
 endfun
 
 
-fun! vm#commands#split_lines() abort
+fun! g:Vm.cmd.split_lines() abort
     " Split regions so that they don't cross line boundaries.
-    if s:F.no_regions() | return | endif
     call s:G.split_lines()
     if get(g:, 'VM_autoremove_empty_lines', 1)
         call s:G.remove_empty_lines()
@@ -710,31 +686,29 @@ fun! vm#commands#split_lines() abort
 endfun
 
 
-fun! vm#commands#remove_empty_lines() abort
+fun! g:Vm.cmd.remove_empty_lines() abort
     " Remove selections that consist of empty lines.
     call s:G.remove_empty_lines()
     call s:G.update_and_select_region()
 endfun
 
 
-fun! vm#commands#visual_cursors() abort
+fun! g:Vm.cmd.visual_cursors() abort
     " Create a column of cursors from visual mode.
-    call s:set_extend_mode(0)
     call vm#visual#cursors(visualmode())
 endfun
 
 
-fun! vm#commands#visual_add() abort
+fun! g:Vm.cmd.visual_add() abort
     " Convert a visual selection to a VM selection.
-    call s:set_extend_mode(1)
+    call s:extend_mode()
     call vm#visual#add(visualmode())
 endfun
 
 
-fun! vm#commands#remove_every_n_regions(count) abort
+fun! g:Vm.cmd.remove_every_n_regions(count) abort
     " Remove every n regions, given by [count], min 2.
-    if s:F.no_regions() | return | endif
-    let R = s:R() | let i = 1 | let cnt = a:count < 2 ? 2 : a:count
+    let [R, i, cnt] = [s:R(), 1, a:count < 2 ? 2 : a:count]
     for n in range(1, len(R))
         if n % cnt == 0
             call R[n-i].remove()
@@ -745,9 +719,8 @@ fun! vm#commands#remove_every_n_regions(count) abort
 endfun
 
 
-fun! vm#commands#mouse_column() abort
+fun! g:Vm.cmd.mouse_column() abort
     " Create a column of cursors with the mouse.
-    call s:set_extend_mode(0)
     let start = getpos('.')[1:2]
     exe "normal! \<LeftMouse>"
     let end = getpos('.')[1:2]
@@ -755,26 +728,25 @@ fun! vm#commands#mouse_column() abort
     if start[0] < end[0]
         call cursor(start[0], start[1])
         while getpos('.')[1] < end[0]
-            call vm#commands#add_cursor_down(0, 1)
+            call g:Vm.cmd.add_cursor_down(0, 1)
         endwhile
         if getpos('.')[1] > end[0]
-            call vm#commands#skip(1)
+            call g:Vm.cmd.skip(1)
         endif
     else
         call cursor(start[0], start[1])
         while getpos('.')[1] > end[0]
-            call vm#commands#add_cursor_up(0, 1)
+            call g:Vm.cmd.add_cursor_up(0, 1)
         endwhile
         if getpos('.')[1] < end[0]
-            call vm#commands#skip(1)
+            call g:Vm.cmd.skip(1)
         endif
     endif
 endfun
 
 
-fun! vm#commands#shrink_or_enlarge(shrink) abort
+fun! g:Vm.cmd.shrink_or_enlarge(shrink) abort
     " Reduce/enlarge selection size by 1.
-    if s:F.no_regions() | return | endif
     call s:G.extend_mode()
 
     let dir = s:v.direction
@@ -782,16 +754,16 @@ fun! vm#commands#shrink_or_enlarge(shrink) abort
     let s:v.motion = a:shrink? (dir? 'h':'l') : (dir? 'l':'h')
     call s:call_motion()
 
-    call vm#commands#invert_direction()
+    call g:Vm.cmd.invert_direction()
 
     let s:v.motion = a:shrink? (dir? 'l':'h') : (dir? 'h':'l')
     call s:call_motion()
 
-    if s:v.direction != dir | call vm#commands#invert_direction(1) | endif
+    if s:v.direction != dir | call g:Vm.cmd.invert_direction(1) | endif
 endfun
 
 
-fun! vm#commands#increase_or_decrease(increase, all_types, count)
+fun! g:Vm.cmd.increase_or_decrease(increase, all_types, count)
     let oldnr = &nrformats
     if a:all_types
         setlocal nrformats+=alpha
@@ -808,15 +780,16 @@ endfun
 " Reselect last regions, undo, redo
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#commands#reselect_last()
-    let was_active = s:init(0, 1, 0)
+fun! vm#commands#reselect_last(was_active)
+    if !a:was_active | call vm#init_buffer() | endif
+
     if empty(get(b:, 'VM_LastBackup', {})) || empty(get(b:VM_LastBackup, 'regions', []))
         return s:F.exit('No regions to restore')
     endif
 
-    if was_active && !s:X()
+    if a:was_active && !s:X()
         call s:G.erase_regions()
-    elseif was_active
+    elseif a:was_active
         return s:F.msg('Not in extend mode.')
     endif
 
@@ -835,7 +808,7 @@ endfun
 
 
 
-fun! vm#commands#undo() abort
+fun! g:Vm.cmd.undo() abort
     let first = b:VM_Backup.first
     let ticks = b:VM_Backup.ticks
     let index = index(ticks, b:VM_Backup.last)
@@ -857,7 +830,7 @@ fun! vm#commands#undo() abort
 endfun
 
 
-fun! vm#commands#redo() abort
+fun! g:Vm.cmd.redo() abort
     let ticks = b:VM_Backup.ticks
     let index = index(ticks, b:VM_Backup.last)
 
@@ -874,12 +847,16 @@ endfun
 
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" Lambdas
+" Lambdas, helpers
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:extend_mode() abort
+    let g:Vm.extend_mode = 1
+endfun
 
 let s:X                = { -> g:Vm.extend_mode }
 let s:R                = { -> s:V.Regions      }
-let s:is_r             = { -> g:Vm.buffer && !empty(s:G.region_at_pos()) }
+let s:is_r             = { -> !empty(s:G.region_at_pos()) }
 let s:first_line       = { -> line('.') == 1 }
 let s:last_line        = { -> line('.') == line('$') }
 let s:symbol           = {   -> index(['^', '0', '%', '$'],     s:v.motion) >= 0 }

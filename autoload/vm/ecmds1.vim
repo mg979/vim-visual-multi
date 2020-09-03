@@ -62,8 +62,7 @@ fun! s:Edit.delete(X, register, count, manual) abort
     " Delete the selected text and change to cursor mode.
     " Return the deleted text.
     " {{{1
-    if s:F.no_regions() | return | endif
-    if !s:v.direction | call vm#commands#invert_direction() | endif
+    if !s:v.direction | call g:Vm.cmd.invert_direction() | endif
 
     if !a:X     "ask for motion
         return vm#cursors#operation('d', a:count, a:register)

@@ -45,36 +45,36 @@ fun! s:Insert.key(type) abort
     call s:map_single_mode(0)
 
     if a:type ==# 'I'
-        call vm#commands#merge_to_beol(0)
+        call g:Vm.cmd.merge_motion('^')
         call self.key('i')
 
     elseif a:type ==# 'A'
-        call vm#commands#merge_to_beol(1)
+        call g:Vm.cmd.merge_motion('$')
         call self.key('a')
 
     elseif a:type ==# 'o'
-        call vm#commands#merge_to_beol(1)
+        call g:Vm.cmd.merge_motion('$')
         call vm#icmds#insert_line(0)
         call self.start(1)
 
     elseif a:type ==# 'O'
-        call vm#commands#merge_to_beol(0)
+        call g:Vm.cmd.merge_motion('^')
         call vm#icmds#insert_line(1)
         call self.start(1)
 
     elseif a:type ==# 'a'
         if s:X()
-            if s:v.direction | call vm#commands#invert_direction() | endif
+            if s:v.direction | call g:Vm.cmd.invert_direction() | endif
             call s:G.change_mode()
             let s:v.direction = 1
         endif
         for r in s:R() | call s:V.Edit.extra_spaces.add(r) | endfor
-        call vm#commands#motion('l', 1, 0, 0)
+        call g:Vm.cmd.motion('l', 1, 0)
         call self.start(1)
 
     else
         if s:X()
-            if !s:v.direction | call vm#commands#invert_direction() | endif
+            if !s:v.direction | call g:Vm.cmd.invert_direction() | endif
             call s:G.change_mode()
         endif
 

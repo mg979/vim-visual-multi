@@ -39,16 +39,19 @@ com! -bang VMFromSearch call vm#special#commands#deprecated('VMFromSearch')
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-let g:Vm = { 'hi'          : {},
-      \ 'buffer'           : 0,
-      \ 'extend_mode'      : 0,
-      \ 'finding'          : 0,
-      \ 'mappings_enabled' : 0,
-      \ 'last_ex'          : '',
-      \ 'last_normal'      : '',
-      \ 'last_visual'      : '',
-      \ 'registers'        : {'"': [], '-': []},
-      \ 'oldupdate'        : exists("##TextYankPost") ? 0 : &updatetime,
+let g:Vm = {
+      \ 'hi':               {},
+      \ 'cmd':              {},
+      \ 'buffer':           0,
+      \ 'extend_mode':      0,
+      \ 'find_operator':    0,
+      \ 'mappings_enabled': 0,
+      \ 'last_ex':          '',
+      \ 'last_normal':      '',
+      \ 'last_visual':      '',
+      \ 'registers':        {'"': [], '-': []},
+      \ 'oldupdate':        exists("##TextYankPost") ? 0 : &updatetime,
+      \ 'run':              function('vm#commands#run'),
       \}
 
 let g:VM_highlight_matches = get(g:, 'VM_highlight_matches', 'underline')

@@ -38,7 +38,7 @@ endfun
 
 fun! s:Edit.change(X, count, reg, smart_case) abort
     if !len(s:R()) | return | endif
-    if !s:v.direction | call vm#commands#invert_direction() | endif
+    if !s:v.direction | call g:Vm.cmd.invert_direction() | endif
     if a:smart_case && !exists('s:v.smart_case_change')
         let s:v.smart_case_change = 1
     endif
@@ -73,7 +73,7 @@ fun! s:Edit.surround() abort
     if !len(s:R()) | return | endif
     if !s:X() | call vm#operators#select(1, 'iw') | endif
 
-    if !s:v.direction | call vm#commands#invert_direction() | endif
+    if !s:v.direction | call g:Vm.cmd.invert_direction() | endif
     let s:v.W = self.store_widths()
     let reselect = 1
 
@@ -213,7 +213,7 @@ fun! s:Edit.align() abort
         endif
     endfor
     call s:G.update_and_select_region()
-    call vm#commands#motion('l', 1, 0, 0)
+    call g:Vm.cmd.motion('l', 1, 0)
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -227,7 +227,7 @@ fun! s:Edit.shift(dir) abort
         call self.paste(0, 0, 1, '"')
     else
         call self.delete(1, "_", 0, 0)
-        call vm#commands#motion('h', 1, 0, 0)
+        call g:Vm.cmd.motion('h', 1, 0)
         call self.paste(1, 0, 1, '"')
     endif
 endfun

@@ -217,7 +217,7 @@ fun! s:change_at_cursors(M, reg, n) abort
   let reg = a:reg != s:v.def_reg? a:reg : "_"
 
   if Obj == '_'
-    call vm#commands#motion('^', 1, 0, 0)
+    call g:Vm.cmd.motion('^', 1, 0)
     call vm#operators#select(1, '$')
     let s:v.changed_text =  s:V.Edit.delete(1, reg, 1, 0)
     call s:V.Insert.key('i')
@@ -238,7 +238,7 @@ fun! s:change_at_cursors(M, reg, n) abort
   elseif Obj=='l'
     call s:G.extend_mode()
     if N > 1
-      call vm#commands#motion('l', N-1, 0, 0)
+      call g:Vm.cmd.motion('l', N-1, 0)
     endif
     call feedkeys('"'.reg."c")
 
