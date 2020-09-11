@@ -36,7 +36,7 @@ fun! vm#themes#init() abort
 
 
   if theme == 'default'
-    exe "highlight! link VM_Mono     ".get(g:, 'VM_Mono_hl',   'IncSearch')
+    exe "highlight! link VM_Mono     ".get(g:, 'VM_Mono_hl',   'ErrorMsg')
     exe "highlight! link VM_Cursor   ".get(g:, 'VM_Cursor_hl', 'Visual')
     exe "highlight! link VM_Extend   ".get(g:, 'VM_Extend_hl', 'DiffAdd')
     exe "highlight! link VM_Insert   ".get(g:, 'VM_Insert_hl', 'DiffChange')
