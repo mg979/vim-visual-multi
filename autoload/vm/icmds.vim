@@ -46,6 +46,7 @@ fun! vm#icmds#x(cmd) abort
                 if strpart(getline(r.l), r.a) =~ '\s*$' " at EOL
                     call search('\s*$', '', r.l)
                 endif
+                "FIXME this part is bugged with multibyte chars
                 call r.shift(-1,-1)
                 if r.a > 1
                     let t1 = strpart(getline('.'), 0, r.a - 1)
@@ -68,7 +69,8 @@ fun! vm#icmds#x(cmd) abort
             call r.shift(-1,-1)
         else                                "normal backspace
             keepjumps normal! X
-            call r.update_cursor_pos()
+            let w = strlen(@-)
+            call r.shift(-w, -w)
         endif
 
         "update changed size
