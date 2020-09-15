@@ -454,10 +454,9 @@ Show Infoline ~
 
   Default mapping: \\l
 
-  The 'infoline' show informations about current regions and patterns, and the
-  modes you're in. If the statusline works, this will redundant, but in case
-  it doesn't, it can be of help. The symbols used are the same, so this applies
-  to both.
+  The 'infoline' shows information about current regions and patterns and the
+  modes you're in. If the statusline works this will be redundant, but in case
+  it doesn't this can be of help. The symbols used between both are the same.
 >
     M+ / m- : whether mappings are enabled or not
     V+ / v- : whether multiline mode is enabled or not
