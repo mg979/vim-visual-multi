@@ -30,8 +30,8 @@ com! -bar VMDebug  call vm#special#commands#debug()
 com! -bar VMClear  call vm#hard_reset()
 com! -bar VMLive   call vm#special#commands#live()
 
-com! -bang  -nargs=? VMRegisters call vm#special#commands#show_registers(<bang>0, <q-args>)
-com! -range -nargs=? VMSearch    call vm#special#commands#search(<line1>, <line2>, <q-args>)
+com! -bang  -nargs=?       VMRegisters call vm#special#commands#show_registers(<bang>0, <q-args>)
+com! -range -bang -nargs=? VMSearch    call vm#special#commands#search(<bang>0, <line1>, <line2>, <q-args>)
 
 " Deprecated commands {{{1
 com! -bang VMFromSearch call vm#special#commands#deprecated('VMFromSearch')

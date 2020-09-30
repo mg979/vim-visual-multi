@@ -38,6 +38,20 @@ can be necessary if VM exited with errors for some reason.
 
 ------------------------------------------------------------------------------
 
+    [range] VMSearch[!] [pattern]                                  *:VMSearch*
+
+Select all regions in [range] that matches the current search register
+|quote/|, or the given [pattern]. If <bang> is used, ignore [range], and just
+select the next occurrence. Examples:
+>
+  :VMSearch!                    -> select the next occurrence of @/
+  :VMSearch! \<pattern\>        -> select the next occurrence of \<pattern\>
+  :VMSearch                     -> select occurrences of @/ in current line
+  :%VMSearch \<pattern\>        -> select all occurrences of \<pattern\>
+  :'<,'>VMSearch \<pattern\>    -> range is visual selection
+
+------------------------------------------------------------------------------
+
     VMLive                                                           *:VMLive*
 
 Toggle |g:VM_live_editing|.
@@ -48,19 +62,6 @@ Toggle |g:VM_live_editing|.
 
 Show VM registers, or single [register]. With <bang>, delete a [register], or
 all of them if no register is specified.
-
-------------------------------------------------------------------------------
-
-    [range] VMSearch [pattern]                                     *:VMSearch*
-
-Select next region that matches the current search register |quote/|, or the
-given [pattern]. If started from visual mode or with a [range], it will select
-all occurrences in |range|. Examples:
->
-  :VMSearch                     -> select the next occurrence of @/
-  :VMSearch \<pattern\>         -> select the next occurrence of \<pattern\>
-  :%VMSearch \<pattern\>        -> select all occurrences of \<pattern\>
-  :'<,'>VMSearch \<pattern\>    -> range is visual selection
 
 ------------------------------------------------------------------------------
 
