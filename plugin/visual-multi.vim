@@ -25,7 +25,6 @@ set cpo&vim
 
 com! -nargs=? -complete=customlist,vm#themes#complete VMTheme call vm#themes#load(<q-args>)
 
-com! -bar VMConfig call vm#special#config#start()
 com! -bar VMDebug  call vm#special#commands#debug()
 com! -bar VMClear  call vm#hard_reset()
 com! -bar VMLive   call vm#special#commands#live()
