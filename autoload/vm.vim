@@ -11,7 +11,6 @@ let g:VM_reselect_first                   = get(g:, 'VM_reselect_first', 0)
 let g:VM_case_setting                     = get(g:, 'VM_case_setting', 'smart')
 let g:VM_use_first_cursor_in_line         = get(g:, 'VM_use_first_cursor_in_line', 0)
 let g:VM_disable_syntax_in_imode          = get(g:, 'VM_disable_syntax_in_imode', 0)
-let g:VM_exit_on_1_cursor_left            = get(g:, 'VM_exit_on_1_cursor_left', 0)
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "Reindentation after insert mode

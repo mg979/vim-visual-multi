@@ -86,11 +86,6 @@ Hopefully you won't need to alter any of these.
   You could want to do it for performance reasons.
 
 
-*g:VM_exit_on_1_cursor_left*                       Default: 0
-
-  Automatically exit VM if there's a single cursor left after a command.
-
-
 *VM_recursive_operations_at_cursors*               Default: 1
 
   When executing normal commands in cursor mode (`dw` and similar), by default
