@@ -38,17 +38,18 @@ Example of |vim-multiple-cursors| -like mappings:
 -------------------------------------------------------------------------------
 DEFAULT MAPPINGS                                          *vm-default-mappings*
                                                         *g:VM_default_mappings*
-Non-buffer mappings, except <C-n>, can be disabled with:
->
-    let g:VM_default_mappings = 0
-<                                                          *g:VM_mouse_mappings*
-Mouse mappings can be enabled with:
->
-    let g:VM_mouse_mappings = 1
-<
+
 Default mappings are `permanent`, that is, always available, and applied when
 Vim starts. Buffer mappings instead are applied per-buffer, when VM is started.
 
+Permanent mappings, except <C-n>, can be disabled with:
+>
+    let g:VM_default_mappings = 0
+<                                                          *g:VM_mouse_mappings*
+Mouse mappings (also permanent) can be enabled with:
+>
+    let g:VM_mouse_mappings = 1
+<
                                                              *g:VM_leader-dict*
 Mappings preceded by \\ are meant prefixed with |g:VM_leader|.
 
