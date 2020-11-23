@@ -86,6 +86,9 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#themes#statusline() abort
+  if !exists('b:visual_multi')
+    return ''
+  endif
   let v = b:VM_Selection.Vars
   let vm = VMInfos()
   let color  = '%#VM_Extend#'
