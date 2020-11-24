@@ -100,12 +100,11 @@ fun! s:Insert.start(...) abort
 
     let I.index     = R.index
     let I.begin     = [R.l, R.a]
-    let I.size      = s:F.size()
     let I.cursors   = []
     let I.lines     = {}
     let I.change    = 0         " text change, only if g:VM_live_editing
     let I.col       = col('.')
-    let I.char      = ''        " set by InsertCharPre
+    let I.reupdate  = v:false   " set by InsertCharPre and CompleteDone
 
     " remove current regions highlight
     call s:G.remove_highlight()
@@ -273,9 +272,6 @@ fun! s:Insert.update_text(insert_leave) abort
         endfor
     endif
 
-    " store the buffer size after the edits, it will be checked on InsertLeave
-    let I.size = s:F.size()
-
     " put the cursor where it should stay after the lines update
     " as said before, the actual cursor can be pushed by cursors behind it
     call cursor(ln, I.col)
@@ -290,13 +286,14 @@ fun! s:Insert.stop(...) abort
     " Called on InsertLeave.
     if s:F.not_VM() | return | endif
 
-    " there could be a mismatch between last recorded buffer size and final
-    " one, this can happen after CompleteDone, or abbreviation expansion,
-    " because in these cases TextChangedI isn't triggered, if this happen we
-    " must update lines again
-    if self.char != ''
+    " text must be updated again after InsertLeave, to take into account
+    " changes that don't trigger TextChangedI, for example when exiting
+    " insert mode immediately after CompleteDone or abbreviation expansion
+    " the only case we don't do this, it's when no characters are typed, nor
+    " completion has been performed
+    if self.reupdate
         call self.update_text(1)
-        let self.char = ''
+        let self.reupdate = v:false
     endif
 
     call self.clear_hi() | call self.auto_end() | let i = 0
@@ -548,7 +545,8 @@ fun! s:Insert.auto_start() abort
         au!
         au TextChangedI  <buffer> call b:VM_Selection.Insert.update_text(0)
         au InsertLeave   <buffer> call b:VM_Selection.Insert.stop()
-        au InsertCharPre <buffer> let b:VM_Selection.Insert.char = v:char
+        au InsertCharPre <buffer> let b:VM_Selection.Insert.reupdate = v:true
+        au CompleteDone  <buffer> let b:VM_Selection.Insert.reupdate = v:true
     augroup END
 endfun
 
