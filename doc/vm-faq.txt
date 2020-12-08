@@ -1,6 +1,6 @@
 *vm-faq.txt*    Version 0.3.0    Last change: June 15 2019
 
-FREQUENTLY ASKED QUESTIONS                                   *visual-multi-faq*
+FREQUENTLY ASKED QUESTIONS                                             *vm-faq*
 ===============================================================================
                                                                     *vm-errors*
 VM has quit with errors and I can't clear VM highlight matches.~

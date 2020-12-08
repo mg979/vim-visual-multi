@@ -1,6 +1,6 @@
 *vm-ex-commands.txt*    Version 0.5.0    Last change: September 27 2019
 
-EX COMMANDS                                         *visual-multi-ex-commands*
+EX COMMANDS                                                   *vm-ex-commands*
 ==============================================================================
 
 The following Ex commands can be run at any time:

@@ -36,7 +36,7 @@ Example of |vim-multiple-cursors| -like mappings:
     let g:VM_maps['Decrease']    = '-'
 <
 -------------------------------------------------------------------------------
-DEFAULT MAPPINGS                                          *vm-default-mappings*
+DEFAULT MAPPINGS                                          *vm-mappings-default*
                                                         *g:VM_default_mappings*
 
 Default mappings are `permanent`, that is, always available, and applied when
@@ -65,7 +65,7 @@ visual mappings, and buffer mappings.
 -------------------------------------------------------------------------------
   Name                Keys        Notes ~
 -------------------------------------------------------------------------------
-                                         *visual-multi-qr* *vm-quick-reference*
+                                                               *vm-mappings-qr*
 Exit                  <Esc>       quit VM
 Find Under            <C-n>       select the word under cursor
 Find Subword Under    <C-n>       from visual mode, without word boundaries
@@ -83,7 +83,7 @@ Mouse Column    <M-C-RightMouse>  create a column, from current cursor to
 
 
 -------------------------------------------------------------------------------
-VISUAL MODE MAPPINGS                                       *vm-visual-mappings*
+VISUAL MODE MAPPINGS                                       *vm-mappings-visual*
 
 Of these, `Visual Subtract` and `Visual Reduce` are buffer mappings.
 
@@ -102,7 +102,7 @@ Visual Reduce          \\r        remove regions outside of visual selection
 
 
 -------------------------------------------------------------------------------
-BUFFER MAPPINGS                                            *vm-buffer-mappings*
+BUFFER MAPPINGS                                            *vm-mappings-buffer*
 
 Not included are the mappings that mimic default vim commands (motions, several
 text objects), unless specified.

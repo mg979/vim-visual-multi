@@ -1,11 +1,11 @@
 *vm-settings.txt*    Version 0.3.0    Last change: June 13 2019
 
-Settings                                       |visual-multi-settings|
-Highlight                                      |visual-multi-highlight|
+Settings                                                 |vm-settings|
+Highlight                                                |vm-highlight|
 
 
 
-SETTINGS                                                *visual-multi-settings*
+SETTINGS                                                          *vm-settings*
 ===============================================================================
 
 Hopefully you won't need to alter any of these.
@@ -192,12 +192,12 @@ automatically when exiting insert mode, unless this value is 0.
 
 *g:VM_plugins_compatibilty*                        Default: {}
 
-Used for plugins compatibility, see |visual-multi-compatibility|.
+Used for plugins compatibility, see |vm-compatibility|.
 
 
 
 
-HIGHLIGHT                                              *visual-multi-highlight*
+HIGHLIGHT                                                        *vm-highlight*
 ===============================================================================
 
 
@@ -210,7 +210,7 @@ You can load a theme by default by defining:  >
     let g:VM_theme = 'your_chosen_theme'
 <                                                                    *:VMTheme*
 If you want to change theme, run: >
-    :VMTheme
+    :VMTheme <tab>
 <
 To relink VM highlight groups: >
 

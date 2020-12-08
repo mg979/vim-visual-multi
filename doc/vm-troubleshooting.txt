@@ -1,20 +1,20 @@
 *vm-troubleshooting.txt*    Version 0.3.0    Last change: June 13 2019
 
-Known issues                                   |visual-multi-bugs|
-Plugins compatibility                          |visual-multi-compatibility|
+Known issues                                            |vm-bugs|
+Plugins compatibility                                   |vm-compatibility|
 
 
 
-TROUBLESHOOTING                                  *visual-multi-troubleshooting*
+TROUBLESHOOTING                                           *vm-troubleshooting*
 ===============================================================================
 
-First stop for troubleshooting is |visual-multi-faq|.
+First stop for troubleshooting is |vm-faq|.
 
 
 
 
 
-KNOWN ISSUES                                               *visual-multi-bugs*
+KNOWN ISSUES                                                         *vm-bugs*
 ==============================================================================
 
 VM relies mostly on autocommands, especially in insert mode. Plugins and
@@ -33,6 +33,7 @@ action, you could write it as:
 
 ------------------------------------------------------------------------------
                                                            *vm-autocompletion*
+
 Some autocompletion plugins can cause trouble if the active cursor is not the
 first cursor in the line. In this case this can help:
 >
@@ -51,7 +52,7 @@ should be used when you want to use cursors as 'fields' to edit sequentially.
 
 
 
-PLUGINS COMPATIBILITY                             *visual-multi-compatibility*
+PLUGINS COMPATIBILITY                                       *vm-compatibility*
 ==============================================================================
 
 As mentioned above, snippets plugins cannot work with VM. Other plugins can

@@ -18,11 +18,11 @@ License                                        |visual-multi-license|
 
 Additional resources:
 
-Settings                                       |visual-multi-settings|
-Quick reference                                |visual-multi-qr|
-Frequently asked questions                     |visual-multi-faq|
-Troubleshooting                                |visual-multi-troubleshooting|
-Additional Ex commands                         |visual-multi-ex-commands|
+Settings                                       |vm-settings|
+Quick reference                                |vm-quick-reference|
+Frequently asked questions                     |vm-faq|
+Troubleshooting                                |vm-troubleshooting|
+Additional Ex commands                         |vm-ex-commands|
 
 
 
@@ -31,7 +31,7 @@ REQUIREMENTS                                        *visual-multi-requirements*
 
 Vim 8/Neovim is required.
 
-Here for troubles? Go to |visual-multi-faq| or |visual-multi-troubleshooting|.
+Here for troubles? Go to |vm-faq| or |vm-troubleshooting|.
 
 
 
@@ -313,7 +313,7 @@ When you see mappings with 2 backslashes, that's the VM leader, so the mappings
 will be different if you change it.
 
 
-----------------------------------------------------------------  *vm-quickref*
+---------------------------------------------------------  *vm-quick-reference*
 Quick reference ~
 
 
@@ -834,7 +834,7 @@ only if <Tab> key has been used at least once, i.e, it won't happen if you move
 from region to region and perform individual changes, without cycling cursors
 from within insert mode.
 
-See also |visual-multi-bugs|.
+See also |vm-bugs|.
 
 
 
