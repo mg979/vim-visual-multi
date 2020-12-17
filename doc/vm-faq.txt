@@ -15,7 +15,7 @@ How to start VM with matches from current search register? ~
 Run |:VMSearch|.
 
 -------------------------------------------------------------------------------
-                                                                  *vm-mappings*
+                                                              *vm-mappings-faq*
 I want to remap the main VM mappings.~
 
 You have to initialize the mappings dictionary and replace individual mappings
@@ -35,7 +35,7 @@ To disable a specific mapping, set it to an empty string:
   let g:VM_maps["Select Operator"]    = ''
 <
 -------------------------------------------------------------------------------
-                                                          *vm-disable-mappings*
+                                                          *vm-mappings-disable*
 How can I temporarily disable VM mappings? ~
 
 VM has a <Plug> for that. Normally it is bound to |VM_leader| + <Space>, but
@@ -90,7 +90,7 @@ or check one of the following settings:
 
 
 -------------------------------------------------------------------------------
-                                                           *vm-custom-mappings*
+                                                           *vm-mappings-custom*
 Can I have a mapping for...? ~
 
 If you find yourself repeating a certain action, you can create mappings like:

@@ -217,7 +217,7 @@ work with it. You can among other things:
 - conversely, remove all regions that are not in the visual selection
 - find regex pattern in visual selection, etc
 
-See |vm-visual-mappings| for details.
+See |vm-mappings-visual| for details.
 
 
 -----------------------------------------------------------  *vm-mouse-support*
@@ -325,7 +325,7 @@ Select Right/Left            <S-Right>, <S-Left>          |vm-shift-select|
 Select All Words             \\A                          |vm-select-all|
 Find with Regex              \\/                          |vm-regex-search|
 Reselect Last                \\gS                         |vm-reselect-last|
-Toggle Mappings              \\<Space>                    |vm-toggle-mappings|
+Toggle Mappings              \\<Space>                    |vm-mappings-toggle|
 Select Operator              s                            |vm-select-operator|
 Find Operator                m                            |vm-find-operator|
 Alignment                    \\a                          |vm-align|
@@ -431,7 +431,7 @@ Find with Regex ~
   in the visual selection.
 
 
----------------------------------------------------------  *vm-toggle-mappings*
+---------------------------------------------------------  *vm-mappings-toggle*
 Toggle Mappings ~
 
   Default mapping: \\<Space>
@@ -821,7 +821,7 @@ SINGLE REGION MODE                                   *visual-multi-single-mode*
 It is a submode that allows motions to be performed on single regions, rather
 than all at once. Commands still affect all regions, though.
 
-                                   |vm-buffer-mappings| |g:VM_single_mode_maps|
+                                   |vm-mappings-buffer| |g:VM_single_mode_maps|
 
 When you enter insert mode you can use <Tab> and <S-Tab> to cycle among
 cursors, to make changes sequentially at each of them. When you press <Tab>,

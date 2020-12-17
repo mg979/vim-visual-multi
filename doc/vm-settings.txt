@@ -163,7 +163,7 @@ Hopefully you won't need to alter any of these.
 
 Set to 0 to disable entirely insert mode mappings to cycle cursors in
 |vm-single-mode|. If you only want to change the default mappings, see
-|vm-buffer-mappings|.
+|vm-mappings-buffer|.
 
 
 *g:VM_single_mode_auto_reset*                      Default: 1
