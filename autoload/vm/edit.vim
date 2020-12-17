@@ -412,6 +412,7 @@ endfun
 fun! s:Edit.after_commands(reselect, ...) abort
     " Trigger post processing and reenable mappings.
     let s:v.multiline = s:old_multiline
+    let s:v.merge = 1
     if a:reselect
         call s:V.Edit.post_process(1, a:1)
     else
