@@ -324,6 +324,7 @@ Add Cursors Down/Up          <C-Down> / <C-Up>            |vm-add-cursors|
 Add Cursor at Position       \\\                          |vm-add-cursor|
 Select Right/Left            <S-Right>, <S-Left>          |vm-shift-select|
 Select All Words             \\A                          |vm-select-all|
+Slash motion                 g/                           |vm-slash|
 Find with Regex              \\/                          |vm-regex-search|
 Reselect Last                \\gS                         |vm-reselect-last|
 Toggle Mappings              \\<Space>                    |vm-mappings-toggle|
@@ -417,6 +418,18 @@ Select All Words ~
 
   Selects all occurrences of a word. Works in both normal and visual mode.
   Rules are the same as for <C-n>. Works from visual mode too.
+
+
+-------------------------------------------------------------------  *vm-slash*
+Slash motion~
+
+  Default mapping: g/
+
+  Key `/` is not mapped by default, so that you can perform regular searches
+  for words to add. Instead, use `g/` if you want `/` to work on all regions.
+
+  Note that `n` and `N` can't be used to repeat the search, because they are
+  used to get the next VM match.
 
 
 ------------------------------------------------------------  *vm-regex-search*
@@ -530,7 +543,6 @@ Duplication                   \\d                        |vm-duplicate|
 Shift Selections              <M-S-Arrows>               |vm-shifting|
 Case conversion               \\C                        |vm-case-conversion|
 Remove every n regions        \\R                        |vm-remove-every-n|
-Go-to-regex motion            \\g, \\G                   |vm-goto-regex|
 Numbering                     \\n, \\N                   |vm-numbering|
 Filter regions                \\f                        |vm-filter|
 Transform with expression     \\e                        |vm-transform|
@@ -636,22 +648,6 @@ Remove every n regions ~
 
   Removes every `n` regions. Without [count] it will remove every other region,
   with [count] 3 it will remove every third region, etc.
-
-
---------------------------------------------------------------  *vm-goto-regex*
-Go-to-regex motion ~
-
-  Default mappings: \\g, \\G
-
-  It is similar to a |f| motion (find character), but it accepts a regex
-  pattern and a [count]. \\G does the same, but additionally it will remove
-  regions for which the motion failed (the character[s] could not be found).
-
-  Examples:  >
-    \\g   ->  a     ->  will search for the letter 'a' in the same line
-    \\g   ->  \d    ->  will search for a digit
-    \\G   ->  \d    ->  will also remove cursors where a digit was not found
-    2\\g  ->  \d\d  ->  will search for 2 consecutive digits
 
 
 ---------------------------------------------------------------  *vm-numbering*
