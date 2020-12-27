@@ -542,7 +542,7 @@ fun! vm#commands#regex_motion(regex, count, remove) abort
                 \ g:VM_case_setting == 'ignore' ? '\c' : '\C'
 
     if empty(regex)
-      return s:F.msg('Cancel')
+        return s:F.msg('Cancel')
     endif
 
     call s:F.Scroll.get()
@@ -553,7 +553,7 @@ fun! vm#commands#regex_motion(regex, count, remove) abort
         for r in ( s:v.single_region ? [R] : s:R() )
             call cursor(r.L, r.b)
             let endl = s:v.multiline && !empty(a:regex) ? line('$') : r.L
-            if !search(regex.case, 'z', endl)
+            if !search(regex . case, 'z', endl)
                 if a:remove | call r.remove() | endif
                 continue
             endif
@@ -568,7 +568,7 @@ fun! vm#commands#regex_motion(regex, count, remove) abort
         for r in ( s:v.single_region ? [R] : s:R() )
             call cursor(r.l, r.a)
             let endl = s:v.multiline && !empty(a:regex) ? line('$') : r.l
-            if !search(regex.case, 'b', endl)
+            if !search(regex . case, 'b', endl)
                 if a:remove | call r.remove() | endif
                 continue
             endif
