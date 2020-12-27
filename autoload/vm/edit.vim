@@ -88,6 +88,7 @@ fun! s:Edit.run_normal(cmd, ...) abort
 
     let g:Vm.last_normal = [cmd, args.recursive]
     let s:v.dot = [cmd, args.recursive]
+    let s:v.merge = 1
     call self.after_commands(0)
 
     if !empty(errors)
@@ -168,6 +169,7 @@ fun! s:Edit.run_ex(...) abort
         let errors = v:errmsg
     endtry
 
+    let s:v.merge = 1
     call self.after_commands(0)
 
     if !empty(errors)
@@ -222,6 +224,7 @@ fun! s:Edit.run_macro() abort
     call s:G.cursor_mode()
 
     call self.process('normal! @'.reg)
+    let s:v.merge = 1
     call self.after_commands(0)
 endfun
 
@@ -412,7 +415,6 @@ endfun
 fun! s:Edit.after_commands(reselect, ...) abort
     " Trigger post processing and reenable mappings.
     let s:v.multiline = s:old_multiline
-    let s:v.merge = 1
     if a:reselect
         call s:V.Edit.post_process(1, a:1)
     else
