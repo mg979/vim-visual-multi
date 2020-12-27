@@ -582,7 +582,14 @@ fun! vm#commands#regex_motion(regex, count, remove) abort
     endif
 
     " if using slash-search, it's safer to merge regions
-    let s:v.merge = !empty(a:regex)
+    " a region update is also needed for some reason (some bytes map issue)
+    if !empty(a:regex)
+        let s:v.merge = 1
+        if !a:remove
+            call s:G.update_regions()
+        endif
+    endif
+
     " update variables, facing direction, highlighting
     call s:after_move(R)
 endfun
