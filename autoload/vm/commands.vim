@@ -370,7 +370,7 @@ fun! vm#commands#find_next(skip, nav) abort
     "write search pattern if not navigating and no search set
     if s:X() && !a:nav | call s:Search.add_if_empty() | endif
 
-    call s:Search.validate()
+    if !s:Search.validate() | return | endif
 
     if s:navigate(a:nav, 1) | return 0        "just navigate to previous
     elseif a:skip           | call s:skip()   "skip current match
@@ -387,7 +387,7 @@ fun! vm#commands#find_prev(skip, nav) abort
     "write search pattern if not navigating and no search set
     if s:X() && !a:nav | call s:Search.add_if_empty() | endif
 
-    call s:Search.validate()
+    if !s:Search.validate() | return | endif
 
     let r = s:G.region_at_pos()
     if empty(r)  | let r = s:G.select_region(s:v.index) | endif

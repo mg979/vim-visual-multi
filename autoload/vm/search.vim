@@ -100,12 +100,12 @@ endfun
 
 fun! s:Search.validate() abort
     " Check whether the current search is valid, if not, clear the search.
-    if s:v.eco || empty(s:v.search) | return | endif
+    if s:v.eco || empty(s:v.search) | return v:false | endif
 
     call self.join()
 
     "pattern found, ok
-    if search(@/, 'cnw') | return | endif
+    if search(@/, 'cnw') | return v:true | endif
 
     while 1
         let i = 0
@@ -116,6 +116,7 @@ fun! s:Search.validate() abort
         break
     endwhile
     call self.join()
+    return v:true
 endfun
 
 
