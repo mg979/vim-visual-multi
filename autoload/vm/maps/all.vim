@@ -153,6 +153,7 @@ fun! vm#maps#all#buffer() abort
         \"Enlarge":                 [leader.'+',  'n'],
         \"Goto Regex":              [leader.'g',  'n'],
         \"Goto Regex!":             [leader.'G',  'n'],
+        \"Slash Search":            ['g/',        'n'],
         \})
 
   "arrows

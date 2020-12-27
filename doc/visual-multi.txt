@@ -127,9 +127,10 @@ line, that is, they cannot cross line boundaries unless |multiline-mode| is
 enabled.
 
 Finally, some |object-motions| and |various-motions| require |multiline-mode|,
-and some are aliased to avoid conflict with VM mappings `[` and `]`:
+and some are aliased to avoid conflict with VM mappings:
 
    vim    VM~
+    /     g/      to next match (for all regions)
     (     (       [count] sentences backward
     )     )       [count] sentences forward
     {     {       [count] paragraphs backward

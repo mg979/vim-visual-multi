@@ -173,6 +173,7 @@ endfun
 fun! vm#commands#regex_done() abort
     " Terminate the VM regex mode after having entered search a pattern.
     let s:v.visual_regex = s:v.using_regex == 2
+    let extend_current = s:v.using_regex == 3
     call vm#commands#regex_reset()
 
     if s:v.visual_regex
@@ -180,6 +181,10 @@ fun! vm#commands#regex_done() abort
         let g:Vm.finding = 1
         silent keepjumps normal! gv
         exe "silent normal \<Plug>(VM-Visual-Find)"
+        return
+
+    elseif extend_current
+        call vm#commands#regex_motion(@/, 1, 0)
         return
 
     elseif s:X() | silent keepjumps normal! gny`]
@@ -547,12 +552,13 @@ fun! vm#commands#regex_motion(regex, count, remove) abort
     if s:v.direction
         for r in ( s:v.single_region ? [R] : s:R() )
             call cursor(r.L, r.b)
-            if !search(regex.case, 'z', r.L)
+            let endl = s:v.multiline && !empty(a:regex) ? line('$') : r.L
+            if !search(regex.case, 'z', endl)
                 if a:remove | call r.remove() | endif
                 continue
             endif
             if X
-                let r.b = getpos('.')[2]
+                let [r.L, r.b] = getpos('.')[1:2]
                 call r.update_region()
             else
                 call r.update_cursor_pos()
@@ -561,12 +567,13 @@ fun! vm#commands#regex_motion(regex, count, remove) abort
     else
         for r in ( s:v.single_region ? [R] : s:R() )
             call cursor(r.l, r.a)
-            if !search(regex.case, 'b', r.l)
+            let endl = s:v.multiline && !empty(a:regex) ? line('$') : r.l
+            if !search(regex.case, 'b', endl)
                 if a:remove | call r.remove() | endif
                 continue
             endif
             if X
-                let r.a = getpos('.')[2]
+                let [r.l, r.a] = getpos('.')[1:2]
                 call r.update_region()
             else
                 call r.update_cursor_pos()
@@ -574,7 +581,9 @@ fun! vm#commands#regex_motion(regex, count, remove) abort
         endfor
     endif
 
-    "update variables, facing direction, highlighting
+    " if using slash-search, it's safer to merge regions
+    let s:v.merge = !empty(a:regex)
+    " update variables, facing direction, highlighting
     call s:after_move(R)
 endfun
 

@@ -24,6 +24,7 @@ fun! vm#plugs#permanent() abort
   xnoremap <silent><expr> <Plug>(VM-Find-Subword-Under)      <sid>Visual('under')
 
   nnoremap <silent>       <Plug>(VM-Start-Regex-Search)      @=vm#commands#find_by_regex(1)<cr>
+  nnoremap <silent>       <Plug>(VM-Slash-Search)            @=vm#commands#find_by_regex(3)<cr>
   xnoremap <silent>       <Plug>(VM-Visual-Regex)            :call vm#commands#find_by_regex(2)<cr>:call feedkeys('/', 'n')<cr>
 
   nnoremap <silent>       <Plug>(VM-Left-Mouse)              <LeftMouse>

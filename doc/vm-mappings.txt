@@ -119,6 +119,7 @@ Seek Next             <C-f>       fast go to next (from next page)
 Seek Prev             <C-b>       fast go to previous (from previous page)
 Skip Region             q         skip and find to next
 Remove Region           Q         remove region under cursor
+Slash Search            g/        extend/move cursors with /
 Replace                 R         replace in regions, or start replace mode
 Toggle Multiline        M         see |vm-multiline-mode|
 
