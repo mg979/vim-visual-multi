@@ -544,19 +544,35 @@ fun! vm#commands#regex_motion(regex, count, remove) abort
     let [ R, X ] = [ s:R()[ s:v.index ], s:X() ]
     call s:before_move()
 
-    for r in ( s:v.single_region ? [R] : s:R() )
-        call cursor(r.l, r.a)
-        if !search(regex.case, 'zp', r.l)
-            if a:remove | call r.remove() | endif
-            continue
-        endif
-        if X
-            let r.b = getpos('.')[2]
-            call r.update_region()
-        else
-            call r.update_cursor_pos()
-        endif
-    endfor
+    if s:v.direction
+        for r in ( s:v.single_region ? [R] : s:R() )
+            call cursor(r.L, r.b)
+            if !search(regex.case, 'z', r.L)
+                if a:remove | call r.remove() | endif
+                continue
+            endif
+            if X
+                let r.b = getpos('.')[2]
+                call r.update_region()
+            else
+                call r.update_cursor_pos()
+            endif
+        endfor
+    else
+        for r in ( s:v.single_region ? [R] : s:R() )
+            call cursor(r.l, r.a)
+            if !search(regex.case, 'b', r.l)
+                if a:remove | call r.remove() | endif
+                continue
+            endif
+            if X
+                let r.a = getpos('.')[2]
+                call r.update_region()
+            else
+                call r.update_cursor_pos()
+            endif
+        endfor
+    endif
 
     "update variables, facing direction, highlighting
     call s:after_move(R)
