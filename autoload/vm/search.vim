@@ -43,7 +43,7 @@ fun! s:Search.get_pattern(register) abort
     let t = self.escape_pattern(t)
     let p = s:v.whole_word ? '\<'.t.'\>' : t
     "if whole word, ensure pattern can be found
-    let p = search(p, 'nc')? p : t
+    let p = search(p, 'ncw')? p : t
     return p
 endfun
 
