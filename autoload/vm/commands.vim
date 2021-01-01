@@ -302,7 +302,14 @@ endfun
 fun! s:get_region(next) abort
     " Call the needed function and notify if reselecting a region.
     if !get(g:, 'VM_notify_previously_selected', 0)
-        return a:next ? s:get_next() : s:get_prev()
+        try
+            return a:next ? s:get_next() : s:get_prev()
+        catch /E38[45]/
+            redraw
+            let dir = a:next ? 'BOTTOM' : 'TOP'
+            call s:F.msg(printf("Search hit %s without a match for %s", dir, @/))
+            return s:G.select_region_at_pos('.')
+        endtry
     endif
     normal! m`
     echo "\r"
