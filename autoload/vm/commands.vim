@@ -326,27 +326,25 @@ fun! s:get_region(next) abort
 endfun
 
 fun! s:get_next() abort
+    let s:v.nav_direction = 1
     if s:X()
         silent keepjumps normal! ngny`]
-        let R = s:G.new_region()
+        return s:G.new_region()
     else
         silent keepjumps normal! ngny`[
-        let R = vm#commands#add_cursor_at_word(0, 0)
+        return vm#commands#add_cursor_at_word(0, 0)
     endif
-    let s:v.nav_direction = 1
-    return R
 endfun
 
 fun! s:get_prev() abort
+    let s:v.nav_direction = 0
     if s:X()
         silent keepjumps normal! NgNy`]
-        let R = s:G.new_region()
+        return s:G.new_region()
     else
         silent keepjumps normal! NgNy`[
-        let R = vm#commands#add_cursor_at_word(0, 0)
+        return vm#commands#add_cursor_at_word(0, 0)
     endif
-    let s:v.nav_direction = 0
-    return R
 endfun
 
 fun! s:navigate(force, dir) abort
