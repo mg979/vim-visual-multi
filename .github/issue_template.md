@@ -1,7 +1,7 @@
 <!-- Before posting an issue, read at least:
 
-    :help visual-multi-faq
-    :help visual-multi-settings
+    :help vm-faq
+    :help vm-settings
 
     Please don't post requests for mappings, and be sure to read the faq to see
     how you can customize them, if you need.
