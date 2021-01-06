@@ -250,6 +250,7 @@ fun! s:Insert.update_text(insert_leave) abort
     if a:insert_leave
         let extra = s:cur_char_bytes() - 1
         let text = getline(ln)[ (pos-1) : (coln-1 + extra) ]
+        let coln += extra
     elseif coln > 1
         let text = getline(ln)[ (pos-1) : (coln-2) ]
     else
