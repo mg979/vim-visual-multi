@@ -116,15 +116,16 @@ fun! vm#variables#reset() abort
   let &smartcase   = v.oldcase[0]
   let &ignorecase  = v.oldcase[1]
   let &lz          = v.oldlz
-  let &ch          = v.oldch
+  let &cmdheight   = v.oldch
   let &clipboard   = v.clipboard
-  let &indentkeys  = v.indentkeys
-  let &cinkeys     = v.cinkeys
-  let &synmaxcol   = v.synmaxcol
-  let &textwidth   = v.textwidth
-  let &softtabstop  = v.softtabstop
-  let &conceallevel = v.conceallevel
-  let &concealcursor = v.concealcursor
+
+  let &l:indentkeys    = v.indentkeys
+  let &l:cinkeys       = v.cinkeys
+  let &l:synmaxcol     = v.synmaxcol
+  let &l:textwidth     = v.textwidth
+  let &l:softtabstop   = v.softtabstop
+  let &l:conceallevel  = v.conceallevel
+  let &l:concealcursor = v.concealcursor
 
   if get(g:, 'VM_set_statusline', 2)
     let &l:statusline  = v.statusline
