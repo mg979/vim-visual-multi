@@ -165,7 +165,7 @@ fun! s:Insert.apply_settings() abort
     " syn minlines/synmaxcol settings
     if !s:v.insert
         if g:VM_disable_syntax_in_imode
-            let &synmaxcol = 1
+            let &l:synmaxcol = 1
         elseif get(g:, 'VM_reduce_sync_minlines', 1) && len(b:VM_sync_minlines)
             if get(b:, 'VM_minlines', 0)
                 exe 'syn sync minlines='.b:VM_minlines
@@ -340,11 +340,11 @@ fun! s:Insert.stop(...) abort
     call s:step_back()
     call s:V.Edit.post_process(0,0)
 
-    let &indentkeys   = s:v.indentkeys
-    let &cinkeys      = s:v.cinkeys
-    let &synmaxcol    = s:v.synmaxcol
-    let &textwidth    = s:v.textwidth
-    let &softtabstop  = s:v.softtabstop
+    let &l:indentkeys   = s:v.indentkeys
+    let &l:cinkeys      = s:v.cinkeys
+    let &l:synmaxcol    = s:v.synmaxcol
+    let &l:textwidth    = s:v.textwidth
+    let &l:softtabstop  = s:v.softtabstop
 
     "restore sync minlines if possible
     if len(b:VM_sync_minlines)

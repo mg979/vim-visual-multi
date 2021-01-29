@@ -28,7 +28,7 @@ fun! vm#variables#set() abort
   set clipboard=
 
   "disable conceal
-  let &conceallevel = vm#comp#conceallevel()
+  let &l:conceallevel = vm#comp#conceallevel()
   set concealcursor=
 
   set virtualedit=onemore

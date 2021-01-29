@@ -836,7 +836,7 @@ fun! vm#commands#increase_or_decrease(increase, all_types, count)
     let map = a:increase ? "\<c-a>" : "\<c-x>"
     call s:V.Edit.run_normal(map, {'count': a:count, 'recursive': 0})
     if a:all_types
-        let &nrformats = oldnr
+        let &l:nrformats = oldnr
     endif
 endfun
 
