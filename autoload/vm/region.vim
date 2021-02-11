@@ -480,7 +480,9 @@ fun! s:Region.highlight() abort
     "------------------ cursor mode ----------------------------
 
     if !s:X()
-        let R.matches.cursor = matchaddpos('MultiCursor', [[R.l, R.a]], 40)
+        let R.matches.cursor = R.a == 1
+                    \ ? matchadd('MultiCursor', '\%' . R.l . 'l\%1c')
+                    \ : matchaddpos('MultiCursor', [[R.l, R.a]], 40)
         return
     endif
 
