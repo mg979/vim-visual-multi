@@ -260,7 +260,7 @@ fun! s:Region.set_vcol(...) abort
     if !s:vertical()
         let self.vcol = 0
     elseif !self.vcol
-        let self.vcol = virtcol('.')
+        let self.vcol = col('.')
     endif
 endfun
 
