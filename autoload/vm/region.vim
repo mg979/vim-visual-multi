@@ -261,6 +261,9 @@ fun! s:Region.set_vcol(...) abort
         let self.vcol = 0
     elseif !self.vcol
         let self.vcol = col('.')
+        if !&expandtab
+            let self.ntabs = count(getline('.')[:col('.')-2], "\t")
+        endif
     endif
 endfun
 
@@ -302,6 +305,12 @@ fun! s:keep_vertical_col(r) abort
     let vcol    = a:r.vcol
     let lnum    = line('.')
     let endline = (col('$') > 1)? col('$') - 1 : 1
+
+    if !&expandtab
+        let ntabs = count(getline('.')[:col('.')-1], "\t")
+        let tabsdiff = ntabs - a:r.ntabs
+        let vcol -= &tabstop * tabsdiff - tabsdiff
+    endif
 
     if ( vcol < endline )
         call cursor ( lnum, vcol )
@@ -602,7 +611,6 @@ fun! s:region_vars(r, cursor, ...) abort
         let R.h     = R.L - R.l             " height
         let R.k     = R.dir? R.a : R.b      " anchor
         let R.K     = R.dir? R.A : R.B      " anchor offset
-        let R.vcol  = 0                     " vertical column
 
     elseif !a:0            "/////////// REGION ////////////
 
@@ -622,7 +630,6 @@ fun! s:region_vars(r, cursor, ...) abort
         let R.h     = R.L - R.l             " height
         let R.k     = R.dir? R.a : R.b      " anchor
         let R.K     = R.dir? R.A : R.B      " anchor offset
-        let R.vcol  = 0                     " vertical column
 
     else                   "///////// FROM ARGS ///////////
 
@@ -640,8 +647,10 @@ fun! s:region_vars(r, cursor, ...) abort
         let R.h     = R.L - R.l             " height
         let R.k     = R.dir? R.a : R.b      " anchor
         let R.K     = R.dir? R.A : R.B      " anchor offset
-        let R.vcol  = 0                     " vertical column
     endif
+
+    let R.vcol  = 0 " vertical column
+    let R.ntabs = 0 " line indentation if noexpandtab
 endfun
 
 
