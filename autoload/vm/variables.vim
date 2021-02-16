@@ -19,7 +19,7 @@ fun! vm#variables#set() abort
   elseif g:VM_case_setting ==? 'sensitive'
     set nosmartcase
     set noignorecase
-  else
+  elseif g:VM_case_setting ==? 'ignore'
     set nosmartcase
     set ignorecase
   endif

@@ -8,7 +8,7 @@ let g:VM_custom_commands                  = get(g:, 'VM_custom_commands', {})
 let g:VM_commands_aliases                 = get(g:, 'VM_commands_aliases', {})
 let g:VM_debug                            = get(g:, 'VM_debug', 0)
 let g:VM_reselect_first                   = get(g:, 'VM_reselect_first', 0)
-let g:VM_case_setting                     = get(g:, 'VM_case_setting', 'smart')
+let g:VM_case_setting                     = get(g:, 'VM_case_setting', '')
 let g:VM_use_first_cursor_in_line         = get(g:, 'VM_use_first_cursor_in_line', 0)
 let g:VM_disable_syntax_in_imode          = get(g:, 'VM_disable_syntax_in_imode', 0)
 

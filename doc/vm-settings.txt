@@ -75,10 +75,11 @@ Hopefully you won't need to alter any of these.
   The first region will be reselected after most commands, if set to 1.
 
 
-*g:VM_case_setting*                                Default: 'smart'
+*g:VM_case_setting*                                Default: ''
 
-  Starting case matching for patterns. Other values: 'sensitive', 'ignore'
-  Can be switched inside VM.
+  Possible values: 'smart', 'sensitive', 'ignore'.
+  Starting case matching for patterns. Can be switched inside VM.
+  Leave empty to use your current setting.
 
 
 *g:VM_disable_syntax_in_imode*                     Default: 0

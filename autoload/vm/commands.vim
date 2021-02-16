@@ -543,8 +543,8 @@ fun! vm#commands#regex_motion(regex, count, remove) abort
     if s:F.no_regions() | return | endif
 
     let regex = empty(a:regex) ? s:F.search_chars(a:count) : a:regex
-    let case =    g:VM_case_setting == 'smart'  ? '' :
-                \ g:VM_case_setting == 'ignore' ? '\c' : '\C'
+    let case =    g:VM_case_setting ==? 'sensitive' ? '\C' :
+                \ g:VM_case_setting ==? 'ignore'    ? '\c' : ''
 
     if empty(regex)
         return s:F.msg('Cancel')
