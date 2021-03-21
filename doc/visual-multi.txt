@@ -86,6 +86,9 @@ be followed by the text object you want to change. Supported commands:
     <C-A>       increase number
     <C-X>       decrease number
 
+You can enter |insert-mode| with `i`, `I`, `a`, `A`, and only from cursor mode
+also with `o` and `O`.
+
 Also see |vm-motions| for supported motions in VM (some with differences).
 
 
@@ -111,6 +114,9 @@ Some commands enforce |cursor-mode| when run from |extend-mode|, such as:
 Others can use a different mapping:
 
     gu/gU   change case (instead of vim default u/U)
+
+Differently from |cursor-mode|, the `o` and `O` mappings are used to invert the
+facing of the selected regions, and not to start insert mode.
 
 More specific commands will be covered further on.
 
