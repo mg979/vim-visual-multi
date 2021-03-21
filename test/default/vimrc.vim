@@ -7,4 +7,5 @@ set runtimepath=$VIMRUNTIME
 set packpath=
 set nocompatible
 set runtimepath^=..
+set ignorecase smartcase
 source ../plugin/visual-multi.vim
