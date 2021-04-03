@@ -8,7 +8,8 @@ let s:plugins = extend({
             \},
             \'AutoPairs': {
             \   'test': { -> exists('b:autopairs_enabled') && b:autopairs_enabled },
-            \   'enable': 'unlet b:autopairs_loaded | call AutoPairsTryInit() | let b:autopairs_enabled = 1',
+            \   'enable': 'unlet b:autopairs_loaded | if exists("*autopairs#AutoPairsTryInit") | '
+            \             . 'call autopairs#AutoPairsTryInit() | else | call AutoPairsTryInit() | endif | let b:autopairs_enabled = 1',
             \   'disable': 'let b:autopairs_enabled = 0',
             \},
             \'tagalong': {
