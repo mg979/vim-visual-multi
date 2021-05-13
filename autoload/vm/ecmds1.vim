@@ -375,7 +375,7 @@ fun! s:Edit.fill_register(reg, text, force_ow) abort
     let text      = a:text
     let reg       = empty(a:reg) ? '"' : a:reg
     let temp_reg  = reg == '§'
-    let overwrite = reg ==# s:v.def_reg || ( a:force_ow && !temp_reg )
+    let overwrite = reg ==# s:v.def_reg || reg == '+' || ( a:force_ow && !temp_reg )
     let maxw      = max(map(copy(text), 'len(v:val)'))
     let type      = s:v.multiline? 'V' : ( len(s:R())>1? 'b'.maxw : 'v' )
 
