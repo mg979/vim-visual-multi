@@ -384,7 +384,10 @@ fun! s:Edit.fill_register(reg, text, force_ow) abort
         let g:Vm.registers[s:v.def_reg] = text
         let s:v.oldreg = [s:v.def_reg, join(text, "\n"), type]
     endif
-    let g:Vm.registers[reg] = text
+    " don't store the system register
+    if reg != '+'
+        let g:Vm.registers[reg] = text
+    endif
 
     "vim register is overwritten if unnamed, or if forced
     if overwrite
