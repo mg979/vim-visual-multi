@@ -37,9 +37,7 @@ With vim-plug:
     
 With Vim 8+:
 
-    grep -qxF 'packloadall' ~/.vimrc || echo 'packloadall' >> ~/.vimrc
-    mkdir -p ~/.vim/pack/plugins/start
-    git clone https://github.com/mg979/vim-visual-multi ~/.vim/pack/plugins/start/vim-visual-multi
+    grep -qxF 'packloadall' ~/.vimrc || echo 'packloadall' >> ~/.vimrc && mkdir -p ~/.vim/pack/plugins/start && git clone https://github.com/mg979/vim-visual-multi ~/.vim/pack/plugins/start/vim-visual-multi
 
 
 ### Documentation
