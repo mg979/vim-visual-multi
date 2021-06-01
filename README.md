@@ -34,6 +34,10 @@ And more... of course, you can enter insert mode and autocomplete will work.
 With vim-plug:
 
     Plug 'mg979/vim-visual-multi', {'branch': 'master'}
+    
+With Vim 8+:
+
+    mkdir -p ~/.vim/pack/plugins/start && git clone https://github.com/mg979/vim-visual-multi ~/.vim/pack/plugins/start/vim-visual-multi
 
 
 ### Documentation
