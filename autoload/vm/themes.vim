@@ -16,13 +16,13 @@ fun! vm#themes#init() abort
 
   if !empty(g:VM_highlight_matches)
     let out = execute('highlight Search')
-    let hi = strtrans(substitute(out, '^.*xxx ', '', ''))
-    let hi = substitute(hi, '\^.', '', 'g')
-    if match(hi, ' links to ') >= 0
+    if match(out, ' links to ') >= 0
       let hi = substitute(out, '^.*links to ', '', '')
-      let g:Vm.search_hi = "hi! link Search ".hi
+      let g:Vm.search_hi = "hi! link Search " . hi
     else
-      let g:Vm.search_hi = "hi! Search ".hi
+      let hi = strtrans(substitute(out, '^.*xxx ', '', ''))
+      let hi = substitute(hi, '\^.', '', 'g')
+      let g:Vm.search_hi = "hi! Search " . hi
     endif
 
     call vm#themes#hi()
