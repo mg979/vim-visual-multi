@@ -322,7 +322,9 @@ fun! vm#special#commands#search(bang, l1, l2, pattern) abort
     call vm#init_buffer(1)
     let g:Vm.extend_mode = 1
     if search(pat, 'n')
-      call s:V.Search.get_slash_reg(pat)
+      if just_started
+        call s:V.Search.get_slash_reg(pat)
+      endif
     else
       throw 'not found'
     endif
