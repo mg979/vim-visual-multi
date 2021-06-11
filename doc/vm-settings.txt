@@ -225,4 +225,40 @@ To relink VM highlight groups: >
 *g:VM_Cursor_hl*  ,, in extend mode (the cursors)
 *g:VM_Insert_hl*  ,, in insert mode (the virtual cursors)
 
+
+
+
+DEFINING THEMES IN COLORSCHEMES                               *vm-colorschemes*
+===============================================================================
+
+If you want to load a theme inside a colorscheme, just put in the colorscheme
+script:
+>
+  silent! VMTheme 'some_theme'
+<
+If you want to apply a custom theme, you may either relink groups as shown
+above (but then settings would persist for other colorschemes), or do it like
+this (example):
+>
+  if exists('g:loaded_visual_multi')
+
+    " to avoid that current theme is reapplied on colorscheme change
+    let g:VM_theme_set_by_colorscheme = 1
+
+    " you can define both or just one, depending on the scheme
+    if &background == 'light'
+      hi VM_Extend ctermbg=24    ctermfg=237    guibg=#AAF0D6    guifg=NONE
+      hi VM_Cursor ctermbg=31    ctermfg=237    guibg=#78dede    guifg=#262626
+      hi VM_Insert ctermbg=239   ctermfg=237    guibg=#ffffaf    guifg=#262626
+      hi VM_Mono   ctermbg=180   ctermfg=235    guibg=#B23A2D    guifg=#ffffff
+    else
+      hi VM_Extend ctermbg=24    ctermfg=237    guibg=#5f8787    guifg=#ffffff
+      hi VM_Cursor ctermbg=31    ctermfg=237    guibg=#00af87    guifg=#ffffff
+      hi VM_Insert ctermbg=239   ctermfg=237    guibg=#5f0087    guifg=#ffffff
+      hi VM_Mono   ctermbg=180   ctermfg=235    guibg=#e05f51    guifg=#ffffff
+    endif
+
+  endif
+<
+
  vim: ft=help et sw=2 ts=2 sts=2 tw=79

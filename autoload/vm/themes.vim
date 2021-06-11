@@ -4,8 +4,17 @@
 
 let s:Themes = {}
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#themes#init() abort
   if !exists('g:Vm') | return | endif
+
+  if exists('g:VM_theme_set_by_colorscheme')
+    unlet g:VM_theme_set_by_colorscheme
+    highlight! link MultiCursor VM_Cursor
+    return
+  endif
+
   let theme = get(g:, 'VM_theme', 'default')
 
   silent! hi clear VM_Mono
@@ -34,7 +43,6 @@ fun! vm#themes#init() abort
   let g:Vm.hi.insert  = 'VM_Insert'
   let g:Vm.hi.message = get(g:, 'VM_Message_hl', 'WarningMsg')
 
-
   if theme == 'default'
     exe "highlight! link VM_Mono     ".get(g:, 'VM_Mono_hl',   'ErrorMsg')
     exe "highlight! link VM_Cursor   ".get(g:, 'VM_Cursor_hl', 'Visual')
@@ -61,7 +69,7 @@ endfun
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#themes#load(theme) abort
-  " Load a theme.
+  " Load a theme or set default.
   if empty(a:theme)
     let g:VM_theme = 'default'
     echo 'Theme set to default'
