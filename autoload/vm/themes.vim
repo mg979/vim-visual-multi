@@ -74,13 +74,11 @@ fun! vm#themes#load(theme) abort
   call vm#themes#init()
 endfun
 
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 fun! vm#themes#complete(A, L, P) abort
-  if &background=='light'
-    let valid = ['sand', 'paper', 'lightblue1', 'lightblue2', 'lightpurple1', 'lightpurple2']
-  elseif &background=='dark'
-    let valid = ['iceblue', 'ocean', 'neon', 'purplegray', 'nord', 'codedark', 'spacegray', 'olive', 'sand']
-  endif
-  return filter(sort(valid), 'v:val=~#a:A')
+  let valid = &background == 'light' ? s:Themes._light : s:Themes._dark
+  return filter(sort(copy(valid)), 'v:val=~#a:A')
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -112,6 +110,11 @@ fun! vm#themes#statusline() abort
         \ color, mode, '%#VM_Insert#', vm.ratio, single, '%#TabLine#',
         \ patterns, color, vm.status . ' ')
 endfun
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+let s:Themes._light = ['sand', 'paper', 'lightblue1', 'lightblue2', 'lightpurple1', 'lightpurple2']
+let s:Themes._dark = ['iceblue', 'ocean', 'neon', 'purplegray', 'nord', 'codedark', 'spacegray', 'olive', 'sand']
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
