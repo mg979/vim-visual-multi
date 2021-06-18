@@ -89,6 +89,9 @@ fun! vm#icmds#cw(ctrlu) abort
     let s:v.storepos = getpos('.')[1:2]
     let keep_line = get(g:, 'VM_icw_keeps_line', 1)
 
+    " we'll move right if an extra space will be added
+    call vm#region#set_motion('l', 0)
+
     for r in s:R()
         call r.shift(change, change)
 
@@ -99,7 +102,7 @@ fun! vm#icmds#cw(ctrlu) abort
 
         if r.a > 1 && s:eol(r) "add extra space and move right
             call s:V.Edit.extra_spaces.add(r)
-            call r.move('l')
+            call r.move_cursor()
         endif
 
         let L = getline(r.l)

@@ -518,7 +518,7 @@ fun! vm#commands#merge_to_beol(eol) abort
     if s:F.no_regions() | return | endif
     call s:G.cursor_mode()
 
-    let s:v.motion = a:eol? "\<End>" : '^'
+    let s:v.motion = a:eol? "$" : '^'
     let s:v.merge = 1
     call s:call_motion()
 endfun
@@ -613,7 +613,11 @@ fun! s:call_motion(...) abort
 
     call s:before_move()
 
-    for r in regions | call r.move() | endfor
+    if s:X()
+        for r in regions | call r.move_region() | endfor
+    else
+        for r in regions | call r.move_cursor() | endfor
+    endif
 
     "update variables, facing direction, highlighting
     call s:after_move(R)
@@ -622,6 +626,15 @@ endfun
 
 fun! s:before_move() abort
     call s:G.reset_byte_map(0)
+
+    " unmap VM buffer mapping and set current motion
+    let key = substitute(s:v.motion, '^[1-9]\d*', '', '')
+    let s:motionKey = key == '|' ? '\|'
+                \   : key =~? '^[ft]' ? key[0]
+                \   : key
+    exe b:VM_unmaps[s:motionKey]
+    call vm#region#set_motion(s:v.motion, 1)
+
     if !s:X() | let s:v.merge = 1 | endif
 endfun
 
@@ -639,6 +652,9 @@ fun! s:after_move(R) abort
         call s:G.update_highlight()
         call s:G.select_region(a:R.index)
     endif
+
+    " remap VM buffer key for motion
+    exe b:VM_maps[s:motionKey]
 endfun
 
 

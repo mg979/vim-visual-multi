@@ -84,6 +84,13 @@ endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+fun! vm#region#set_motion(motion, recursive)
+    let s:v.motion = a:motion
+    let s:v.motion_cmd = 'keepjumps normal' . (a:recursive ? '' : '!')
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
 let s:Region = {}
 
 
@@ -243,18 +250,6 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
-fun! s:Region.move(...) abort
-    " Move cursors, or extend regions by motion.
-    let s:motion = a:0? a:1 : s:v.motion
-
-    if !s:X()
-        call s:move_cursor(self)
-    else
-        call s:move_region(self)
-    endif
-endfun
-
-
 fun! s:Region.set_vcol(...) abort
     " Set vertical column if motion is j or k, and vcol not previously set.
     if !s:vertical()
@@ -271,23 +266,23 @@ endfun
 
 
 fun! s:vertical() abort
-    return index(['j', 'k'], s:motion[0]) >=0
+    return index(['j', 'k'], s:v.motion[0]) >=0
 endfun
 
 
-fun! s:move_cursor(r) abort
+fun! s:Region.move_cursor() abort
     " If not in extend mode, just move the cursors.
 
-    call cursor(a:r.l, a:r.a)
-    call a:r.set_vcol()
-    exe "keepjumps normal! ".s:motion
+    call cursor(self.l, self.a)
+    call self.set_vcol()
+    exe s:v.motion_cmd s:v.motion
 
     "keep line or column
-    if s:vertical()       | call s:keep_vertical_col(a:r)
-    elseif !s:v.multiline | call s:keep_line(a:r, line('.'))
+    if s:vertical()       | call s:keep_vertical_col(self)
+    elseif !s:v.multiline | call s:keep_line(self, line('.'))
     endif
 
-    call a:r.update_cursor_pos()
+    call self.update_cursor_pos()
 endfun
 
 
@@ -325,14 +320,14 @@ fun! s:keep_vertical_col(r) abort
 endfun
 
 
-fun! s:move_region(r) abort
+fun! s:Region.move_region() abort
     " Perform the motion.
-    let r = a:r | let a = r.a | let b = r.b | let up = 0 | let down = 0
+    let r = self | let a = r.a | let b = r.b | let up = 0 | let down = 0
 
     "move the cursor to the current head and perform the motion
     call cursor(r.cur_ln(), r.cur_col())
-    call a:r.set_vcol()
-    exe "keepjumps normal! ".s:motion
+    call r.set_vcol()
+    exe s:v.motion_cmd s:v.motion
 
     if s:vertical() | call s:keep_vertical_col(r) | endif
 

@@ -605,12 +605,15 @@ fun! s:step_back() abort
         return
     endif
 
+    " set motion for mutibyte fix
+    call vm#region#set_motion('lh', 0)
+
     for r in s:v.single_region ? [s:R()[s:Insert.index]] : s:R()
         if r.a != col([r.l, '$']) && r.a > 1
             " move one byte back
             call r.shift(-1,-1)
             " fix column in case of multibyte chars by using a motion
-            call r.move('lh')
+            call r.move_cursor()
         endif
     endfor
 endfun
