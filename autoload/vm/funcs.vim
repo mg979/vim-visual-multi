@@ -188,14 +188,15 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! s:Funcs.get_expr(x) abort
-    let l:Has = { x, c -> match(x, '%'.c ) >= 0 }
+    let l:Has = { x, c -> match(x, '\C%'.c ) >= 0 }
     let l:Sub = { x, a, b -> substitute(x, a, b, 'g') }
     let N = len(s:R()) | let x = a:x
 
     if l:Has(x, 't')   | let x = l:Sub(x, '%t', 'r.txt')                    | endif
+    if l:Has(x, 'f')   | let x = l:Sub(x, '%f', 'str2float(r.txt)')         | endif
+    if l:Has(x, 'n')   | let x = l:Sub(x, '%n', 'str2nr(r.txt)')            | endif
     if l:Has(x, 'i')   | let x = l:Sub(x, '%i', 'r.index')                  | endif
-    if l:Has(x, 'n')   | let x = l:Sub(x, '%n', N)                          | endif
-    if l:Has(x, 'syn') | let x = l:Sub(x, '%syn', 's:F.syntax([r.l, r.a])') | endif
+    if l:Has(x, 'N')   | let x = l:Sub(x, '%N', N)                          | endif
     return x
 endfun
 
