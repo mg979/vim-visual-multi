@@ -234,13 +234,13 @@ DEFINING THEMES IN COLORSCHEMES                               *vm-colorschemes*
 If you want to load a theme inside a colorscheme, just put in the colorscheme
 script:
 >
-  silent! VMTheme 'some_theme'
+  silent! VMTheme theme_name
 <
 If you want to apply a custom theme, you may either relink groups as shown
 above (but then settings would persist for other colorschemes), or do it like
 this (example):
 >
-  if exists('g:loaded_visual_multi')
+  if exists(':VMTheme')
 
     " to avoid that current theme is reapplied on colorscheme change
     let g:VM_theme_set_by_colorscheme = 1

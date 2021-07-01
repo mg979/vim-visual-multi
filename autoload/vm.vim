@@ -90,7 +90,7 @@ fun! vm#init_buffer(cmd_type) abort
             if !has_key(g:Vm, 'Search')
                 call vm#themes#init()
             else
-                call vm#themes#hi()
+                call vm#themes#search_highlight()
             endif
             hi clear Search
             exe g:Vm.Search

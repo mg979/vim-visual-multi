@@ -87,7 +87,6 @@ endfun
 
 augroup VM_start
   au!
-  au ColorScheme  * call vm#themes#init()
   au VimEnter     * call s:vm_registers()
   au VimLeavePre  * call s:vm_persist()
 augroup END

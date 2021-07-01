@@ -4,10 +4,36 @@
 
 let s:Themes = {}
 
+augroup VM_reset_theme
+  au!
+  au ColorScheme * call vm#themes#init()
+augroup END
+
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#themes#init() abort
   if !exists('g:Vm') | return | endif
+
+  if !empty(g:VM_highlight_matches)
+    let out = execute('highlight Search')
+    if match(out, ' links to ') >= 0
+      let hi = substitute(out, '^.*links to ', '', '')
+      let g:Vm.search_hi = "hi! link Search " . hi
+    else
+      let hi = strtrans(substitute(out, '^.*xxx ', '', ''))
+      let hi = substitute(hi, '\^.', '', 'g')
+      let g:Vm.search_hi = "hi! Search " . hi
+    endif
+
+    call vm#themes#search_highlight()
+  endif
+
+  let g:Vm.hi.mono    = 'VM_Mono'
+  let g:Vm.hi.cursor  = 'VM_Cursor'
+  let g:Vm.hi.extend  = 'VM_Extend'
+  let g:Vm.hi.insert  = 'VM_Insert'
+  let g:Vm.hi.message = get(g:, 'VM_Message_hl', 'WarningMsg')
 
   if exists('g:VM_theme_set_by_colorscheme')
     unlet g:VM_theme_set_by_colorscheme
@@ -22,26 +48,6 @@ fun! vm#themes#init() abort
   silent! hi clear VM_Extend
   silent! hi clear VM_Insert
   silent! hi clear MultiCursor
-
-  if !empty(g:VM_highlight_matches)
-    let out = execute('highlight Search')
-    if match(out, ' links to ') >= 0
-      let hi = substitute(out, '^.*links to ', '', '')
-      let g:Vm.search_hi = "hi! link Search " . hi
-    else
-      let hi = strtrans(substitute(out, '^.*xxx ', '', ''))
-      let hi = substitute(hi, '\^.', '', 'g')
-      let g:Vm.search_hi = "hi! Search " . hi
-    endif
-
-    call vm#themes#hi()
-  endif
-
-  let g:Vm.hi.mono    = 'VM_Mono'
-  let g:Vm.hi.cursor  = 'VM_Cursor'
-  let g:Vm.hi.extend  = 'VM_Extend'
-  let g:Vm.hi.insert  = 'VM_Insert'
-  let g:Vm.hi.message = get(g:, 'VM_Message_hl', 'WarningMsg')
 
   if theme == 'default'
     exe "highlight! link VM_Mono     ".get(g:, 'VM_Mono_hl',   'ErrorMsg')
@@ -58,7 +64,7 @@ endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-fun! vm#themes#hi() abort
+fun! vm#themes#search_highlight() abort
   " Init Search highlight.
   let g:Vm.Search = g:VM_highlight_matches == 'underline' ? 'hi Search term=underline cterm=underline gui=underline' :
         \           g:VM_highlight_matches == 'red'       ? 'hi Search ctermfg=196 guifg=#ff0000' :
