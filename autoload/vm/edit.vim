@@ -265,10 +265,36 @@ fun! s:Edit.process(cmd, ...) abort
 
     if empty(s:v.storepos) | let s:v.storepos = getpos('.')[1:2] | endif
 
-    let store           = a:0 && has_key(a:1, 'store') && a:1.store != "_"
-    let backup_txt      = a:0 && has_key(a:1, 'store')
-    let stay_put        = a:0 && has_key(a:1, 'stay_put')
-    let do_cursor_moved = !exists("##TextYankPost")
+    let backup_txt      = a:0 && has_key(a:1, 'store')      " deleting regions, store their text
+    let write_reg       = backup_txt && a:1.store != '_'    " also write vim register unless _
+    let stay_put        = a:0 && has_key(a:1, 'stay_put')   " don't move the cursors after command
+    let do_cursor_moved = !exists("##TextYankPost")         " we want CursorMoved, even if cursor doesn't move
+
+    " if we are planning to store regions text, it's because commands can delete them
+    " but not all commands will alter vim registers, even if text changes
+    "
+    " then there's a bug: if user has mappings that redirect to _ register,
+    " they will be falsely interpreted as using " register
+    " if we just assume that " register contains deleted text and we store it,
+    " we'd concatenate instead the old unchanged register, that will become
+    " exponentially bigger in the process, because we write it back too
+    "
+    " so what we do is:
+    "
+    " - store the old " register
+    " - clear it
+    " - if commands change the register
+    "       regions text must be stored
+    "       the old " register will not be restored
+    " - if after command " register is still empty
+    "       don't store anything
+    "       the old " register will be restored
+
+    if backup_txt
+        let oldreg = [@", getregtype('"')]
+        let @" = ''
+    endif
+    let must_restore_register = v:false
 
     call s:G.backup_regions()
 
@@ -285,7 +311,13 @@ fun! s:Edit.process(cmd, ...) abort
 
         " store deleted text during deletions/changes at cursors
         if backup_txt
-            call add(txt, getreg(s:v.def_reg))
+            if @" == ''
+                let backup_txt = v:false
+                let write_reg = v:false
+                let must_restore_register = v:true
+            else
+                call add(txt, getreg(s:v.def_reg))
+            endif
         endif
 
         " update new cursor position after the command, unless specified
@@ -303,12 +335,16 @@ fun! s:Edit.process(cmd, ...) abort
         endif
     endfor
 
-    " fill VM register after deletions/changes at cursors
-    if store
+    if must_restore_register
+        call setreg('"', oldreg[0], oldreg[1])
+
+    elseif write_reg
+        " fill VM register after deletions/changes at cursors
         " overwrite vim register if requested
         call self.fill_register(a:1.store, txt, a:1.vimreg)
     endif
-    " backup original regions text since it could used
+
+    " the original regions text could used by commands
     if backup_txt
         let s:v.changed_text = txt
     endif
