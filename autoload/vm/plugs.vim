@@ -344,9 +344,13 @@ endfun
 fun! s:Visual(cmd) abort
   " Restore register after a visual yank.
   if !g:Vm.buffer
-    let g:Vm.visual_reg = ['"', getreg('"'), getregtype('"')]
-    let r = "g:Vm.visual_reg[0], g:Vm.visual_reg[1], g:Vm.visual_reg[2]"
-    let r = ":let b:VM_Selection.Vars.oldreg = g:Vm.visual_reg\<cr>:call setreg(".r.")\<cr>"
+    let g:Vm.vreg = ['"', getreg('"'), getregtype('"')]
+    let r = "g:Vm.vreg[0], g:Vm.vreg[1], g:Vm.vreg[2]"
+    let r = ":let b:VM_Selection.Vars.oldreg = g:Vm.vreg\<cr>:call setreg(".r.")\<cr>"
+    if &clipboard =~ 'plus'
+      let g:Vm.vregplus = ['+', getreg('+'), getregtype('+')]
+      let r .= ":call setreg(g:Vm.vregplus[0], g:Vm.vregplus[1], g:Vm.vregplus[2])\<cr>"
+    endif
   else
     let r = ''
   endif
