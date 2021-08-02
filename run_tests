@@ -1,0 +1,15 @@
+#!/bin/bash
+
+cd test
+
+[ -e test.py ] || exit
+
+chmod u+x test.py
+
+if [ $# -gt 0 ]; then
+	./test.py "$@"
+else
+	./test.py
+fi
+
+chmod u-x test.py

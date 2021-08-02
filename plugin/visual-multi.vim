@@ -6,12 +6,11 @@
 " Licence:      The MIT License (MIT)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
+" Guard {{{
 if v:version < 800
   echomsg '[vim-visual-multi] Vim version 8 is required'
   finish
 endif
-
-"Initialize variables
 
 if exists("g:loaded_visual_multi")
   finish
@@ -20,6 +19,7 @@ let g:loaded_visual_multi = 1
 
 let s:save_cpo = &cpo
 set cpo&vim
+"}}}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
