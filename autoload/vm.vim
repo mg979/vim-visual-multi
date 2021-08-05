@@ -155,9 +155,7 @@ fun! vm#reset(...)
 
     call vm#comp#exit()
 
-    " restore visual marks
-    call setpos("'<", s:v.vmarks[0])
-    call setpos("'>", s:v.vmarks[1])
+    call s:V.Funcs.restore_visual_marks()
 
     "exiting manually
     if !get(g:, 'VM_silent_exit', 0) && !a:0

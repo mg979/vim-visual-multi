@@ -51,7 +51,6 @@ endfun
 
 fun! s:Funcs.byte2pos(byte) abort
     " Return the (line, col) position of a byte offset.
-
     let line = byte2line(a:byte)
     let col  = a:byte - line2byte(line) + 1
     return [line, col]
@@ -152,6 +151,13 @@ fun! s:Funcs.restore_regs() abort
     let g:Vm.registers['"'] = []
     let g:Vm.registers['-'] = []
     silent! unlet g:Vm.registers['§']
+endfun
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+fun! s:Funcs.restore_visual_marks() abort
+    call setpos("'<", s:v.vmarks[0])
+    call setpos("'>", s:v.vmarks[1])
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
