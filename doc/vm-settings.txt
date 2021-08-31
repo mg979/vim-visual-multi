@@ -96,7 +96,7 @@ Hopefully you won't need to alter any of these.
 
 *g:VM_custom_remaps*                               Default: {}
 
-  To remap VM keys while preserving the function of the original VM mapping.
+  To remap VM mappings to other VM mappings.
   Example:
   >
   " also use <c-p> to select previous and <c-s> to skip current

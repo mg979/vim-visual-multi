@@ -35,6 +35,9 @@ Example of |vim-multiple-cursors| -like mappings:
     let g:VM_maps['Increase']    = '+'
     let g:VM_maps['Decrease']    = '-'
 <
+For Colemak users, see |vm-colemak|.
+
+
 -------------------------------------------------------------------------------
 DEFAULT MAPPINGS                                          *vm-mappings-default*
                                                         *g:VM_default_mappings*
@@ -125,7 +128,6 @@ Toggle Multiline        M         see |vm-multiline-mode|
 
 The following are valid in extend-mode: ~
 
-Invert Direction        o         as |o| in visual mode
 Surround                S         requires |vim-surround| plugin
 Move Right          <M-S-Right>   move all selections to the right
 Move Left           <M-S-Left>    ,,      ,,          to the left
@@ -182,5 +184,50 @@ Toggle Whole Word     \\w         toggle whole word search
 Case Setting          \\c         cycle case setting ('scs' -> 'noic' -> 'ic')
 Toggle Mappings       \\<Space>   toggle VM mappings
 Toggle Single Region  \\<CR>      toggle single region mode
+
+
+-------------------------------------------------------------------------------
+COLEMAK MAPPINGS                                                   *vm-colemak*
+
+For Colemak users or more extensive remappings: this mapping system wasn't
+really designed for that. Take into account that when you assign keys this way,
+you assign a `VM <Plug>` to a key, you aren't remapping a key to another key.
+For example if you do:
+>
+  let g:VM_maps['i'] = 'a'
+  let g:VM_maps['I'] = 'A'
+  let g:VM_maps['a'] = 'o'
+  let g:VM_maps['A'] = 'O'
+
+You aren't remapping `i` to `a`, but the other way around. This translates to:
+>
+  nmap a <Plug>(VM-i)
+  nmap A <Plug>(VM-I)
+  nmap o <Plug>(VM-a)
+  nmap O <Plug>(VM-A)
+
+And the VM plugs have a fixed meaning: if you remapped `i`, it's not that
+`<Plug>(VM-i)` means something different, it still means "start insert mode
+before the cursor".
+
+This means that you have to take other VM mappings into account, that could
+overwrite your mappings. In this case you would also need to map something to
+overtake `o` and `O` functions, so this would work:
+>
+  let g:VM_maps['i'] = 'a'
+  let g:VM_maps['I'] = 'A'
+  let g:VM_maps['a'] = 'o'
+  let g:VM_maps['A'] = 'O'
+  let g:VM_maps['o'] = 'i'
+  let g:VM_maps['O'] = 'I'
+<
+In general if you switch `A` and `B`, writing
+>
+  map[A] = B
+  map[B] = A
+
+is enough, but if you want to change more keys, you have to remap all
+combinations to avoid that some of the mappings won't work.
+
 
  vim: ft=help et sw=2 ts=2 sts=2 tw=79
