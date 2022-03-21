@@ -93,7 +93,7 @@ fun! vm#init_buffer(cmd_type) abort
                 call vm#themes#search_highlight()
             endif
             hi clear Search
-            exe g:Vm.Search
+            exe 'hi! ' . g:Vm.Search
         endif
 
         if !v:hlsearch && a:cmd_type != 2
@@ -146,7 +146,7 @@ fun! vm#reset(...)
 
     if !empty(g:VM_highlight_matches)
         hi clear Search
-        exe g:Vm.search_hi
+        exe 'hi! ' . g:Vm.search_hi
     endif
 
     if g:Vm.oldupdate && &updatetime != g:Vm.oldupdate

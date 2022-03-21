@@ -19,11 +19,11 @@ fun! vm#themes#init() abort
     let out = execute('highlight Search')
     if match(out, ' links to ') >= 0
       let hi = substitute(out, '^.*links to ', '', '')
-      let g:Vm.search_hi = "hi! link Search " . hi
+      let g:Vm.search_hi = "link Search " . hi
     else
       let hi = strtrans(substitute(out, '^.*xxx ', '', ''))
       let hi = substitute(hi, '\^.', '', 'g')
-      let g:Vm.search_hi = "hi! Search " . hi
+      let g:Vm.search_hi = "Search " . hi
     endif
 
     call vm#themes#search_highlight()
@@ -66,10 +66,11 @@ endfun
 
 fun! vm#themes#search_highlight() abort
   " Init Search highlight.
-  let g:Vm.Search = g:VM_highlight_matches == 'underline' ? 'hi Search term=underline cterm=underline gui=underline' :
-        \           g:VM_highlight_matches == 'red'       ? 'hi Search ctermfg=196 guifg=#ff0000' :
-        \           g:VM_highlight_matches =~ '^hi!\? '   ? g:VM_highlight_matches
-        \                                                 : 'hi Search term=underline cterm=underline gui=underline'
+  let hl = g:VM_highlight_matches
+  let g:Vm.Search = hl == 'underline' ? 'Search term=underline cterm=underline gui=underline' :
+        \           hl == 'red'       ? 'Search ctermfg=196 guifg=#ff0000' :
+        \           hl =~ '^hi!\? '   ? substitute(g:VM_highlight_matches, '^hi!\?', '', '')
+        \                             : 'Search term=underline cterm=underline gui=underline'
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
