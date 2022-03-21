@@ -735,6 +735,22 @@ fun! vm#commands#invert_direction(...) abort
     call s:G.select_region(s:v.index)
 endfun
 
+function! vm#commands#reset_direction(...) abort
+    " Resets regions facing.
+    if s:F.no_regions() || s:v.auto | return | endif
+
+    let s:v.direction = 1
+    for r in s:R()
+        let r.dir = 1
+        let r.k = r.a
+        let r.K = r.A
+    endfor
+
+    if !a:0 | return | endif
+    call s:G.update_highlight()
+    call s:G.select_region(s:v.index)
+endfunction
+
 
 fun! vm#commands#split_lines() abort
     " Split regions so that they don't cross line boundaries.

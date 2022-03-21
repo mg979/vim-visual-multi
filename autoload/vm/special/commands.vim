@@ -324,6 +324,8 @@ fun! vm#special#commands#search(bang, l1, l2, pattern) abort
     if search(pat, 'n')
       if just_started
         call s:V.Search.get_slash_reg(pat)
+      else
+        call s:V.Search.add(pat)
       endif
     else
       throw 'not found'
@@ -338,6 +340,7 @@ fun! vm#special#commands#search(bang, l1, l2, pattern) abort
       let end = line2byte(a:l2) + col([a:l2, '$']) - 1
       let r = s:G.get_all_regions(start, end)
     endif
+    call vm#commands#reset_direction(1)
     call winrestview(view)
     call s:G.select_region_at_pos([r.l, r.a])
   catch
