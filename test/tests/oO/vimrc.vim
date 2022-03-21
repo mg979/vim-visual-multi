@@ -6,6 +6,8 @@ function! VimrunnerPyEvaluateCommandOutput(command)
   return output
 endfunction
 
+let g:loaded_remote_plugins = 1
+
 set runtimepath=$VIMRUNTIME
 set packpath=
 set nocompatible
