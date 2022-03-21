@@ -1,6 +1,6 @@
 *vm-mappings.txt*    Version 0.3.0    Last change: June 11 2019
 
-MAPPINGS ~
+MAPPINGS                                                      *vm-mappings-all*
 ===============================================================================
                                                                     *g:VM_maps*
 To change any mapping you must first initialize the variable:

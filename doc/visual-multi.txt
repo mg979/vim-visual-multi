@@ -3,30 +3,31 @@
 VISUAL-MULTI - TABLE OF CONTENTS                                 *visual-multi*
 ===============================================================================
 
-Requirements                                   |visual-multi-requirements|
-Introduction                                   |visual-multi-introduction|
-Modes                                          |visual-multi-modes|
-Regions and patterns                           |visual-multi-regions|
-Mappings                                       |visual-multi-mappings|
-Run ... at cursors                             |visual-multi-run-at-cursors|
-Commands                                       |visual-multi-commands|
-Registers                                      |visual-multi-registers|
-Other features                                 |visual-multi-other|
-Single region mode                             |visual-multi-single-mode|
-Credits                                        |visual-multi-credits|
-License                                        |visual-multi-license|
+Requirements                                             |vm-requirements|
+Introduction                                             |vm-introduction|
+Quick reference                                          |vm-quick-reference|
+Modes                                                    |vm-modes|
+Regions and patterns                                     |vm-regions|
+Mappings                                                 |vm-mappings|
+Run ... at cursors                                       |vm-run-at-cursors|
+Commands                                                 |vm-commands|
+Registers                                                |vm-registers|
+Other features                                           |vm-other|
+Single region mode                                       |vm-single-mode|
+Credits                                                  |vm-credits|
+License                                                  |vm-license|
 
-Additional resources:
+Additional help:
 
 Settings                                       |vm-settings|
-Quick reference                                |vm-quick-reference|
+Mappings reference                             |vm-mappings-all|
 Frequently asked questions                     |vm-faq|
 Troubleshooting                                |vm-troubleshooting|
 Additional Ex commands                         |vm-ex-commands|
 
 
 
-REQUIREMENTS                                        *visual-multi-requirements*
+REQUIREMENTS                                                  *vm-requirements*
 ===============================================================================
 
 Vim 8/Neovim is required.
@@ -37,7 +38,7 @@ Here for troubles? Go to |vm-faq| or |vm-troubleshooting|.
 
 
 
-INTRODUCTION                                        *visual-multi-introduction*
+INTRODUCTION                                                  *vm-introduction*
 ===============================================================================
 
 Visual-Multi (VM in short) is a multiple selections/cursors plugin.
@@ -62,7 +63,39 @@ multiple selections?
 
 
 
-MODES                                                      *visual-multi-modes*
+QUICK REFERENCE                                            *vm-quick-reference*
+===============================================================================
+
+
+Find Word                    <C-n>                        |vm-find-word|
+Next/Previous/Skip           n / N / q                    |vm-find-next|
+Remove Region                Q                            |vm-remove-region|
+Add Cursors Down/Up          <C-Down> / <C-Up>            |vm-add-cursors|
+Add Cursor at Position       \\\                          |vm-add-cursor|
+Select Right/Left            <S-Right>, <S-Left>          |vm-shift-select|
+Select All Words             \\A                          |vm-select-all|
+Slash motion                 g/                           |vm-slash|
+Find with Regex              \\/                          |vm-regex-search|
+Reselect Last                \\gS                         |vm-reselect-last|
+Toggle Mappings              \\<Space>                    |vm-mappings-toggle|
+Select Operator              s                            |vm-select-operator|
+Find Operator                m                            |vm-find-operator|
+Alignment                    \\a                          |vm-align|
+Transposition                \\t                          |vm-transpose|
+
+Note: `\\` you see here is the |g:VM_leader|, that can be changed.
+
+Note: some mappings in this list are <buffer> mappings, that is, they are
+available only after VM has started. |vm-mappings-buffer|
+
+Note: you don't need to learn all, or even most commands. If you want to keep
+things simple, commands listed here should be enough.
+
+
+
+
+
+MODES                                                                *vm-modes*
 ===============================================================================
 
 There are two main modes VM can work in, |cursor-mode| and |extend-mode|.
@@ -153,6 +186,10 @@ VM supports several operators by default:
 
   y/d/c       yank/delete/change
   gu/gU       change case
+
+VM uses its own registers, that are lists of strings, one element for each
+region that is yanked/deleted. You can read more about them in the
+|vm-registers| section.
 
 There is also built-in support for:
 
@@ -256,17 +293,11 @@ Note that multiline mode must be enabled for some text objects motions, or they
 will fail. See |vm-motions|.
 
 
----------------------------------------------------------------  *vm-registers*
-
-VM uses its own registers, that are lists of strings, one element for each
-region that is yanked/deleted. You can read more about them in the
-|visual-multi-registers| section, since this is an accessory topic.
 
 
 
 
-
-REGIONS AND PATTERNS                                      *visual-multi-regions*
+REGIONS AND PATTERNS                                                *vm-regions*
 ===============================================================================
 
 With the term 'region' I mean either a cursor or a selection. You can consider
@@ -289,15 +320,12 @@ will never be automatically added in cursor mode.
 
 
 
-MAPPINGS                                                *visual-multi-mappings*
+MAPPINGS                                                          *vm-mappings*
 ===============================================================================
 
-What follows are the default mappings, and an overview of most commands.
-For a quick reference of the mappings, and instructions on how to change them,
-see |g:VM_maps| or:
->
-    :help vm-mappings.txt
-<
+For a reference of all mappings, and instructions on how to change them,
+see |g:VM_maps|.
+
 VM mostly uses buffer mappings, except a handful of them that are always
 mapped. Buffer mappings are applied when VM starts, and removed when VM ends.
 It tries not to overwrite pre-existant buffer mappings, so rather than doing
@@ -307,7 +335,6 @@ still be warned if this happens.
 
 
 ----------------------------------------------------------------  *g:VM_leader*
-
 
 Since there are a lot of new mappings, the chance for conflicts would be high,
 if you use plugins that use buffer mappings (common with |ftplugins|).
@@ -319,32 +346,9 @@ Default is `\\` (two backslashes). If you want to change it, set (for example):
 When you see mappings with 2 backslashes, that's the VM leader, so the mappings
 will be different if you change it.
 
+See also |g:VM_leader-dict| if you want to use different leaders for global and
+buffer mappings.
 
----------------------------------------------------------  *vm-quick-reference*
-Quick reference ~
-
-
-Find Word                    <C-n>                        |vm-find-word|
-Next/Previous/Skip           n / N / q                    |vm-find-next|
-Add Cursors Down/Up          <C-Down> / <C-Up>            |vm-add-cursors|
-Add Cursor at Position       \\\                          |vm-add-cursor|
-Select Right/Left            <S-Right>, <S-Left>          |vm-shift-select|
-Select All Words             \\A                          |vm-select-all|
-Slash motion                 g/                           |vm-slash|
-Find with Regex              \\/                          |vm-regex-search|
-Reselect Last                \\gS                         |vm-reselect-last|
-Toggle Mappings              \\<Space>                    |vm-mappings-toggle|
-Select Operator              s                            |vm-select-operator|
-Find Operator                m                            |vm-find-operator|
-Alignment                    \\a                          |vm-align|
-Transposition                \\t                          |vm-transpose|
-
-NOTE: some mappings in this list are <buffer> mappings, that is, they are
-available only after VM has started.
-
-NOTE: you don't need to learn all, or even most commands. If you think you'll
-use the plugin for quick refactorings, and you want to keep things simple, you
-can stop reading here, and just use some of the commands listed in this table.
 
 ---------------------------------------------------------------  *vm-find-word*
 Find Word ~
@@ -357,11 +361,12 @@ Find Word ~
   From normal mode it accepts a [count], so that you can do 3<C-n> to select
   the first 3 occurrences of the word under cursor.
 
+                                              *vm-find-next* *vm-remove-region*
   After VM has started, you can also use the following mappings:
-                                                                 *vm-find-next*
     n            find next
     N            find previous
     q            skip and find next (or previous if searching backwards)
+    Q            remove current region and go to previous
     ]            go to next
     [            go to previous
     <C-f>        go to next (by page)
@@ -504,7 +509,7 @@ Show Infoline ~
 
 
 
-RUN ... AT CURSORS                                *visual-multi-run-at-cursors*
+RUN ... AT CURSORS                                          *vm-run-at-cursors*
 ===============================================================================
 
 You can enter any kind of normal/visual/ex command, and it will be repeated at
@@ -532,7 +537,7 @@ Macro      \\@     run a macro at cursors                     *vm-run-macro*
 
 
 
-COMMANDS                                                *visual-multi-commands*
+COMMANDS                                                          *vm-commands*
 ===============================================================================
 
 The commands that follow are placed somewhat in order of complexity (and
@@ -555,7 +560,7 @@ Transform with expression     \\e                        |vm-transform|
 
 
 
---------------------------------------------------------------------  *vm-align*
+-------------------------------------------------------------------  *vm-align*
 Alignment ~
 
   Default mappings: \\a, \\<, \\>
@@ -720,7 +725,7 @@ Transform regions with expression ~
 
 
 
-NOTES ABOUT REGISTERS                                  *visual-multi-registers*
+NOTES ABOUT REGISTERS                                            *vm-registers*
 ===============================================================================
 
 VM uses its own registers: they don't have a 'type' as vim registers, because
@@ -775,7 +780,7 @@ You can also enable persistance (see |g:VM_persistent_registers|).
 
 
 
-OTHER FEATURES                                             *visual-multi-other*
+OTHER FEATURES                                              *vm-other-features*
 ===============================================================================
 
 Smart case change~
@@ -818,7 +823,7 @@ is gS (without leader).
 
 
 
-SINGLE REGION MODE                                   *visual-multi-single-mode*
+SINGLE REGION MODE                                             *vm-single-mode*
 ===============================================================================
 
   Default mapping: \\<CR>
@@ -845,7 +850,7 @@ See also |vm-bugs|.
 
 
 
-CREDITS                                                  *visual-multi-credits*
+CREDITS                                                            *vm-credits*
 ===============================================================================
 
 Bram Moolenaar for Vim
@@ -855,7 +860,7 @@ Tim Pope for |vim-abolish|                 https://github.com/tpope/vim-abolish
 
 
 
-LICENSE                                                  *visual-multi-license*
+LICENSE                                                            *vm-license*
 ===============================================================================
 
 MIT
