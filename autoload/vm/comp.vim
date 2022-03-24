@@ -11,6 +11,11 @@ let s:plugins = extend({
             \   'enable': 'unlet b:autopairs_loaded | call AutoPairsTryInit() | let b:autopairs_enabled = 1',
             \   'disable': 'let b:autopairs_enabled = 0',
             \},
+            \'smartinput': {
+            \   'test': { -> exists('g:loaded_smartinput') && g:loaded_smartinput == 1 },
+            \   'enable': 'let b:smartinput_disabled = 1',
+            \   'disable': 'unlet! b:smartinput_disabled',
+            \},
             \'tagalong': {
             \   'test': { -> exists('b:tagalong_initialized') },
             \   'enable': 'TagalongInit',
