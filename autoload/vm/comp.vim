@@ -13,8 +13,8 @@ let s:plugins = extend({
             \},
             \'smartinput': {
             \   'test': { -> exists('g:loaded_smartinput') && g:loaded_smartinput == 1 },
-            \   'enable': 'let b:smartinput_disabled = 1',
-            \   'disable': 'unlet! b:smartinput_disabled',
+            \   'enable': 'unlet! b:smartinput_disabled',
+            \   'disable': 'let b:smartinput_disabled = 1',
             \},
             \'tagalong': {
             \   'test': { -> exists('b:tagalong_initialized') },
