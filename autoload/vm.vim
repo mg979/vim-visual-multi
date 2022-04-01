@@ -97,7 +97,7 @@ fun! vm#init_buffer(cmd_type) abort
         endif
 
         if !v:hlsearch && a:cmd_type != 2
-            call feedkeys("\<Plug>(VM-Hls)")
+            call s:enable_hls()
         endif
 
         call s:V.Funcs.set_statusline(0)
@@ -116,6 +116,13 @@ fun! vm#init_buffer(cmd_type) abort
     endtry
 endfun
 
+fun! s:enable_hls()
+    if mode(1) == 'n'
+        call feedkeys("\<Plug>(VM-Hls)")
+    else
+        call timer_start(50, { t -> s:enable_hls() })
+    endif
+endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Reset
