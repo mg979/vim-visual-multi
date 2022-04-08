@@ -388,7 +388,7 @@ endfun
 fun! s:Insert.clear_hi() abort
     " Clear cursors highlight.
     for c in self.cursors
-        call matchdelete(c.hl)
+        silent! call matchdelete(c.hl)
     endfor
 endfun
 
@@ -429,7 +429,7 @@ fun! s:Cursor.update(ln, change) abort
     let C = self
     let C._a = C.a + a:change
 
-    call matchdelete(C.hl)
+    silent! call matchdelete(C.hl)
     let C.hl  = matchaddpos('MultiCursor', [[C.l, C._a]], 40)
 endfun
 
