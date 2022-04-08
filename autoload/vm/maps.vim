@@ -259,12 +259,14 @@ fun! s:assign(plug, key, buffer, ...) abort
         let K = maparg(k, m, 0, 1)
         if !empty(K) && K.buffer
             let b = 'b'.bufnr('%').': '
+            " Handle Neovim mappings with Lua functions as rhs
+            let rhs = has_key(K, 'rhs') ? K.rhs : '<Lua function ' .. K.callback .. '>'
             if m != 'i'
-                let s = b.'Could not map: '.k.' ('.a:plug.')  ->  ' . K.rhs
+                let s = b.'Could not map: '.k.' ('.a:plug.')  ->  ' . rhs
                 call add(b:VM_Debug.lines, s)
                 return ''
             else
-                let s = b.'Overwritten imap: '.k.' ('.a:plug.')  ->  ' . K.rhs
+                let s = b.'Overwritten imap: '.k.' ('.a:plug.')  ->  ' . rhs
                 call add(b:VM_Debug.lines, s)
             endif
         endif
