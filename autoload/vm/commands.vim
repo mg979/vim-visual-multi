@@ -844,13 +844,13 @@ fun! vm#commands#shrink_or_enlarge(shrink) abort
 endfun
 
 
-fun! vm#commands#increase_or_decrease(increase, all_types, count)
+fun! vm#commands#increase_or_decrease(increase, all_types, count, g)
     let oldnr = &nrformats
     if a:all_types
         setlocal nrformats+=alpha
     endif
     let map = a:increase ? "\<c-a>" : "\<c-x>"
-    call s:V.Edit.run_normal(map, {'count': a:count, 'recursive': 0})
+    call s:V.Edit.run_normal(map, {'count': a:count, 'recursive': 0, 'gcount': a:g})
     if a:all_types
         let &l:nrformats = oldnr
     endif

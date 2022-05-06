@@ -59,7 +59,7 @@ fun! s:Edit.run_normal(cmd, ...) abort
 
     " defaults: commands are recursive, count=1, vim registers untouched
     let args = {
-                \'recursive': 1, 'count': 1, 'vimreg': 0,
+                \'recursive': 1, 'count': 1, 'vimreg': 0, 'gcount': 0,
                 \'silent': get(g:, 'VM_silent_ex_commands', 0)
                 \}
 
@@ -79,8 +79,9 @@ fun! s:Edit.run_normal(cmd, ...) abort
     let errors = ''
 
     try
-        if a:cmd ==? 'x' | call s:bs_del(n.a:cmd)
-        else             | call self.process(c, args)
+        if a:cmd ==? 'x'   | call s:bs_del(n . a:cmd)
+        elseif args.gcount | call self.process(a:cmd, args)
+        else               | call self.process(c, args)
         endif
     catch
         let errors = v:errmsg
@@ -270,6 +271,9 @@ fun! s:Edit.process(cmd, ...) abort
     let stay_put        = a:0 && has_key(a:1, 'stay_put')   " don't move the cursors after command
     let do_cursor_moved = !exists("##TextYankPost")         " we want CursorMoved, even if cursor doesn't move
 
+    " used by g<C-A>, g<C-X>
+    let gcount = a:0 && get(a:1, 'gcount', 0) ? a:1.count ? a:1.count : 1 : 0
+
     " if we are planning to store regions text, it's because commands can delete them
     " but not all commands will alter vim registers, even if text changes
     "
@@ -307,7 +311,16 @@ fun! s:Edit.process(cmd, ...) abort
 
         " execute command at cursor
         call cursor(r.l, r.a)
-        exe a:cmd
+
+        if gcount
+            let tick = b:changedtick
+            exe 'normal! ' . gcount . a:cmd
+            if b:changedtick > tick
+                let gcount += a:1.count
+            endif
+        else
+            exe a:cmd
+        endif
 
         " store deleted text during deletions/changes at cursors
         if backup_txt

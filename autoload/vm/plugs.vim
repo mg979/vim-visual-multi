@@ -159,10 +159,12 @@ fun! vm#plugs#buffer() abort
   nnoremap <silent>        <Plug>(VM-&)                       :<C-u>call b:VM_Selection.Edit.run_normal('&', {'recursive': 0, 'silent': 1})<cr>
   nnoremap <silent>        <Plug>(VM-Del)                     :<C-u>call b:VM_Selection.Edit.run_normal('x', {'count': v:count1, 'recursive': 0})<cr>
   nnoremap <silent>        <Plug>(VM-Dot)                     :<C-u>call b:VM_Selection.Edit.dot()<cr>
-  nnoremap <silent>        <Plug>(VM-Increase)                :<C-u>call vm#commands#increase_or_decrease(1, 0, v:count1)<cr>
-  nnoremap <silent>        <Plug>(VM-Decrease)                :<C-u>call vm#commands#increase_or_decrease(0, 0, v:count1)<cr>
-  nnoremap <silent>        <Plug>(VM-Alpha-Increase)          :<C-u>call vm#commands#increase_or_decrease(1, 1, v:count1)<cr>
-  nnoremap <silent>        <Plug>(VM-Alpha-Decrease)          :<C-u>call vm#commands#increase_or_decrease(0, 1, v:count1)<cr>
+  nnoremap <silent>        <Plug>(VM-Increase)                :<C-u>call vm#commands#increase_or_decrease(1, 0, v:count1, v:false)<cr>
+  nnoremap <silent>        <Plug>(VM-Decrease)                :<C-u>call vm#commands#increase_or_decrease(0, 0, v:count1, v:false)<cr>
+  nnoremap <silent>        <Plug>(VM-gIncrease)               :<C-u>call vm#commands#increase_or_decrease(1, 0, v:count1, v:true)<cr>
+  nnoremap <silent>        <Plug>(VM-gDecrease)               :<C-u>call vm#commands#increase_or_decrease(0, 0, v:count1, v:true)<cr>
+  nnoremap <silent>        <Plug>(VM-Alpha-Increase)          :<C-u>call vm#commands#increase_or_decrease(1, 1, v:count1, v:false)<cr>
+  nnoremap <silent>        <Plug>(VM-Alpha-Decrease)          :<C-u>call vm#commands#increase_or_decrease(0, 1, v:count1, v:false)<cr>
   nnoremap <silent>        <Plug>(VM-a)                       :<C-u>call b:VM_Selection.Insert.key('a')<cr>
   nnoremap <silent>        <Plug>(VM-A)                       :<C-u>call b:VM_Selection.Insert.key('A')<cr>
   nnoremap <silent>        <Plug>(VM-i)                       :<C-u>call b:VM_Selection.Insert.key('i')<cr>

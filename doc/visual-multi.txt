@@ -116,8 +116,10 @@ be followed by the text object you want to change. Supported commands:
     R           enter |vm-replace-mode|
     ~           change case of single character
     &           repeat last substitution
-    <C-A>       increase number
-    <C-X>       decrease number
+    <C-A>       increase numbers
+    <C-X>       decrease numbers
+    g<C-A>      progressively increase numbers (like |v_g_CTRL-A|)
+    g<C-X>      progressively decrease numbers (like |v_g_CTRL-X|)
 
 You can enter |insert-mode| with `i`, `I`, `a`, `A`, and only from cursor mode
 also with `o` and `O`.
@@ -141,8 +143,8 @@ Some commands are specific to |extend-mode|, such as:
 
 Some commands enforce |cursor-mode| when run from |extend-mode|, such as:
 
-    <C-A>   increase number
-    <C-X>   decrease number
+    <C-A>   increase numbers
+    <C-X>   decrease numbers
 
 Others can use a different mapping:
 
