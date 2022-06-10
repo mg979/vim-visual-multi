@@ -1,9 +1,6 @@
 " needed by vimrunner
 function! VimrunnerPyEvaluateCommandOutput(command)
-  redir => output
-    silent exe a:command
-  redir END
-  return output
+  return execute(a:command)
 endfunction
 
 let g:loaded_remote_plugins = 1

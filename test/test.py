@@ -190,6 +190,10 @@ def main():
     parser.add_argument('-d', '--diff', action='store_true', help='diff falied tests')
     args = parser.parse_args()
 
+    # clear vim environmental variable in case tests are run from within (n)vim
+    os.environ.pop('VIMRUNTIME', None)
+    os.environ.pop('VIM', None)
+
     # vim version and default vimrc
     global VIM, DEFAULT_VIMRC, KEY_PRESS_INTERVAL, LIVE_EDITING, DIFF_FAILED
     VIM = shutil.which('vim' if not args.nvim else 'nvim')
