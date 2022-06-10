@@ -73,7 +73,8 @@ Some plugins have built-in compatibility:
   - Shougo/deoplete.nvim
   - ncmw/ncm2
 
-If you want to run some code before/after VM starts/exits, see |vm-functions|.
+If you want to run some code before/after VM starts/exits, see
+|vm-faq-functions|.
 
 If you make a plugin and want to test if VM is active, perform a check on the
 |b:visual_multi| variable.

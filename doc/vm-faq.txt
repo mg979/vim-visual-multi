@@ -2,20 +2,20 @@
 
 FREQUENTLY ASKED QUESTIONS                                             *vm-faq*
 ===============================================================================
-                                                                    *vm-errors*
+
+                                                                *vm-faq-errors*
 VM has quit with errors and I can't clear VM highlight matches.~
 
-Run |:VMClear|
+Run |:VMClear|.
 
 -------------------------------------------------------------------------------
-                                                           *vm-search-register*
-
-How to start VM with matches from current search register? ~
+                                                                *vm-faq-search*
+How to start VM looking for a pattern? ~
 
 Run |:VMSearch|. It also accepts a pattern and a |range| (% finds all matches).
 
 -------------------------------------------------------------------------------
-                                                              *vm-mappings-faq*
+                                                              *vm-faq-mappings*
 I want to remap the main VM mappings.~
 
 You have to initialize the mappings dictionary and replace individual mappings
@@ -24,19 +24,19 @@ with your own. Below there are some examples.
 For a full list of mappings and other informations, see |vm-mappings.txt|.
 >
   let g:VM_maps = {}
+  let g:VM_maps["Exit"]               = '<C-C>'   " quit VM
   let g:VM_maps['Find Under']         = '<C-d>'   " replace C-n
   let g:VM_maps['Find Subword Under'] = '<C-d>'   " replace visual C-n
   let g:VM_maps["Add Cursor Down"]    = '<M-j>'   " new cursor down
   let g:VM_maps["Add Cursor Up"]      = '<M-k>'   " new cursor up
   let g:VM_maps["Toggle Mappings"]    = '<CR>'    " toggle VM buffer mappings
-  let g:VM_maps["Exit"]               = '<Space>' " quit VM
 
 To disable a specific mapping, set it to an empty string:
 >
   let g:VM_maps["Select Operator"]    = ''
 <
 -------------------------------------------------------------------------------
-                                                          *vm-mappings-disable*
+                                                      *vm-faq-disable-mappings*
 How can I temporarily disable VM mappings? ~
 
 VM has a <Plug> for that. Normally it is bound to |VM_leader| + <Space>, but
@@ -46,7 +46,7 @@ unless you use <Space> as |VM_leader|, you may prefer an easier mapping:
 <
 
 -------------------------------------------------------------------------------
-                                                                 *vm-functions*
+                                                             *vm-faq-functions*
 How can I do something before VM starts, or after VM ends? ~
 
 You can create these functions: >
@@ -67,7 +67,7 @@ If you need to perform some action before/after `each` VM command is run: >
   autocmd User visual_multi_after_cmd    call MyFunc2()
 
 -------------------------------------------------------------------------------
-                                                                     *vm-remap*
+                                                                 *vm-faq-remap*
 How can I remap x in VM? ~
 
 There are several ways: either do a remap using the functions described above,
@@ -91,14 +91,15 @@ or check one of the following settings:
 
 
 -------------------------------------------------------------------------------
-                                                           *vm-mappings-custom*
+                                                       *vm-faq-custom-mappings*
 Can I have a mapping for...? ~
 
 If you find yourself repeating a certain action, you can create mappings like:
 >
   nmap cp vip<Plug>(VM-Visual-Cursors)
 <
-This would create a column of cursors that spans the current inner paragraph.
+This would create a column of cursors that spans over the current inner
+paragraph.
 >
 Obviously you can just use keys rather than plugs:
 >

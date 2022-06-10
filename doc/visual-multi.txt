@@ -228,7 +228,7 @@ Some keys have a special behaviour (different from vim):
 
 NOTE: Some mappings that you may have (<C-H> for <BS> etc.) will NOT work,
 and they will probably break your text. For some of them there may be
-solutions, for others not. See |vm-remap|.
+solutions, for others not. See |vm-faq-remap|.
 
 NOTE: Since <C-V> is remapped, you should use <C-Q> to insert special
 characters.
@@ -384,7 +384,7 @@ Find Word ~
   be selected, but in this case no patterns will be added. A new pattern is
   only added when you press <C-n> on some text without any region.
 
-  NOTE: you can remap these keys. See also |vm-remap|.
+  NOTE: you can remap these keys. See also |vm-faq-remap|.
 
 
 -------------------------------------------------------------  *vm-add-cursors*
