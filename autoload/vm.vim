@@ -129,6 +129,9 @@ endfun
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 fun! vm#reset(...)
+    if !exists('b:visual_multi')
+        return {}
+    endif
     call vm#variables#reset()
     call vm#commands#regex_reset()
 
