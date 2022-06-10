@@ -202,6 +202,8 @@ fun! vm#maps#all#buffer() abort
         \"I End":                   ['<End>',       'i'],
         \"I CtrlB":                 ['<C-b>',       'i'],
         \"I CtrlF":                 ['<C-f>',       'i'],
+        \"I CtrlC":                 ['<C-c>',       'i'],
+        \"I CtrlO":                 ['<C-o>',       'i'],
         \"I Replace":               ['<Insert>',    'i'],
         \})
 

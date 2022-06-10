@@ -236,6 +236,8 @@ fun! vm#plugs#buffer() abort
   inoremap <silent><expr> <Plug>(VM-I-CtrlA)            <sid>Insert('I')
   inoremap <silent><expr> <Plug>(VM-I-CtrlB)            <sid>Insert('h')
   inoremap <silent><expr> <Plug>(VM-I-CtrlF)            <sid>Insert('l')
+  inoremap <silent>       <Plug>(VM-I-CtrlC)            <Esc>
+  inoremap <silent><expr> <Plug>(VM-I-CtrlO)            <sid>Insert('O')
   inoremap <silent><expr> <Plug>(VM-I-Next)             vm#icmds#goto(1)
   inoremap <silent><expr> <Plug>(VM-I-Prev)             vm#icmds#goto(0)
   inoremap <silent><expr> <Plug>(VM-I-Replace)          <sid>Insert('ins')
@@ -261,6 +263,11 @@ endfun
 
 fun! s:Insert(key) abort
   " Handle keys in insert mode.
+  if a:key == 'o'
+    echo 'Not supported'
+    return ''
+  endif
+
   let VM = b:VM_Selection
   let i  = ":call b:VM_Selection.Insert.key('i')\<cr>"
   let a  = ":call b:VM_Selection.Insert.key('a')\<cr>"
