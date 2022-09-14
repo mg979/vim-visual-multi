@@ -260,7 +260,7 @@ fun! s:assign(plug, key, buffer, ...) abort
         if !empty(K) && K.buffer
             let b = 'b'.bufnr('%').': '
             " Handle Neovim mappings with Lua functions as rhs
-            let rhs = has_key(K, 'rhs') ? K.rhs : string(K.callback)
+            let rhs = has_key(K, 'rhs') ? K.rhs : has_key(K, 'callback') ? '<Lua callback>' : '<???>'
             if m != 'i'
                 let s = b.'Could not map: '.k.' ('.a:plug.')  ->  ' . rhs
                 call add(b:VM_Debug.lines, s)
