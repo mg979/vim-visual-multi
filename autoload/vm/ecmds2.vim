@@ -89,7 +89,7 @@ fun! s:Edit.surround() abort
         endif
     endif
 
-    nunmap <buffer> S
+    silent! nunmap <buffer> S
 
     call self.run_visual('S'.c, 1)
     if index(['[', '{', '('], c) >= 0
