@@ -55,8 +55,8 @@ fun! vm#maps#all#permanent() abort
     let maps["Add Cursor At Pos"][0]     = leader.'\'
     let maps["Start Regex Search"][0]    = leader.'/'
     let maps["Select All"][0]            = leader.'A'
-    let maps["Add Cursor Down"][0]       = '<C-Down>'
-    let maps["Add Cursor Up"][0]         = '<C-Up>'
+    let maps["Add Cursor Down"][0]       = '<D-Down>'
+    let maps["Add Cursor Up"][0]         = '<D-Up>'
     let maps["Select l"][0]              = '<S-Right>'
     let maps["Select h"][0]              = '<S-Left>'
     let maps["Visual Regex"][0]          = visual.'/'
@@ -159,8 +159,8 @@ fun! vm#maps#all#buffer() abort
   call extend(maps, {
         \"Select Cursor Down":      ['<M-C-Down>',  'n'],
         \"Select Cursor Up":        ['<M-C-Up>',    'n'],
-        \"Add Cursor Down":         ['<C-Down>',    'n'],
-        \"Add Cursor Up":           ['<C-Up>',      'n'],
+        \"Add Cursor Down":         ['<D-Down>',    'n'],
+        \"Add Cursor Up":           ['<D-Up>',      'n'],
         \"Select j":                ['<S-Down>',    'n'],
         \"Select k":                ['<S-Up>',      'n'],
         \"Select l":                ['<S-Right>',   'n'],
@@ -183,8 +183,8 @@ fun! vm#maps#all#buffer() abort
         \"I Arrow b":               ['<C-Left>',    'i'],
         \"I Arrow W":               ['<C-S-Right>', 'i'],
         \"I Arrow B":               ['<C-S-Left>',  'i'],
-        \"I Arrow ge":              ['<C-Up>',      'i'],
-        \"I Arrow e":               ['<C-Down>',    'i'],
+        \"I Arrow ge":              ['<D-Up>',      'i'],
+        \"I Arrow e":               ['<D-Down>',    'i'],
         \"I Arrow gE":              ['<C-S-Up>',    'i'],
         \"I Arrow E":               ['<C-S-Down>',  'i'],
         \"I Left Arrow":            ['<Left>',      'i'],
