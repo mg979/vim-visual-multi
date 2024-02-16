@@ -68,8 +68,8 @@ endfun
 fun! s:Global.get_all_regions(...) abort
     " Get all regions, optionally between two byte offsets.
 
-    let ows = &wrapscan
-    set nowrapscan
+    let [ows, ei] = [&wrapscan, &eventignore]
+    set nowrapscan eventignore=all
     let [l:start, l:end] = a:0 ? [a:1, a:2] : [1, 0]
     call s:F.Cursor(l:start)
     silent keepjumps normal! ygn
@@ -89,6 +89,7 @@ fun! s:Global.get_all_regions(...) abort
         endtry
     endwhile
     let &wrapscan = ows
+    let &eventignore = ei
     return R
 endfun
 
