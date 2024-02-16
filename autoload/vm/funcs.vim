@@ -320,7 +320,7 @@ fun! s:Funcs.msg(text) abort
     echo "\r"
     redraw
     if type(a:text) == type("")
-        exe "echohl" g:Vm.hi.message
+        echohl WarningMsg
         echon a:text
         echohl None | return
     endif

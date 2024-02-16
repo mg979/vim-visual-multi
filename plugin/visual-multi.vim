@@ -36,6 +36,12 @@ com! -range -bang -nargs=? VMSearch    call vm#special#commands#search(<bang>0, 
 com! -bang VMFromSearch call vm#special#commands#deprecated('VMFromSearch')
 "}}}
 
+hi default link VM_Mono ErrorMsg
+hi default link VM_Cursor Visual
+hi default link VM_Extend PmenuSel
+hi default link VM_Insert DiffChange
+hi link MultiCursor VM_Cursor
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 let g:Vm = { 'hi'          : {},
@@ -54,7 +60,7 @@ let g:VM_highlight_matches = get(g:, 'VM_highlight_matches', 'underline')
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"Global mappings
+" Global mappings
 
 call vm#plugs#permanent()
 call vm#maps#default()

@@ -213,52 +213,27 @@ You can load a theme by default by defining:  >
 If you want to change theme, run: >
     :VMTheme <tab>
 <
-To relink VM highlight groups: >
+These are the default VM highlight groups: >
 
-  let g:VM_Mono_hl   = 'DiffText'
-  let g:VM_Extend_hl = 'DiffAdd'
-  let g:VM_Cursor_hl = 'Visual'
-  let g:VM_Insert_hl = 'DiffChange'
+  hi! link VM_Mono   DiffText
+  hi! link VM_Extend DiffAdd
+  hi! link VM_Cursor Visual
+  hi! link VM_Insert DiffChange
 <
-*g:VM_Mono_hl*    is the highlight in cursor mode
-*g:VM_Extend_hl*  ,, in extend mode (the selections)
-*g:VM_Cursor_hl*  ,, in extend mode (the cursors)
-*g:VM_Insert_hl*  ,, in insert mode (the virtual cursors)
+*VM_Mono*    is the highlight in cursor mode
+*VM_Extend*  ,, in extend mode (the selections)
+*VM_Cursor*  ,, in extend mode (the cursors)
+*VM_Insert*  ,, in insert mode (the virtual cursors)
 
-
-
-
-DEFINING THEMES IN COLORSCHEMES                               *vm-colorschemes*
-===============================================================================
+                                                              *vm-colorschemes*
 
 If you want to load a theme inside a colorscheme, just put in the colorscheme
 script:
 >
   silent! VMTheme theme_name
 <
-If you want to apply a custom theme, you may either relink groups as shown
-above (but then settings would persist for other colorschemes), or do it like
-this (example):
->
-  if exists(':VMTheme')
+You can also link (or redefine) the highlight groups directly.
 
-    " to avoid that current theme is reapplied on colorscheme change
-    let g:VM_theme_set_by_colorscheme = 1
 
-    " you can define both or just one, depending on the scheme
-    if &background == 'light'
-      hi VM_Extend ctermbg=24    ctermfg=237    guibg=#AAF0D6    guifg=NONE
-      hi VM_Cursor ctermbg=31    ctermfg=237    guibg=#78dede    guifg=#262626
-      hi VM_Insert ctermbg=239   ctermfg=237    guibg=#ffffaf    guifg=#262626
-      hi VM_Mono   ctermbg=180   ctermfg=235    guibg=#B23A2D    guifg=#ffffff
-    else
-      hi VM_Extend ctermbg=24    ctermfg=237    guibg=#5f8787    guifg=#ffffff
-      hi VM_Cursor ctermbg=31    ctermfg=237    guibg=#00af87    guifg=#ffffff
-      hi VM_Insert ctermbg=239   ctermfg=237    guibg=#5f0087    guifg=#ffffff
-      hi VM_Mono   ctermbg=180   ctermfg=235    guibg=#e05f51    guifg=#ffffff
-    endif
-
-  endif
-<
 
  vim: ft=help et sw=2 ts=2 sts=2 tw=79

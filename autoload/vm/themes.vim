@@ -29,37 +29,18 @@ fun! vm#themes#init() abort
     call vm#themes#search_highlight()
   endif
 
-  let g:Vm.hi.mono    = 'VM_Mono'
-  let g:Vm.hi.cursor  = 'VM_Cursor'
-  let g:Vm.hi.extend  = 'VM_Extend'
-  let g:Vm.hi.insert  = 'VM_Insert'
-  let g:Vm.hi.message = get(g:, 'VM_Message_hl', 'WarningMsg')
-
-  if exists('g:VM_theme_set_by_colorscheme')
-    unlet g:VM_theme_set_by_colorscheme
-    highlight! link MultiCursor VM_Cursor
-    return
-  endif
-
-  let theme = get(g:, 'VM_theme', 'default')
-
-  silent! hi clear VM_Mono
-  silent! hi clear VM_Cursor
-  silent! hi clear VM_Extend
-  silent! hi clear VM_Insert
-  silent! hi clear MultiCursor
+  let theme = get(g:, 'VM_theme')
 
   if theme == 'default'
-    exe "highlight! link VM_Mono     ".get(g:, 'VM_Mono_hl',   'ErrorMsg')
-    exe "highlight! link VM_Cursor   ".get(g:, 'VM_Cursor_hl', 'Visual')
-    exe "highlight! link VM_Extend   ".get(g:, 'VM_Extend_hl', 'PmenuSel')
-    exe "highlight! link VM_Insert   ".get(g:, 'VM_Insert_hl', 'DiffChange')
-    exe "highlight! link MultiCursor ".get(g:, 'VM_Cursor_hl', 'Visual')
-    return
-  endif
+    hi! link VM_Mono ErrorMsg
+    hi! link VM_Cursor Visual
+    hi! link VM_Extend PmenuSel
+    hi! link VM_Insert DiffChange
+    hi! link MultiCursor VM_Cursor
 
-  call s:Themes[theme]()
-  highlight! link MultiCursor VM_Cursor
+  elseif has_key(s:Themes, theme)
+    call s:Themes[theme]()
+  endif
 endfun
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -77,9 +58,8 @@ endfun
 
 fun! vm#themes#load(theme) abort
   " Load a theme or set default.
-  if empty(a:theme)
+  if empty(a:theme) || a:theme == 'default'
     let g:VM_theme = 'default'
-    echo 'Theme set to default'
   elseif index(keys(s:Themes), a:theme) < 0
     echo "No such theme."
     return

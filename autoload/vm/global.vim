@@ -165,13 +165,13 @@ fun! s:Global.update_cursor_highlight(...) abort
     highlight clear MultiCursor
 
     if s:v.insert
-        exe "highlight link MultiCursor ".g:Vm.hi.insert
+        highlight! link MultiCursor VM_Insert
 
     elseif !s:X() && self.all_empty()
-        exe "highlight link MultiCursor ".g:Vm.hi.mono
+        highlight! link MultiCursor VM_Mono
 
     else
-        exe "highlight link MultiCursor ".g:Vm.hi.cursor
+        highlight! link MultiCursor VM_Cursor
     endif
 endfun
 
