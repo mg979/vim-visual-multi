@@ -29,7 +29,7 @@ fun! vm#themes#init() abort
     call vm#themes#search_highlight()
   endif
 
-  let theme = get(g:, 'VM_theme')
+  let theme = get(g:, 'VM_theme', '')
 
   if theme == 'default'
     hi! link VM_Mono ErrorMsg
