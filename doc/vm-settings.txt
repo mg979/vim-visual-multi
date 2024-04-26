@@ -42,6 +42,12 @@ Hopefully you won't need to alter any of these.
   selection. See |vm-quick-reference|.
 
 
+*g:VM_add_cursor_at_pos_no_mappings*               Default: 0
+
+  When starting VM by adding a single cursor at position, don't enable buffer
+  mappings, so that you can keep moving freely the cursor to add more cursors
+  elsewhere.
+
 *g:VM_show_warnings*                               Default: 1
 
   When entering VM and there are mapping conflicts, a warning is displayed. Set

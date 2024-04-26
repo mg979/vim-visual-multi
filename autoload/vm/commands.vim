@@ -42,12 +42,9 @@ fun! vm#commands#init() abort
 endfun
 
 
-fun! s:set_extend_mode(X) abort
+fun! s:set_extend_mode(enable) abort
     " If just starting, enable extend mode if appropriate.
-
-    if s:X() || a:X | return s:init(0, 1, 1)
-    else            | return s:init(0, 1, 0)
-    endif
+    return s:init(0, 1, s:X() || a:enable)
 endfun
 
 
@@ -88,8 +85,12 @@ endfun
 
 
 fun! vm#commands#add_cursor_at_pos(extend) abort
-    " Add/toggle a single cursor at current position.
-    call s:set_extend_mode(a:extend)
+    " Add/toggle a single cursor at current position. Per option, disable
+    " mappings if just starting.
+    if s:set_extend_mode(a:extend) == 0
+                \ && get(g:, 'VM_add_cursor_at_pos_no_mappings', 0)
+        call s:V.Maps.disable(1)
+    endif
     call s:G.new_cursor(1)
 endfun
 
