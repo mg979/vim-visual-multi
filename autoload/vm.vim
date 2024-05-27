@@ -169,7 +169,7 @@ fun! vm#reset(...)
 
     "exiting manually
     if !get(g:, 'VM_silent_exit', 0) && !a:0
-        call s:V.Funcs.msg('Exited Visual-Multi.')
+        silent! call s:V.Funcs.msg('Exited Visual-Multi.')
     else
         echo "\r"
     endif
