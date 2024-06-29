@@ -89,9 +89,9 @@ fun! s:Edit.surround() abort
         endif
     endif
 
-    silent! nunmap <buffer> S
+    exe b:VM_mapping['Surround']['unmap']
 
-    call self.run_visual('S'.c, 1)
+    call self.run_visual(b:VM_mapping['Surround']['key'].c, 1)
     if index(['[', '{', '('], c) >= 0
         call map(s:v.W, 'v:val + 3')
     else
@@ -103,7 +103,7 @@ fun! s:Edit.surround() abort
         call self.post_process(0)
     endif
 
-    nmap <silent> <nowait> <buffer> S <Plug>(VM-Surround)
+    exe b:VM_mapping['Surround']['map']
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
