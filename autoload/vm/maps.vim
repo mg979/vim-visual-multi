@@ -173,6 +173,11 @@ fun! s:build_permanent_maps() abort
     for key in keys(maps)
         call add(g:Vm.unmaps, s:unmap(maps[key], 0))
     endfor
+
+    "store some mappings that need special handling
+    let g:Vm.maps.toggle   = get(g:VM_maps, 'Toggle Mappings', g:Vm.leader.buffer . '<Space>')
+    let g:Vm.maps.exit     = get(g:VM_maps, 'Exit', '<Esc>')
+    let g:Vm.maps.surround = get(g:VM_maps, 'Surround', 'S')
 endfun
 
 
@@ -231,12 +236,6 @@ fun! s:build_buffer_maps() abort
             unlet maps[key]
         endif
     endfor
-
-    "store the key used to toggle mappings
-    let g:Vm.maps.toggle = has_key(g:VM_maps, 'Toggle Mappings') ?
-                \ g:VM_maps['Toggle Mappings'] : g:Vm.leader.buffer . '<Space>'
-    let g:Vm.maps.exit   = has_key(g:VM_maps, 'Exit') ?
-                \ g:VM_maps['Exit'] : '<Esc>'
 
     "generate list of 'exe' commands for unmappings
     for key in keys(maps)

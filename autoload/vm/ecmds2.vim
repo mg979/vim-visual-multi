@@ -89,21 +89,25 @@ fun! s:Edit.surround() abort
         endif
     endif
 
-    silent! nunmap <buffer> S
+    let S = g:Vm.maps.surround
 
-    call self.run_visual('S'.c, 1)
+    exe 'silent! nunmap <buffer> ' . S
+
+    call self.run_visual(S . c, 1)
+
     if index(['[', '{', '('], c) >= 0
         call map(s:v.W, 'v:val + 3')
     else
         call map(s:v.W, 'v:val + 1')
     endif
+
     if reselect
         call self.post_process(1, 0)
     else
         call self.post_process(0)
     endif
 
-    nmap <silent> <nowait> <buffer> S <Plug>(VM-Surround)
+    exe 'nmap <silent> <nowait> <buffer> ' . S . ' <Plug>(VM-Surround)'
 endfun
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
