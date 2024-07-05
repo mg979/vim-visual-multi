@@ -36,7 +36,7 @@ com! -range -bang -nargs=? VMSearch    call vm#special#commands#search(<bang>0, 
 com! -bang VMFromSearch call vm#special#commands#deprecated('VMFromSearch')
 "}}}
 
-hi default link VM_Mono ErrorMsg
+hi default link VM_Mono IncSearch
 hi default link VM_Cursor Visual
 hi default link VM_Extend PmenuSel
 hi default link VM_Insert DiffChange
