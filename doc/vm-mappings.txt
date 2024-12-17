@@ -15,11 +15,15 @@ To disable a specific mapping, set it to an empty string:
 >
     let g:VM_maps["Select Operator"] = ''
 <
+Additionally, to remap `s` to the same function as `c`:
+>
+    let g:VM_custom_remaps["s"] = 'c'
+<
 To enable undo/redo (still experimental):
 >
     let g:VM_maps["Undo"] = 'u'
     let g:VM_maps["Redo"] = '<C-r>'
-
+<
 Example of SublimeText-like mappings:
 >
     let g:VM_maps['Find Under']         = '<C-d>'
@@ -36,6 +40,13 @@ Example of |vim-multiple-cursors| -like mappings:
     let g:VM_maps['Decrease']    = '-'
 <
 For Colemak users, see |vm-colemak|.
+
+For Neovim users using lua:
+>
+    local VM_maps = vim.g.VM_maps or {}
+    VM_maps["Select Operator"] = ''
+    vim.g.VM_maps = VM_maps
+<
 
 
 -------------------------------------------------------------------------------
