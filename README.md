@@ -54,6 +54,13 @@ To run the tutorial:
 
     vim -Nu path/to/visual-multi/tutorialrc
 
+Vimcasts and exercises
+
+- [Advanced Multiline Editing in Neovim](https://www.youtube.com/watch?v=N-X_zjU5INs&t=555s) by [Andrew Courter](https://www.youtube.com/@ascourter)
+- [Multiline Editing in Neovim](https://www.youtube.com/watch?v=p4D8-brdrZo&t=98s) by [Andrew Courter](https://www.youtube.com/@ascourter)
+- [vim-visual-multi - Weekly (Neo)vim Plugin](https://www.youtube.com/watch?v=LhcnGU-COpo) by [CantuCodes](https://www.youtube.com/@cantucodes)
+- [vim-visual-multi-exercises](https://github.com/juanMarinero/vim-visual-multi-exercises) by [juanMarinero](https://github.com/juanMarinero)
+
 
 ### [Wiki](https://github.com/mg979/vim-visual-multi/wiki)
 
