@@ -118,6 +118,16 @@ fun! s:Maps.end(keep_permanent) abort
     silent! cunmap <buffer> <cr>
     silent! cunmap <buffer> <esc>
 
+    " restore saved buffer mappings
+    if exists('b:VM_saved_buffer_maps')
+        for key in keys(b:VM_saved_buffer_maps)
+            let K = b:VM_saved_buffer_maps[key]
+            let mode = key[0]
+            let lhs = key[1:]
+            call s:restore_mapping(mode, lhs, K)
+        endfor
+    endif
+
     " restore permanent mappings
     if a:keep_permanent
         for m in g:Vm.maps.permanent | exe m | endfor
@@ -185,6 +195,7 @@ fun! s:build_buffer_maps() abort
     " Run once per buffer. Generate buffer mappings and integrate custom ones.
     let b:VM_maps   = []
     let b:VM_unmaps = []
+    let b:VM_saved_buffer_maps = {}
     let check_maps  = get(b:, 'VM_check_mappings', g:VM_check_mappings)
     let force_maps  = get(b:, 'VM_force_maps', get(g:, 'VM_force_maps', []))
 
@@ -252,18 +263,19 @@ fun! s:assign(plug, key, buffer, ...) abort
     "check if the mapping can be applied: this only runs for buffer mappings
     "a:1 is a bool that is true if mappings must be checked
     "a:2 can contain a list of mappings that will be applied anyway (forced)
-    "otherwise, if a buffer mapping already exists, the remapping fails, and
-    "a debug line is added
+    "otherwise, if a buffer mapping already exists, save it for later restoration
+    "and override it (previously it would fail)
     if a:0 && a:1 && index(a:2, k) < 0
         let K = maparg(k, m, 0, 1)
         if !empty(K) && K.buffer
             let b = 'b'.bufnr('%').': '
             " Handle Neovim mappings with Lua functions as rhs
             let rhs = has_key(K, 'rhs') ? K.rhs : '<Lua callback>'
+            " Save the existing buffer mapping for restoration
+            let b:VM_saved_buffer_maps[m.k] = K
             if m != 'i'
-                let s = b.'Could not map: '.k.' ('.a:plug.')  ->  ' . rhs
+                let s = b.'Overriding buffer map: '.k.' ('.a:plug.')  ->  ' . rhs
                 call add(b:VM_Debug.lines, s)
-                return ''
             else
                 let s = b.'Overwritten imap: '.k.' ('.a:plug.')  ->  ' . rhs
                 call add(b:VM_Debug.lines, s)
@@ -284,6 +296,38 @@ fun! s:unmap(key, buffer) abort
     let m = a:key[1]
     let b = a:buffer? ' <buffer> ' : ' '
     return "silent! ".m."unmap".b.k
+endfun
+
+
+fun! s:restore_mapping(mode, lhs, mapinfo) abort
+    " Restore a saved buffer mapping from mapinfo dict.
+    " The mapinfo dict comes from maparg() with dict=1 parameter.
+    let cmd = a:mode
+    let cmd .= a:mapinfo.noremap ? 'noremap ' : 'map '
+    let cmd .= a:mapinfo.buffer ? '<buffer> ' : ''
+    let cmd .= a:mapinfo.silent ? '<silent> ' : ''
+    let cmd .= a:mapinfo.nowait ? '<nowait> ' : ''
+    let cmd .= a:mapinfo.expr ? '<expr> ' : ''
+    let cmd .= a:lhs . ' '
+
+    " Handle the rhs - check if it's a Lua callback (Neovim)
+    if has_key(a:mapinfo, 'callback')
+        " For Neovim with Lua callbacks, we need to use the callback
+        " This is a bit tricky, but we can use the sid and lnum if available
+        if has_key(a:mapinfo, 'rhs') && !empty(a:mapinfo.rhs)
+            let cmd .= a:mapinfo.rhs
+        else
+            " If we can't get the rhs, skip restoration and log a warning
+            echohl WarningMsg
+            echom 'VM: Could not restore Lua callback mapping for ' . a:lhs
+            echohl None
+            return
+        endif
+    else
+        let cmd .= a:mapinfo.rhs
+    endif
+
+    execute cmd
 endfun
 
 
